@@ -1,0 +1,169 @@
+package frc.trigon.robot.subsystems.swerve.trihardswerve;
+
+import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.Pigeon2Configuration;
+import com.ctre.phoenix6.hardware.Pigeon2;
+import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
+import com.pathplanner.lib.util.PIDConstants;
+import com.pathplanner.lib.util.ReplanningConfig;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.util.Units;
+import frc.trigon.robot.constants.RobotConstants;
+import frc.trigon.robot.subsystems.swerve.SwerveConstants;
+import frc.trigon.robot.subsystems.swerve.SwerveModuleIO;
+
+public class TrihardSwerveConstants extends SwerveConstants {
+    private static final double
+            MAX_SPEED_METERS_PER_SECOND = 4.25,
+            MAX_MODULE_SPEED_METERS_PER_SECOND = 4.25,
+            MAX_ROTATIONAL_SPEED_RADIANS_PER_SECOND = 12.03;
+
+    static final double
+            SIDE_LENGTH_METERS = 0.7,
+            DISTANCE_FROM_CENTER_OF_BASE = SIDE_LENGTH_METERS / 2;
+    private static final double RATE_LIMIT = 5.5;
+    private static final SlewRateLimiter
+            X_SLEW_RATE_LIMITER = new SlewRateLimiter(RATE_LIMIT),
+            Y_SLEW_RATE_LIMITER = new SlewRateLimiter(RATE_LIMIT);
+    private static final Translation2d[] LOCATIONS = {
+            new Translation2d(DISTANCE_FROM_CENTER_OF_BASE, DISTANCE_FROM_CENTER_OF_BASE),
+            new Translation2d(DISTANCE_FROM_CENTER_OF_BASE, -DISTANCE_FROM_CENTER_OF_BASE),
+            new Translation2d(-DISTANCE_FROM_CENTER_OF_BASE, DISTANCE_FROM_CENTER_OF_BASE),
+            new Translation2d(-DISTANCE_FROM_CENTER_OF_BASE, -DISTANCE_FROM_CENTER_OF_BASE)
+    };
+    private static final TrihardSwerveModuleIO[] MODULES_IO = {
+            new TrihardSwerveModuleIO(TrihardSwerveModuleConstants.FRONT_LEFT_SWERVE_MODULE_CONSTANTS, "FrontLeft"),
+            new TrihardSwerveModuleIO(TrihardSwerveModuleConstants.FRONT_RIGHT_SWERVE_MODULE_CONSTANTS, "FrontRight"),
+            new TrihardSwerveModuleIO(TrihardSwerveModuleConstants.REAR_LEFT_SWERVE_MODULE_CONSTANTS, "RearLeft"),
+            new TrihardSwerveModuleIO(TrihardSwerveModuleConstants.REAR_RIGHT_SWERVE_MODULE_CONSTANTS, "RearRight")
+    };
+    private static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(LOCATIONS);
+    private static final PIDConstants
+            TRANSLATION_PID_CONSTANTS = new PIDConstants(3, 0, 0),
+            ROTATION_PID_CONSTANTS = new PIDConstants(5, 0, 0),
+            AUTO_ROTATION_PID_CONSTANTS = new PIDConstants(3, 0.0008, 0.5);
+    private static final int PIGEON_ID = 0;
+    static final Pigeon2 GYRO = new Pigeon2(PIGEON_ID);
+    private static final Rotation3d GYRO_MOUNT_POSITION = new Rotation3d(
+            Units.degreesToRadians(-0.796127),
+            Units.degreesToRadians(-0.95211),
+            Units.degreesToRadians(90.0146)
+    );
+    private static final TrapezoidProfile.Constraints ROTATION_CONSTRAINTS = new TrapezoidProfile.Constraints(
+            720,
+            720
+    );
+
+    private static final PIDController ROTATION_PID_CONTROLLER = new PIDController(
+            5, 0, 0
+    );
+
+    private static final ProfiledPIDController PROFILED_PID_CONTROLLER = new ProfiledPIDController(
+            ROTATION_PID_CONSTANTS.kP,
+            ROTATION_PID_CONSTANTS.kI,
+            ROTATION_PID_CONSTANTS.kD,
+            ROTATION_CONSTRAINTS
+    );
+
+    private static final double DRIVE_RADIUS_METERS = Math.hypot(
+            DISTANCE_FROM_CENTER_OF_BASE, DISTANCE_FROM_CENTER_OF_BASE
+    );
+    private static final ReplanningConfig REPLANNING_CONFIG = new ReplanningConfig(true, false);
+    private static final HolonomicPathFollowerConfig HOLONOMIC_PATH_FOLLOWER_CONFIG = new HolonomicPathFollowerConfig(
+            TRANSLATION_PID_CONSTANTS,
+            AUTO_ROTATION_PID_CONSTANTS,
+            MAX_MODULE_SPEED_METERS_PER_SECOND,
+            DRIVE_RADIUS_METERS,
+            REPLANNING_CONFIG // TODO: check how this works
+    );
+
+    static StatusSignal<Double> YAW_SIGNAL, PITCH_SIGNAL, X_ACCELERATION_SIGNAL, Y_ACCELERATION_SIGNAL, Z_ACCELERATION_SIGNAL;
+
+    static {
+        PROFILED_PID_CONTROLLER.enableContinuousInput(-180, 180);
+        PROFILED_PID_CONTROLLER.setIntegratorRange(-30, 30);
+        ROTATION_PID_CONTROLLER.enableContinuousInput(-180, 180);
+
+        if (!RobotConstants.IS_REPLAY)
+            configureGyro();
+    }
+
+    private static void configureGyro() {
+        final Pigeon2Configuration gyroConfig = new Pigeon2Configuration();
+
+        gyroConfig.MountPose.MountPoseRoll = Units.radiansToDegrees(GYRO_MOUNT_POSITION.getX());
+        gyroConfig.MountPose.MountPosePitch = Units.radiansToDegrees(GYRO_MOUNT_POSITION.getY());
+        gyroConfig.MountPose.MountPoseYaw = Units.radiansToDegrees(GYRO_MOUNT_POSITION.getZ());
+
+        GYRO.getConfigurator().apply(gyroConfig);
+
+        YAW_SIGNAL = GYRO.getYaw();
+        PITCH_SIGNAL = GYRO.getPitch();
+        X_ACCELERATION_SIGNAL = GYRO.getAccelerationX();
+        Y_ACCELERATION_SIGNAL = GYRO.getAccelerationY();
+        Z_ACCELERATION_SIGNAL = GYRO.getAccelerationZ();
+
+        YAW_SIGNAL.setUpdateFrequency(200);
+        PITCH_SIGNAL.setUpdateFrequency(100);
+        X_ACCELERATION_SIGNAL.setUpdateFrequency(50);
+        Y_ACCELERATION_SIGNAL.setUpdateFrequency(50);
+        Z_ACCELERATION_SIGNAL.setUpdateFrequency(50);
+        GYRO.optimizeBusUtilization();
+    }
+
+    @Override
+    public SwerveDriveKinematics getKinematics() {
+        return KINEMATICS;
+    }
+
+    @Override
+    protected SwerveModuleIO[] getModulesIO() {
+        return MODULES_IO;
+    }
+
+    @Override
+    protected HolonomicPathFollowerConfig getPathFollowerConfig() {
+        return HOLONOMIC_PATH_FOLLOWER_CONFIG;
+    }
+
+    @Override
+    protected double getMaxSpeedMetersPerSecond() {
+        return MAX_SPEED_METERS_PER_SECOND;
+    }
+
+    @Override
+    protected double getMaxRotationalSpeedRadiansPerSecond() {
+        return MAX_ROTATIONAL_SPEED_RADIANS_PER_SECOND;
+    }
+
+    @Override
+    protected PIDController getRotationController() {
+        return ROTATION_PID_CONTROLLER;
+    }
+
+    @Override
+    public ProfiledPIDController getProfiledRotationController() {
+        return PROFILED_PID_CONTROLLER;
+    }
+
+    @Override
+    protected SlewRateLimiter getXSlewRateLimiter() {
+        return X_SLEW_RATE_LIMITER;
+    }
+
+    @Override
+    protected SlewRateLimiter getYSlewRateLimiter() {
+        return Y_SLEW_RATE_LIMITER;
+    }
+
+    @Override
+    public double getRobotSideLength() {
+        return SIDE_LENGTH_METERS;
+    }
+}
