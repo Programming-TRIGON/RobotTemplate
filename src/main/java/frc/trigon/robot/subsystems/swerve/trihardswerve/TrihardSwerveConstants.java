@@ -74,13 +74,13 @@ public class TrihardSwerveConstants extends SwerveConstants {
     private static final double DRIVE_RADIUS_METERS = Math.hypot(
             DISTANCE_FROM_CENTER_OF_BASE, DISTANCE_FROM_CENTER_OF_BASE
     );
-    private static final ReplanningConfig REPLANNING_CONFIG = new ReplanningConfig(true, false);
+    private static final ReplanningConfig REPLANNING_CONFIG = new ReplanningConfig(true, true);
     private static final HolonomicPathFollowerConfig HOLONOMIC_PATH_FOLLOWER_CONFIG = new HolonomicPathFollowerConfig(
             TRANSLATION_PID_CONSTANTS,
             AUTO_ROTATION_PID_CONSTANTS,
             MAX_MODULE_SPEED_METERS_PER_SECOND,
             DRIVE_RADIUS_METERS,
-            REPLANNING_CONFIG // TODO: check how this works
+            REPLANNING_CONFIG
     );
 
     static StatusSignal<Double> YAW_SIGNAL, PITCH_SIGNAL, X_ACCELERATION_SIGNAL, Y_ACCELERATION_SIGNAL, Z_ACCELERATION_SIGNAL;
