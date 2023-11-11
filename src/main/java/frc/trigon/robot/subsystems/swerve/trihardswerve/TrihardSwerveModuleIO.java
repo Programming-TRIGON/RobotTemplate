@@ -106,20 +106,20 @@ public class TrihardSwerveModuleIO extends SwerveModuleIO {
     private double getDriveDistance(double moduleAngleDegrees) {
         BaseStatusSignal.refreshAll(drivePositionSignal, driveVelocitySignal);
         final double latencyCompensatedRevolutions = BaseStatusSignal.getLatencyCompensatedValue(drivePositionSignal, driveVelocitySignal);
-        final double distance = Conversions.revolutionsToDistance(latencyCompensatedRevolutions, TrihardSwerveModuleConstants.WHEEL_DIAMETER_METERS);
-        return removeCouplingFromDistance(distance, moduleAngleDegrees);
+        final double revolutionsWithoutCoupling = removeCouplingFromRevolutions(latencyCompensatedRevolutions, moduleAngleDegrees);
+        return Conversions.revolutionsToDistance(revolutionsWithoutCoupling, TrihardSwerveModuleConstants.WHEEL_DIAMETER_METERS);
     }
 
     /**
      * When the steer motor moves, the drive motor moves as well due to the coupling.
-     * This will affect the current position of the drive motor, so we need to remove the coupling from the distance.
+     * This will affect the current position of the drive motor, so we need to remove the coupling from the position.
      *
-     * @param distance           the distance in meters
+     * @param drivePosition      the position in revolutions
      * @param moduleAngleDegrees the angle of the module in degrees
      * @return the distance without the coupling
      */
-    private double removeCouplingFromDistance(double distance, double moduleAngleDegrees) {
+    private double removeCouplingFromRevolutions(double drivePosition, double moduleAngleDegrees) {
         final double coupledAngle = moduleAngleDegrees * TrihardSwerveModuleConstants.COUPLING_RATIO;
-        return distance - coupledAngle;
+        return drivePosition - coupledAngle;
     }
 }
