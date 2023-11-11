@@ -85,7 +85,7 @@ public class SwerveModuleIO {
      */
     private double reduceSkew(double targetVelocityRevolutions) {
         final double steerErrorRadians = Units.degreesToRadians(swerveModuleInputs.steerClosedLoopErrorDegrees);
-        final double cosineScalar = Math.cos(steerErrorRadians);
+        final double cosineScalar = Math.abs(Math.cos(steerErrorRadians));
         return targetVelocityRevolutions * cosineScalar;
     }
 
