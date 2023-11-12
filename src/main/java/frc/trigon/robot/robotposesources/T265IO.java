@@ -5,16 +5,13 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import frc.trigon.robot.utilities.JsonHandler;
-import org.littletonrobotics.junction.Logger;
 
 public class T265IO extends RobotPoseSourceIO {
     private static final NetworkTable NETWORK_TABLE = NetworkTableInstance.getDefault().getTable("T265");
     private static final short CONFIDENCE_THRESHOLD = 2;
-    private final String name;
     private final NetworkTableEntry jsonDump;
 
     protected T265IO(String name) {
-        this.name = name;
         jsonDump = NETWORK_TABLE.getEntry(name + "/jsonDump");
     }
 

@@ -40,7 +40,8 @@ public class SwerveCommands {
         return new FunctionalCommand(
                 () -> SWERVE.initializeDrive(true),
                 () -> SWERVE.fieldRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), thetaSupplier.getAsDouble(), rateLimit),
-                (interrupted) -> {},
+                (interrupted) -> {
+                },
                 () -> false,
                 SWERVE
         );
@@ -63,7 +64,8 @@ public class SwerveCommands {
                     SWERVE.setLastRotationMovementAngle(null);
                 },
                 () -> SWERVE.fieldRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), angleSupplier.get(), rateLimit),
-                (interrupted) -> {},
+                (interrupted) -> {
+                },
                 () -> false,
                 SWERVE
         );
@@ -81,7 +83,8 @@ public class SwerveCommands {
         return new FunctionalCommand(
                 () -> SWERVE.initializeDrive(false),
                 () -> SWERVE.fieldRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), thetaSupplier.getAsDouble(), rateLimit),
-                (interrupted) -> {},
+                (interrupted) -> {
+                },
                 () -> false,
                 SWERVE
         );
@@ -104,7 +107,8 @@ public class SwerveCommands {
                     SWERVE.setLastRotationMovementAngle(null);
                 },
                 () -> SWERVE.fieldRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), angleSupplier.get(), rateLimit),
-                (interrupted) -> {},
+                (interrupted) -> {
+                },
                 () -> false,
                 SWERVE
         );
@@ -122,7 +126,8 @@ public class SwerveCommands {
         return new FunctionalCommand(
                 () -> SWERVE.initializeDrive(true),
                 () -> SWERVE.selfRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), thetaSupplier.getAsDouble(), rateLimit),
-                (interrupted) -> {},
+                (interrupted) -> {
+                },
                 () -> false,
                 SWERVE
         );
@@ -140,7 +145,8 @@ public class SwerveCommands {
         return new FunctionalCommand(
                 () -> SWERVE.initializeDrive(false),
                 () -> SWERVE.selfRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), thetaSupplier.getAsDouble(), rateLimit),
-                (interrupted) -> {},
+                (interrupted) -> {
+                },
                 () -> false,
                 SWERVE
         );

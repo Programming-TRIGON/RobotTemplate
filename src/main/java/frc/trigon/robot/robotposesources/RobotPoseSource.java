@@ -12,7 +12,7 @@ public class RobotPoseSource extends SubsystemBase {
     protected final String name;
     private final RobotPoseSourceInputsAutoLogged robotPoseSourceInputs = new RobotPoseSourceInputsAutoLogged();
     private Transform3d cameraToRobotCenter;
-    private RobotPoseSourceIO robotPoseSourceIO;
+    private final RobotPoseSourceIO robotPoseSourceIO;
     private double lastUpdatedTimestamp;
     private Pose2d lastRobotPose = new Pose2d();
 
