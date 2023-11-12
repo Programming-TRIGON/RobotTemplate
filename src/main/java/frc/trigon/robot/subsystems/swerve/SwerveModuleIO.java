@@ -25,8 +25,7 @@ public class SwerveModuleIO {
         updateInputs(swerveModuleInputs);
         Logger.processInputs(getLoggingPath(), swerveModuleInputs);
 
-        // TODO: remove this comment when akit gets fixed
-//        updateNetworkTables();
+        updateNetworkTables();
     }
 
     public void setDriveMotorClosedLoop(boolean closedLoop) {

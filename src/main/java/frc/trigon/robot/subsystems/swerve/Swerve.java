@@ -17,6 +17,7 @@ import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.constants.RobotConstants;
 import frc.trigon.robot.subsystems.poseestimator.PoseEstimator;
 import frc.trigon.robot.utilities.AllianceUtilities;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.ArrayList;
@@ -375,9 +376,6 @@ public class Swerve extends SubsystemBase {
         Logger.recordOutput("Swerve/Velocity/rot", getSelfRelativeVelocity().omegaRadiansPerSecond);
         Logger.recordOutput("Swerve/Velocity/x", getSelfRelativeVelocity().vxMetersPerSecond);
         Logger.recordOutput("Swerve/Velocity/y", getSelfRelativeVelocity().vyMetersPerSecond);
-        Logger.recordOutput("Swerve/currentCommand", getCurrentCommand() == null ? "null" : getCurrentCommand().getName());
-        Logger.recordOutput("Swerve/currentStates", getModuleStates());
-        Logger.recordOutput("Swerve/targetStates", getTargetStates());
 
         if (targetProfiledPose == null) {
             Logger.recordOutput("targetPose", POSE_ESTIMATOR.getCurrentPose());
@@ -387,6 +385,7 @@ public class Swerve extends SubsystemBase {
         }
     }
 
+    @AutoLogOutput(key = "Swerve/currentStates")
     private SwerveModuleState[] getModuleStates() {
         final SwerveModuleState[] states = new SwerveModuleState[modulesIO.length];
 
@@ -396,6 +395,7 @@ public class Swerve extends SubsystemBase {
         return states;
     }
 
+    @AutoLogOutput(key = "Swerve/targetStates")
     private SwerveModuleState[] getTargetStates() {
         final SwerveModuleState[] states = new SwerveModuleState[modulesIO.length];
 

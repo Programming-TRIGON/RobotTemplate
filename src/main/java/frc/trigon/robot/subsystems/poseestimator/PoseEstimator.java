@@ -12,7 +12,7 @@ import frc.trigon.robot.robotposesources.PoseSourceConstants;
 import frc.trigon.robot.robotposesources.RobotPoseSource;
 import frc.trigon.robot.subsystems.swerve.Swerve;
 import frc.trigon.robot.utilities.AllianceUtilities;
-import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.AutoLogOutput;
 
 import java.util.HashMap;
 import java.util.Optional;
@@ -73,6 +73,7 @@ public class PoseEstimator implements AutoCloseable {
     /**
      * @return the estimated pose of the robot, relative to the current driver station
      */
+    @AutoLogOutput(key = "robotPose")
     public Pose2d getCurrentPose() {
         return AllianceUtilities.toAlliancePose(swerveDrivePoseEstimator.getEstimatedPosition());
     }
@@ -83,7 +84,6 @@ public class PoseEstimator implements AutoCloseable {
             updateFieldWidget();
 
         SmartDashboard.putData("field", field);
-        Logger.recordOutput("robotPose", getCurrentPose());
     }
 
     private void updateFieldWidget() {

@@ -61,7 +61,6 @@ public class T265IO extends RobotPoseSourceIO {
         final T265JsonDump jsonDump = getJsonDump();
 
         try {
-            Logger.recordOutput(name + "/confidence", jsonDump.confidence);
             return jsonDump.confidence >= CONFIDENCE_THRESHOLD && jsonDump.translation.length == 3 && jsonDump.rotation.length == 4;
         } catch (NullPointerException e) {
             return false;
