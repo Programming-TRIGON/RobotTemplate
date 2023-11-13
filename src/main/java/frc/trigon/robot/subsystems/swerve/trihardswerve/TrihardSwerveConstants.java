@@ -19,6 +19,11 @@ import frc.trigon.robot.subsystems.swerve.SwerveConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveModuleIO;
 
 public class TrihardSwerveConstants extends SwerveConstants {
+    private static final double RATE_LIMIT = 5.5;
+    private static final SlewRateLimiter
+            X_SLEW_RATE_LIMITER = new SlewRateLimiter(RATE_LIMIT),
+            Y_SLEW_RATE_LIMITER = new SlewRateLimiter(RATE_LIMIT);
+
     private static final double
             MAX_SPEED_METERS_PER_SECOND = 4.25,
             MAX_MODULE_SPEED_METERS_PER_SECOND = 4.25,
@@ -27,49 +32,51 @@ public class TrihardSwerveConstants extends SwerveConstants {
     static final double
             SIDE_LENGTH_METERS = 0.7,
             DISTANCE_FROM_CENTER_OF_BASE = SIDE_LENGTH_METERS / 2;
-    private static final double RATE_LIMIT = 5.5;
-    private static final SlewRateLimiter
-            X_SLEW_RATE_LIMITER = new SlewRateLimiter(RATE_LIMIT),
-            Y_SLEW_RATE_LIMITER = new SlewRateLimiter(RATE_LIMIT);
     private static final Translation2d[] LOCATIONS = {
             new Translation2d(DISTANCE_FROM_CENTER_OF_BASE, DISTANCE_FROM_CENTER_OF_BASE),
             new Translation2d(DISTANCE_FROM_CENTER_OF_BASE, -DISTANCE_FROM_CENTER_OF_BASE),
             new Translation2d(-DISTANCE_FROM_CENTER_OF_BASE, DISTANCE_FROM_CENTER_OF_BASE),
             new Translation2d(-DISTANCE_FROM_CENTER_OF_BASE, -DISTANCE_FROM_CENTER_OF_BASE)
     };
+    private static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(LOCATIONS);
+
     private static final TrihardSwerveModuleIO[] MODULES_IO = {
             new TrihardSwerveModuleIO(TrihardSwerveModuleConstants.FRONT_LEFT_SWERVE_MODULE_CONSTANTS, "FrontLeft"),
             new TrihardSwerveModuleIO(TrihardSwerveModuleConstants.FRONT_RIGHT_SWERVE_MODULE_CONSTANTS, "FrontRight"),
             new TrihardSwerveModuleIO(TrihardSwerveModuleConstants.REAR_LEFT_SWERVE_MODULE_CONSTANTS, "RearLeft"),
             new TrihardSwerveModuleIO(TrihardSwerveModuleConstants.REAR_RIGHT_SWERVE_MODULE_CONSTANTS, "RearRight")
     };
-    private static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(LOCATIONS);
+
+    private static final int
+            LOOK_STRAIGHT_P = 5,
+            LOOK_STRAIGHT_I = 0,
+            LOOK_STRAIGHT_D = 0;
+    private static final PIDController LOOK_STRAIGHT_PID_CONTROLLER = new PIDController(LOOK_STRAIGHT_P, LOOK_STRAIGHT_I, LOOK_STRAIGHT_D);
     private static final PIDConstants
             TRANSLATION_PID_CONSTANTS = new PIDConstants(3, 0, 0),
             ROTATION_PID_CONSTANTS = new PIDConstants(5, 0, 0),
             AUTO_ROTATION_PID_CONSTANTS = new PIDConstants(3, 0.0008, 0.5);
-    private static final int PIGEON_ID = 0;
-    static final Pigeon2 GYRO = new Pigeon2(PIGEON_ID);
-    private static final Rotation3d GYRO_MOUNT_POSITION = new Rotation3d(
-            Units.degreesToRadians(-0.796127),
-            Units.degreesToRadians(-0.95211),
-            Units.degreesToRadians(90.0146)
-    );
+    private static final double
+            MAX_ROTATION_VELOCITY = 720,
+            MAX_ROTATION_ACCELERATION = 720;
     private static final TrapezoidProfile.Constraints ROTATION_CONSTRAINTS = new TrapezoidProfile.Constraints(
-            720,
-            720
+            MAX_ROTATION_VELOCITY,
+            MAX_ROTATION_ACCELERATION
     );
-
-    private static final PIDController ROTATION_PID_CONTROLLER = new PIDController(
-            5, 0, 0
-    );
-
     private static final ProfiledPIDController PROFILED_PID_CONTROLLER = new ProfiledPIDController(
             ROTATION_PID_CONSTANTS.kP,
             ROTATION_PID_CONSTANTS.kI,
             ROTATION_PID_CONSTANTS.kD,
             ROTATION_CONSTRAINTS
     );
+
+    private static final int PIGEON_ID = 0;
+    private static final Rotation3d GYRO_MOUNT_POSITION = new Rotation3d(
+            Units.degreesToRadians(-0.796127),
+            Units.degreesToRadians(-0.95211),
+            Units.degreesToRadians(90.0146)
+    );
+    static final Pigeon2 GYRO = new Pigeon2(PIGEON_ID);
 
     private static final double DRIVE_RADIUS_METERS = Math.hypot(
             DISTANCE_FROM_CENTER_OF_BASE, DISTANCE_FROM_CENTER_OF_BASE
@@ -88,7 +95,7 @@ public class TrihardSwerveConstants extends SwerveConstants {
     static {
         PROFILED_PID_CONTROLLER.enableContinuousInput(-180, 180);
         PROFILED_PID_CONTROLLER.setIntegratorRange(-30, 30);
-        ROTATION_PID_CONTROLLER.enableContinuousInput(-180, 180);
+        LOOK_STRAIGHT_PID_CONTROLLER.enableContinuousInput(-180, 180);
 
         if (!RobotConstants.IS_REPLAY)
             configureGyro();
@@ -143,8 +150,8 @@ public class TrihardSwerveConstants extends SwerveConstants {
     }
 
     @Override
-    protected PIDController getRotationController() {
-        return ROTATION_PID_CONTROLLER;
+    protected PIDController getLookStraightController() {
+        return LOOK_STRAIGHT_PID_CONTROLLER;
     }
 
     @Override

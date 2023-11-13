@@ -361,7 +361,7 @@ public class Swerve extends SubsystemBase {
         if (lastRotationMovementAngle == null)
             return 0;
         final Rotation2d currentAngle = POSE_ESTIMATOR.getCurrentPose().getRotation();
-        final double outputDegrees = constants.getRotationController().calculate(currentAngle.getDegrees(), lastRotationMovementAngle.getDegrees());
+        final double outputDegrees = constants.getLookStraightController().calculate(currentAngle.getDegrees(), lastRotationMovementAngle.getDegrees());
         return Units.degreesToRadians(outputDegrees);
     }
 

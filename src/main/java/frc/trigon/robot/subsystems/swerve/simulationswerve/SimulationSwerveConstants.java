@@ -14,22 +14,26 @@ import frc.trigon.robot.subsystems.swerve.SwerveModuleIO;
 
 public class SimulationSwerveConstants extends SwerveConstants {
     private static final double RATE_LIMIT = 10;
-    static final SlewRateLimiter
+    private static final SlewRateLimiter
             X_SLEW_RATE_LIMITER = new SlewRateLimiter(RATE_LIMIT),
             Y_SLEW_RATE_LIMITER = new SlewRateLimiter(RATE_LIMIT);
+
     private static final double
             MAX_SPEED_METERS_PER_SECOND = 4.25,
             MAX_MODULE_SPEED_METERS_PER_SECOND = 4.25,
             MAX_ROTATIONAL_SPEED_RADIANS_PER_SECOND = 12.03;
+
     static final double
             SIDE_LENGTH_METERS = 0.7,
             DISTANCE_FROM_CENTER_OF_BASE = SIDE_LENGTH_METERS / 2;
     private static final Translation2d[] LOCATIONS = {
-            SimulationSwerveModuleConstants.FRONT_RIGHT_MODULE_LOCATION,
-            SimulationSwerveModuleConstants.FRONT_LEFT_MODULE_LOCATION,
-            SimulationSwerveModuleConstants.REAR_RIGHT_MODULE_LOCATION,
-            SimulationSwerveModuleConstants.REAR_LEFT_MODULE_LOCATION
+            new Translation2d(DISTANCE_FROM_CENTER_OF_BASE, DISTANCE_FROM_CENTER_OF_BASE),
+            new Translation2d(DISTANCE_FROM_CENTER_OF_BASE, -DISTANCE_FROM_CENTER_OF_BASE),
+            new Translation2d(-DISTANCE_FROM_CENTER_OF_BASE, DISTANCE_FROM_CENTER_OF_BASE),
+            new Translation2d(-DISTANCE_FROM_CENTER_OF_BASE, -DISTANCE_FROM_CENTER_OF_BASE)
     };
+    private static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(LOCATIONS);
+
     private static final SimulationSwerveModuleIO[] MODULES_IO = {
             new SimulationSwerveModuleIO(SimulationSwerveModuleConstants.FRONT_RIGHT_SWERVE_MODULE_CONSTANTS, "FrontRight"),
             new SimulationSwerveModuleIO(SimulationSwerveModuleConstants.FRONT_LEFT_SWERVE_MODULE_CONSTANTS, "FrontLeft"),
@@ -37,20 +41,22 @@ public class SimulationSwerveConstants extends SwerveConstants {
             new SimulationSwerveModuleIO(SimulationSwerveModuleConstants.REAR_LEFT_SWERVE_MODULE_CONSTANTS, "RearLeft")
     };
 
-    private static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(LOCATIONS);
+    private static final int
+            LOOK_STRAIGHT_P = 12,
+            LOOK_STRAIGHT_I = 0,
+            LOOK_STRAIGHT_D = 0;
+    private static final PIDController LOOK_STRAIGHT_PID_CONTROLLER = new PIDController(LOOK_STRAIGHT_P, LOOK_STRAIGHT_I, LOOK_STRAIGHT_D);
     private static final PIDConstants
             TRANSLATION_PID_CONSTANTS = new PIDConstants(20, 0, 0),
             ROTATION_PID_CONSTANTS = new PIDConstants(12, 0, 0),
             AUTO_ROTATION_PID_CONSTANTS = new PIDConstants(6, 0, 0);
+    private static final double
+            MAX_ROTATION_VELOCITY = 720,
+            MAX_ROTATION_ACCELERATION = 720;
     private static final TrapezoidProfile.Constraints ROTATION_CONSTRAINTS = new TrapezoidProfile.Constraints(
-            720,
-            720
+            MAX_ROTATION_VELOCITY,
+            MAX_ROTATION_ACCELERATION
     );
-
-    private static final PIDController ROTATION_PID_CONTROLLER = new PIDController(
-            12, 0, 0
-    );
-
     private static final ProfiledPIDController PROFILED_PID_CONTROLLER = new ProfiledPIDController(
             ROTATION_PID_CONSTANTS.kP,
             ROTATION_PID_CONSTANTS.kI,
@@ -58,9 +64,7 @@ public class SimulationSwerveConstants extends SwerveConstants {
             ROTATION_CONSTRAINTS
     );
 
-    private static final double DRIVE_RADIUS_METERS = Math.hypot(
-            DISTANCE_FROM_CENTER_OF_BASE, DISTANCE_FROM_CENTER_OF_BASE
-    );
+    private static final double DRIVE_RADIUS_METERS = Math.hypot(DISTANCE_FROM_CENTER_OF_BASE, DISTANCE_FROM_CENTER_OF_BASE);
     private static final ReplanningConfig REPLANNING_CONFIG = new ReplanningConfig(true, true);
     private static final HolonomicPathFollowerConfig HOLONOMIC_PATH_FOLLOWER_CONFIG = new HolonomicPathFollowerConfig(
             TRANSLATION_PID_CONSTANTS,
@@ -73,7 +77,7 @@ public class SimulationSwerveConstants extends SwerveConstants {
     static {
         PROFILED_PID_CONTROLLER.enableContinuousInput(-180, 180);
         PROFILED_PID_CONTROLLER.setIntegratorRange(-30, 30);
-        ROTATION_PID_CONTROLLER.enableContinuousInput(-180, 180);
+        LOOK_STRAIGHT_PID_CONTROLLER.enableContinuousInput(-180, 180);
     }
 
     @Override
@@ -102,8 +106,8 @@ public class SimulationSwerveConstants extends SwerveConstants {
     }
 
     @Override
-    protected PIDController getRotationController() {
-        return ROTATION_PID_CONTROLLER;
+    protected PIDController getLookStraightController() {
+        return LOOK_STRAIGHT_PID_CONTROLLER;
     }
 
     @Override

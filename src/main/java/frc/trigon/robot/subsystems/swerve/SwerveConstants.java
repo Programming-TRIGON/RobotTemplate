@@ -31,7 +31,13 @@ public abstract class SwerveConstants {
         return new SimulationSwerveConstants();
     }
 
-    protected abstract PIDController getRotationController();
+    /**
+     * When the swerve moves, one of the motors might be slower than the others, thus the swerve will spin a bit when driving straight.
+     * To counter this, we use pid to stay at the last angle the swerve's rotation moved at.
+     *
+     * @return the pid controller to stay at the last angle the swerve's rotation moved at
+     */
+    protected abstract PIDController getLookStraightController();
 
     protected abstract ProfiledPIDController getProfiledRotationController();
 

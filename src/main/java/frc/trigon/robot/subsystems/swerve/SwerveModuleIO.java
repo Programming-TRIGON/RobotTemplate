@@ -24,8 +24,6 @@ public class SwerveModuleIO {
     public void periodic() {
         updateInputs(swerveModuleInputs);
         Logger.processInputs(getLoggingPath(), swerveModuleInputs);
-
-        updateNetworkTables();
     }
 
     public void setDriveMotorClosedLoop(boolean closedLoop) {
@@ -54,11 +52,6 @@ public class SwerveModuleIO {
 
     SwerveModuleState getTargetState() {
         return new SwerveModuleState(targetVelocity, targetAngle);
-    }
-
-    private void updateNetworkTables() {
-        Logger.recordOutput(getLoggingPath() + "/targetState", getTargetState());
-        Logger.recordOutput(getLoggingPath() + "/currentState", getCurrentState());
     }
 
     /**
