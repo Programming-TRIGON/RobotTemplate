@@ -5,7 +5,6 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 public class Conversions {
     public static final double
             MAG_TICKS = 4096,
-            FALCON_TICKS = 2048,
             DEGREES_PER_REVOLUTIONS = 360,
             HUNDRED_MS_PER_SEC = 10,
             SEC_PER_MIN = 60;
@@ -28,26 +27,6 @@ public class Conversions {
      */
     public static double revolutionsToMagTicks(double revolutions) {
         return revolutions * MAG_TICKS;
-    }
-
-    /**
-     * Converts falcon ticks to revolutions.
-     *
-     * @param ticks falcon ticks
-     * @return revolutions
-     */
-    public static double falconTicksToRevolutions(double ticks) {
-        return ticks / FALCON_TICKS;
-    }
-
-    /**
-     * Converts revolutions to falcon ticks.
-     *
-     * @param revolutions revolutions
-     * @return falcon ticks
-     */
-    public static double revolutionsToFalconTicks(double revolutions) {
-        return revolutions * FALCON_TICKS;
     }
 
     /**
@@ -88,26 +67,6 @@ public class Conversions {
      */
     public static double degreesToMagTicks(double degrees) {
         return revolutionsToMagTicks(degreesToRevolutions(degrees));
-    }
-
-    /**
-     * Converts falcon ticks to degrees.
-     *
-     * @param ticks falcon ticks
-     * @return degrees
-     */
-    public static double falconTicksToDegrees(double ticks) {
-        return revolutionsToDegrees(falconTicksToRevolutions(ticks));
-    }
-
-    /**
-     * Converts degrees to falcon ticks.
-     *
-     * @param degrees degrees
-     * @return falcon ticks
-     */
-    public static double degreesToFalconTicks(double degrees) {
-        return revolutionsToFalconTicks(degreesToRevolutions(degrees));
     }
 
     /**
