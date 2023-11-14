@@ -365,11 +365,20 @@ public class Swerve extends SubsystemBase {
         return Units.degreesToRadians(outputDegrees);
     }
 
+    /**
+     * Limits the slew rate of the given chassis speeds so the robot will be more stable.
+     * This will only limit the slew rate if the given chassis speeds are zero to give more control to the driver.
+     *
+     * @param toLimit the chassis speeds to limit
+     */
     private void rateLimit(ChassisSpeeds toLimit) {
         final double x = toLimit.vxMetersPerSecond;
         final double y = toLimit.vyMetersPerSecond;
-        toLimit.vxMetersPerSecond = x == 0 ? constants.getXSlewRateLimiter().calculate(x) : x;
-        toLimit.vyMetersPerSecond = y == 0 ? constants.getYSlewRateLimiter().calculate(y) : y;
+        final double limitedX = constants.getXSlewRateLimiter().calculate(x);
+        final double limitedY = constants.getYSlewRateLimiter().calculate(y);
+
+        toLimit.vxMetersPerSecond = x == 0 ? limitedX : x;
+        toLimit.vyMetersPerSecond = y == 0 ? limitedY : y;
     }
 
     private void updateNetworkTables() {
