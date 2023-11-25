@@ -6,12 +6,12 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardBoolean;
 public class KeyboardController {
     private final LoggedDashboardBoolean
             esc, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10,
-            f11, f12, del, backtick, one, two, three, four,
+            f11, f12, delete, backtick, one, two, three, four,
             five, six, seven, eight, nine, zero, minus, equals,
             backspace, tab, q, w, e, r, t, y, u, i, o, p, a, s,
             d, f, g, h, j, k, l, semicolon, apostrophe, leftShift,
-            z, x, c, v, b, n, m, comma, period, forwardSlash,
-            rightShift, leftCtrl, leftAlt, rightAlt, rightCtrl,
+            z, x, c, v, b, n, m, comma, period,
+            rightShift, leftCtrl, leftAlt, rightCtrl,
             left, right, up, down, numpad0, numpad1, numpad2,
             numpad3, numpad4, numpad5, numpad6, numpad7, numpad8,
             numpad9;
@@ -33,20 +33,20 @@ public class KeyboardController {
         f10 = new LoggedDashboardBoolean("keyboard/f10", false);
         f11 = new LoggedDashboardBoolean("keyboard/f11", false);
         f12 = new LoggedDashboardBoolean("keyboard/f12", false);
-        del = new LoggedDashboardBoolean("keyboard/del", false);
-        backtick = new LoggedDashboardBoolean("keyboard/backtick", false);
-        one = new LoggedDashboardBoolean("keyboard/one", false);
-        two = new LoggedDashboardBoolean("keyboard/two", false);
-        three = new LoggedDashboardBoolean("keyboard/three", false);
-        four = new LoggedDashboardBoolean("keyboard/four", false);
-        five = new LoggedDashboardBoolean("keyboard/five", false);
-        six = new LoggedDashboardBoolean("keyboard/six", false);
-        seven = new LoggedDashboardBoolean("keyboard/seven", false);
-        eight = new LoggedDashboardBoolean("keyboard/eight", false);
-        nine = new LoggedDashboardBoolean("keyboard/nine", false);
-        zero = new LoggedDashboardBoolean("keyboard/zero", false);
-        minus = new LoggedDashboardBoolean("keyboard/minus", false);
-        equals = new LoggedDashboardBoolean("keyboard/equals", false);
+        delete = new LoggedDashboardBoolean("keyboard/delete", false);
+        backtick = new LoggedDashboardBoolean("keyboard/`", false);
+        one = new LoggedDashboardBoolean("keyboard/1", false);
+        two = new LoggedDashboardBoolean("keyboard/2", false);
+        three = new LoggedDashboardBoolean("keyboard/3", false);
+        four = new LoggedDashboardBoolean("keyboard/4", false);
+        five = new LoggedDashboardBoolean("keyboard/5", false);
+        six = new LoggedDashboardBoolean("keyboard/6", false);
+        seven = new LoggedDashboardBoolean("keyboard/7", false);
+        eight = new LoggedDashboardBoolean("keyboard/8", false);
+        nine = new LoggedDashboardBoolean("keyboard/9", false);
+        zero = new LoggedDashboardBoolean("keyboard/0", false);
+        minus = new LoggedDashboardBoolean("keyboard/-", false);
+        equals = new LoggedDashboardBoolean("keyboard/=", false);
         backspace = new LoggedDashboardBoolean("keyboard/backspace", false);
         tab = new LoggedDashboardBoolean("keyboard/tab", false);
         q = new LoggedDashboardBoolean("keyboard/q", false);
@@ -68,9 +68,9 @@ public class KeyboardController {
         j = new LoggedDashboardBoolean("keyboard/j", false);
         k = new LoggedDashboardBoolean("keyboard/k", false);
         l = new LoggedDashboardBoolean("keyboard/l", false);
-        semicolon = new LoggedDashboardBoolean("keyboard/semicolon", false);
-        apostrophe = new LoggedDashboardBoolean("keyboard/apostrophe", false);
-        leftShift = new LoggedDashboardBoolean("keyboard/leftShift", false);
+        semicolon = new LoggedDashboardBoolean("keyboard/;", false);
+        apostrophe = new LoggedDashboardBoolean("keyboard/'", false);
+        leftShift = new LoggedDashboardBoolean("keyboard/shift", false);
         z = new LoggedDashboardBoolean("keyboard/z", false);
         x = new LoggedDashboardBoolean("keyboard/x", false);
         c = new LoggedDashboardBoolean("keyboard/c", false);
@@ -78,14 +78,12 @@ public class KeyboardController {
         b = new LoggedDashboardBoolean("keyboard/b", false);
         n = new LoggedDashboardBoolean("keyboard/n", false);
         m = new LoggedDashboardBoolean("keyboard/m", false);
-        comma = new LoggedDashboardBoolean("keyboard/comma", false);
-        period = new LoggedDashboardBoolean("keyboard/period", false);
-        forwardSlash = new LoggedDashboardBoolean("keyboard/forwardSlash", false);
-        rightShift = new LoggedDashboardBoolean("keyboard/rightShift", false);
-        leftCtrl = new LoggedDashboardBoolean("keyboard/leftCtrl", false);
-        leftAlt = new LoggedDashboardBoolean("keyboard/leftAlt", false);
-        rightAlt = new LoggedDashboardBoolean("keyboard/rightAlt", false);
-        rightCtrl = new LoggedDashboardBoolean("keyboard/rightCtrl", false);
+        comma = new LoggedDashboardBoolean("keyboard/,", false);
+        period = new LoggedDashboardBoolean("keyboard/.", false);
+        rightShift = new LoggedDashboardBoolean("keyboard/right shift", false);
+        leftCtrl = new LoggedDashboardBoolean("keyboard/ctrl", false);
+        leftAlt = new LoggedDashboardBoolean("keyboard/alt", false);
+        rightCtrl = new LoggedDashboardBoolean("keyboard/right ctrl", false);
         left = new LoggedDashboardBoolean("keyboard/left", false);
         right = new LoggedDashboardBoolean("keyboard/right", false);
         up = new LoggedDashboardBoolean("keyboard/up", false);
@@ -154,8 +152,8 @@ public class KeyboardController {
         return new Trigger(f12::get);
     }
 
-    public Trigger del() {
-        return new Trigger(del::get);
+    public Trigger delete() {
+        return new Trigger(delete::get);
     }
 
     public Trigger backtick() {
@@ -342,10 +340,6 @@ public class KeyboardController {
         return new Trigger(period::get);
     }
 
-    public Trigger forwardSlash() {
-        return new Trigger(forwardSlash::get);
-    }
-
     public Trigger rightShift() {
         return new Trigger(rightShift::get);
     }
@@ -356,10 +350,6 @@ public class KeyboardController {
 
     public Trigger leftAlt() {
         return new Trigger(leftAlt::get);
-    }
-
-    public Trigger rightAlt() {
-        return new Trigger(rightAlt::get);
     }
 
     public Trigger rightCtrl() {
