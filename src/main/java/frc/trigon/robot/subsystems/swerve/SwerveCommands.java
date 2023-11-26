@@ -34,10 +34,10 @@ public class SwerveCommands {
      * @param thetaSupplier the target theta power, CCW+
      * @return the command
      */
-    public static FunctionalCommand getClosedLoopFieldRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier thetaSupplier, boolean rateLimit) {
+    public static FunctionalCommand getClosedLoopFieldRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier thetaSupplier) {
         return new FunctionalCommand(
                 () -> SWERVE.initializeDrive(true),
-                () -> SWERVE.fieldRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), thetaSupplier.getAsDouble(), rateLimit),
+                () -> SWERVE.fieldRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), thetaSupplier.getAsDouble()),
                 (interrupted) -> {
                 },
                 () -> false,
@@ -54,14 +54,14 @@ public class SwerveCommands {
      * @param angleSupplier the target angle supplier
      * @return the command
      */
-    public static FunctionalCommand getClosedLoopFieldRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, Supplier<Rotation2d> angleSupplier, boolean rateLimit) {
+    public static FunctionalCommand getClosedLoopFieldRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, Supplier<Rotation2d> angleSupplier) {
         return new FunctionalCommand(
                 () -> {
                     SWERVE.initializeDrive(true);
                     SWERVE.resetRotationController();
                     SWERVE.setLastRotationMovementAngle(null);
                 },
-                () -> SWERVE.fieldRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), angleSupplier.get(), rateLimit),
+                () -> SWERVE.fieldRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), angleSupplier.get()),
                 (interrupted) -> {
                 },
                 () -> false,
@@ -77,10 +77,10 @@ public class SwerveCommands {
      * @param thetaSupplier the target theta power, CCW+
      * @return the command
      */
-    public static FunctionalCommand getOpenLoopFieldRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier thetaSupplier, boolean rateLimit) {
+    public static FunctionalCommand getOpenLoopFieldRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier thetaSupplier) {
         return new FunctionalCommand(
                 () -> SWERVE.initializeDrive(false),
-                () -> SWERVE.fieldRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), thetaSupplier.getAsDouble(), rateLimit),
+                () -> SWERVE.fieldRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), thetaSupplier.getAsDouble()),
                 (interrupted) -> {
                 },
                 () -> false,
@@ -97,14 +97,14 @@ public class SwerveCommands {
      * @param angleSupplier the target angle supplier
      * @return the command
      */
-    public static FunctionalCommand getOpenLoopFieldRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, Supplier<Rotation2d> angleSupplier, boolean rateLimit) {
+    public static FunctionalCommand getOpenLoopFieldRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, Supplier<Rotation2d> angleSupplier) {
         return new FunctionalCommand(
                 () -> {
                     SWERVE.initializeDrive(false);
                     SWERVE.resetRotationController();
                     SWERVE.setLastRotationMovementAngle(null);
                 },
-                () -> SWERVE.fieldRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), angleSupplier.get(), rateLimit),
+                () -> SWERVE.fieldRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), angleSupplier.get()),
                 (interrupted) -> {
                 },
                 () -> false,
@@ -120,10 +120,10 @@ public class SwerveCommands {
      * @param thetaSupplier the target theta power, CCW+
      * @return the command
      */
-    public static FunctionalCommand getClosedLoopSelfRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier thetaSupplier, boolean rateLimit) {
+    public static FunctionalCommand getClosedLoopSelfRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier thetaSupplier) {
         return new FunctionalCommand(
                 () -> SWERVE.initializeDrive(true),
-                () -> SWERVE.selfRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), thetaSupplier.getAsDouble(), rateLimit),
+                () -> SWERVE.selfRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), thetaSupplier.getAsDouble()),
                 (interrupted) -> {
                 },
                 () -> false,
@@ -139,10 +139,10 @@ public class SwerveCommands {
      * @param thetaSupplier the target theta power, CCW+
      * @return the command
      */
-    public static FunctionalCommand getOpenLoopSelfRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier thetaSupplier, boolean rateLimit) {
+    public static FunctionalCommand getOpenLoopSelfRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier thetaSupplier) {
         return new FunctionalCommand(
                 () -> SWERVE.initializeDrive(false),
-                () -> SWERVE.selfRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), thetaSupplier.getAsDouble(), rateLimit),
+                () -> SWERVE.selfRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), thetaSupplier.getAsDouble()),
                 (interrupted) -> {
                 },
                 () -> false,

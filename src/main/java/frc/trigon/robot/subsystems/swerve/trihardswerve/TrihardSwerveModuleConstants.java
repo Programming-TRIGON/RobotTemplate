@@ -17,7 +17,6 @@ public class TrihardSwerveModuleConstants {
             DRIVE_GEAR_RATIO = 8.14,
             STEER_GEAR_RATIO = 12.8;
     static final double WHEEL_DIAMETER_METERS = 0.1016;
-    static final double MAX_THEORETICAL_SPEED_METERS_PER_SECOND = 6;
 
     static final int
             FRONT_LEFT_ID = 0,
@@ -40,7 +39,7 @@ public class TrihardSwerveModuleConstants {
             STEER_MOTOR_INVERTED_VALUE = InvertedValue.CounterClockwise_Positive;
     private static final double
             DRIVE_SLIP_CURRENT = 100,
-            STEER_CURRENT_LIMIT = 20;
+            STEER_CURRENT_LIMIT = 50;
 
     //TODO: check gains
     private static final double

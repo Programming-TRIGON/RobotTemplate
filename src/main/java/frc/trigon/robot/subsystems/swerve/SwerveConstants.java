@@ -3,7 +3,6 @@ package frc.trigon.robot.subsystems.swerve;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import frc.trigon.robot.constants.RobotConstants;
 import frc.trigon.robot.subsystems.swerve.simulationswerve.SimulationSwerveConstants;
@@ -21,10 +20,10 @@ public abstract class SwerveConstants {
             TRANSLATION_VELOCITY_TOLERANCE = 0.05,
             ROTATION_VELOCITY_TOLERANCE = 0.05;
     static final double
-            DRIVE_NEUTRAL_DEADBAND = 0.1,
-            ROTATION_NEUTRAL_DEADBAND = 0.1;
+            DRIVE_NEUTRAL_DEADBAND = 0.2,
+            ROTATION_NEUTRAL_DEADBAND = 0.2;
 
-    public static SwerveConstants generateConstants() {
+    static SwerveConstants generateConstants() {
         if (RobotConstants.ROBOT_TYPE == RobotConstants.RobotType.TRIHARD)
             return new TrihardSwerveConstants();
 
@@ -56,7 +55,5 @@ public abstract class SwerveConstants {
 
     protected abstract double getMaxRotationalSpeedRadiansPerSecond();
 
-    protected abstract SlewRateLimiter getXSlewRateLimiter();
-
-    protected abstract SlewRateLimiter getYSlewRateLimiter();
+    protected abstract double getMaxModuleSpeedMetersPerSecond();
 }

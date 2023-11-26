@@ -14,11 +14,14 @@ import edu.wpi.first.wpilibj.Notifier;
 import frc.trigon.robot.subsystems.swerve.SwerveModuleIO;
 import frc.trigon.robot.subsystems.swerve.SwerveModuleInputsAutoLogged;
 import frc.trigon.robot.utilities.Conversions;
+import org.littletonrobotics.junction.Logger;
+
+import java.util.HashMap;
+
 
 public class TrihardSwerveModuleIO extends SwerveModuleIO {
+    private static final SetBrakeNotifier SET_BRAKE_NOTIFIER = new SetBrakeNotifier();
     private final TalonFX steerMotor, driveMotor;
-    private final Notifier setBrakeNotifier = new Notifier(this::setBrakeSynchronous);
-    private boolean brake = true;
     private final StatusSignal<Double> steerPositionSignal, steerVelocitySignal, driveStatorCurrentSignal, drivePositionSignal, driveVelocitySignal;
 
     private final VelocityTorqueCurrentFOC driveVelocityRequest = new VelocityTorqueCurrentFOC(0);
@@ -53,7 +56,7 @@ public class TrihardSwerveModuleIO extends SwerveModuleIO {
     @Override
     protected void setTargetOpenLoopVelocity(double velocity) {
         final double optimizedVelocity = optimizeVelocity(velocity);
-        final double power = optimizedVelocity / TrihardSwerveModuleConstants.MAX_THEORETICAL_SPEED_METERS_PER_SECOND;
+        final double power = optimizedVelocity / TrihardSwerveConstants.MAX_MODULE_SPEED_METERS_PER_SECOND;
         final double voltage = Conversions.compensatedPowerToVoltage(power, TrihardSwerveModuleConstants.VOLTAGE_COMPENSATION_SATURATION);
 
         driveMotor.setControl(driveVoltageRequest.withOutput(voltage));
@@ -67,6 +70,7 @@ public class TrihardSwerveModuleIO extends SwerveModuleIO {
 
     @Override
     protected void setTargetAngle(Rotation2d angle) {
+        Logger.recordOutput(getLoggingPath() + "targetAngle", angle.getDegrees());
         steerMotor.setControl(steerPositionRequest.withPosition(angle.getRotations()));
     }
 
@@ -78,25 +82,8 @@ public class TrihardSwerveModuleIO extends SwerveModuleIO {
 
     @Override
     protected void setBrake(boolean brake) {
-        this.brake = brake;
-        setBrakeNotifier.startSingle(0);
-    }
-
-    // TODO: javadoc
-    private void setBrakeSynchronous() {
-        final NeutralModeValue neutralModeValue = brake ? NeutralModeValue.Brake : NeutralModeValue.Coast;
-
-        setNeutralMode(driveMotor, neutralModeValue);
-        setNeutralMode(steerMotor, neutralModeValue);
-    }
-
-    private void setNeutralMode(TalonFX talonFX, NeutralModeValue neutralModeValue) {
-        final MotorOutputConfigs config = new MotorOutputConfigs();
-        final TalonFXConfigurator configurator = talonFX.getConfigurator();
-
-        configurator.refresh(config, 5);
-        config.NeutralMode = neutralModeValue;
-        configurator.apply(config, 5);
+        SET_BRAKE_NOTIFIER.setBrake(driveMotor, brake ? NeutralModeValue.Brake : NeutralModeValue.Coast);
+        SET_BRAKE_NOTIFIER.setBrake(steerMotor, brake ? NeutralModeValue.Brake : NeutralModeValue.Coast);
     }
 
     /**
@@ -143,5 +130,37 @@ public class TrihardSwerveModuleIO extends SwerveModuleIO {
         driveVelocityRequest.UpdateFreqHz = 0;
         driveVoltageRequest.UpdateFreqHz = 0;
         steerPositionRequest.UpdateFreqHz = 0;
+    }
+
+    public static class SetBrakeNotifier implements AutoCloseable {
+        private final Notifier notifier = new Notifier(this::setBrakeForAllMotors);
+        private final HashMap<TalonFX, NeutralModeValue> motorsToSet = new HashMap<>();
+
+        public SetBrakeNotifier() {
+            notifier.startPeriodic(0.5);
+        }
+
+        @Override
+        public void close() {
+            notifier.close();
+        }
+
+        public void setBrake(TalonFX talonFX, NeutralModeValue neutralModeValue) {
+            motorsToSet.put(talonFX, neutralModeValue);
+        }
+
+        private void setBrakeForAllMotors() {
+            motorsToSet.forEach(this::setBrakeSynchronous);
+            motorsToSet.clear();
+        }
+
+        private void setBrakeSynchronous(TalonFX motor, NeutralModeValue neutralModeValue) {
+            final MotorOutputConfigs config = new MotorOutputConfigs();
+            final TalonFXConfigurator configurator = motor.getConfigurator();
+
+            configurator.refresh(config, 10);
+            config.NeutralMode = neutralModeValue;
+            configurator.apply(config, 10);
+        }
     }
 }

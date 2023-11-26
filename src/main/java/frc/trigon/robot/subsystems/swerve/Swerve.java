@@ -7,6 +7,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
@@ -34,7 +35,6 @@ public class Swerve extends SubsystemBase {
     private final Notifier configurePathPlannerNotifier = new Notifier(this::configurePathPlanner);
     private final List<Double> previousLoopTimestamps = new ArrayList<>();
     private Pose2d targetProfiledPose = null;
-    @AutoLogOutput
     private Rotation2d lastRotationMovementAngle = null;
 
     public static Swerve getInstance() {
@@ -172,6 +172,11 @@ public class Swerve extends SubsystemBase {
             currentModule.setDriveMotorClosedLoop(closedLoop);
     }
 
+    void stop() {
+        for (SwerveModuleIO currentModule : modulesIO)
+            currentModule.stop();
+    }
+
     /**
      * Sets whether the swerve motors should brake or coast.
      *
@@ -188,10 +193,9 @@ public class Swerve extends SubsystemBase {
      * @param xPower      the x power
      * @param yPower      the y power
      * @param targetAngle the target angle
-     * @param rateLimit   whether the swerve should be rate limited
      */
-    void fieldRelativeDrive(double xPower, double yPower, Rotation2d targetAngle, boolean rateLimit) {
-        final ChassisSpeeds speeds = selfRelativeSpeedsFromFieldRelativePowers(xPower, yPower, 0, rateLimit);
+    void fieldRelativeDrive(double xPower, double yPower, Rotation2d targetAngle) {
+        final ChassisSpeeds speeds = selfRelativeSpeedsFromFieldRelativePowers(xPower, yPower, 0);
         speeds.omegaRadiansPerSecond = calculateProfiledAngleSpeedToTargetAngle(targetAngle);
 
         selfRelativeDrive(speeds);
@@ -204,10 +208,9 @@ public class Swerve extends SubsystemBase {
      * @param xPower     the x power
      * @param yPower     the y power
      * @param thetaPower the theta power
-     * @param rateLimit  whether the swerve should be rate limited
      */
-    void fieldRelativeDrive(double xPower, double yPower, double thetaPower, boolean rateLimit) {
-        final ChassisSpeeds speeds = selfRelativeSpeedsFromFieldRelativePowers(xPower, yPower, thetaPower, rateLimit);
+    void fieldRelativeDrive(double xPower, double yPower, double thetaPower) {
+        final ChassisSpeeds speeds = selfRelativeSpeedsFromFieldRelativePowers(xPower, yPower, thetaPower);
         selfRelativeDrive(speeds);
     }
 
@@ -217,28 +220,26 @@ public class Swerve extends SubsystemBase {
      * @param xPower     the x power
      * @param yPower     the y power
      * @param thetaPower the theta power
-     * @param rateLimit  whether the swerve should be rate limited
      */
-    void selfRelativeDrive(double xPower, double yPower, double thetaPower, boolean rateLimit) {
+    void selfRelativeDrive(double xPower, double yPower, double thetaPower) {
         final ChassisSpeeds speeds = powersToSpeeds(xPower, yPower, thetaPower);
-        if (rateLimit)
-            rateLimit(speeds);
-
         selfRelativeDrive(speeds);
     }
 
     private void selfRelativeDrive(ChassisSpeeds chassisSpeeds) {
         updatePreviousLoopTimestamps();
-
         chassisSpeeds = discretize(chassisSpeeds);
-        if (isStill(chassisSpeeds))
-            chassisSpeeds = new ChassisSpeeds();
+        if (isStill(chassisSpeeds)) {
+            stop();
+            return;
+        }
 
         final SwerveModuleState[] swerveModuleStates = constants.getKinematics().toSwerveModuleStates(chassisSpeeds);
         setTargetModuleStates(swerveModuleStates);
     }
 
     private void setTargetModuleStates(SwerveModuleState[] swerveModuleStates) {
+        SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, constants.getMaxModuleSpeedMetersPerSecond());
         for (int i = 0; i < modulesIO.length; i++)
             modulesIO[i].setTargetState(swerveModuleStates[i]);
     }
@@ -312,12 +313,9 @@ public class Swerve extends SubsystemBase {
         );
     }
 
-    private ChassisSpeeds selfRelativeSpeedsFromFieldRelativePowers(double xPower, double yPower, double thetaPower, boolean rateLimit) {
+    private ChassisSpeeds selfRelativeSpeedsFromFieldRelativePowers(double xPower, double yPower, double thetaPower) {
         final ChassisSpeeds fieldRelativeSpeeds = powersToSpeeds(xPower, yPower, thetaPower);
-        final ChassisSpeeds selfRelativeSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(fieldRelativeSpeeds, POSE_ESTIMATOR.getCurrentPose().getRotation());
-        if (rateLimit)
-            rateLimit(selfRelativeSpeeds);
-        return selfRelativeSpeeds;
+        return ChassisSpeeds.fromFieldRelativeSpeeds(fieldRelativeSpeeds, POSE_ESTIMATOR.getCurrentPose().getRotation());
     }
 
     private ChassisSpeeds powersToSpeeds(double xPower, double yPower, double thetaPower) {
@@ -354,22 +352,6 @@ public class Swerve extends SubsystemBase {
         final Rotation2d currentAngle = POSE_ESTIMATOR.getCurrentPose().getRotation();
         final double outputDegrees = constants.getLookStraightController().calculate(currentAngle.getDegrees(), lastRotationMovementAngle.getDegrees());
         return Units.degreesToRadians(outputDegrees);
-    }
-
-    /**
-     * Limits the slew rate of the given chassis speeds so the robot will be more stable.
-     * This will only limit the slew rate if the given chassis speeds are zero to give more control to the driver.
-     *
-     * @param toLimit the chassis speeds to limit
-     */
-    private void rateLimit(ChassisSpeeds toLimit) {
-        final double x = toLimit.vxMetersPerSecond;
-        final double y = toLimit.vyMetersPerSecond;
-        final double limitedX = constants.getXSlewRateLimiter().calculate(x);
-        final double limitedY = constants.getYSlewRateLimiter().calculate(y);
-
-        toLimit.vxMetersPerSecond = x == 0 ? limitedX : x;
-        toLimit.vyMetersPerSecond = y == 0 ? limitedY : y;
     }
 
     private void updateNetworkTables() {

@@ -49,7 +49,7 @@ public class SimulationSwerveModuleIO extends SwerveModuleIO {
 
     @Override
     protected void setTargetOpenLoopVelocity(double velocity) {
-        final double power = velocity / SimulationSwerveModuleConstants.MAX_THEORETICAL_SPEED_METERS_PER_SECOND;
+        final double power = velocity / SimulationSwerveConstants.MAX_MODULE_SPEED_METERS_PER_SECOND;
         final double voltage = power * SimulationSwerveModuleConstants.MAX_MOTOR_VOLTAGE;
         setDriveVoltage(voltage);
     }

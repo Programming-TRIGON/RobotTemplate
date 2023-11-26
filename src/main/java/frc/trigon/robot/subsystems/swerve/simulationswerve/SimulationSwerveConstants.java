@@ -5,7 +5,6 @@ import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -13,15 +12,10 @@ import frc.trigon.robot.subsystems.swerve.SwerveConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveModuleIO;
 
 public class SimulationSwerveConstants extends SwerveConstants {
-    private static final double RATE_LIMIT = 10;
-    private static final SlewRateLimiter
-            X_SLEW_RATE_LIMITER = new SlewRateLimiter(RATE_LIMIT),
-            Y_SLEW_RATE_LIMITER = new SlewRateLimiter(RATE_LIMIT);
-
     private static final double
             MAX_SPEED_METERS_PER_SECOND = 4.25,
-            MAX_MODULE_SPEED_METERS_PER_SECOND = 4.25,
             MAX_ROTATIONAL_SPEED_RADIANS_PER_SECOND = 12.03;
+    static final double MAX_MODULE_SPEED_METERS_PER_SECOND = 6;
 
     private static final double
             MODULE_FROM_MODULE_DISTANCE = 0.7,
@@ -111,22 +105,17 @@ public class SimulationSwerveConstants extends SwerveConstants {
     }
 
     @Override
-    public ProfiledPIDController getProfiledRotationController() {
+    protected ProfiledPIDController getProfiledRotationController() {
         return PROFILED_PID_CONTROLLER;
     }
 
     @Override
-    public double getRobotSideLength() {
+    protected double getRobotSideLength() {
         return MODULE_FROM_MODULE_DISTANCE;
     }
 
     @Override
-    protected SlewRateLimiter getXSlewRateLimiter() {
-        return X_SLEW_RATE_LIMITER;
-    }
-
-    @Override
-    protected SlewRateLimiter getYSlewRateLimiter() {
-        return Y_SLEW_RATE_LIMITER;
+    protected double getMaxModuleSpeedMetersPerSecond() {
+        return MAX_MODULE_SPEED_METERS_PER_SECOND;
     }
 }

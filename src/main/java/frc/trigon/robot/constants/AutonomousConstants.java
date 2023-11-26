@@ -10,6 +10,6 @@ public class AutonomousConstants {
     }
 
     private static void registerCommands() {
-//        NamedCommands.registerCommand(name, commands);
+//        NamedCommands.registerCommand(name, command);
     }
 }

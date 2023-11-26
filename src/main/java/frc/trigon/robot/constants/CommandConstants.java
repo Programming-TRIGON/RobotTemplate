@@ -21,21 +21,18 @@ public class CommandConstants {
             FIELD_RELATIVE_DRIVE_COMMAND = SwerveCommands.getOpenLoopFieldRelativeDriveCommand(
                     () -> applyShiftModeToPower(DRIVER_CONTROLLER.getLeftY() / OperatorConstants.STICKS_SPEED_DIVIDER, OperatorConstants.MINIMUM_TRANSLATION_SHIFT_POWER),
                     () -> applyShiftModeToPower(DRIVER_CONTROLLER.getLeftX() / OperatorConstants.STICKS_SPEED_DIVIDER, OperatorConstants.MINIMUM_TRANSLATION_SHIFT_POWER),
-                    () -> applyShiftModeToPower(DRIVER_CONTROLLER.getRightX() / OperatorConstants.STICKS_SPEED_DIVIDER, OperatorConstants.MINIMUM_ROTATION_SHIFT_POWER),
-                    true
+                    () -> applyShiftModeToPower(DRIVER_CONTROLLER.getRightX() / OperatorConstants.STICKS_SPEED_DIVIDER, OperatorConstants.MINIMUM_ROTATION_SHIFT_POWER)
             ),
             SELF_RELATIVE_DRIVE_COMMAND = SwerveCommands.getOpenLoopSelfRelativeDriveCommand(
                     () -> applyShiftModeToPower(DRIVER_CONTROLLER.getLeftY() / OperatorConstants.STICKS_SPEED_DIVIDER, OperatorConstants.MINIMUM_TRANSLATION_SHIFT_POWER),
                     () -> applyShiftModeToPower(DRIVER_CONTROLLER.getLeftX() / OperatorConstants.STICKS_SPEED_DIVIDER, OperatorConstants.MINIMUM_TRANSLATION_SHIFT_POWER),
-                    () -> applyShiftModeToPower(DRIVER_CONTROLLER.getRightX() / OperatorConstants.STICKS_SPEED_DIVIDER, OperatorConstants.MINIMUM_ROTATION_SHIFT_POWER),
-                    true
+                    () -> applyShiftModeToPower(DRIVER_CONTROLLER.getRightX() / OperatorConstants.STICKS_SPEED_DIVIDER, OperatorConstants.MINIMUM_ROTATION_SHIFT_POWER)
             ),
             RESET_HEADING_COMMAND = new InstantCommand(() -> POSE_ESTIMATOR.resetPose(changeRotation(POSE_ESTIMATOR.getCurrentPose(), new Rotation2d()))),
             SELF_RELATIVE_DRIVE_FROM_DPAD_COMMAND = SwerveCommands.getOpenLoopSelfRelativeDriveCommand(
                     () -> applyShiftModeToPower(getXPowerFromPov(DRIVER_CONTROLLER.getPov()) / OperatorConstants.POV_DIVIDER, OperatorConstants.MINIMUM_TRANSLATION_SHIFT_POWER),
                     () -> applyShiftModeToPower(getYPowerFromPov(DRIVER_CONTROLLER.getPov()) / OperatorConstants.POV_DIVIDER, OperatorConstants.MINIMUM_TRANSLATION_SHIFT_POWER),
-                    () -> 0,
-                    true
+                    () -> 0
             ),
             BRAKE_SWERVE_COMMAND = new InstantCommand(() -> SWERVE.setBrake(true));
 

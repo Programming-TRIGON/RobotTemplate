@@ -10,7 +10,6 @@ public class SimulationSwerveModuleConstants {
             DRIVE_GEAR_RATIO = 8.14,
             STEER_GEAR_RATIO = 12.8;
     static final double WHEEL_DIAMETER_METERS = 0.1016;
-    static final double MAX_THEORETICAL_SPEED_METERS_PER_SECOND = 4.2;
 
     private static final double
             DRIVE_MOMENT_OF_INERTIA = 0.003,
