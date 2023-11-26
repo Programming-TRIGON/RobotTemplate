@@ -176,3 +176,5 @@ networktables.json
 *.wpilog
 simgui.json
 simgui-ds.json
+
+ctre_sim
