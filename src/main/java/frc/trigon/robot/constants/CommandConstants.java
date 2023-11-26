@@ -14,24 +14,27 @@ import frc.trigon.robot.subsystems.swerve.SwerveCommands;
 public class CommandConstants {
     private static final PoseEstimator POSE_ESTIMATOR = RobotContainer.POSE_ESTIMATOR;
     private static final XboxController DRIVER_CONTROLLER = OperatorConstants.DRIVER_CONTROLLER;
+    private static final double
+            MINIMUM_TRANSLATION_SHIFT_POWER = 0.18,
+            MINIMUM_ROTATION_SHIFT_POWER = 0.3;
 
     private static final Swerve SWERVE = Swerve.getInstance();
 
     public static final Command
             FIELD_RELATIVE_DRIVE_COMMAND = SwerveCommands.getOpenLoopFieldRelativeDriveCommand(
-                    () -> applyShiftModeToPower(DRIVER_CONTROLLER.getLeftY() / OperatorConstants.STICKS_SPEED_DIVIDER, OperatorConstants.MINIMUM_TRANSLATION_SHIFT_POWER),
-                    () -> applyShiftModeToPower(DRIVER_CONTROLLER.getLeftX() / OperatorConstants.STICKS_SPEED_DIVIDER, OperatorConstants.MINIMUM_TRANSLATION_SHIFT_POWER),
-                    () -> applyShiftModeToPower(DRIVER_CONTROLLER.getRightX() / OperatorConstants.STICKS_SPEED_DIVIDER, OperatorConstants.MINIMUM_ROTATION_SHIFT_POWER)
+                    () -> DRIVER_CONTROLLER.getLeftY() / OperatorConstants.STICKS_SPEED_DIVIDER / calculateShiftModeValue(MINIMUM_TRANSLATION_SHIFT_POWER),
+                    () -> DRIVER_CONTROLLER.getLeftX() / OperatorConstants.STICKS_SPEED_DIVIDER / calculateShiftModeValue(MINIMUM_TRANSLATION_SHIFT_POWER),
+                    () -> DRIVER_CONTROLLER.getRightX() / OperatorConstants.STICKS_SPEED_DIVIDER / calculateShiftModeValue(MINIMUM_ROTATION_SHIFT_POWER)
             ),
             SELF_RELATIVE_DRIVE_COMMAND = SwerveCommands.getOpenLoopSelfRelativeDriveCommand(
-                    () -> applyShiftModeToPower(DRIVER_CONTROLLER.getLeftY() / OperatorConstants.STICKS_SPEED_DIVIDER, OperatorConstants.MINIMUM_TRANSLATION_SHIFT_POWER),
-                    () -> applyShiftModeToPower(DRIVER_CONTROLLER.getLeftX() / OperatorConstants.STICKS_SPEED_DIVIDER, OperatorConstants.MINIMUM_TRANSLATION_SHIFT_POWER),
-                    () -> applyShiftModeToPower(DRIVER_CONTROLLER.getRightX() / OperatorConstants.STICKS_SPEED_DIVIDER, OperatorConstants.MINIMUM_ROTATION_SHIFT_POWER)
+                    () -> DRIVER_CONTROLLER.getLeftY() / OperatorConstants.STICKS_SPEED_DIVIDER/ calculateShiftModeValue(MINIMUM_TRANSLATION_SHIFT_POWER),
+                    () -> DRIVER_CONTROLLER.getLeftX() / OperatorConstants.STICKS_SPEED_DIVIDER/ calculateShiftModeValue(MINIMUM_TRANSLATION_SHIFT_POWER),
+                    () -> DRIVER_CONTROLLER.getRightX() / OperatorConstants.STICKS_SPEED_DIVIDER/ calculateShiftModeValue(MINIMUM_ROTATION_SHIFT_POWER)
             ),
             RESET_HEADING_COMMAND = new InstantCommand(() -> POSE_ESTIMATOR.resetPose(changeRotation(POSE_ESTIMATOR.getCurrentPose(), new Rotation2d()))),
             SELF_RELATIVE_DRIVE_FROM_DPAD_COMMAND = SwerveCommands.getOpenLoopSelfRelativeDriveCommand(
-                    () -> applyShiftModeToPower(getXPowerFromPov(DRIVER_CONTROLLER.getPov()) / OperatorConstants.POV_DIVIDER, OperatorConstants.MINIMUM_TRANSLATION_SHIFT_POWER),
-                    () -> applyShiftModeToPower(getYPowerFromPov(DRIVER_CONTROLLER.getPov()) / OperatorConstants.POV_DIVIDER, OperatorConstants.MINIMUM_TRANSLATION_SHIFT_POWER),
+                    () -> getXPowerFromPov(DRIVER_CONTROLLER.getPov()) / OperatorConstants.POV_DIVIDER / calculateShiftModeValue(MINIMUM_TRANSLATION_SHIFT_POWER),
+                    () -> getYPowerFromPov(DRIVER_CONTROLLER.getPov()) / OperatorConstants.POV_DIVIDER / calculateShiftModeValue(MINIMUM_TRANSLATION_SHIFT_POWER),
                     () -> 0
             ),
             BRAKE_SWERVE_COMMAND = new InstantCommand(() -> SWERVE.setBrake(true));
@@ -40,19 +43,14 @@ public class CommandConstants {
      * The shift mode is a mode of the robot that slows down the robot relative to how much the right trigger axis is pressed.
      * This method will take the given power, and slow it down relative to how much the right trigger is pressed.
      *
-     * @param power        the power to slow down
      * @param minimumPower the minimum amount of power the shift mode can limit (as an absolute number)
      * @return the power to apply to the robot
      */
-    public static double applyShiftModeToPower(double power, double minimumPower) {
-        if (Math.abs(power) < minimumPower)
-            return power;
+    public static double calculateShiftModeValue(double minimumPower) {
+        final double squaredShiftModeValue = Math.pow(DRIVER_CONTROLLER.getRightTriggerAxis(), 2);
+        final double minimumShiftValueCoefficient = 1 - (1 / minimumPower);
 
-        final double powerSign = Math.signum(power);
-        final double slope = -(1 - minimumPower * powerSign - (1 - power));
-        final double shiftModeValue = DRIVER_CONTROLLER.getRightTriggerAxis();
-
-        return slope * shiftModeValue + power;
+        return 1 - squaredShiftModeValue * minimumShiftValueCoefficient;
     }
 
     private static double getXPowerFromPov(double pov) {

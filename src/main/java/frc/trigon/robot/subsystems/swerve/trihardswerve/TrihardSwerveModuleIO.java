@@ -14,7 +14,6 @@ import edu.wpi.first.wpilibj.Notifier;
 import frc.trigon.robot.subsystems.swerve.SwerveModuleIO;
 import frc.trigon.robot.subsystems.swerve.SwerveModuleInputsAutoLogged;
 import frc.trigon.robot.utilities.Conversions;
-import org.littletonrobotics.junction.Logger;
 
 import java.util.HashMap;
 
@@ -70,7 +69,6 @@ public class TrihardSwerveModuleIO extends SwerveModuleIO {
 
     @Override
     protected void setTargetAngle(Rotation2d angle) {
-        Logger.recordOutput(getLoggingPath() + "targetAngle", angle.getDegrees());
         steerMotor.setControl(steerPositionRequest.withPosition(angle.getRotations()));
     }
 

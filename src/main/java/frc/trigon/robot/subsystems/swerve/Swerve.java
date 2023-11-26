@@ -55,6 +55,7 @@ public class Swerve extends SubsystemBase {
             currentModule.periodic();
 
         updateNetworkTables();
+        updatePreviousLoopTimestamps();
     }
 
     public SwerveConstants getConstants() {
@@ -133,6 +134,16 @@ public class Swerve extends SubsystemBase {
                 Math.abs(getSelfRelativeVelocity().omegaRadiansPerSecond) < SwerveConstants.ROTATION_VELOCITY_TOLERANCE;
     }
 
+    /**
+     * Sets whether the swerve motors should brake or coast.
+     *
+     * @param brake whether the drive motors should brake or coast
+     */
+    public void setBrake(boolean brake) {
+        for (SwerveModuleIO currentModule : modulesIO)
+            currentModule.setBrake(brake);
+    }
+
     void initializeDrive(boolean closedLoop) {
         setClosedLoop(closedLoop);
         setLastRotationMovementAngle(POSE_ESTIMATOR.getCurrentPose().getRotation());
@@ -178,16 +189,6 @@ public class Swerve extends SubsystemBase {
     }
 
     /**
-     * Sets whether the swerve motors should brake or coast.
-     *
-     * @param brake whether the drive motors should brake or coast
-     */
-    public void setBrake(boolean brake) {
-        for (SwerveModuleIO currentModule : modulesIO)
-            currentModule.setBrake(brake);
-    }
-
-    /**
      * Drives the swerve with the given powers and a target angle, relative to the field's frame of reference.
      *
      * @param xPower      the x power
@@ -227,7 +228,6 @@ public class Swerve extends SubsystemBase {
     }
 
     private void selfRelativeDrive(ChassisSpeeds chassisSpeeds) {
-        updatePreviousLoopTimestamps();
         chassisSpeeds = discretize(chassisSpeeds);
         if (isStill(chassisSpeeds)) {
             stop();
@@ -256,6 +256,9 @@ public class Swerve extends SubsystemBase {
     }
 
     private double getAverageLoopTime() {
+        if (previousLoopTimestamps.size() < SwerveConstants.MAX_SAVED_PREVIOUS_LOOP_TIMESTAMPS)
+            return RobotConstants.PERIODIC_TIME_SECONDS;
+
         double differenceSum = 0;
         double lastTimestamp = -1;
 

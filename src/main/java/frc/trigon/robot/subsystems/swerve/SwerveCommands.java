@@ -23,7 +23,8 @@ public class SwerveCommands {
     }
 
     public static Command getDriveToPoseCommand(PathConstraints constraints, Pose2d targetPose) {
-        return new DeferredCommand(() -> AutoBuilder.pathfindToPose(targetPose, constraints), Set.of(SWERVE));
+        return new InstantCommand(() -> SWERVE.initializeDrive(true))
+                .andThen(new DeferredCommand(() -> AutoBuilder.pathfindToPose(targetPose, constraints), Set.of(SWERVE)));
     }
 
     /**
