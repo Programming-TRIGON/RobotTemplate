@@ -27,22 +27,21 @@ public class Swerve extends SubsystemBase {
     private static final Swerve INSTANCE = new Swerve();
     private static final PoseEstimator POSE_ESTIMATOR = RobotContainer.POSE_ESTIMATOR;
     private final SwerveInputsAutoLogged swerveInputs = new SwerveInputsAutoLogged();
-    private final SwerveIO swerveIO;
+    private final SwerveIO swerveIO = SwerveIO.generateIO();
+    private final SwerveConstants constants = SwerveConstants.generateConstants();
     private final SwerveModuleIO[] modulesIO;
-    private final SwerveConstants constants;
     private final Notifier updateLastRotationMovementAngleNotifier = new Notifier(() -> lastRotationMovementAngle = POSE_ESTIMATOR.getCurrentPose().getRotation());
     private final Notifier configurePathPlannerNotifier = new Notifier(this::configurePathPlanner);
     private final List<Double> previousLoopTimestamps = new ArrayList<>();
     private Pose2d targetProfiledPose = null;
-    private Rotation2d lastRotationMovementAngle = new Rotation2d();
+    @AutoLogOutput
+    private Rotation2d lastRotationMovementAngle = null;
 
     public static Swerve getInstance() {
         return INSTANCE;
     }
 
     private Swerve() {
-        swerveIO = SwerveIO.generateIO();
-        constants = SwerveConstants.generateConstants();
         modulesIO = getModulesIO();
         configurePathPlannerNotifier.startSingle(2);
     }
@@ -135,7 +134,6 @@ public class Swerve extends SubsystemBase {
     }
 
     void initializeDrive(boolean closedLoop) {
-        setBrake(true);
         setClosedLoop(closedLoop);
         setLastRotationMovementAngle(POSE_ESTIMATOR.getCurrentPose().getRotation());
     }
@@ -174,17 +172,12 @@ public class Swerve extends SubsystemBase {
             currentModule.setDriveMotorClosedLoop(closedLoop);
     }
 
-    void stop() {
-        for (SwerveModuleIO currentModule : modulesIO)
-            currentModule.stop();
-    }
-
     /**
      * Sets whether the swerve motors should brake or coast.
      *
      * @param brake whether the drive motors should brake or coast
      */
-    void setBrake(boolean brake) {
+    public void setBrake(boolean brake) {
         for (SwerveModuleIO currentModule : modulesIO)
             currentModule.setBrake(brake);
     }
@@ -237,12 +230,10 @@ public class Swerve extends SubsystemBase {
     private void selfRelativeDrive(ChassisSpeeds chassisSpeeds) {
         updatePreviousLoopTimestamps();
 
-        if (isStill(chassisSpeeds)) {
-            stop();
-            return;
-        }
-
         chassisSpeeds = discretize(chassisSpeeds);
+        if (isStill(chassisSpeeds))
+            chassisSpeeds = new ChassisSpeeds();
+
         final SwerveModuleState[] swerveModuleStates = constants.getKinematics().toSwerveModuleStates(chassisSpeeds);
         setTargetModuleStates(swerveModuleStates);
     }
@@ -421,10 +412,9 @@ public class Swerve extends SubsystemBase {
      * @return true if the chassis speeds are considered to be "still"
      */
     private boolean isStill(ChassisSpeeds chassisSpeeds) {
-        return
-                Math.abs(chassisSpeeds.vxMetersPerSecond) <= SwerveConstants.DRIVE_NEUTRAL_DEADBAND &&
-                        Math.abs(chassisSpeeds.vyMetersPerSecond) <= SwerveConstants.DRIVE_NEUTRAL_DEADBAND &&
-                        Math.abs(chassisSpeeds.omegaRadiansPerSecond) <= SwerveConstants.ROTATION_NEUTRAL_DEADBAND;
+        return Math.abs(chassisSpeeds.vxMetersPerSecond) <= SwerveConstants.DRIVE_NEUTRAL_DEADBAND &&
+                Math.abs(chassisSpeeds.vyMetersPerSecond) <= SwerveConstants.DRIVE_NEUTRAL_DEADBAND &&
+                Math.abs(chassisSpeeds.omegaRadiansPerSecond) <= SwerveConstants.ROTATION_NEUTRAL_DEADBAND;
     }
 
     private SwerveModuleIO[] getModulesIO() {

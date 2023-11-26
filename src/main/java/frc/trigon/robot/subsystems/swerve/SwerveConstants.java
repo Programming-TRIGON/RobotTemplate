@@ -22,7 +22,7 @@ public abstract class SwerveConstants {
             ROTATION_VELOCITY_TOLERANCE = 0.05;
     static final double
             DRIVE_NEUTRAL_DEADBAND = 0.1,
-            ROTATION_NEUTRAL_DEADBAND = 0.;
+            ROTATION_NEUTRAL_DEADBAND = 0.1;
 
     public static SwerveConstants generateConstants() {
         if (RobotConstants.ROBOT_TYPE == RobotConstants.RobotType.TRIHARD)

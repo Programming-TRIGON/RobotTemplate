@@ -14,12 +14,10 @@ public class SwerveCommands {
     private static final Swerve SWERVE = Swerve.getInstance();
 
     /**
-     * @return a command that brakes the swerve modules and then coasts them, runs when disabled
+     * @return a command that waits a bit, then coasts the swerve modules, runs when disabled (should be called on disabled)
      */
-    public static Command getBrakeAndCoastCommand() {
-        return new WaitCommand(0.2)
-                .andThen(new InstantCommand(() -> SWERVE.setBrake(true)))
-                .andThen(new WaitCommand(SwerveConstants.BRAKE_TIME_SECONDS))
+    public static Command getDelayedCoastCommand() {
+        return new WaitCommand(SwerveConstants.BRAKE_TIME_SECONDS)
                 .andThen(new InstantCommand(() -> SWERVE.setBrake(false)))
                 .ignoringDisable(true);
     }

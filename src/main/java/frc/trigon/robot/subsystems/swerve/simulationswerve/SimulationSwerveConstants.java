@@ -23,14 +23,14 @@ public class SimulationSwerveConstants extends SwerveConstants {
             MAX_MODULE_SPEED_METERS_PER_SECOND = 4.25,
             MAX_ROTATIONAL_SPEED_RADIANS_PER_SECOND = 12.03;
 
-    static final double
-            SIDE_LENGTH_METERS = 0.7,
-            DISTANCE_FROM_CENTER_OF_BASE = SIDE_LENGTH_METERS / 2;
+    private static final double
+            MODULE_FROM_MODULE_DISTANCE = 0.7,
+            MODULE_DISTANCE_FROM_CENTER_OF_BASE = MODULE_FROM_MODULE_DISTANCE / 2;
     private static final Translation2d[] LOCATIONS = {
-            new Translation2d(DISTANCE_FROM_CENTER_OF_BASE, DISTANCE_FROM_CENTER_OF_BASE),
-            new Translation2d(DISTANCE_FROM_CENTER_OF_BASE, -DISTANCE_FROM_CENTER_OF_BASE),
-            new Translation2d(-DISTANCE_FROM_CENTER_OF_BASE, DISTANCE_FROM_CENTER_OF_BASE),
-            new Translation2d(-DISTANCE_FROM_CENTER_OF_BASE, -DISTANCE_FROM_CENTER_OF_BASE)
+            new Translation2d(MODULE_DISTANCE_FROM_CENTER_OF_BASE, MODULE_DISTANCE_FROM_CENTER_OF_BASE),
+            new Translation2d(MODULE_DISTANCE_FROM_CENTER_OF_BASE, -MODULE_DISTANCE_FROM_CENTER_OF_BASE),
+            new Translation2d(-MODULE_DISTANCE_FROM_CENTER_OF_BASE, MODULE_DISTANCE_FROM_CENTER_OF_BASE),
+            new Translation2d(-MODULE_DISTANCE_FROM_CENTER_OF_BASE, -MODULE_DISTANCE_FROM_CENTER_OF_BASE)
     };
     private static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(LOCATIONS);
 
@@ -64,7 +64,7 @@ public class SimulationSwerveConstants extends SwerveConstants {
             ROTATION_CONSTRAINTS
     );
 
-    private static final double DRIVE_RADIUS_METERS = Math.hypot(DISTANCE_FROM_CENTER_OF_BASE, DISTANCE_FROM_CENTER_OF_BASE);
+    private static final double DRIVE_RADIUS_METERS = Math.hypot(MODULE_DISTANCE_FROM_CENTER_OF_BASE, MODULE_DISTANCE_FROM_CENTER_OF_BASE);
     private static final ReplanningConfig REPLANNING_CONFIG = new ReplanningConfig(true, true);
     private static final HolonomicPathFollowerConfig HOLONOMIC_PATH_FOLLOWER_CONFIG = new HolonomicPathFollowerConfig(
             TRANSLATION_PID_CONSTANTS,
@@ -117,7 +117,7 @@ public class SimulationSwerveConstants extends SwerveConstants {
 
     @Override
     public double getRobotSideLength() {
-        return SIDE_LENGTH_METERS;
+        return MODULE_FROM_MODULE_DISTANCE;
     }
 
     @Override

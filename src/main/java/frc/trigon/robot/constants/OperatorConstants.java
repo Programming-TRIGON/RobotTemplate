@@ -19,8 +19,8 @@ public class OperatorConstants {
             POV_DIVIDER = 2,
             STICKS_SPEED_DIVIDER = 1;
     static final double
-            MINIMUM_TRANSLATION_SHIFT_POWER = 0.18,
-            MINIMUM_ROTATION_SHIFT_POWER = 0.4;
+            MINIMUM_TRANSLATION_SHIFT_POWER = 0.08,
+            MINIMUM_ROTATION_SHIFT_POWER = 0.3;
 
     public static final Trigger
             RESET_HEADING_TRIGGER = DRIVER_CONTROLLER.y(),

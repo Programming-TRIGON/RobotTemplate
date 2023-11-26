@@ -1,5 +1,6 @@
 package frc.trigon.robot.subsystems.swerve.trihardswerve;
 
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -11,12 +12,12 @@ import frc.trigon.robot.utilities.Conversions;
 public class TrihardSwerveModuleConstants {
     static final double VOLTAGE_COMPENSATION_SATURATION = 12;
     static final boolean ENABLE_FOC = true;
-    static final double COUPLING_RATIO = 0;
+    static final double COUPLING_RATIO = 2.63852242744;
     static final double
-            DRIVE_GEAR_RATIO = 5.14,
+            DRIVE_GEAR_RATIO = 8.14,
             STEER_GEAR_RATIO = 12.8;
     static final double WHEEL_DIAMETER_METERS = 0.1016;
-    static final double MAX_THEORETICAL_SPEED_METERS_PER_SECOND = 4;
+    static final double MAX_THEORETICAL_SPEED_METERS_PER_SECOND = 6;
 
     static final int
             FRONT_LEFT_ID = 0,
@@ -38,12 +39,12 @@ public class TrihardSwerveModuleConstants {
             DRIVE_MOTOR_INVERTED_VALUE = InvertedValue.Clockwise_Positive,
             STEER_MOTOR_INVERTED_VALUE = InvertedValue.CounterClockwise_Positive;
     private static final double
-            DRIVE_OPEN_LOOP_RAMP_RATE = 0.1,
-            DRIVE_CLOSED_LOOP_RAMP_RATE = 0.2;
+            DRIVE_SLIP_CURRENT = 100,
+            STEER_CURRENT_LIMIT = 20;
 
     //TODO: check gains
     private static final double
-            STEER_MOTOR_P = 0.656875,
+            STEER_MOTOR_P = 75,
             STEER_MOTOR_I = 0,
             STEER_MOTOR_D = 0;
     private static final double
@@ -110,6 +111,8 @@ public class TrihardSwerveModuleConstants {
             );
 
     private final Notifier setSteerMotorPositionToAbsoluteNotifier = new Notifier(this::setSteerMotorPositionToAbsolute);
+    @SuppressWarnings("unchecked")
+    final StatusSignal<Double>[] statusSignals = new StatusSignal[5];
     final TalonFX driveMotor, steerMotor;
     final DutyCycleEncoder steerEncoder;
     final double encoderOffset;
@@ -121,8 +124,8 @@ public class TrihardSwerveModuleConstants {
         this.encoderOffset = encoderOffset;
 
         if (!RobotConstants.IS_REPLAY) {
-            configureDriveMotor();
             configureSteerMotor();
+            configureDriveMotor();
         }
     }
 
@@ -134,6 +137,8 @@ public class TrihardSwerveModuleConstants {
 
         config.MotorOutput.Inverted = STEER_MOTOR_INVERTED_VALUE;
         config.Feedback.SensorToMechanismRatio = STEER_GEAR_RATIO;
+        config.CurrentLimits.StatorCurrentLimit = STEER_CURRENT_LIMIT;
+        config.CurrentLimits.StatorCurrentLimitEnable = true;
 
         config.Slot0.kP = STEER_MOTOR_P;
         config.Slot0.kI = STEER_MOTOR_I;
@@ -142,11 +147,10 @@ public class TrihardSwerveModuleConstants {
 
         steerMotor.getConfigurator().apply(config);
 
-        steerMotor.getPosition().setUpdateFrequency(150);
-        steerMotor.getStatorCurrent().setUpdateFrequency(20);
-        steerMotor.getVelocity().setUpdateFrequency(150);
-        steerMotor.getClosedLoopError().setUpdateFrequency(70);
-        steerMotor.optimizeBusUtilization();
+        statusSignals[0] = steerMotor.getPosition().clone();
+        statusSignals[1] = steerMotor.getVelocity().clone();
+        statusSignals[0].setUpdateFrequency(250);
+        statusSignals[1].setUpdateFrequency(250);
 
         setSteerMotorPositionToAbsoluteNotifier.startSingle(ENCODER_UPDATE_TIME_SECONDS);
     }
@@ -160,8 +164,10 @@ public class TrihardSwerveModuleConstants {
         config.MotorOutput.Inverted = DRIVE_MOTOR_INVERTED_VALUE;
         config.Feedback.SensorToMechanismRatio = DRIVE_GEAR_RATIO;
 
-        config.OpenLoopRamps.DutyCycleOpenLoopRampPeriod = DRIVE_OPEN_LOOP_RAMP_RATE;
-        config.ClosedLoopRamps.DutyCycleClosedLoopRampPeriod = DRIVE_CLOSED_LOOP_RAMP_RATE;
+        config.TorqueCurrent.PeakForwardTorqueCurrent = DRIVE_SLIP_CURRENT;
+        config.TorqueCurrent.PeakReverseTorqueCurrent = -DRIVE_SLIP_CURRENT;
+        config.CurrentLimits.StatorCurrentLimit = DRIVE_SLIP_CURRENT;
+        config.CurrentLimits.StatorCurrentLimitEnable = true;
 
         config.Slot0.kP = DRIVE_MOTOR_P;
         config.Slot0.kI = DRIVE_MOTOR_I;
@@ -172,9 +178,12 @@ public class TrihardSwerveModuleConstants {
 
         driveMotor.getConfigurator().apply(config);
 
-        driveMotor.getPosition().setUpdateFrequency(100);
-        driveMotor.getVelocity().setUpdateFrequency(100);
-        driveMotor.getDutyCycle().setUpdateFrequency(10);
+        statusSignals[2] = driveMotor.getPosition().clone();
+        statusSignals[3] = driveMotor.getVelocity().clone();
+        statusSignals[4] = driveMotor.getStatorCurrent().clone();
+        statusSignals[2].setUpdateFrequency(250);
+        statusSignals[3].setUpdateFrequency(250);
+        statusSignals[4].setUpdateFrequency(20);
         driveMotor.optimizeBusUtilization();
     }
 

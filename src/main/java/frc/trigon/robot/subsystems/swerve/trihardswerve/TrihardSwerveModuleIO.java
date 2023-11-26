@@ -2,23 +2,28 @@ package frc.trigon.robot.subsystems.swerve.trihardswerve;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.controls.*;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.configs.TalonFXConfigurator;
+import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.Notifier;
 import frc.trigon.robot.subsystems.swerve.SwerveModuleIO;
 import frc.trigon.robot.subsystems.swerve.SwerveModuleInputsAutoLogged;
 import frc.trigon.robot.utilities.Conversions;
 
 public class TrihardSwerveModuleIO extends SwerveModuleIO {
     private final TalonFX steerMotor, driveMotor;
-    private final StatusSignal<Double> steerPositionSignal, steerStatorCurrentSignal, steerVelocitySignal, steerClosedLoopErrorSignal, drivePositionSignal, driveVelocitySignal, driveDutyCycleSignal;
+    private final Notifier setBrakeNotifier = new Notifier(this::setBrakeSynchronous);
+    private boolean brake = true;
+    private final StatusSignal<Double> steerPositionSignal, steerVelocitySignal, driveStatorCurrentSignal, drivePositionSignal, driveVelocitySignal;
 
-    private final VelocityVoltage driveVelocityRequest = new VelocityVoltage(0, 0, TrihardSwerveModuleConstants.ENABLE_FOC, 0, 0, false);
+    private final VelocityTorqueCurrentFOC driveVelocityRequest = new VelocityTorqueCurrentFOC(0);
     private final VoltageOut driveVoltageRequest = new VoltageOut(0, TrihardSwerveModuleConstants.ENABLE_FOC, false);
     private final PositionVoltage steerPositionRequest = new PositionVoltage(0, 0, TrihardSwerveModuleConstants.ENABLE_FOC, 0, 0, false);
-    private final ControlRequest
-            coastRequest = new CoastOut(),
-            brakeRequest = new StaticBrake();
 
     TrihardSwerveModuleIO(TrihardSwerveModuleConstants moduleConstants, String moduleName) {
         super(moduleName);
@@ -26,30 +31,28 @@ public class TrihardSwerveModuleIO extends SwerveModuleIO {
         this.steerMotor = moduleConstants.steerMotor;
         this.driveMotor = moduleConstants.driveMotor;
 
-        steerPositionSignal = steerMotor.getPosition();
-        steerVelocitySignal = steerMotor.getVelocity();
-        steerClosedLoopErrorSignal = steerMotor.getClosedLoopError();
-        steerStatorCurrentSignal = steerMotor.getStatorCurrent();
+        steerPositionSignal = moduleConstants.statusSignals[0];
+        steerVelocitySignal = moduleConstants.statusSignals[1];
+        drivePositionSignal = moduleConstants.statusSignals[2];
+        driveVelocitySignal = moduleConstants.statusSignals[3];
+        driveStatorCurrentSignal = moduleConstants.statusSignals[4];
 
-        drivePositionSignal = driveMotor.getPosition();
-        driveVelocitySignal = driveMotor.getVelocity();
-        driveDutyCycleSignal = driveMotor.getDutyCycle();
+        // TODO: check if this is needed.
+        makeRequestsSynchronous();
     }
 
     @Override
     protected void updateInputs(SwerveModuleInputsAutoLogged inputs) {
         inputs.steerAngleDegrees = getAngleDegrees();
-        inputs.steerCurrent = steerStatorCurrentSignal.refresh().getValue();
-        inputs.steerClosedLoopErrorDegrees = Conversions.revolutionsToDegrees(steerClosedLoopErrorSignal.refresh().getValue());
 
         inputs.driveDistanceMeters = getDriveDistance(inputs.steerAngleDegrees);
         inputs.driveVelocityMetersPerSecond = Conversions.revolutionsToDistance(driveVelocitySignal.getValue(), TrihardSwerveModuleConstants.WHEEL_DIAMETER_METERS);
-        inputs.driveDutyCycle = driveDutyCycleSignal.refresh().getValue();
+        inputs.driveCurrent = driveStatorCurrentSignal.refresh().getValue();
     }
 
     @Override
     protected void setTargetOpenLoopVelocity(double velocity) {
-        final double optimizedVelocity = removeCouplingFromTargetVelocity(velocity);
+        final double optimizedVelocity = optimizeVelocity(velocity);
         final double power = optimizedVelocity / TrihardSwerveModuleConstants.MAX_THEORETICAL_SPEED_METERS_PER_SECOND;
         final double voltage = Conversions.compensatedPowerToVoltage(power, TrihardSwerveModuleConstants.VOLTAGE_COMPENSATION_SATURATION);
 
@@ -58,7 +61,7 @@ public class TrihardSwerveModuleIO extends SwerveModuleIO {
 
     @Override
     protected void setTargetClosedLoopVelocity(double velocity) {
-        final double optimizedVelocity = removeCouplingFromTargetVelocity(velocity);
+        final double optimizedVelocity = optimizeVelocity(velocity);
         driveMotor.setControl(driveVelocityRequest.withVelocity(optimizedVelocity));
     }
 
@@ -75,23 +78,36 @@ public class TrihardSwerveModuleIO extends SwerveModuleIO {
 
     @Override
     protected void setBrake(boolean brake) {
-        if (brake) {
-            driveMotor.setControl(brakeRequest);
-            steerMotor.setControl(brakeRequest);
-        } else {
-            driveMotor.setControl(coastRequest);
-            steerMotor.setControl(coastRequest);
-        }
+        this.brake = brake;
+        setBrakeNotifier.startSingle(0);
+    }
+
+    // TODO: javadoc
+    private void setBrakeSynchronous() {
+        final NeutralModeValue neutralModeValue = brake ? NeutralModeValue.Brake : NeutralModeValue.Coast;
+
+        setNeutralMode(driveMotor, neutralModeValue);
+        setNeutralMode(steerMotor, neutralModeValue);
+    }
+
+    private void setNeutralMode(TalonFX talonFX, NeutralModeValue neutralModeValue) {
+        final MotorOutputConfigs config = new MotorOutputConfigs();
+        final TalonFXConfigurator configurator = talonFX.getConfigurator();
+
+        configurator.refresh(config, 5);
+        config.NeutralMode = neutralModeValue;
+        configurator.apply(config, 5);
     }
 
     /**
      * When the steer motor moves, the drive motor moves as well due to the coupling.
      * This will the real output velocity of the drive motor, so we need to remove the coupling from the velocity.
+     * Note that this function accepts meters per second and returns revolutions per second
      *
      * @param targetDriveVelocityMetersPerSecond the target velocity of the drive motor in meters per second
-     * @return the velocity without the coupling
+     * @return the velocity without the coupling in revolutions
      */
-    private double removeCouplingFromTargetVelocity(double targetDriveVelocityMetersPerSecond) {
+    private double optimizeVelocity(double targetDriveVelocityMetersPerSecond) {
         final double velocityRevolutions = Conversions.distanceToRevolutions(targetDriveVelocityMetersPerSecond, TrihardSwerveModuleConstants.WHEEL_DIAMETER_METERS);
         final double driveRateBackOut = steerVelocitySignal.getValue() * TrihardSwerveModuleConstants.COUPLING_RATIO;
         return velocityRevolutions - driveRateBackOut;
@@ -121,5 +137,11 @@ public class TrihardSwerveModuleIO extends SwerveModuleIO {
     private double removeCouplingFromRevolutions(double drivePosition, double moduleAngleDegrees) {
         final double coupledAngle = moduleAngleDegrees * TrihardSwerveModuleConstants.COUPLING_RATIO;
         return drivePosition - coupledAngle;
+    }
+
+    private void makeRequestsSynchronous() {
+        driveVelocityRequest.UpdateFreqHz = 0;
+        driveVoltageRequest.UpdateFreqHz = 0;
+        steerPositionRequest.UpdateFreqHz = 0;
     }
 }

@@ -39,12 +39,10 @@ public class SimulationSwerveModuleIO extends SwerveModuleIO {
             stop();
 
         inputs.steerAngleDegrees = Conversions.revolutionsToDegrees(steerMotor.getAngularPositionRotations());
-        inputs.steerCurrent = steerMotor.getCurrentDrawAmps();
-        inputs.steerClosedLoopErrorDegrees = steerPIDController.getPositionError();
 
         inputs.driveDistanceMeters = Conversions.revolutionsToDistance(driveMotor.getAngularPositionRotations(), SimulationSwerveModuleConstants.WHEEL_DIAMETER_METERS);
         inputs.driveVelocityMetersPerSecond = Conversions.revolutionsToDistance(Units.radiansToRotations(driveMotor.getAngularVelocityRadPerSec()), SimulationSwerveModuleConstants.WHEEL_DIAMETER_METERS);
-        inputs.driveDutyCycle = driveAppliedVoltage;
+        inputs.driveCurrent = driveMotor.getCurrentDrawAmps();
 
         lastInputs = inputs;
     }

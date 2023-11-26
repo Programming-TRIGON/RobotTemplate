@@ -3,7 +3,6 @@ package frc.trigon.robot.subsystems.swerve;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.util.Units;
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
 
@@ -11,8 +10,7 @@ public class SwerveModuleIO {
     private final SwerveModuleInputsAutoLogged swerveModuleInputs = new SwerveModuleInputsAutoLogged();
     private final String name;
     private boolean driveMotorClosedLoop = false;
-    private double targetVelocity;
-    private Rotation2d targetAngle = new Rotation2d();
+    private SwerveModuleState targetState = new SwerveModuleState();
 
     public SwerveModuleIO(String name) {
         this.name = name;
@@ -31,11 +29,9 @@ public class SwerveModuleIO {
     }
 
     public void setTargetState(SwerveModuleState targetState) {
-        targetState = SwerveModuleState.optimize(targetState, getCurrentAngle());
-        setTargetAngle(targetState.angle);
-        setTargetVelocity(targetState.speedMetersPerSecond);
-        targetAngle = targetState.angle;
-        targetVelocity = targetState.speedMetersPerSecond;
+        this.targetState = SwerveModuleState.optimize(targetState, getCurrentAngle());
+        setTargetAngle(this.targetState.angle);
+        setTargetVelocity(this.targetState.speedMetersPerSecond, this.targetState.angle);
     }
 
     protected String getLoggingPath() {
@@ -51,16 +47,17 @@ public class SwerveModuleIO {
     }
 
     SwerveModuleState getTargetState() {
-        return new SwerveModuleState(targetVelocity, targetAngle);
+        return targetState;
     }
 
     /**
      * Sets the target velocity for the module. In meters per second.
      *
-     * @param velocity the target velocity
+     * @param velocity         the target velocity
+     * @param targetSteerAngle the target steer angle, to calculate for skew reduction
      */
-    private void setTargetVelocity(double velocity) {
-        velocity = reduceSkew(velocity);
+    private void setTargetVelocity(double velocity, Rotation2d targetSteerAngle) {
+        velocity = reduceSkew(velocity, targetSteerAngle);
 
         if (driveMotorClosedLoop)
             setTargetClosedLoopVelocity(velocity);
@@ -73,11 +70,12 @@ public class SwerveModuleIO {
      * This method will counter that by reducing the target velocity according to the angle motor's error cosine.
      *
      * @param targetVelocityRevolutions the target velocity in revolutions per second
+     * @param targetSteerAngle          the target steer angle
      * @return the reduced target velocity in revolutions per second
      */
-    private double reduceSkew(double targetVelocityRevolutions) {
-        final double steerErrorRadians = Units.degreesToRadians(swerveModuleInputs.steerClosedLoopErrorDegrees);
-        final double cosineScalar = Math.abs(Math.cos(steerErrorRadians));
+    private double reduceSkew(double targetVelocityRevolutions, Rotation2d targetSteerAngle) {
+        final double closedLoopError = targetSteerAngle.getRadians() - getCurrentAngle().getRadians();
+        final double cosineScalar = Math.abs(Math.cos(closedLoopError));
         return targetVelocityRevolutions * cosineScalar;
     }
 
@@ -121,11 +119,9 @@ public class SwerveModuleIO {
     @AutoLog
     public static class SwerveModuleInputs {
         public double steerAngleDegrees = 0;
-        public double steerCurrent = 0;
-        public double steerClosedLoopErrorDegrees = 0;
 
         public double driveVelocityMetersPerSecond = 0;
         public double driveDistanceMeters = 0;
-        public double driveDutyCycle = 0;
+        public double driveCurrent = 0;
     }
 }

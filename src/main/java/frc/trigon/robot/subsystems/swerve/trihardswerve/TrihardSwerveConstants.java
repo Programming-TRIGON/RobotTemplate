@@ -24,19 +24,20 @@ public class TrihardSwerveConstants extends SwerveConstants {
             X_SLEW_RATE_LIMITER = new SlewRateLimiter(RATE_LIMIT),
             Y_SLEW_RATE_LIMITER = new SlewRateLimiter(RATE_LIMIT);
 
+    // TODO: Calibrate values
     private static final double
             MAX_SPEED_METERS_PER_SECOND = 4.25,
             MAX_MODULE_SPEED_METERS_PER_SECOND = 4.25,
             MAX_ROTATIONAL_SPEED_RADIANS_PER_SECOND = 12.03;
 
-    static final double
-            SIDE_LENGTH_METERS = 0.7,
-            DISTANCE_FROM_CENTER_OF_BASE = SIDE_LENGTH_METERS / 2;
+    private static final double
+            MODULE_FROM_MODULE_DISTANCE = 0.55,
+            MODULE_DISTANCE_FROM_CENTER_OF_BASE = MODULE_FROM_MODULE_DISTANCE / 2;
     private static final Translation2d[] LOCATIONS = {
-            new Translation2d(DISTANCE_FROM_CENTER_OF_BASE, DISTANCE_FROM_CENTER_OF_BASE),
-            new Translation2d(DISTANCE_FROM_CENTER_OF_BASE, -DISTANCE_FROM_CENTER_OF_BASE),
-            new Translation2d(-DISTANCE_FROM_CENTER_OF_BASE, DISTANCE_FROM_CENTER_OF_BASE),
-            new Translation2d(-DISTANCE_FROM_CENTER_OF_BASE, -DISTANCE_FROM_CENTER_OF_BASE)
+            new Translation2d(MODULE_DISTANCE_FROM_CENTER_OF_BASE, MODULE_DISTANCE_FROM_CENTER_OF_BASE),
+            new Translation2d(MODULE_DISTANCE_FROM_CENTER_OF_BASE, -MODULE_DISTANCE_FROM_CENTER_OF_BASE),
+            new Translation2d(-MODULE_DISTANCE_FROM_CENTER_OF_BASE, MODULE_DISTANCE_FROM_CENTER_OF_BASE),
+            new Translation2d(-MODULE_DISTANCE_FROM_CENTER_OF_BASE, -MODULE_DISTANCE_FROM_CENTER_OF_BASE)
     };
     private static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(LOCATIONS);
 
@@ -48,7 +49,7 @@ public class TrihardSwerveConstants extends SwerveConstants {
     };
 
     private static final int
-            LOOK_STRAIGHT_P = 5,
+            LOOK_STRAIGHT_P = 0,
             LOOK_STRAIGHT_I = 0,
             LOOK_STRAIGHT_D = 0;
     private static final PIDController LOOK_STRAIGHT_PID_CONTROLLER = new PIDController(LOOK_STRAIGHT_P, LOOK_STRAIGHT_I, LOOK_STRAIGHT_D);
@@ -79,7 +80,7 @@ public class TrihardSwerveConstants extends SwerveConstants {
     static final Pigeon2 GYRO = new Pigeon2(PIGEON_ID);
 
     private static final double DRIVE_RADIUS_METERS = Math.hypot(
-            DISTANCE_FROM_CENTER_OF_BASE, DISTANCE_FROM_CENTER_OF_BASE
+            MODULE_DISTANCE_FROM_CENTER_OF_BASE, MODULE_DISTANCE_FROM_CENTER_OF_BASE
     );
     private static final ReplanningConfig REPLANNING_CONFIG = new ReplanningConfig(true, true);
     private static final HolonomicPathFollowerConfig HOLONOMIC_PATH_FOLLOWER_CONFIG = new HolonomicPathFollowerConfig(
@@ -90,7 +91,12 @@ public class TrihardSwerveConstants extends SwerveConstants {
             REPLANNING_CONFIG
     );
 
-    static StatusSignal<Double> YAW_SIGNAL, PITCH_SIGNAL, X_ACCELERATION_SIGNAL, Y_ACCELERATION_SIGNAL, Z_ACCELERATION_SIGNAL;
+    static final StatusSignal<Double>
+            YAW_SIGNAL = GYRO.getYaw().clone(),
+            PITCH_SIGNAL = GYRO.getPitch().clone(),
+            X_ACCELERATION_SIGNAL = GYRO.getAccelerationX().clone(),
+            Y_ACCELERATION_SIGNAL = GYRO.getAccelerationY().clone(),
+            Z_ACCELERATION_SIGNAL = GYRO.getAccelerationZ().clone();
 
     static {
         PROFILED_PID_CONTROLLER.enableContinuousInput(-180, 180);
@@ -109,12 +115,6 @@ public class TrihardSwerveConstants extends SwerveConstants {
         gyroConfig.MountPose.MountPoseYaw = Units.radiansToDegrees(GYRO_MOUNT_POSITION.getZ());
 
         GYRO.getConfigurator().apply(gyroConfig);
-
-        YAW_SIGNAL = GYRO.getYaw();
-        PITCH_SIGNAL = GYRO.getPitch();
-        X_ACCELERATION_SIGNAL = GYRO.getAccelerationX();
-        Y_ACCELERATION_SIGNAL = GYRO.getAccelerationY();
-        Z_ACCELERATION_SIGNAL = GYRO.getAccelerationZ();
 
         YAW_SIGNAL.setUpdateFrequency(200);
         PITCH_SIGNAL.setUpdateFrequency(100);
@@ -171,6 +171,6 @@ public class TrihardSwerveConstants extends SwerveConstants {
 
     @Override
     public double getRobotSideLength() {
-        return SIDE_LENGTH_METERS;
+        return MODULE_FROM_MODULE_DISTANCE;
     }
 }

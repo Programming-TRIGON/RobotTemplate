@@ -7,7 +7,7 @@ import frc.trigon.robot.subsystems.swerve.trihardswerve.TrihardSwerveIO;
 import org.littletonrobotics.junction.AutoLog;
 
 public class SwerveIO {
-    public static SwerveIO generateIO() {
+    static SwerveIO generateIO() {
         if (RobotConstants.IS_REPLAY)
             return new SwerveIO();
         if (RobotConstants.ROBOT_TYPE == RobotConstants.RobotType.TRIHARD)

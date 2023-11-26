@@ -8,6 +8,7 @@ package frc.trigon.robot;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.trigon.robot.constants.CommandConstants;
 import frc.trigon.robot.constants.RobotConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveCommands;
 import frc.trigon.robot.utilities.LocalADStarAK;
@@ -21,7 +22,8 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 public class Robot extends LoggedRobot {
     public static final boolean IS_REAL = Robot.isReal();
-    private final Command brakeAndCoastCommand = SwerveCommands.getBrakeAndCoastCommand();
+    private final Command delayedCoastCommand = SwerveCommands.getDelayedCoastCommand();
+    private final CommandScheduler commandScheduler = CommandScheduler.getInstance();
     private Command autonomousCommand;
     private RobotContainer robotContainer;
 
@@ -34,17 +36,17 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void robotPeriodic() {
-        CommandScheduler.getInstance().run();
+        commandScheduler.run();
     }
 
     @Override
     public void disabledInit() {
-        brakeAndCoastCommand.schedule();
+        delayedCoastCommand.schedule();
     }
 
     @Override
     public void autonomousInit() {
-        brakeAndCoastCommand.cancel();
+        enabledInit();
         autonomousCommand = robotContainer.getAutonomousCommand();
 
         if (autonomousCommand != null)
@@ -53,7 +55,7 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void teleopInit() {
-        brakeAndCoastCommand.cancel();
+        enabledInit();
         if (autonomousCommand != null)
             autonomousCommand.cancel();
     }
@@ -61,6 +63,11 @@ public class Robot extends LoggedRobot {
     @Override
     public void testInit() {
         CommandScheduler.getInstance().cancelAll();
+    }
+
+    private void enabledInit() {
+        delayedCoastCommand.cancel();
+        CommandConstants.BRAKE_SWERVE_COMMAND.schedule();
     }
 
     private void configLogger() {
@@ -71,13 +78,11 @@ public class Robot extends LoggedRobot {
 
             Logger.setReplaySource(new WPILOGReader(logPath));
             Logger.addDataReceiver(new WPILOGWriter(logWriterPath));
-            Logger.start();
-
-            return;
+        } else {
+            Logger.addDataReceiver(new WPILOGWriter(RobotConstants.ROBOT_TYPE.loggingPath));
+            Logger.addDataReceiver(new NT4Publisher());
         }
 
-        Logger.addDataReceiver(new WPILOGWriter(RobotConstants.ROBOT_TYPE.loggingPath));
-        Logger.addDataReceiver(new NT4Publisher());
         Logger.start();
     }
 }
