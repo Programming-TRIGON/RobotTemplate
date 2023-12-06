@@ -75,14 +75,6 @@ public class SimulationSwerveModuleIO extends SwerveModuleIO {
         setSteerVoltage(0);
     }
 
-    private double voltageToMaxedVoltage(double voltage) {
-        return MathUtil.clamp(
-                voltage,
-                -SimulationSwerveModuleConstants.MAX_MOTOR_VOLTAGE,
-                SimulationSwerveModuleConstants.MAX_MOTOR_VOLTAGE
-        );
-    }
-
     private void setDriveVoltage(double voltage) {
         driveAppliedVoltage = voltageToMaxedVoltage(voltage);
         driveMotor.setInputVoltage(driveAppliedVoltage);
@@ -90,5 +82,13 @@ public class SimulationSwerveModuleIO extends SwerveModuleIO {
 
     private void setSteerVoltage(double voltage) {
         steerMotor.setInputVoltage(voltageToMaxedVoltage(voltage));
+    }
+
+    private double voltageToMaxedVoltage(double voltage) {
+        return MathUtil.clamp(
+                voltage,
+                -SimulationSwerveModuleConstants.MAX_MOTOR_VOLTAGE,
+                SimulationSwerveModuleConstants.MAX_MOTOR_VOLTAGE
+        );
     }
 }

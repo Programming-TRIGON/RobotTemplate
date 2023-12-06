@@ -1,4 +1,4 @@
-package frc.trigon.robot.subsystems.poseestimator;
+package frc.trigon.robot.poseestimation.poseestimator;
 
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -8,8 +8,8 @@ import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.trigon.robot.constants.RobotConstants;
-import frc.trigon.robot.robotposesources.PoseSourceConstants;
-import frc.trigon.robot.robotposesources.RobotPoseSource;
+import frc.trigon.robot.poseestimation.robotposesources.PoseSourceConstants;
+import frc.trigon.robot.poseestimation.robotposesources.RobotPoseSource;
 import frc.trigon.robot.subsystems.swerve.Swerve;
 import frc.trigon.robot.utilities.AllianceUtilities;
 import org.littletonrobotics.junction.AutoLogOutput;

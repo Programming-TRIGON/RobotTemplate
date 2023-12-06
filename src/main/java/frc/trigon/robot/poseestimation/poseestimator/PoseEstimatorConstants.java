@@ -1,4 +1,4 @@
-package frc.trigon.robot.subsystems.poseestimator;
+package frc.trigon.robot.poseestimation.poseestimator;
 
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;

@@ -16,7 +16,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.constants.RobotConstants;
-import frc.trigon.robot.subsystems.poseestimator.PoseEstimator;
+import frc.trigon.robot.poseestimation.poseestimator.PoseEstimator;
 import frc.trigon.robot.utilities.AllianceUtilities;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;

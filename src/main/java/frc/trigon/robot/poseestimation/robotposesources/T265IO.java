@@ -1,4 +1,4 @@
-package frc.trigon.robot.robotposesources;
+package frc.trigon.robot.poseestimation.robotposesources;
 
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.networktables.NetworkTable;
