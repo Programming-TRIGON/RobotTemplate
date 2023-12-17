@@ -28,7 +28,7 @@ public class Commands {
     public static Command getToggleBrakeCommand() {
         return new InstantCommand(() -> {
             IS_BRAKING = !IS_BRAKING;
-            AbstractSubsystem.REGISTERED_SUBSYSTEMS.forEach(subsystem -> subsystem.setBrake(IS_BRAKING));
+            AbstractSubsystem.forEach(subsystem -> subsystem.setBrake(IS_BRAKING));
         });
     }
 

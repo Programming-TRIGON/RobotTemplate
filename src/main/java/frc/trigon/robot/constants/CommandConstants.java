@@ -37,7 +37,7 @@ public class CommandConstants {
                     () -> getYPowerFromPov(DRIVER_CONTROLLER.getPov()) / OperatorConstants.POV_DIVIDER / calculateShiftModeValue(MINIMUM_TRANSLATION_SHIFT_POWER),
                     () -> 0
             ),
-            BRAKE_MOTORS_COMMAND = new InstantCommand(() -> AbstractSubsystem.REGISTERED_SUBSYSTEMS.forEach(subsystem -> subsystem.setBrake(true)));
+            BRAKE_MOTORS_COMMAND = new InstantCommand(() -> AbstractSubsystem.forEach(subsystem -> subsystem.setBrake(true)));
 
     /**
      * The shift mode is a mode of the robot that slows down the robot relative to how much the right trigger axis is pressed.
