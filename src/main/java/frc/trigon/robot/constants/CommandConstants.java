@@ -7,12 +7,12 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.components.XboxController;
-import frc.trigon.robot.poseestimation.poseestimator.PoseEstimator;
+import frc.trigon.robot.subsystems.AbstractSubsystem;
 import frc.trigon.robot.subsystems.swerve.Swerve;
 import frc.trigon.robot.subsystems.swerve.SwerveCommands;
+import frc.trigon.robot.utilities.AllianceUtilities;
 
 public class CommandConstants {
-    private static final PoseEstimator POSE_ESTIMATOR = RobotContainer.POSE_ESTIMATOR;
     private static final XboxController DRIVER_CONTROLLER = OperatorConstants.DRIVER_CONTROLLER;
     private static final double
             MINIMUM_TRANSLATION_SHIFT_POWER = 0.18,
@@ -22,22 +22,22 @@ public class CommandConstants {
 
     public static final Command
             FIELD_RELATIVE_DRIVE_COMMAND = SwerveCommands.getOpenLoopFieldRelativeDriveCommand(
+            () -> DRIVER_CONTROLLER.getLeftY() / OperatorConstants.STICKS_SPEED_DIVIDER / calculateShiftModeValue(MINIMUM_TRANSLATION_SHIFT_POWER),
+            () -> DRIVER_CONTROLLER.getLeftX() / OperatorConstants.STICKS_SPEED_DIVIDER / calculateShiftModeValue(MINIMUM_TRANSLATION_SHIFT_POWER),
+            () -> DRIVER_CONTROLLER.getRightX() / OperatorConstants.STICKS_SPEED_DIVIDER / calculateShiftModeValue(MINIMUM_ROTATION_SHIFT_POWER)
+    ),
+            SELF_RELATIVE_DRIVE_COMMAND = SwerveCommands.getOpenLoopSelfRelativeDriveCommand(
                     () -> DRIVER_CONTROLLER.getLeftY() / OperatorConstants.STICKS_SPEED_DIVIDER / calculateShiftModeValue(MINIMUM_TRANSLATION_SHIFT_POWER),
                     () -> DRIVER_CONTROLLER.getLeftX() / OperatorConstants.STICKS_SPEED_DIVIDER / calculateShiftModeValue(MINIMUM_TRANSLATION_SHIFT_POWER),
                     () -> DRIVER_CONTROLLER.getRightX() / OperatorConstants.STICKS_SPEED_DIVIDER / calculateShiftModeValue(MINIMUM_ROTATION_SHIFT_POWER)
             ),
-            SELF_RELATIVE_DRIVE_COMMAND = SwerveCommands.getOpenLoopSelfRelativeDriveCommand(
-                    () -> DRIVER_CONTROLLER.getLeftY() / OperatorConstants.STICKS_SPEED_DIVIDER/ calculateShiftModeValue(MINIMUM_TRANSLATION_SHIFT_POWER),
-                    () -> DRIVER_CONTROLLER.getLeftX() / OperatorConstants.STICKS_SPEED_DIVIDER/ calculateShiftModeValue(MINIMUM_TRANSLATION_SHIFT_POWER),
-                    () -> DRIVER_CONTROLLER.getRightX() / OperatorConstants.STICKS_SPEED_DIVIDER/ calculateShiftModeValue(MINIMUM_ROTATION_SHIFT_POWER)
-            ),
-            RESET_HEADING_COMMAND = new InstantCommand(() -> POSE_ESTIMATOR.resetPose(changeRotation(POSE_ESTIMATOR.getCurrentPose(), new Rotation2d()))),
+            RESET_HEADING_COMMAND = new InstantCommand(() -> RobotContainer.POSE_ESTIMATOR.resetPose(changeRotation(RobotContainer.POSE_ESTIMATOR.getCurrentPose(), new Rotation2d()))),
             SELF_RELATIVE_DRIVE_FROM_DPAD_COMMAND = SwerveCommands.getOpenLoopSelfRelativeDriveCommand(
                     () -> getXPowerFromPov(DRIVER_CONTROLLER.getPov()) / OperatorConstants.POV_DIVIDER / calculateShiftModeValue(MINIMUM_TRANSLATION_SHIFT_POWER),
                     () -> getYPowerFromPov(DRIVER_CONTROLLER.getPov()) / OperatorConstants.POV_DIVIDER / calculateShiftModeValue(MINIMUM_TRANSLATION_SHIFT_POWER),
                     () -> 0
             ),
-            BRAKE_SWERVE_COMMAND = new InstantCommand(() -> SWERVE.setBrake(true));
+            BRAKE_MOTORS_COMMAND = new InstantCommand(() -> AbstractSubsystem.REGISTERED_SUBSYSTEMS.forEach(subsystem -> subsystem.setBrake(true)));
 
     /**
      * The shift mode is a mode of the robot that slows down the robot relative to how much the right trigger axis is pressed.
@@ -63,10 +63,9 @@ public class CommandConstants {
         return Math.sin(-povRadians);
     }
 
-    private static Pose2d changeRotation(Pose2d pose2d, Rotation2d newRotation) {
-        return new Pose2d(
-                pose2d.getTranslation(),
-                newRotation
+    private static AllianceUtilities.AlliancePose2d changeRotation(AllianceUtilities.AlliancePose2d pose2d, Rotation2d newRotation) {
+        return AllianceUtilities.AlliancePose2d.fromCurrentAlliancePose(
+                new Pose2d(pose2d.toCurrentAlliancePose().getTranslation(), newRotation)
         );
     }
 }

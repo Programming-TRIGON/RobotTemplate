@@ -3,6 +3,7 @@ package frc.trigon.robot.poseestimation.robotposesources;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.trigon.robot.Robot;
+import frc.trigon.robot.utilities.AllianceUtilities;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -10,26 +11,27 @@ import org.littletonrobotics.junction.Logger;
  */
 public class RobotPoseSource extends SubsystemBase {
     protected final String name;
-    private final RobotPoseSourceInputsAutoLogged robotPoseSourceInputs = new RobotPoseSourceInputsAutoLogged();
-    private Transform3d cameraToRobotCenter;
+    private final RobotPoseSourceInputsAutoLogged inputs = new RobotPoseSourceInputsAutoLogged();
+    private final Transform3d robotCenterToCamera;
     private final RobotPoseSourceIO robotPoseSourceIO;
     private double lastUpdatedTimestamp;
-    private Pose2d lastRobotPose = new Pose2d();
 
-    public RobotPoseSource(PoseSourceConstants.RobotPoseSourceType robotPoseSourceType, String name, Transform3d cameraToRobotCenter) {
-        if (robotPoseSourceType != PoseSourceConstants.RobotPoseSourceType.PHOTON_CAMERA)
-            this.cameraToRobotCenter = cameraToRobotCenter;
+    public RobotPoseSource(PoseSourceConstants.RobotPoseSourceType robotPoseSourceType, String name, Transform3d robotCenterToCamera) {
         this.name = name;
+        if (robotPoseSourceType != PoseSourceConstants.RobotPoseSourceType.PHOTON_CAMERA)
+            this.robotCenterToCamera = robotCenterToCamera;
+        else
+            this.robotCenterToCamera = new Transform3d();
 
         if (Robot.IS_REAL)
-            robotPoseSourceIO = robotPoseSourceType.createIOFunction.apply(name, cameraToRobotCenter);
+            robotPoseSourceIO = robotPoseSourceType.createIOFunction.apply(name, robotCenterToCamera);
         else
             robotPoseSourceIO = new RobotPoseSourceIO();
     }
 
     public static double[] pose3dToDoubleArray(Pose3d pose) {
         if (pose == null)
-            return null;
+            return new double[0];
 
         return new double[]{
                 pose.getTranslation().getX(),
@@ -43,21 +45,33 @@ public class RobotPoseSource extends SubsystemBase {
 
     @Override
     public void periodic() {
-        robotPoseSourceIO.updateInputs(robotPoseSourceInputs);
-        Logger.processInputs(name, robotPoseSourceInputs);
+        robotPoseSourceIO.updateInputs(inputs);
+        Logger.processInputs(name, inputs);
+        final AllianceUtilities.AlliancePose2d currentPose = getRobotPose();
+        if (!hasNewResult() || currentPose == null)
+            Logger.recordOutput("Poses/Robot/" + name + "Pose", new Pose2d(500, 500, new Rotation2d()));
+        else
+            Logger.recordOutput("Poses/Robot/" + name + "Pose", currentPose.toCurrentAlliancePose());
+    }
+
+    public int getVisibleTags() {
+        return inputs.visibleTags;
+    }
+
+    public double getAverageDistanceFromTags() {
+        return inputs.lastResultTimestamp;
     }
 
     public boolean hasNewResult() {
-        return isNewTimestamp() && robotPoseSourceInputs.hasResult;
+        return isNewTimestamp() && inputs.hasResult;
     }
 
-    public Pose2d getRobotPose() {
-        final Pose3d cameraPose = doubleArrayToPose3d(robotPoseSourceInputs.cameraPose);
+    public AllianceUtilities.AlliancePose2d getRobotPose() {
+        final Pose3d cameraPose = doubleArrayToPose3d(inputs.cameraPose);
         if (cameraPose == null)
-            return lastRobotPose;
+            return null;
 
-        lastRobotPose = cameraPose.transformBy(cameraToRobotCenter).toPose2d();
-        return lastRobotPose;
+        return AllianceUtilities.AlliancePose2d.fromBlueAlliancePose(cameraPose.transformBy(robotCenterToCamera.inverse()).toPose2d());
     }
 
     public String getName() {
@@ -65,7 +79,7 @@ public class RobotPoseSource extends SubsystemBase {
     }
 
     public double getLastResultTimestamp() {
-        return robotPoseSourceInputs.lastResultTimestamp;
+        return inputs.lastResultTimestamp;
     }
 
     private boolean isNewTimestamp() {
@@ -77,7 +91,7 @@ public class RobotPoseSource extends SubsystemBase {
     }
 
     private Pose3d doubleArrayToPose3d(double[] doubleArray) {
-        if (doubleArray == null)
+        if (doubleArray == null || doubleArray.length != 6)
             return null;
 
         return new Pose3d(

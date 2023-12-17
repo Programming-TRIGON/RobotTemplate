@@ -6,7 +6,6 @@ import com.ctre.phoenix6.hardware.Pigeon2;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -26,12 +25,12 @@ public class TrihardSwerveConstants extends SwerveConstants {
 
     private static final double
             MODULE_FROM_MODULE_DISTANCE = 0.55,
-            MODULE_DISTANCE_FROM_CENTER_OF_BASE = MODULE_FROM_MODULE_DISTANCE / 2;
+            MODULE_XY_DISTANCE_FROM_CENTER_OF_BASE = MODULE_FROM_MODULE_DISTANCE / 2;
     private static final Translation2d[] LOCATIONS = {
-            new Translation2d(MODULE_DISTANCE_FROM_CENTER_OF_BASE, MODULE_DISTANCE_FROM_CENTER_OF_BASE),
-            new Translation2d(MODULE_DISTANCE_FROM_CENTER_OF_BASE, -MODULE_DISTANCE_FROM_CENTER_OF_BASE),
-            new Translation2d(-MODULE_DISTANCE_FROM_CENTER_OF_BASE, MODULE_DISTANCE_FROM_CENTER_OF_BASE),
-            new Translation2d(-MODULE_DISTANCE_FROM_CENTER_OF_BASE, -MODULE_DISTANCE_FROM_CENTER_OF_BASE)
+            new Translation2d(MODULE_XY_DISTANCE_FROM_CENTER_OF_BASE, MODULE_XY_DISTANCE_FROM_CENTER_OF_BASE),
+            new Translation2d(MODULE_XY_DISTANCE_FROM_CENTER_OF_BASE, -MODULE_XY_DISTANCE_FROM_CENTER_OF_BASE),
+            new Translation2d(-MODULE_XY_DISTANCE_FROM_CENTER_OF_BASE, MODULE_XY_DISTANCE_FROM_CENTER_OF_BASE),
+            new Translation2d(-MODULE_XY_DISTANCE_FROM_CENTER_OF_BASE, -MODULE_XY_DISTANCE_FROM_CENTER_OF_BASE)
     };
     private static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(LOCATIONS);
 
@@ -42,11 +41,6 @@ public class TrihardSwerveConstants extends SwerveConstants {
             new TrihardSwerveModuleIO(TrihardSwerveModuleConstants.REAR_RIGHT_SWERVE_MODULE_CONSTANTS, "RearRight")
     };
 
-    private static final int
-            LOOK_STRAIGHT_P = 0,
-            LOOK_STRAIGHT_I = 0,
-            LOOK_STRAIGHT_D = 0;
-    private static final PIDController LOOK_STRAIGHT_PID_CONTROLLER = new PIDController(LOOK_STRAIGHT_P, LOOK_STRAIGHT_I, LOOK_STRAIGHT_D);
     private static final PIDConstants
             TRANSLATION_PID_CONSTANTS = new PIDConstants(3, 0, 0),
             ROTATION_PID_CONSTANTS = new PIDConstants(5, 0, 0),
@@ -74,7 +68,7 @@ public class TrihardSwerveConstants extends SwerveConstants {
     static final Pigeon2 GYRO = new Pigeon2(PIGEON_ID);
 
     private static final double DRIVE_RADIUS_METERS = Math.hypot(
-            MODULE_DISTANCE_FROM_CENTER_OF_BASE, MODULE_DISTANCE_FROM_CENTER_OF_BASE
+            MODULE_XY_DISTANCE_FROM_CENTER_OF_BASE, MODULE_XY_DISTANCE_FROM_CENTER_OF_BASE
     );
     private static final ReplanningConfig REPLANNING_CONFIG = new ReplanningConfig(true, true);
     private static final HolonomicPathFollowerConfig HOLONOMIC_PATH_FOLLOWER_CONFIG = new HolonomicPathFollowerConfig(
@@ -95,7 +89,6 @@ public class TrihardSwerveConstants extends SwerveConstants {
     static {
         PROFILED_PID_CONTROLLER.enableContinuousInput(-180, 180);
         PROFILED_PID_CONTROLLER.setIntegratorRange(-30, 30);
-        LOOK_STRAIGHT_PID_CONTROLLER.enableContinuousInput(-180, 180);
 
         if (!RobotConstants.IS_REPLAY)
             configureGyro();
@@ -141,11 +134,6 @@ public class TrihardSwerveConstants extends SwerveConstants {
     @Override
     protected double getMaxRotationalSpeedRadiansPerSecond() {
         return MAX_ROTATIONAL_SPEED_RADIANS_PER_SECOND;
-    }
-
-    @Override
-    protected PIDController getLookStraightController() {
-        return LOOK_STRAIGHT_PID_CONTROLLER;
     }
 
     @Override

@@ -3,7 +3,6 @@ package frc.trigon.robot.subsystems.swerve.simulationswerve;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -19,12 +18,12 @@ public class SimulationSwerveConstants extends SwerveConstants {
 
     private static final double
             MODULE_FROM_MODULE_DISTANCE = 0.7,
-            MODULE_DISTANCE_FROM_CENTER_OF_BASE = MODULE_FROM_MODULE_DISTANCE / 2;
+            MODULE_XY_DISTANCE_FROM_CENTER_OF_BASE = MODULE_FROM_MODULE_DISTANCE / 2;
     private static final Translation2d[] LOCATIONS = {
-            new Translation2d(MODULE_DISTANCE_FROM_CENTER_OF_BASE, MODULE_DISTANCE_FROM_CENTER_OF_BASE),
-            new Translation2d(MODULE_DISTANCE_FROM_CENTER_OF_BASE, -MODULE_DISTANCE_FROM_CENTER_OF_BASE),
-            new Translation2d(-MODULE_DISTANCE_FROM_CENTER_OF_BASE, MODULE_DISTANCE_FROM_CENTER_OF_BASE),
-            new Translation2d(-MODULE_DISTANCE_FROM_CENTER_OF_BASE, -MODULE_DISTANCE_FROM_CENTER_OF_BASE)
+            new Translation2d(MODULE_XY_DISTANCE_FROM_CENTER_OF_BASE, MODULE_XY_DISTANCE_FROM_CENTER_OF_BASE),
+            new Translation2d(MODULE_XY_DISTANCE_FROM_CENTER_OF_BASE, -MODULE_XY_DISTANCE_FROM_CENTER_OF_BASE),
+            new Translation2d(-MODULE_XY_DISTANCE_FROM_CENTER_OF_BASE, MODULE_XY_DISTANCE_FROM_CENTER_OF_BASE),
+            new Translation2d(-MODULE_XY_DISTANCE_FROM_CENTER_OF_BASE, -MODULE_XY_DISTANCE_FROM_CENTER_OF_BASE)
     };
     private static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(LOCATIONS);
 
@@ -35,11 +34,6 @@ public class SimulationSwerveConstants extends SwerveConstants {
             new SimulationSwerveModuleIO(SimulationSwerveModuleConstants.REAR_LEFT_SWERVE_MODULE_CONSTANTS, "RearLeft")
     };
 
-    private static final int
-            LOOK_STRAIGHT_P = 12,
-            LOOK_STRAIGHT_I = 0,
-            LOOK_STRAIGHT_D = 0;
-    private static final PIDController LOOK_STRAIGHT_PID_CONTROLLER = new PIDController(LOOK_STRAIGHT_P, LOOK_STRAIGHT_I, LOOK_STRAIGHT_D);
     private static final PIDConstants
             TRANSLATION_PID_CONSTANTS = new PIDConstants(20, 0, 0),
             ROTATION_PID_CONSTANTS = new PIDConstants(12, 0, 0),
@@ -58,7 +52,7 @@ public class SimulationSwerveConstants extends SwerveConstants {
             ROTATION_CONSTRAINTS
     );
 
-    private static final double DRIVE_RADIUS_METERS = Math.hypot(MODULE_DISTANCE_FROM_CENTER_OF_BASE, MODULE_DISTANCE_FROM_CENTER_OF_BASE);
+    private static final double DRIVE_RADIUS_METERS = Math.hypot(MODULE_XY_DISTANCE_FROM_CENTER_OF_BASE, MODULE_XY_DISTANCE_FROM_CENTER_OF_BASE);
     private static final ReplanningConfig REPLANNING_CONFIG = new ReplanningConfig(true, true);
     private static final HolonomicPathFollowerConfig HOLONOMIC_PATH_FOLLOWER_CONFIG = new HolonomicPathFollowerConfig(
             TRANSLATION_PID_CONSTANTS,
@@ -71,17 +65,16 @@ public class SimulationSwerveConstants extends SwerveConstants {
     static {
         PROFILED_PID_CONTROLLER.enableContinuousInput(-180, 180);
         PROFILED_PID_CONTROLLER.setIntegratorRange(-30, 30);
-        LOOK_STRAIGHT_PID_CONTROLLER.enableContinuousInput(-180, 180);
-    }
-
-    @Override
-    protected SwerveModuleIO[] getModulesIO() {
-        return MODULES_IO;
     }
 
     @Override
     public SwerveDriveKinematics getKinematics() {
         return KINEMATICS;
+    }
+
+    @Override
+    protected SwerveModuleIO[] getModulesIO() {
+        return MODULES_IO;
     }
 
     @Override
@@ -97,11 +90,6 @@ public class SimulationSwerveConstants extends SwerveConstants {
     @Override
     protected double getMaxRotationalSpeedRadiansPerSecond() {
         return MAX_ROTATIONAL_SPEED_RADIANS_PER_SECOND;
-    }
-
-    @Override
-    protected PIDController getLookStraightController() {
-        return LOOK_STRAIGHT_PID_CONTROLLER;
     }
 
     @Override

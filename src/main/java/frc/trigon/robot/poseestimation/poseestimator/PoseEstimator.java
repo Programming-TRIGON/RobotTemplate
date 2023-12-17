@@ -1,8 +1,12 @@
 package frc.trigon.robot.poseestimation.poseestimator;
 
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -12,7 +16,7 @@ import frc.trigon.robot.poseestimation.robotposesources.PoseSourceConstants;
 import frc.trigon.robot.poseestimation.robotposesources.RobotPoseSource;
 import frc.trigon.robot.subsystems.swerve.Swerve;
 import frc.trigon.robot.utilities.AllianceUtilities;
-import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
 
 import java.util.HashMap;
 import java.util.Optional;
@@ -30,6 +34,7 @@ public class PoseEstimator implements AutoCloseable {
     private final Field2d field = new Field2d();
     private final RobotPoseSource[] robotPoseSources;
     private DriverStation.Alliance lastAlliance;
+    private AllianceUtilities.AlliancePose2d robotPose = PoseEstimatorConstants.DEFAULT_POSE;
 
     /**
      * Constructs a new PoseEstimator.
@@ -42,9 +47,9 @@ public class PoseEstimator implements AutoCloseable {
                 swerve.getConstants().getKinematics(),
                 swerve.getHeading(),
                 swerve.getModulePositions(),
-                PoseEstimatorConstants.DEFAULT_POSE,
+                PoseEstimatorConstants.DEFAULT_POSE.toBlueAlliancePose(),
                 PoseEstimatorConstants.STATES_AMBIGUITY,
-                PoseEstimatorConstants.VISION_CALCULATIONS_AMBIGUITY
+                VecBuilder.fill(0, 0, 0)
         );
 
         putAprilTagsOnFieldWidget();
@@ -61,28 +66,29 @@ public class PoseEstimator implements AutoCloseable {
     /**
      * Resets the pose estimator to the given pose, and the gyro to the given pose's heading.
      *
-     * @param currentPose the pose to reset to
+     * @param currentPose the pose to reset to, as an {@link AllianceUtilities.AlliancePose2d}
      */
-    public void resetPose(Pose2d currentPose) {
-        final Pose2d currentBluePose = AllianceUtilities.toAlliancePose(currentPose);
+    public void resetPose(AllianceUtilities.AlliancePose2d currentPose) {
+        final Pose2d currentBluePose = currentPose.toBlueAlliancePose();
         swerve.setHeading(currentBluePose.getRotation());
 
         resetPoseEstimator(currentBluePose);
     }
 
     /**
-     * @return the estimated pose of the robot, relative to the current driver station
+     * @return the estimated pose of the robot, as an {@link AllianceUtilities.AlliancePose2d}
      */
-    @AutoLogOutput(key = "robotPose")
-    public Pose2d getCurrentPose() {
-        return AllianceUtilities.toAlliancePose(swerveDrivePoseEstimator.getEstimatedPosition());
+    public AllianceUtilities.AlliancePose2d getCurrentPose() {
+        return robotPose;
     }
 
     private void periodic() {
         updatePoseEstimator();
+        robotPose = AllianceUtilities.AlliancePose2d.fromBlueAlliancePose(swerveDrivePoseEstimator.getEstimatedPosition());
+        Logger.recordOutput("Poses/Robot/RobotPose", robotPose.toCurrentAlliancePose());
+
         if (didAllianceChange())
             updateFieldWidget();
-
         SmartDashboard.putData("field", field);
     }
 
@@ -107,7 +113,7 @@ public class PoseEstimator implements AutoCloseable {
     private void updatePoseEstimator() {
         updatePoseEstimatorStates();
         attemptToUpdateWithRobotPoseSources();
-        field.setRobotPose(getCurrentPose());
+        field.setRobotPose(getCurrentPose().toCurrentAlliancePose());
     }
 
     private void attemptToUpdateWithRobotPoseSources() {
@@ -118,13 +124,23 @@ public class PoseEstimator implements AutoCloseable {
     }
 
     private void updateFromPoseSource(RobotPoseSource robotPoseSource) {
-        final Pose2d robotPose = robotPoseSource.getRobotPose();
+        final AllianceUtilities.AlliancePose2d robotPose = robotPoseSource.getRobotPose();
+        if (robotPose == null)
+            return;
 
-        field.getObject(robotPoseSource.getName()).setPose(AllianceUtilities.toAlliancePose(robotPose));
+        field.getObject(robotPoseSource.getName()).setPose(robotPose.toCurrentAlliancePose());
         swerveDrivePoseEstimator.addVisionMeasurement(
-                robotPose,
-                robotPoseSource.getLastResultTimestamp()
+                robotPose.toBlueAlliancePose(),
+                robotPoseSource.getLastResultTimestamp(),
+                averageDistanceToStdDevs(robotPoseSource.getAverageDistanceFromTags(), robotPoseSource.getVisibleTags())
         );
+    }
+
+    private Matrix<N3, N1> averageDistanceToStdDevs(double averageDistance, int visibleTags) {
+        final double translationStd = PoseEstimatorConstants.TRANSLATIONS_STD_EXPONENT * Math.pow(averageDistance, 2) / visibleTags;
+        final double thetaStd = PoseEstimatorConstants.THETA_STD_EXPONENT * Math.pow(averageDistance, 2) / visibleTags;
+
+        return VecBuilder.fill(translationStd, translationStd, thetaStd);
     }
 
     private void updatePoseEstimatorStates() {

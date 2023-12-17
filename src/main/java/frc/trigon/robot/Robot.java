@@ -5,13 +5,10 @@
 
 package frc.trigon.robot;
 
-import com.pathplanner.lib.pathfinding.Pathfinding;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.trigon.robot.constants.CommandConstants;
 import frc.trigon.robot.constants.RobotConstants;
-import frc.trigon.robot.subsystems.swerve.SwerveCommands;
-import frc.trigon.robot.utilities.LocalADStarAK;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -22,7 +19,6 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 public class Robot extends LoggedRobot {
     public static final boolean IS_REAL = Robot.isReal();
-    private final Command delayedCoastCommand = SwerveCommands.getDelayedCoastCommand();
     private final CommandScheduler commandScheduler = CommandScheduler.getInstance();
     private Command autonomousCommand;
     private RobotContainer robotContainer;
@@ -30,18 +26,12 @@ public class Robot extends LoggedRobot {
     @Override
     public void robotInit() {
         configLogger();
-        Pathfinding.setPathfinder(new LocalADStarAK());
         robotContainer = new RobotContainer();
     }
 
     @Override
     public void robotPeriodic() {
         commandScheduler.run();
-    }
-
-    @Override
-    public void disabledInit() {
-        delayedCoastCommand.schedule();
     }
 
     @Override
@@ -66,8 +56,7 @@ public class Robot extends LoggedRobot {
     }
 
     private void enabledInit() {
-        delayedCoastCommand.cancel();
-        CommandConstants.BRAKE_SWERVE_COMMAND.schedule();
+        CommandConstants.BRAKE_MOTORS_COMMAND.schedule();
     }
 
     private void configLogger() {
@@ -79,8 +68,8 @@ public class Robot extends LoggedRobot {
             Logger.setReplaySource(new WPILOGReader(logPath));
             Logger.addDataReceiver(new WPILOGWriter(logWriterPath));
         } else {
-            Logger.addDataReceiver(new WPILOGWriter(RobotConstants.ROBOT_TYPE.loggingPath));
             Logger.addDataReceiver(new NT4Publisher());
+            Logger.addDataReceiver(new WPILOGWriter(RobotConstants.ROBOT_TYPE.loggingPath));
         }
 
         Logger.start();

@@ -52,7 +52,7 @@ public class SimulationSwerveModuleConstants {
 
     final DCMotorSim driveMotor, steerMotor;
 
-    public SimulationSwerveModuleConstants(DCMotorSim driveMotor, DCMotorSim steerMotor) {
+    private SimulationSwerveModuleConstants(DCMotorSim driveMotor, DCMotorSim steerMotor) {
         this.driveMotor = driveMotor;
         this.steerMotor = steerMotor;
     }

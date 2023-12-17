@@ -25,11 +25,46 @@ public class AllianceUtilities {
     public static Pose2d toAlliancePose(Pose2d pose) {
         if (isBlueAlliance())
             return pose;
+        return switchAlliance(pose);
+    }
 
+    private static Pose2d switchAlliance(Pose2d pose) {
         return new Pose2d(
                 FieldConstants.FIELD_LENGTH_METERS - pose.getX(),
                 FieldConstants.FIELD_WIDTH_METERS - pose.getY(),
                 pose.getRotation().minus(Rotation2d.fromRotations(0.5))
         );
+    }
+
+    public static class AlliancePose2d {
+        private final Pose2d blueAlliancePose;
+
+        private AlliancePose2d(Pose2d blueAlliancePose) {
+            this.blueAlliancePose = blueAlliancePose;
+        }
+
+        public static AlliancePose2d fromBlueAlliancePose(Pose2d blueAlliancePose) {
+            return new AlliancePose2d(blueAlliancePose);
+        }
+
+        public static AlliancePose2d fromRedAlliancePose(Pose2d redAlliancePose) {
+            return new AlliancePose2d(switchAlliance(redAlliancePose));
+        }
+
+        public static AlliancePose2d fromCurrentAlliancePose(Pose2d currentAlliancePose) {
+            return new AlliancePose2d(toAlliancePose(currentAlliancePose));
+        }
+
+        public Pose2d toBlueAlliancePose() {
+            return blueAlliancePose;
+        }
+
+        public Pose2d toRedAlliancePose() {
+            return switchAlliance(blueAlliancePose);
+        }
+
+        public Pose2d toCurrentAlliancePose() {
+            return toAlliancePose(blueAlliancePose);
+        }
     }
 }

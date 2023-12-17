@@ -4,7 +4,10 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj2.command.*;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.DeferredCommand;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.trigon.robot.utilities.InitExecuteCommand;
 
 import java.util.Set;
 import java.util.function.DoubleSupplier;
@@ -12,15 +15,6 @@ import java.util.function.Supplier;
 
 public class SwerveCommands {
     private static final Swerve SWERVE = Swerve.getInstance();
-
-    /**
-     * @return a command that waits a bit, then coasts the swerve modules, runs when disabled (should be called on disabled)
-     */
-    public static Command getDelayedCoastCommand() {
-        return new WaitCommand(SwerveConstants.BRAKE_TIME_SECONDS)
-                .andThen(new InstantCommand(() -> SWERVE.setBrake(false)))
-                .ignoringDisable(true);
-    }
 
     public static Command getDriveToPoseCommand(PathConstraints constraints, Pose2d targetPose) {
         return new InstantCommand(() -> SWERVE.initializeDrive(true))
@@ -35,13 +29,10 @@ public class SwerveCommands {
      * @param thetaSupplier the target theta power, CCW+
      * @return the command
      */
-    public static FunctionalCommand getClosedLoopFieldRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier thetaSupplier) {
-        return new FunctionalCommand(
+    public static Command getClosedLoopFieldRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier thetaSupplier) {
+        return new InitExecuteCommand(
                 () -> SWERVE.initializeDrive(true),
                 () -> SWERVE.fieldRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), thetaSupplier.getAsDouble()),
-                (interrupted) -> {
-                },
-                () -> false,
                 SWERVE
         );
     }
@@ -55,17 +46,10 @@ public class SwerveCommands {
      * @param angleSupplier the target angle supplier
      * @return the command
      */
-    public static FunctionalCommand getClosedLoopFieldRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, Supplier<Rotation2d> angleSupplier) {
-        return new FunctionalCommand(
-                () -> {
-                    SWERVE.initializeDrive(true);
-                    SWERVE.resetRotationController();
-                    SWERVE.setLastRotationMovementAngle(null);
-                },
+    public static Command getClosedLoopFieldRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, Supplier<Rotation2d> angleSupplier) {
+        return new InitExecuteCommand(
+                () -> SWERVE.initializeDrive(true),
                 () -> SWERVE.fieldRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), angleSupplier.get()),
-                (interrupted) -> {
-                },
-                () -> false,
                 SWERVE
         );
     }
@@ -78,13 +62,10 @@ public class SwerveCommands {
      * @param thetaSupplier the target theta power, CCW+
      * @return the command
      */
-    public static FunctionalCommand getOpenLoopFieldRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier thetaSupplier) {
-        return new FunctionalCommand(
+    public static Command getOpenLoopFieldRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier thetaSupplier) {
+        return new InitExecuteCommand(
                 () -> SWERVE.initializeDrive(false),
                 () -> SWERVE.fieldRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), thetaSupplier.getAsDouble()),
-                (interrupted) -> {
-                },
-                () -> false,
                 SWERVE
         );
     }
@@ -98,17 +79,10 @@ public class SwerveCommands {
      * @param angleSupplier the target angle supplier
      * @return the command
      */
-    public static FunctionalCommand getOpenLoopFieldRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, Supplier<Rotation2d> angleSupplier) {
-        return new FunctionalCommand(
-                () -> {
-                    SWERVE.initializeDrive(false);
-                    SWERVE.resetRotationController();
-                    SWERVE.setLastRotationMovementAngle(null);
-                },
+    public static Command getOpenLoopFieldRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, Supplier<Rotation2d> angleSupplier) {
+        return new InitExecuteCommand(
+                () -> SWERVE.initializeDrive(false),
                 () -> SWERVE.fieldRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), angleSupplier.get()),
-                (interrupted) -> {
-                },
-                () -> false,
                 SWERVE
         );
     }
@@ -121,13 +95,10 @@ public class SwerveCommands {
      * @param thetaSupplier the target theta power, CCW+
      * @return the command
      */
-    public static FunctionalCommand getClosedLoopSelfRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier thetaSupplier) {
-        return new FunctionalCommand(
+    public static Command getClosedLoopSelfRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier thetaSupplier) {
+        return new InitExecuteCommand(
                 () -> SWERVE.initializeDrive(true),
                 () -> SWERVE.selfRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), thetaSupplier.getAsDouble()),
-                (interrupted) -> {
-                },
-                () -> false,
                 SWERVE
         );
     }
@@ -140,13 +111,10 @@ public class SwerveCommands {
      * @param thetaSupplier the target theta power, CCW+
      * @return the command
      */
-    public static FunctionalCommand getOpenLoopSelfRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier thetaSupplier) {
-        return new FunctionalCommand(
+    public static Command getOpenLoopSelfRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier thetaSupplier) {
+        return new InitExecuteCommand(
                 () -> SWERVE.initializeDrive(false),
                 () -> SWERVE.selfRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), thetaSupplier.getAsDouble()),
-                (interrupted) -> {
-                },
-                () -> false,
                 SWERVE
         );
     }

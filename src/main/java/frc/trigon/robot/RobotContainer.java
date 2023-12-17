@@ -6,8 +6,8 @@
 package frc.trigon.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.trigon.robot.constants.CameraConstants;
 import frc.trigon.robot.constants.CommandConstants;
 import frc.trigon.robot.constants.OperatorConstants;
 import frc.trigon.robot.poseestimation.poseestimator.PoseEstimator;
@@ -16,14 +16,13 @@ import frc.trigon.robot.utilities.Commands;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class RobotContainer {
-    public static final PoseEstimator POSE_ESTIMATOR = new PoseEstimator();
+    public static final PoseEstimator POSE_ESTIMATOR = new PoseEstimator(CameraConstants.OV9281);
     private final Swerve swerve = Swerve.getInstance();
-    private final Notifier buildAutoChooserNotifier = new Notifier(this::buildAutoChooser);
     private LoggedDashboardChooser<Command> autoChooser;
 
     public RobotContainer() {
         configureBindings();
-        buildAutoChooserNotifier.startSingle(3);
+        Commands.getDelayedCommand(3, this::buildAutoChooser).schedule();
     }
 
     /**
@@ -46,10 +45,10 @@ public class RobotContainer {
         OperatorConstants.RESET_HEADING_TRIGGER.onTrue(CommandConstants.RESET_HEADING_COMMAND);
         OperatorConstants.DRIVE_FROM_DPAD_TRIGGER.whileTrue(CommandConstants.SELF_RELATIVE_DRIVE_FROM_DPAD_COMMAND);
         OperatorConstants.TOGGLE_FIELD_AND_SELF_RELATIVE_DRIVE_TRIGGER.onTrue(Commands.getToggleFieldAndSelfRelativeDriveCommand());
+        OperatorConstants.TOGGLE_BRAKE_TRIGGER.onTrue(Commands.getToggleBrakeCommand());
     }
 
     private void buildAutoChooser() {
         autoChooser = new LoggedDashboardChooser<>("AutoChooser", AutoBuilder.buildAutoChooser());
-        buildAutoChooserNotifier.close();
     }
 }

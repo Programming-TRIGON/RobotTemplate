@@ -5,17 +5,17 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
-import edu.wpi.first.wpilibj.Notifier;
 import frc.trigon.robot.constants.RobotConstants;
+import frc.trigon.robot.utilities.Commands;
 import frc.trigon.robot.utilities.Conversions;
 
 public class TrihardSwerveModuleConstants {
     static final double VOLTAGE_COMPENSATION_SATURATION = 12;
     static final boolean ENABLE_FOC = true;
-    static final double COUPLING_RATIO = 2.63852242744;
     static final double
             DRIVE_GEAR_RATIO = 8.14,
-            STEER_GEAR_RATIO = 12.8;
+            STEER_GEAR_RATIO = 12.8,
+            COUPLING_RATIO = 2.63852242744;
     static final double WHEEL_DIAMETER_METERS = 0.1016;
 
     static final int
@@ -109,14 +109,12 @@ public class TrihardSwerveModuleConstants {
                     REAR_RIGHT_ENCODER_OFFSET
             );
 
-    private final Notifier setSteerMotorPositionToAbsoluteNotifier = new Notifier(this::setSteerMotorPositionToAbsolute);
-    @SuppressWarnings("unchecked")
-    final StatusSignal<Double>[] statusSignals = new StatusSignal[5];
     final TalonFX driveMotor, steerMotor;
     final DutyCycleEncoder steerEncoder;
     final double encoderOffset;
+    StatusSignal<Double> steerPositionSignal, steerVelocitySignal, driveStatorCurrentSignal, drivePositionSignal, driveVelocitySignal;
 
-    public TrihardSwerveModuleConstants(TalonFX driveMotor, TalonFX steerMotor, DutyCycleEncoder steerEncoder, double encoderOffset) {
+    private TrihardSwerveModuleConstants(TalonFX driveMotor, TalonFX steerMotor, DutyCycleEncoder steerEncoder, double encoderOffset) {
         this.driveMotor = driveMotor;
         this.steerMotor = steerMotor;
         this.steerEncoder = steerEncoder;
@@ -146,12 +144,12 @@ public class TrihardSwerveModuleConstants {
 
         steerMotor.getConfigurator().apply(config);
 
-        statusSignals[0] = steerMotor.getPosition().clone();
-        statusSignals[1] = steerMotor.getVelocity().clone();
-        statusSignals[0].setUpdateFrequency(250);
-        statusSignals[1].setUpdateFrequency(250);
+        steerPositionSignal = steerMotor.getPosition().clone();
+        steerVelocitySignal = steerMotor.getVelocity().clone();
+        steerPositionSignal.setUpdateFrequency(250);
+        steerVelocitySignal.setUpdateFrequency(250);
 
-        setSteerMotorPositionToAbsoluteNotifier.startSingle(ENCODER_UPDATE_TIME_SECONDS);
+        Commands.getDelayedCommand(ENCODER_UPDATE_TIME_SECONDS, this::setSteerMotorPositionToAbsolute).schedule();
     }
 
     private void configureDriveMotor() {
@@ -177,12 +175,12 @@ public class TrihardSwerveModuleConstants {
 
         driveMotor.getConfigurator().apply(config);
 
-        statusSignals[2] = driveMotor.getPosition().clone();
-        statusSignals[3] = driveMotor.getVelocity().clone();
-        statusSignals[4] = driveMotor.getStatorCurrent().clone();
-        statusSignals[2].setUpdateFrequency(250);
-        statusSignals[3].setUpdateFrequency(250);
-        statusSignals[4].setUpdateFrequency(20);
+        drivePositionSignal = driveMotor.getPosition().clone();
+        driveVelocitySignal = driveMotor.getVelocity().clone();
+        driveStatorCurrentSignal = driveMotor.getStatorCurrent().clone();
+        drivePositionSignal.setUpdateFrequency(250);
+        driveVelocitySignal.setUpdateFrequency(250);
+        driveStatorCurrentSignal.setUpdateFrequency(20);
         driveMotor.optimizeBusUtilization();
     }
 
@@ -190,6 +188,5 @@ public class TrihardSwerveModuleConstants {
         // TODO: Check if this works properly
         final double offsettedRevolutions = Conversions.offsetRead(steerEncoder.getAbsolutePosition(), encoderOffset);
         steerMotor.setPosition(offsettedRevolutions);
-        setSteerMotorPositionToAbsoluteNotifier.close();
     }
 }

@@ -14,7 +14,7 @@ public class PoseSourceConstants {
     public static final HashMap<Integer, Pose3d> TAG_ID_TO_POSE = new HashMap<>();
     static final PhotonPoseEstimator.PoseStrategy
             PRIMARY_POSE_STRATEGY = PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
-            SECONDARY_POSE_STRATEGY = PhotonPoseEstimator.PoseStrategy.CLOSEST_TO_CAMERA_HEIGHT;
+            SECONDARY_POSE_STRATEGY = PhotonPoseEstimator.PoseStrategy.LOWEST_AMBIGUITY;
     static AprilTagFieldLayout APRIL_TAG_FIELD_LAYOUT = AprilTagFields.k2023ChargedUp.loadAprilTagLayoutField();
 
     static {

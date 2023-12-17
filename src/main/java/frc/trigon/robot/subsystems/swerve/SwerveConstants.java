@@ -1,7 +1,6 @@
 package frc.trigon.robot.subsystems.swerve;
 
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import frc.trigon.robot.constants.RobotConstants;
@@ -9,10 +8,6 @@ import frc.trigon.robot.subsystems.swerve.simulationswerve.SimulationSwerveConst
 import frc.trigon.robot.subsystems.swerve.trihardswerve.TrihardSwerveConstants;
 
 public abstract class SwerveConstants {
-    /**
-     * This is the time the swerve should wait before braking after being disabled
-     */
-    static final double BRAKE_TIME_SECONDS = 4;
     static final int MAX_SAVED_PREVIOUS_LOOP_TIMESTAMPS = 10;
     static final double
             TRANSLATION_TOLERANCE = 0.03,
@@ -30,24 +25,16 @@ public abstract class SwerveConstants {
         return new SimulationSwerveConstants();
     }
 
-    /**
-     * When the swerve moves, one of the motors might be slower than the others, thus the swerve will spin a bit when driving straight.
-     * To counter this, we use pid to stay at the last angle the swerve's rotation moved at.
-     *
-     * @return the pid controller to stay at the last angle the swerve's rotation moved at
-     */
-    protected abstract PIDController getLookStraightController();
-
-    protected abstract ProfiledPIDController getProfiledRotationController();
+    public abstract SwerveDriveKinematics getKinematics();
 
     /**
      * @return the swerve's robot side length in meters, (not including the bumpers)
      */
     protected abstract double getRobotSideLength();
 
-    protected abstract SwerveModuleIO[] getModulesIO();
+    protected abstract ProfiledPIDController getProfiledRotationController();
 
-    public abstract SwerveDriveKinematics getKinematics();
+    protected abstract SwerveModuleIO[] getModulesIO();
 
     protected abstract HolonomicPathFollowerConfig getPathFollowerConfig();
 

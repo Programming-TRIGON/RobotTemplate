@@ -2,7 +2,6 @@ package frc.trigon.robot.subsystems.swerve;
 
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -11,39 +10,35 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.constants.RobotConstants;
-import frc.trigon.robot.poseestimation.poseestimator.PoseEstimator;
+import frc.trigon.robot.subsystems.AbstractSubsystem;
 import frc.trigon.robot.utilities.AllianceUtilities;
+import frc.trigon.robot.utilities.Commands;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Swerve extends SubsystemBase {
-    private static final Swerve INSTANCE = new Swerve();
-    private static final PoseEstimator POSE_ESTIMATOR = RobotContainer.POSE_ESTIMATOR;
+public class Swerve extends AbstractSubsystem {
+    private static Swerve INSTANCE = null;
     private final SwerveInputsAutoLogged swerveInputs = new SwerveInputsAutoLogged();
     private final SwerveIO swerveIO = SwerveIO.generateIO();
     private final SwerveConstants constants = SwerveConstants.generateConstants();
     private final SwerveModuleIO[] modulesIO;
-    private final Notifier updateLastRotationMovementAngleNotifier = new Notifier(() -> lastRotationMovementAngle = POSE_ESTIMATOR.getCurrentPose().getRotation());
-    private final Notifier configurePathPlannerNotifier = new Notifier(this::configurePathPlanner);
     private final List<Double> previousLoopTimestamps = new ArrayList<>();
-    private Pose2d targetProfiledPose = null;
-    private Rotation2d lastRotationMovementAngle = null;
 
     public static Swerve getInstance() {
+        if (INSTANCE == null)
+            INSTANCE = new Swerve();
         return INSTANCE;
     }
 
     private Swerve() {
         modulesIO = getModulesIO();
-        configurePathPlannerNotifier.startSingle(2);
+        Commands.getDelayedCommand(2, this::configurePathPlanner).schedule();
     }
 
     @Override
@@ -56,6 +51,18 @@ public class Swerve extends SubsystemBase {
 
         updateNetworkTables();
         updatePreviousLoopTimestamps();
+    }
+
+    @Override
+    public void stop() {
+        for (SwerveModuleIO currentModule : modulesIO)
+            currentModule.stop();
+    }
+
+    @Override
+    public void setBrake(boolean brake) {
+        for (SwerveModuleIO currentModule : modulesIO)
+            currentModule.setBrake(brake);
     }
 
     public SwerveConstants getConstants() {
@@ -87,7 +94,6 @@ public class Swerve extends SubsystemBase {
 
     public void setHeading(Rotation2d heading) {
         swerveIO.setHeading(heading);
-        lastRotationMovementAngle = AllianceUtilities.isBlueAlliance() ? heading : heading.minus(Rotation2d.fromRotations(0.5));
     }
 
     public Rotation2d getPitch() {
@@ -120,33 +126,23 @@ public class Swerve extends SubsystemBase {
     }
 
     public boolean atXAxisPosition(double xAxisPosition) {
-        final double currentXAxisVelocity = ChassisSpeeds.fromFieldRelativeSpeeds(getSelfRelativeVelocity(), POSE_ESTIMATOR.getCurrentPose().getRotation()).vxMetersPerSecond;
-        return atTranslationPosition(POSE_ESTIMATOR.getCurrentPose().getX(), xAxisPosition, currentXAxisVelocity);
+        final double currentXAxisVelocity = ChassisSpeeds.fromFieldRelativeSpeeds(getSelfRelativeVelocity(), RobotContainer.POSE_ESTIMATOR.getCurrentPose().toCurrentAlliancePose().getRotation()).vxMetersPerSecond;
+        return atTranslationPosition(RobotContainer.POSE_ESTIMATOR.getCurrentPose().toCurrentAlliancePose().getX(), xAxisPosition, currentXAxisVelocity);
     }
 
     public boolean atYAxisPosition(double yAxisPosition) {
-        final double currentYAxisVelocity = ChassisSpeeds.fromFieldRelativeSpeeds(getSelfRelativeVelocity(), POSE_ESTIMATOR.getCurrentPose().getRotation()).vyMetersPerSecond;
-        return atTranslationPosition(POSE_ESTIMATOR.getCurrentPose().getY(), yAxisPosition, currentYAxisVelocity);
+        final double currentYAxisVelocity = ChassisSpeeds.fromFieldRelativeSpeeds(getSelfRelativeVelocity(), RobotContainer.POSE_ESTIMATOR.getCurrentPose().toCurrentAlliancePose().getRotation()).vyMetersPerSecond;
+        return atTranslationPosition(RobotContainer.POSE_ESTIMATOR.getCurrentPose().toCurrentAlliancePose().getY(), yAxisPosition, currentYAxisVelocity);
     }
 
     public boolean atAngle(Rotation2d angle) {
-        return Math.abs(angle.getDegrees() - POSE_ESTIMATOR.getCurrentPose().getRotation().getDegrees()) < SwerveConstants.ROTATION_TOLERANCE &&
+        return Math.abs(angle.getDegrees() - RobotContainer.POSE_ESTIMATOR.getCurrentPose().toCurrentAlliancePose().getRotation().getDegrees()) < SwerveConstants.ROTATION_TOLERANCE &&
                 Math.abs(getSelfRelativeVelocity().omegaRadiansPerSecond) < SwerveConstants.ROTATION_VELOCITY_TOLERANCE;
-    }
-
-    /**
-     * Sets whether the swerve motors should brake or coast.
-     *
-     * @param brake whether the drive motors should brake or coast
-     */
-    public void setBrake(boolean brake) {
-        for (SwerveModuleIO currentModule : modulesIO)
-            currentModule.setBrake(brake);
     }
 
     void initializeDrive(boolean closedLoop) {
         setClosedLoop(closedLoop);
-        setLastRotationMovementAngle(POSE_ESTIMATOR.getCurrentPose().getRotation());
+        resetRotationController();
     }
 
     /**
@@ -164,28 +160,13 @@ public class Swerve extends SubsystemBase {
         modulesIO[3].setTargetState(left);
     }
 
-    /**
-     * When the swerve moves, one of the motors might be slower than the others, thus the swerve will spin a bit when driving straight.
-     * To counter this, we use pid to stay at the last angle the swerve's rotation moved at.
-     *
-     * @param lastRotationMovementAngle the angle the swerve will try to stay at when it gets no rotation power
-     */
-    void setLastRotationMovementAngle(Rotation2d lastRotationMovementAngle) {
-        this.lastRotationMovementAngle = lastRotationMovementAngle;
-    }
-
     void resetRotationController() {
-        constants.getProfiledRotationController().reset(POSE_ESTIMATOR.getCurrentPose().getRotation().getDegrees());
+        constants.getProfiledRotationController().reset(RobotContainer.POSE_ESTIMATOR.getCurrentPose().toCurrentAlliancePose().getRotation().getDegrees());
     }
 
     void setClosedLoop(boolean closedLoop) {
         for (SwerveModuleIO currentModule : modulesIO)
             currentModule.setDriveMotorClosedLoop(closedLoop);
-    }
-
-    void stop() {
-        for (SwerveModuleIO currentModule : modulesIO)
-            currentModule.stop();
     }
 
     /**
@@ -200,7 +181,6 @@ public class Swerve extends SubsystemBase {
         speeds.omegaRadiansPerSecond = calculateProfiledAngleSpeedToTargetAngle(targetAngle);
 
         selfRelativeDrive(speeds);
-        updateTargetProfiledPoseFromRotationController();
     }
 
     /**
@@ -285,17 +265,14 @@ public class Swerve extends SubsystemBase {
     }
 
     private void configurePathPlanner() {
-        PathPlannerLogging.setLogTargetPoseCallback((pose) -> this.targetProfiledPose = pose);
         AutoBuilder.configureHolonomic(
-                POSE_ESTIMATOR::getCurrentPose,
-                POSE_ESTIMATOR::resetPose,
+                () -> RobotContainer.POSE_ESTIMATOR.getCurrentPose().toCurrentAlliancePose(),
+                (pose2d) -> RobotContainer.POSE_ESTIMATOR.resetPose(AllianceUtilities.AlliancePose2d.fromCurrentAlliancePose(pose2d)),
                 this::getSelfRelativeVelocity,
                 this::selfRelativeDrive,
                 constants.getPathFollowerConfig(),
                 this
         );
-
-        configurePathPlannerNotifier.close();
     }
 
     private boolean atTranslationPosition(double currentTranslationPosition, double targetTranslationPosition, double currentTranslationVelocity) {
@@ -305,72 +282,30 @@ public class Swerve extends SubsystemBase {
 
     private double calculateProfiledAngleSpeedToTargetAngle(Rotation2d targetAngle) {
         constants.getProfiledRotationController().setGoal(targetAngle.getDegrees());
-        final Rotation2d currentAngle = POSE_ESTIMATOR.getCurrentPose().getRotation();
+        final Rotation2d currentAngle = RobotContainer.POSE_ESTIMATOR.getCurrentPose().toCurrentAlliancePose().getRotation();
         return Units.degreesToRadians(constants.getProfiledRotationController().calculate(currentAngle.getDegrees()));
-    }
-
-    private void updateTargetProfiledPoseFromRotationController() {
-        targetProfiledPose = new Pose2d(
-                POSE_ESTIMATOR.getCurrentPose().getTranslation(),
-                Rotation2d.fromDegrees(constants.getProfiledRotationController().getSetpoint().position)
-        );
     }
 
     private ChassisSpeeds selfRelativeSpeedsFromFieldRelativePowers(double xPower, double yPower, double thetaPower) {
         final ChassisSpeeds fieldRelativeSpeeds = powersToSpeeds(xPower, yPower, thetaPower);
-        return ChassisSpeeds.fromFieldRelativeSpeeds(fieldRelativeSpeeds, POSE_ESTIMATOR.getCurrentPose().getRotation());
+        return ChassisSpeeds.fromFieldRelativeSpeeds(fieldRelativeSpeeds, RobotContainer.POSE_ESTIMATOR.getCurrentPose().toCurrentAlliancePose().getRotation());
     }
 
     private ChassisSpeeds powersToSpeeds(double xPower, double yPower, double thetaPower) {
         return new ChassisSpeeds(
                 xPower * constants.getMaxSpeedMetersPerSecond(),
                 yPower * constants.getMaxSpeedMetersPerSecond(),
-                getDriveSpeedFromPower(thetaPower)
+                Math.pow(thetaPower, 2) * Math.signum(thetaPower) * constants.getMaxRotationalSpeedRadiansPerSecond()
         );
     }
 
-    private double getDriveSpeedFromPower(double rotPower) {
-        if (rotPower == 0)
-            return getLockAtLastRotationMovementAngleSpeed();
-
-        updateLastRotationMovement();
-        return Math.pow(rotPower, 2) * Math.signum(rotPower) * constants.getMaxRotationalSpeedRadiansPerSecond();
-    }
-
-    private void updateLastRotationMovement() {
-        updateLastRotationMovementAngleNotifier.stop();
-        updateLastRotationMovementAngleNotifier.startSingle(0.3);
-        lastRotationMovementAngle = null;
-    }
-
-    /**
-     * When the swerve moves, one of the motors might be slower than the others, thus the swerve will spin a bit when driving straight.
-     * To counter this, we use pid to stay at the last angle the swerve's rotation moved at.
-     *
-     * @return the pid output to stay at the last angle the swerve's rotation moved at, in radians per second
-     */
-    private double getLockAtLastRotationMovementAngleSpeed() {
-        if (lastRotationMovementAngle == null)
-            return 0;
-        final Rotation2d currentAngle = POSE_ESTIMATOR.getCurrentPose().getRotation();
-        final double outputDegrees = constants.getLookStraightController().calculate(currentAngle.getDegrees(), lastRotationMovementAngle.getDegrees());
-        return Units.degreesToRadians(outputDegrees);
-    }
-
     private void updateNetworkTables() {
-        Logger.recordOutput("Swerve/Velocity/rot", getSelfRelativeVelocity().omegaRadiansPerSecond);
-        Logger.recordOutput("Swerve/Velocity/x", getSelfRelativeVelocity().vxMetersPerSecond);
-        Logger.recordOutput("Swerve/Velocity/y", getSelfRelativeVelocity().vyMetersPerSecond);
-
-        if (targetProfiledPose == null) {
-            Logger.recordOutput("targetPose", POSE_ESTIMATOR.getCurrentPose());
-        } else {
-            Logger.recordOutput("targetPose", targetProfiledPose);
-            targetProfiledPose = null;
-        }
+        Logger.recordOutput("Swerve/Velocity/Rot", getSelfRelativeVelocity().omegaRadiansPerSecond);
+        Logger.recordOutput("Swerve/Velocity/X", getSelfRelativeVelocity().vxMetersPerSecond);
+        Logger.recordOutput("Swerve/Velocity/Y", getSelfRelativeVelocity().vyMetersPerSecond);
     }
 
-    @AutoLogOutput(key = "Swerve/currentStates")
+    @AutoLogOutput(key = "Swerve/CurrentStates")
     private SwerveModuleState[] getModuleStates() {
         final SwerveModuleState[] states = new SwerveModuleState[modulesIO.length];
 
@@ -380,7 +315,7 @@ public class Swerve extends SubsystemBase {
         return states;
     }
 
-    @AutoLogOutput(key = "Swerve/targetStates")
+    @AutoLogOutput(key = "Swerve/TargetStates")
     private SwerveModuleState[] getTargetStates() {
         final SwerveModuleState[] states = new SwerveModuleState[modulesIO.length];
 
