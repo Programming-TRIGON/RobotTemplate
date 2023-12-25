@@ -4,6 +4,7 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import frc.trigon.robot.constants.RobotConstants;
 import frc.trigon.robot.utilities.Commands;
@@ -37,6 +38,9 @@ public class TrihardSwerveModuleConstants {
     private static final InvertedValue
             DRIVE_MOTOR_INVERTED_VALUE = InvertedValue.Clockwise_Positive,
             STEER_MOTOR_INVERTED_VALUE = InvertedValue.CounterClockwise_Positive;
+    private static final NeutralModeValue
+            DRIVE_MOTOR_NEUTRAL_MODE_VALUE = NeutralModeValue.Brake,
+            STEER_MOTOR_NEUTRAL_MODE_VALUE = NeutralModeValue.Brake;
     private static final double
             DRIVE_SLIP_CURRENT = 100,
             STEER_CURRENT_LIMIT = 50;
@@ -121,35 +125,9 @@ public class TrihardSwerveModuleConstants {
         this.encoderOffset = encoderOffset;
 
         if (!RobotConstants.IS_REPLAY) {
-            configureSteerMotor();
             configureDriveMotor();
+            configureSteerMotor();
         }
-    }
-
-    private void configureSteerMotor() {
-        final TalonFXConfiguration config = new TalonFXConfiguration();
-
-        config.Audio.BeepOnBoot = false;
-        config.Audio.BeepOnConfig = false;
-
-        config.MotorOutput.Inverted = STEER_MOTOR_INVERTED_VALUE;
-        config.Feedback.SensorToMechanismRatio = STEER_GEAR_RATIO;
-        config.CurrentLimits.StatorCurrentLimit = STEER_CURRENT_LIMIT;
-        config.CurrentLimits.StatorCurrentLimitEnable = true;
-
-        config.Slot0.kP = STEER_MOTOR_P;
-        config.Slot0.kI = STEER_MOTOR_I;
-        config.Slot0.kD = STEER_MOTOR_D;
-        config.ClosedLoopGeneral.ContinuousWrap = true;
-
-        steerMotor.getConfigurator().apply(config);
-
-        steerPositionSignal = steerMotor.getPosition().clone();
-        steerVelocitySignal = steerMotor.getVelocity().clone();
-        steerPositionSignal.setUpdateFrequency(250);
-        steerVelocitySignal.setUpdateFrequency(250);
-
-        Commands.getDelayedCommand(ENCODER_UPDATE_TIME_SECONDS, this::setSteerMotorPositionToAbsolute).schedule();
     }
 
     private void configureDriveMotor() {
@@ -159,6 +137,7 @@ public class TrihardSwerveModuleConstants {
         config.Audio.BeepOnConfig = false;
 
         config.MotorOutput.Inverted = DRIVE_MOTOR_INVERTED_VALUE;
+        config.MotorOutput.NeutralMode = DRIVE_MOTOR_NEUTRAL_MODE_VALUE;
         config.Feedback.SensorToMechanismRatio = DRIVE_GEAR_RATIO;
 
         config.TorqueCurrent.PeakForwardTorqueCurrent = DRIVE_SLIP_CURRENT;
@@ -182,6 +161,33 @@ public class TrihardSwerveModuleConstants {
         driveVelocitySignal.setUpdateFrequency(250);
         driveStatorCurrentSignal.setUpdateFrequency(20);
         driveMotor.optimizeBusUtilization();
+    }
+
+    private void configureSteerMotor() {
+        final TalonFXConfiguration config = new TalonFXConfiguration();
+
+        config.Audio.BeepOnBoot = false;
+        config.Audio.BeepOnConfig = false;
+
+        config.MotorOutput.Inverted = STEER_MOTOR_INVERTED_VALUE;
+        config.MotorOutput.NeutralMode = STEER_MOTOR_NEUTRAL_MODE_VALUE;
+        config.Feedback.SensorToMechanismRatio = STEER_GEAR_RATIO;
+        config.CurrentLimits.StatorCurrentLimit = STEER_CURRENT_LIMIT;
+        config.CurrentLimits.StatorCurrentLimitEnable = true;
+
+        config.Slot0.kP = STEER_MOTOR_P;
+        config.Slot0.kI = STEER_MOTOR_I;
+        config.Slot0.kD = STEER_MOTOR_D;
+        config.ClosedLoopGeneral.ContinuousWrap = true;
+
+        steerMotor.getConfigurator().apply(config);
+
+        steerPositionSignal = steerMotor.getPosition().clone();
+        steerVelocitySignal = steerMotor.getVelocity().clone();
+        steerPositionSignal.setUpdateFrequency(250);
+        steerVelocitySignal.setUpdateFrequency(250);
+
+        Commands.getDelayedCommand(ENCODER_UPDATE_TIME_SECONDS, this::setSteerMotorPositionToAbsolute).schedule();
     }
 
     private void setSteerMotorPositionToAbsolute() {

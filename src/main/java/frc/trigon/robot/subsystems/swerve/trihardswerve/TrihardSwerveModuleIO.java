@@ -12,14 +12,13 @@ import frc.trigon.robot.subsystems.swerve.SwerveModuleInputsAutoLogged;
 import frc.trigon.robot.utilities.Conversions;
 import frc.trigon.robot.utilities.TalonFXBrakeThread;
 
-
 public class TrihardSwerveModuleIO extends SwerveModuleIO {
     private final TalonFX steerMotor, driveMotor;
     private final TrihardSwerveModuleConstants moduleConstants;
 
     private final VelocityTorqueCurrentFOC driveVelocityRequest = new VelocityTorqueCurrentFOC(0);
-    private final VoltageOut driveVoltageRequest = new VoltageOut(0, TrihardSwerveModuleConstants.ENABLE_FOC, false);
-    private final PositionVoltage steerPositionRequest = new PositionVoltage(0, 0, TrihardSwerveModuleConstants.ENABLE_FOC, 0, 0, false);
+    private final VoltageOut driveVoltageRequest = new VoltageOut(0).withEnableFOC(TrihardSwerveModuleConstants.ENABLE_FOC);
+    private final PositionVoltage steerPositionRequest = new PositionVoltage(0).withEnableFOC(TrihardSwerveModuleConstants.ENABLE_FOC);
 
     TrihardSwerveModuleIO(TrihardSwerveModuleConstants moduleConstants, String moduleName) {
         super(moduleName);

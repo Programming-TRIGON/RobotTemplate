@@ -33,6 +33,6 @@ public class Commands {
     }
 
     public static Command getDelayedCommand(double delaySeconds, Runnable toRun) {
-        return new WaitCommand(delaySeconds).andThen(toRun);
+        return new WaitCommand(delaySeconds).andThen(toRun).ignoringDisable(true);
     }
 }

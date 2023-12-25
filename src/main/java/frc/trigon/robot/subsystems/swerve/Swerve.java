@@ -1,6 +1,5 @@
 package frc.trigon.robot.subsystems.swerve;
 
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -15,7 +14,6 @@ import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.constants.RobotConstants;
 import frc.trigon.robot.subsystems.AbstractSubsystem;
 import frc.trigon.robot.utilities.AllianceUtilities;
-import frc.trigon.robot.utilities.Commands;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -38,7 +36,7 @@ public class Swerve extends AbstractSubsystem {
 
     private Swerve() {
         modulesIO = getModulesIO();
-        Commands.getDelayedCommand(2, this::configurePathPlanner).schedule();
+        configurePathPlanner();
     }
 
     @Override
@@ -265,6 +263,7 @@ public class Swerve extends AbstractSubsystem {
     }
 
     private void configurePathPlanner() {
+        System.out.println(Timer.getFPGATimestamp());
         AutoBuilder.configureHolonomic(
                 () -> RobotContainer.POSE_ESTIMATOR.getCurrentPose().toCurrentAlliancePose(),
                 (pose2d) -> RobotContainer.POSE_ESTIMATOR.resetPose(AllianceUtilities.AlliancePose2d.fromCurrentAlliancePose(pose2d)),

@@ -19,8 +19,8 @@ public class SimulationSwerveModuleConstants {
             STEER_MOTOR_I = 0,
             STEER_MOTOR_D = 0;
     private static final DCMotor
-            DRIVE_MOTOR_GEARBOX = DCMotor.getFalcon500(1),
-            STEER_MOTOR_GEARBOX = DCMotor.getFalcon500(1);
+            DRIVE_MOTOR_GEARBOX = DCMotor.getFalcon500Foc(1),
+            STEER_MOTOR_GEARBOX = DCMotor.getFalcon500Foc(1);
     private static final DCMotorSim
             FRONT_LEFT_DRIVE_MOTOR = new DCMotorSim(DRIVE_MOTOR_GEARBOX, DRIVE_GEAR_RATIO, DRIVE_MOMENT_OF_INERTIA),
             FRONT_RIGHT_DRIVE_MOTOR = new DCMotorSim(DRIVE_MOTOR_GEARBOX, DRIVE_GEAR_RATIO, DRIVE_MOMENT_OF_INERTIA),

@@ -1,11 +1,20 @@
 package frc.trigon.robot.subsystems;
 
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
 public abstract class AbstractSubsystem extends edu.wpi.first.wpilibj2.command.SubsystemBase {
     private static final List<AbstractSubsystem> REGISTERED_SUBSYSTEMS = new ArrayList<>();
+    private static final Trigger DISABLED_TRIGGER = new Trigger(DriverStation::isDisabled);
+
+    static {
+        DISABLED_TRIGGER.onTrue(new InstantCommand(() -> forEach(AbstractSubsystem::stop)));
+    }
 
     public AbstractSubsystem() {
         REGISTERED_SUBSYSTEMS.add(this);
