@@ -41,6 +41,4 @@ public abstract class SwerveConstants {
     protected abstract double getMaxSpeedMetersPerSecond();
 
     protected abstract double getMaxRotationalSpeedRadiansPerSecond();
-
-    protected abstract double getMaxModuleSpeedMetersPerSecond();
 }

@@ -5,10 +5,8 @@
 
 package frc.trigon.robot;
 
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.trigon.robot.constants.CommandConstants;
 import frc.trigon.robot.constants.RobotConstants;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -32,12 +30,10 @@ public class Robot extends LoggedRobot {
     @Override
     public void robotPeriodic() {
         commandScheduler.run();
-        Logger.recordOutput("Poses/Components/TurretPose", new Pose3d());
     }
 
     @Override
     public void autonomousInit() {
-        enabledInit();
         autonomousCommand = robotContainer.getAutonomousCommand();
 
         if (autonomousCommand != null)
@@ -46,7 +42,6 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void teleopInit() {
-        enabledInit();
         if (autonomousCommand != null)
             autonomousCommand.cancel();
     }
@@ -54,10 +49,6 @@ public class Robot extends LoggedRobot {
     @Override
     public void testInit() {
         CommandScheduler.getInstance().cancelAll();
-    }
-
-    private void enabledInit() {
-        CommandConstants.BRAKE_MOTORS_COMMAND.schedule();
     }
 
     private void configLogger() {

@@ -8,7 +8,6 @@ import frc.trigon.robot.subsystems.AbstractSubsystem;
 import frc.trigon.robot.subsystems.swerve.Swerve;
 
 public class Commands {
-    private static final Swerve SWERVE = Swerve.getInstance();
     private static boolean IS_BRAKING = true;
 
     /**
@@ -16,20 +15,20 @@ public class Commands {
      */
     public static Command getToggleFieldAndSelfRelativeDriveCommand() {
         return new InstantCommand(() -> {
-            if (SWERVE.getDefaultCommand().equals(CommandConstants.FIELD_RELATIVE_DRIVE_COMMAND))
-                SWERVE.setDefaultCommand(CommandConstants.SELF_RELATIVE_DRIVE_COMMAND);
+            if (Swerve.getInstance().getDefaultCommand().equals(CommandConstants.FIELD_RELATIVE_DRIVE_COMMAND))
+                Swerve.getInstance().setDefaultCommand(CommandConstants.SELF_RELATIVE_DRIVE_COMMAND);
             else
-                SWERVE.setDefaultCommand(CommandConstants.FIELD_RELATIVE_DRIVE_COMMAND);
+                Swerve.getInstance().setDefaultCommand(CommandConstants.FIELD_RELATIVE_DRIVE_COMMAND);
 
-            SWERVE.getDefaultCommand().schedule();
+            Swerve.getInstance().getDefaultCommand().schedule();
         });
     }
 
     public static Command getToggleBrakeCommand() {
         return new InstantCommand(() -> {
             IS_BRAKING = !IS_BRAKING;
-            AbstractSubsystem.forEach(subsystem -> subsystem.setBrake(IS_BRAKING));
-        });
+            AbstractSubsystem.setAllSubsystemsBrakeAsync(IS_BRAKING);
+        }).ignoringDisable(true);
     }
 
     public static Command getDelayedCommand(double delaySeconds, Runnable toRun) {

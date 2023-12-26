@@ -3,7 +3,6 @@ package frc.trigon.robot.poseestimation.robotposesources;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
-import frc.trigon.robot.RobotContainer;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
@@ -35,13 +34,18 @@ public class AprilTagPhotonCameraIO extends RobotPoseSourceIO {
     @Override
     protected void updateInputs(RobotPoseSourceInputsAutoLogged inputs) {
         final PhotonPipelineResult latestResult = photonCamera.getLatestResult();
+        Optional<EstimatedRobotPose> optionalEstimatedRobotPose = photonPoseEstimator.update(latestResult);
 
-        inputs.hasResult = latestResult.hasTargets();
-        if (inputs.hasResult)
-            inputs.cameraPose = RobotPoseSource.pose3dToDoubleArray(getCameraPose());
-        inputs.lastResultTimestamp = latestResult.getTimestampSeconds();
-        inputs.visibleTags = latestResult.targets.size();
-        inputs.averageDistanceFromTags = getAverageDistanceFromTags(latestResult);
+        inputs.hasResult = optionalEstimatedRobotPose.isPresent();
+        if (inputs.hasResult) {
+            final EstimatedRobotPose estimatedRobotPose = optionalEstimatedRobotPose.get();
+            inputs.cameraPose = RobotPoseSource.pose3dToDoubleArray(estimatedRobotPose.estimatedPose);
+            inputs.lastResultTimestamp = estimatedRobotPose.timestampSeconds;
+            inputs.visibleTags = estimatedRobotPose.targetsUsed.size();
+            inputs.averageDistanceFromTags = getAverageDistanceFromTags(latestResult);
+        } else {
+            inputs.visibleTags = 0;
+        }
     }
 
     private double getAverageDistanceFromTags(PhotonPipelineResult result) {
@@ -54,13 +58,5 @@ public class AprilTagPhotonCameraIO extends RobotPoseSourceIO {
         }
 
         return distanceSum / targets.size();
-    }
-
-    private Pose3d getCameraPose() {
-        if (PoseSourceConstants.SECONDARY_POSE_STRATEGY == PhotonPoseEstimator.PoseStrategy.CLOSEST_TO_REFERENCE_POSE)
-            photonPoseEstimator.setReferencePose(RobotContainer.POSE_ESTIMATOR.getCurrentPose().toCurrentAlliancePose());
-
-        final Optional<EstimatedRobotPose> estimatedRobotPose = photonPoseEstimator.update();
-        return estimatedRobotPose.map(robotPose -> robotPose.estimatedPose).orElse(null);
     }
 }

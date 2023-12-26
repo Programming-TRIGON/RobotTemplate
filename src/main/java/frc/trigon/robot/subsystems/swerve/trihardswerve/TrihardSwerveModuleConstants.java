@@ -16,7 +16,7 @@ public class TrihardSwerveModuleConstants {
     static final double
             DRIVE_GEAR_RATIO = 8.14,
             STEER_GEAR_RATIO = 12.8,
-            COUPLING_RATIO = 2.63852242744;
+            COUPLING_RATIO = 0.048;
     static final double WHEEL_DIAMETER_METERS = 0.1016;
 
     static final int
@@ -51,25 +51,22 @@ public class TrihardSwerveModuleConstants {
             STEER_MOTOR_I = 0,
             STEER_MOTOR_D = 0;
     private static final double
-            DRIVE_MOTOR_P = 0,
+            DRIVE_MOTOR_P = 40,
             DRIVE_MOTOR_I = 0,
-            DRIVE_MOTOR_D = 0,
-            DRIVE_MOTOR_KS = 0.675593,
-            DRIVE_MOTOR_KV = 8.4759406,
-            DRIVE_MOTOR_KA = 1.2042201;
+            DRIVE_MOTOR_D = 0;
 
     private static final TalonFX
-            FRONT_LEFT_DRIVE_MOTOR = new TalonFX(FRONT_LEFT_DRIVE_MOTOR_ID),
-            FRONT_RIGHT_DRIVE_MOTOR = new TalonFX(FRONT_RIGHT_DRIVE_MOTOR_ID),
-            REAR_LEFT_DRIVE_MOTOR = new TalonFX(REAR_LEFT_DRIVE_MOTOR_ID),
-            REAR_RIGHT_DRIVE_MOTOR = new TalonFX(REAR_RIGHT_DRIVE_MOTOR_ID);
+            FRONT_LEFT_DRIVE_MOTOR = new TalonFX(FRONT_LEFT_DRIVE_MOTOR_ID, RobotConstants.CANIVORE_NAME),
+            FRONT_RIGHT_DRIVE_MOTOR = new TalonFX(FRONT_RIGHT_DRIVE_MOTOR_ID, RobotConstants.CANIVORE_NAME),
+            REAR_LEFT_DRIVE_MOTOR = new TalonFX(REAR_LEFT_DRIVE_MOTOR_ID, RobotConstants.CANIVORE_NAME),
+            REAR_RIGHT_DRIVE_MOTOR = new TalonFX(REAR_RIGHT_DRIVE_MOTOR_ID, RobotConstants.CANIVORE_NAME);
     private static final TalonFX
-            FRONT_LEFT_STEER_MOTOR = new TalonFX(FRONT_LEFT_STEER_MOTOR_ID),
-            FRONT_RIGHT_STEER_MOTOR = new TalonFX(FRONT_RIGHT_STEER_MOTOR_ID),
-            REAR_LEFT_STEER_MOTOR = new TalonFX(REAR_LEFT_STEER_MOTOR_ID),
-            REAR_RIGHT_STEER_MOTOR = new TalonFX(REAR_RIGHT_STEER_MOTOR_ID);
+            FRONT_LEFT_STEER_MOTOR = new TalonFX(FRONT_LEFT_STEER_MOTOR_ID, RobotConstants.CANIVORE_NAME),
+            FRONT_RIGHT_STEER_MOTOR = new TalonFX(FRONT_RIGHT_STEER_MOTOR_ID, RobotConstants.CANIVORE_NAME),
+            REAR_LEFT_STEER_MOTOR = new TalonFX(REAR_LEFT_STEER_MOTOR_ID, RobotConstants.CANIVORE_NAME),
+            REAR_RIGHT_STEER_MOTOR = new TalonFX(REAR_RIGHT_STEER_MOTOR_ID, RobotConstants.CANIVORE_NAME);
 
-    private static final double ENCODER_UPDATE_TIME_SECONDS = 3;
+    private static final double ENCODER_UPDATE_TIME_SECONDS = 5;
     private static final int ENCODER_CHANNEL_OFFSET = 1;
     private static final int
             FRONT_LEFT_ENCODER_CHANNEL = FRONT_LEFT_ID + ENCODER_CHANNEL_OFFSET,
@@ -148,9 +145,6 @@ public class TrihardSwerveModuleConstants {
         config.Slot0.kP = DRIVE_MOTOR_P;
         config.Slot0.kI = DRIVE_MOTOR_I;
         config.Slot0.kD = DRIVE_MOTOR_D;
-        config.Slot0.kS = DRIVE_MOTOR_KS;
-        config.Slot0.kV = DRIVE_MOTOR_KV;
-        config.Slot0.kA = DRIVE_MOTOR_KA;
 
         driveMotor.getConfigurator().apply(config);
 

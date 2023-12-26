@@ -3,9 +3,10 @@ package frc.trigon.robot.constants;
 import frc.trigon.robot.utilities.FilesHandler;
 
 public class RobotConstants {
-    public static final RobotType ROBOT_TYPE = RobotType.SIMULATION;
+    public static final RobotType ROBOT_TYPE = RobotType.TRIHARD;
     public static final boolean IS_REPLAY = false;
     public static final double PERIODIC_TIME_SECONDS = 0.02;
+    public static final String CANIVORE_NAME = "canivore";
 
     public enum RobotType {
         KABLAMA("/media/sda1/logs/"),

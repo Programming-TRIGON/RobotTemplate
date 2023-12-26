@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Swerve extends AbstractSubsystem {
-    private static Swerve INSTANCE = null;
+    private static final Swerve INSTANCE = new Swerve();
     private final SwerveInputsAutoLogged swerveInputs = new SwerveInputsAutoLogged();
     private final SwerveIO swerveIO = SwerveIO.generateIO();
     private final SwerveConstants constants = SwerveConstants.generateConstants();
@@ -29,8 +29,6 @@ public class Swerve extends AbstractSubsystem {
     private final List<Double> previousLoopTimestamps = new ArrayList<>();
 
     public static Swerve getInstance() {
-        if (INSTANCE == null)
-            INSTANCE = new Swerve();
         return INSTANCE;
     }
 
@@ -147,7 +145,6 @@ public class Swerve extends AbstractSubsystem {
      * Locks the swerve, so it'll be hard to move it. This will make the modules look in the middle of a robot in a "x" shape.
      */
     void lockSwerve() {
-        setBrake(true);
         final SwerveModuleState
                 right = new SwerveModuleState(0, Rotation2d.fromDegrees(-45)),
                 left = new SwerveModuleState(0, Rotation2d.fromDegrees(45));
@@ -217,7 +214,7 @@ public class Swerve extends AbstractSubsystem {
     }
 
     private void setTargetModuleStates(SwerveModuleState[] swerveModuleStates) {
-        SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, constants.getMaxModuleSpeedMetersPerSecond());
+        SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, constants.getMaxSpeedMetersPerSecond());
         for (int i = 0; i < modulesIO.length; i++)
             modulesIO[i].setTargetState(swerveModuleStates[i]);
     }
@@ -263,7 +260,6 @@ public class Swerve extends AbstractSubsystem {
     }
 
     private void configurePathPlanner() {
-        System.out.println(Timer.getFPGATimestamp());
         AutoBuilder.configureHolonomic(
                 () -> RobotContainer.POSE_ESTIMATOR.getCurrentPose().toCurrentAlliancePose(),
                 (pose2d) -> RobotContainer.POSE_ESTIMATOR.resetPose(AllianceUtilities.AlliancePose2d.fromCurrentAlliancePose(pose2d)),

@@ -18,10 +18,9 @@ import frc.trigon.robot.subsystems.swerve.SwerveModuleIO;
 
 public class TrihardSwerveConstants extends SwerveConstants {
     // TODO: Calibrate values
-    private static final double
+    static final double
             MAX_SPEED_METERS_PER_SECOND = 4.25,
             MAX_ROTATIONAL_SPEED_RADIANS_PER_SECOND = 12.03;
-    static final double MAX_MODULE_SPEED_METERS_PER_SECOND = 6;
 
     private static final double
             MODULE_FROM_MODULE_DISTANCE = 0.55,
@@ -65,7 +64,7 @@ public class TrihardSwerveConstants extends SwerveConstants {
             Units.degreesToRadians(-0.95211),
             Units.degreesToRadians(90.0146)
     );
-    static final Pigeon2 GYRO = new Pigeon2(PIGEON_ID);
+    static final Pigeon2 GYRO = new Pigeon2(PIGEON_ID, RobotConstants.CANIVORE_NAME);
 
     private static final double DRIVE_RADIUS_METERS = Math.hypot(
             MODULE_XY_DISTANCE_FROM_CENTER_OF_BASE, MODULE_XY_DISTANCE_FROM_CENTER_OF_BASE
@@ -74,7 +73,7 @@ public class TrihardSwerveConstants extends SwerveConstants {
     private static final HolonomicPathFollowerConfig HOLONOMIC_PATH_FOLLOWER_CONFIG = new HolonomicPathFollowerConfig(
             TRANSLATION_PID_CONSTANTS,
             AUTO_ROTATION_PID_CONSTANTS,
-            MAX_MODULE_SPEED_METERS_PER_SECOND,
+            MAX_SPEED_METERS_PER_SECOND,
             DRIVE_RADIUS_METERS,
             REPLANNING_CONFIG
     );
@@ -144,10 +143,5 @@ public class TrihardSwerveConstants extends SwerveConstants {
     @Override
     protected double getRobotSideLength() {
         return MODULE_FROM_MODULE_DISTANCE;
-    }
-
-    @Override
-    protected double getMaxModuleSpeedMetersPerSecond() {
-        return MAX_MODULE_SPEED_METERS_PER_SECOND;
     }
 }

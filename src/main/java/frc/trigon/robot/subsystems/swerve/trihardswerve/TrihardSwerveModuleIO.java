@@ -1,6 +1,8 @@
 package frc.trigon.robot.subsystems.swerve.trihardswerve;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
@@ -10,7 +12,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import frc.trigon.robot.subsystems.swerve.SwerveModuleIO;
 import frc.trigon.robot.subsystems.swerve.SwerveModuleInputsAutoLogged;
 import frc.trigon.robot.utilities.Conversions;
-import frc.trigon.robot.utilities.TalonFXBrakeThread;
 
 public class TrihardSwerveModuleIO extends SwerveModuleIO {
     private final TalonFX steerMotor, driveMotor;
@@ -32,24 +33,25 @@ public class TrihardSwerveModuleIO extends SwerveModuleIO {
     protected void updateInputs(SwerveModuleInputsAutoLogged inputs) {
         inputs.steerAngleDegrees = getAngleDegrees();
 
-        inputs.driveDistanceMeters = getDriveDistance(inputs.steerAngleDegrees);
+        inputs.driveDistanceMeters = getDriveDistance(Rotation2d.fromDegrees(inputs.steerAngleDegrees));;
         inputs.driveVelocityMetersPerSecond = Conversions.revolutionsToDistance(moduleConstants.driveVelocitySignal.getValue(), TrihardSwerveModuleConstants.WHEEL_DIAMETER_METERS);
         inputs.driveCurrent = moduleConstants.driveStatorCurrentSignal.refresh().getValue();
     }
 
     @Override
-    protected void setTargetOpenLoopVelocity(double velocity) {
-        final double optimizedVelocity = optimizeVelocity(velocity);
-        final double power = optimizedVelocity / TrihardSwerveConstants.MAX_MODULE_SPEED_METERS_PER_SECOND;
+    protected void setTargetOpenLoopVelocity(double targetVelocityMetersPerSecond) {
+        final double optimizedVelocityRevolutionsPerSecond = optimizeVelocity(targetVelocityMetersPerSecond);
+        final double optimizedVelocityMetersPerSecond = Conversions.revolutionsToDistance(optimizedVelocityRevolutionsPerSecond, TrihardSwerveModuleConstants.WHEEL_DIAMETER_METERS);
+        final double power = optimizedVelocityMetersPerSecond / TrihardSwerveConstants.MAX_SPEED_METERS_PER_SECOND;
         final double voltage = Conversions.compensatedPowerToVoltage(power, TrihardSwerveModuleConstants.VOLTAGE_COMPENSATION_SATURATION);
 
         driveMotor.setControl(driveVoltageRequest.withOutput(voltage));
     }
 
     @Override
-    protected void setTargetClosedLoopVelocity(double velocity) {
-        final double optimizedVelocity = optimizeVelocity(velocity);
-        driveMotor.setControl(driveVelocityRequest.withVelocity(optimizedVelocity));
+    protected void setTargetClosedLoopVelocity(double targetVelocityMetersPerSecond) {
+        final double optimizedVelocityRevolutionsPerSecond = optimizeVelocity(targetVelocityMetersPerSecond);
+        driveMotor.setControl(driveVelocityRequest.withVelocity(optimizedVelocityRevolutionsPerSecond));
     }
 
     @Override
@@ -65,8 +67,9 @@ public class TrihardSwerveModuleIO extends SwerveModuleIO {
 
     @Override
     protected void setBrake(boolean brake) {
-        TalonFXBrakeThread.setBrakeAsynchronous(driveMotor, brake ? NeutralModeValue.Brake : NeutralModeValue.Coast);
-        TalonFXBrakeThread.setBrakeAsynchronous(steerMotor, brake ? NeutralModeValue.Brake : NeutralModeValue.Coast);
+        final NeutralModeValue neutralModeValue = brake ? NeutralModeValue.Brake : NeutralModeValue.Coast;
+        setBrake(driveMotor, neutralModeValue);
+        setBrake(steerMotor, neutralModeValue);
     }
 
     /**
@@ -89,10 +92,10 @@ public class TrihardSwerveModuleIO extends SwerveModuleIO {
         return Conversions.revolutionsToDegrees(latencyCompensatedRevolutions);
     }
 
-    private double getDriveDistance(double moduleAngleDegrees) {
+    private double getDriveDistance(Rotation2d moduleAngle) {
         BaseStatusSignal.refreshAll(moduleConstants.drivePositionSignal, moduleConstants.driveVelocitySignal);
         final double latencyCompensatedRevolutions = BaseStatusSignal.getLatencyCompensatedValue(moduleConstants.drivePositionSignal, moduleConstants.driveVelocitySignal);
-        final double revolutionsWithoutCoupling = removeCouplingFromRevolutions(latencyCompensatedRevolutions, moduleAngleDegrees);
+        final double revolutionsWithoutCoupling = removeCouplingFromRevolutions(latencyCompensatedRevolutions, moduleAngle);
         return Conversions.revolutionsToDistance(revolutionsWithoutCoupling, TrihardSwerveModuleConstants.WHEEL_DIAMETER_METERS);
     }
 
@@ -100,12 +103,21 @@ public class TrihardSwerveModuleIO extends SwerveModuleIO {
      * When the steer motor moves, the drive motor moves as well due to the coupling.
      * This will affect the current position of the drive motor, so we need to remove the coupling from the position.
      *
-     * @param drivePosition      the position in revolutions
-     * @param moduleAngleDegrees the angle of the module in degrees
+     * @param drivePosition the position in revolutions
+     * @param moduleAngle   the angle of the module
      * @return the distance without the coupling
      */
-    private double removeCouplingFromRevolutions(double drivePosition, double moduleAngleDegrees) {
-        final double coupledAngle = moduleAngleDegrees * TrihardSwerveModuleConstants.COUPLING_RATIO;
+    private double removeCouplingFromRevolutions(double drivePosition, Rotation2d moduleAngle) {
+        final double coupledAngle = moduleAngle.getRotations() * TrihardSwerveModuleConstants.COUPLING_RATIO;
         return drivePosition - coupledAngle;
+    }
+
+    private void setBrake(TalonFX motor, NeutralModeValue neutralModeValue) {
+        final MotorOutputConfigs config = new MotorOutputConfigs();
+        final TalonFXConfigurator configurator = motor.getConfigurator();
+
+        configurator.refresh(config, 10);
+        config.NeutralMode = neutralModeValue;
+        configurator.apply(config, 10);
     }
 }

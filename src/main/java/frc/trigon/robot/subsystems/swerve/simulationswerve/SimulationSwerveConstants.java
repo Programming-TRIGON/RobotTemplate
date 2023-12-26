@@ -11,10 +11,9 @@ import frc.trigon.robot.subsystems.swerve.SwerveConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveModuleIO;
 
 public class SimulationSwerveConstants extends SwerveConstants {
-    private static final double
-            MAX_SPEED_METERS_PER_SECOND = 4.25,
+    static final double
+            MAX_SPEED_METERS_PER_SECOND = 6,
             MAX_ROTATIONAL_SPEED_RADIANS_PER_SECOND = 12.03;
-    static final double MAX_MODULE_SPEED_METERS_PER_SECOND = 6;
 
     private static final double
             MODULE_FROM_MODULE_DISTANCE = 0.7,
@@ -57,7 +56,7 @@ public class SimulationSwerveConstants extends SwerveConstants {
     private static final HolonomicPathFollowerConfig HOLONOMIC_PATH_FOLLOWER_CONFIG = new HolonomicPathFollowerConfig(
             TRANSLATION_PID_CONSTANTS,
             AUTO_ROTATION_PID_CONSTANTS,
-            MAX_MODULE_SPEED_METERS_PER_SECOND,
+            MAX_SPEED_METERS_PER_SECOND,
             DRIVE_RADIUS_METERS,
             REPLANNING_CONFIG
     );
@@ -100,10 +99,5 @@ public class SimulationSwerveConstants extends SwerveConstants {
     @Override
     protected double getRobotSideLength() {
         return MODULE_FROM_MODULE_DISTANCE;
-    }
-
-    @Override
-    protected double getMaxModuleSpeedMetersPerSecond() {
-        return MAX_MODULE_SPEED_METERS_PER_SECOND;
     }
 }

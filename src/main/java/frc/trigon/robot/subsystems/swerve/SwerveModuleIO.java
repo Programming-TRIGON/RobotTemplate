@@ -51,32 +51,32 @@ public class SwerveModuleIO {
     }
 
     /**
-     * Sets the target velocity for the module. In meters per second.
+     * Sets the target velocity for the module.
      *
-     * @param velocity         the target velocity
-     * @param targetSteerAngle the target steer angle, to calculate for skew reduction
+     * @param targetVelocityMetersPerSecond the target velocity, in meters per second
+     * @param targetSteerAngle              the target steer angle, to calculate for skew reduction
      */
-    private void setTargetVelocity(double velocity, Rotation2d targetSteerAngle) {
-        velocity = reduceSkew(velocity, targetSteerAngle);
+    private void setTargetVelocity(double targetVelocityMetersPerSecond, Rotation2d targetSteerAngle) {
+        targetVelocityMetersPerSecond = reduceSkew(targetVelocityMetersPerSecond, targetSteerAngle);
 
         if (driveMotorClosedLoop)
-            setTargetClosedLoopVelocity(velocity);
+            setTargetClosedLoopVelocity(targetVelocityMetersPerSecond);
         else
-            setTargetOpenLoopVelocity(velocity);
+            setTargetOpenLoopVelocity(targetVelocityMetersPerSecond);
     }
 
     /**
      * When changing direction, the module will skew since the angle motor is not at its target angle.
      * This method will counter that by reducing the target velocity according to the angle motor's error cosine.
      *
-     * @param targetVelocityRevolutions the target velocity in revolutions per second
-     * @param targetSteerAngle          the target steer angle
+     * @param targetVelocityMetersPerSecond the target velocity, in meters per second
+     * @param targetSteerAngle              the target steer angle
      * @return the reduced target velocity in revolutions per second
      */
-    private double reduceSkew(double targetVelocityRevolutions, Rotation2d targetSteerAngle) {
+    private double reduceSkew(double targetVelocityMetersPerSecond, Rotation2d targetSteerAngle) {
         final double closedLoopError = targetSteerAngle.getRadians() - getCurrentAngle().getRadians();
         final double cosineScalar = Math.abs(Math.cos(closedLoopError));
-        return targetVelocityRevolutions * cosineScalar;
+        return targetVelocityMetersPerSecond * cosineScalar;
     }
 
     private Rotation2d getCurrentAngle() {
@@ -86,20 +86,10 @@ public class SwerveModuleIO {
     protected void updateInputs(SwerveModuleInputsAutoLogged inputs) {
     }
 
-    /**
-     * Sets the target open loop velocity.
-     *
-     * @param velocity the velocity in meters per second
-     */
-    protected void setTargetOpenLoopVelocity(double velocity) {
+    protected void setTargetOpenLoopVelocity(double targetVelocityMetersPerSecond) {
     }
 
-    /**
-     * Sets the target closed loop velocity.
-     *
-     * @param velocity the velocity in meters per second
-     */
-    protected void setTargetClosedLoopVelocity(double velocity) {
+    protected void setTargetClosedLoopVelocity(double targetVelocityMetersPerSecond) {
     }
 
     protected void setTargetAngle(Rotation2d angle) {

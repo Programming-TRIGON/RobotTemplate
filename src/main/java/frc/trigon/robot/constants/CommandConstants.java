@@ -7,8 +7,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.components.XboxController;
-import frc.trigon.robot.subsystems.AbstractSubsystem;
-import frc.trigon.robot.subsystems.swerve.Swerve;
 import frc.trigon.robot.subsystems.swerve.SwerveCommands;
 import frc.trigon.robot.utilities.AllianceUtilities;
 
@@ -17,8 +15,6 @@ public class CommandConstants {
     private static final double
             MINIMUM_TRANSLATION_SHIFT_POWER = 0.18,
             MINIMUM_ROTATION_SHIFT_POWER = 0.3;
-
-    private static final Swerve SWERVE = Swerve.getInstance();
 
     public static final Command
             FIELD_RELATIVE_DRIVE_COMMAND = SwerveCommands.getOpenLoopFieldRelativeDriveCommand(
@@ -36,8 +32,7 @@ public class CommandConstants {
                     () -> getXPowerFromPov(DRIVER_CONTROLLER.getPov()) / OperatorConstants.POV_DIVIDER / calculateShiftModeValue(MINIMUM_TRANSLATION_SHIFT_POWER),
                     () -> getYPowerFromPov(DRIVER_CONTROLLER.getPov()) / OperatorConstants.POV_DIVIDER / calculateShiftModeValue(MINIMUM_TRANSLATION_SHIFT_POWER),
                     () -> 0
-            ),
-            BRAKE_MOTORS_COMMAND = new InstantCommand(() -> AbstractSubsystem.forEach(subsystem -> subsystem.setBrake(true)));
+            );
 
     /**
      * The shift mode is a mode of the robot that slows down the robot relative to how much the right trigger axis is pressed.

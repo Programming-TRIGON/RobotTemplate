@@ -1,7 +1,6 @@
 package frc.trigon.robot.poseestimation.robotposesources;
 
 import edu.wpi.first.math.geometry.*;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.trigon.robot.Robot;
 import frc.trigon.robot.utilities.AllianceUtilities;
 import org.littletonrobotics.junction.Logger;
@@ -9,12 +8,13 @@ import org.littletonrobotics.junction.Logger;
 /**
  * A pose source is a class that provides the robot's pose, from a camera.
  */
-public class RobotPoseSource extends SubsystemBase {
+public class RobotPoseSource {
     protected final String name;
     private final RobotPoseSourceInputsAutoLogged inputs = new RobotPoseSourceInputsAutoLogged();
     private final Transform3d robotCenterToCamera;
     private final RobotPoseSourceIO robotPoseSourceIO;
     private double lastUpdatedTimestamp;
+    private AllianceUtilities.AlliancePose2d cachedPose = null;
 
     public RobotPoseSource(PoseSourceConstants.RobotPoseSourceType robotPoseSourceType, String name, Transform3d robotCenterToCamera) {
         this.name = name;
@@ -43,15 +43,14 @@ public class RobotPoseSource extends SubsystemBase {
         };
     }
 
-    @Override
-    public void periodic() {
+    public void update() {
         robotPoseSourceIO.updateInputs(inputs);
         Logger.processInputs(name, inputs);
-        final AllianceUtilities.AlliancePose2d currentPose = getRobotPose();
-        if (!hasNewResult() || currentPose == null)
+        cachedPose = getUnCachedRobotPose();
+        if (!inputs.hasResult || cachedPose == null)
             Logger.recordOutput("Poses/Robot/" + name + "Pose", new Pose2d(500, 500, new Rotation2d()));
         else
-            Logger.recordOutput("Poses/Robot/" + name + "Pose", currentPose.toCurrentAlliancePose());
+            Logger.recordOutput("Poses/Robot/" + name + "Pose", cachedPose.toCurrentAlliancePose());
     }
 
     public int getVisibleTags() {
@@ -59,7 +58,7 @@ public class RobotPoseSource extends SubsystemBase {
     }
 
     public double getAverageDistanceFromTags() {
-        return inputs.lastResultTimestamp;
+        return inputs.averageDistanceFromTags;
     }
 
     public boolean hasNewResult() {
@@ -67,11 +66,7 @@ public class RobotPoseSource extends SubsystemBase {
     }
 
     public AllianceUtilities.AlliancePose2d getRobotPose() {
-        final Pose3d cameraPose = doubleArrayToPose3d(inputs.cameraPose);
-        if (cameraPose == null)
-            return null;
-
-        return AllianceUtilities.AlliancePose2d.fromBlueAlliancePose(cameraPose.transformBy(robotCenterToCamera.inverse()).toPose2d());
+        return cachedPose;
     }
 
     public String getName() {
@@ -80,6 +75,14 @@ public class RobotPoseSource extends SubsystemBase {
 
     public double getLastResultTimestamp() {
         return inputs.lastResultTimestamp;
+    }
+
+    private AllianceUtilities.AlliancePose2d getUnCachedRobotPose() {
+        final Pose3d cameraPose = doubleArrayToPose3d(inputs.cameraPose);
+        if (cameraPose == null)
+            return null;
+
+        return AllianceUtilities.AlliancePose2d.fromBlueAlliancePose(cameraPose.transformBy(robotCenterToCamera.inverse()).toPose2d());
     }
 
     private boolean isNewTimestamp() {
