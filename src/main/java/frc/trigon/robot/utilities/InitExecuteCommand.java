@@ -1,7 +1,7 @@
 package frc.trigon.robot.utilities;
 
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
-import frc.trigon.robot.subsystems.AbstractSubsystem;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
  * A command that runs a given runnable when it is initialized, and another runnable on execute.
@@ -15,7 +15,7 @@ public class InitExecuteCommand extends FunctionalCommand {
      * @param onExecute    the runnable to run on command execute
      * @param requirements the subsystems required by this command
      */
-    public InitExecuteCommand(Runnable onInit, Runnable onExecute, AbstractSubsystem... requirements) {
+    public InitExecuteCommand(Runnable onInit, Runnable onExecute, SubsystemBase... requirements) {
         super(onInit, onExecute, (interrupted) -> {}, () -> false, requirements);
     }
 }

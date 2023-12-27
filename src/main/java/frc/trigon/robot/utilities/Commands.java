@@ -4,7 +4,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.trigon.robot.constants.CommandConstants;
-import frc.trigon.robot.subsystems.AbstractSubsystem;
+import frc.trigon.robot.subsystems.MotorSubsystem;
 import frc.trigon.robot.subsystems.swerve.Swerve;
 
 public class Commands {
@@ -27,7 +27,7 @@ public class Commands {
     public static Command getToggleBrakeCommand() {
         return new InstantCommand(() -> {
             IS_BRAKING = !IS_BRAKING;
-            AbstractSubsystem.setAllSubsystemsBrakeAsync(IS_BRAKING);
+            MotorSubsystem.setAllSubsystemsBrakeAsync(IS_BRAKING);
         }).ignoringDisable(true);
     }
 

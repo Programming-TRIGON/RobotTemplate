@@ -12,7 +12,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.constants.RobotConstants;
-import frc.trigon.robot.subsystems.AbstractSubsystem;
+import frc.trigon.robot.subsystems.MotorSubsystem;
 import frc.trigon.robot.utilities.AllianceUtilities;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -20,7 +20,7 @@ import org.littletonrobotics.junction.Logger;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Swerve extends AbstractSubsystem {
+public class Swerve extends MotorSubsystem {
     private static final Swerve INSTANCE = new Swerve();
     private final SwerveInputsAutoLogged swerveInputs = new SwerveInputsAutoLogged();
     private final SwerveIO swerveIO = SwerveIO.generateIO();
