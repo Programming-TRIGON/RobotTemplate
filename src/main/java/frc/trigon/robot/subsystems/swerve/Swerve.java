@@ -142,7 +142,7 @@ public class Swerve extends MotorSubsystem {
     }
 
     /**
-     * Locks the swerve, so it'll be hard to move it. This will make the modules look in the middle of a robot in a "x" shape.
+     * Locks the swerve, so it'll be hard to move it. This will make the modules look in the middle of a robot in an "x" shape.
      */
     void lockSwerve() {
         final SwerveModuleState
