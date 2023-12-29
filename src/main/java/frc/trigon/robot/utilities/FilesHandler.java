@@ -16,28 +16,13 @@ public class FilesHandler {
     public static final String DEPLOY_PATH = Filesystem.getDeployDirectory().getPath() + "/";
 
     /**
-     * Sets the permissions of a file.
-     *
-     * @param file         the file to set the permissions of
-     * @param isReadable   whether the file should be readable
-     * @param isWriteable  whether the file should be writeable
-     * @param isExecutable whether the file should be executable
-     */
-    public static void setPermissions(File file, boolean isReadable, boolean isWriteable, boolean isExecutable) throws IOException, InterruptedException {
-        final Process process = Runtime.getRuntime().exec(
-                new String[]{"chmod -R " + getChmodValue(isReadable, isWriteable, isExecutable) + " " + file.getAbsoluteFile()}
-        );
-        process.waitFor();
-    }
-
-    /**
      * Deletes the given file.
      *
      * @param absolutePath the file's absolute path
      * @throws IOException if the method failed to delete the specified file
      */
     public static void deleteFile(String absolutePath) throws IOException {
-        File file = new File(absolutePath);
+        final File file = new File(absolutePath);
         if (!file.delete())
             throw new IOException("Failed to delete the file \"" + absolutePath + "\".");
     }
@@ -50,7 +35,7 @@ public class FilesHandler {
      * @throws IOException if the method failed to write the string to the file
      */
     public static void writeStringToFile(String absolutePath, String str) throws IOException {
-        FileWriter fileWriter = new FileWriter(absolutePath);
+        final FileWriter fileWriter = new FileWriter(absolutePath);
         fileWriter.write(str);
         fileWriter.close();
     }
@@ -63,8 +48,8 @@ public class FilesHandler {
      * @throws IOException if the method failed to rename the file
      */
     public static void renameFile(String absolutePath, String newName) throws IOException {
-        File file = new File(absolutePath);
-        String newAbsolutePath = extractPathFromAbsolutePath(absolutePath) + newName;
+        final File file = new File(absolutePath);
+        final String newAbsolutePath = extractPathFromAbsolutePath(absolutePath) + newName;
         if (!file.renameTo(new File(newAbsolutePath)))
             throw new IOException("Failed to rename file " + absolutePath + " to " + newName);
     }
@@ -96,7 +81,7 @@ public class FilesHandler {
      * @throws IOException if the method failed to read the file
      */
     public static String readFile(String absolutePath) throws IOException {
-        String newPath = !fileExists(absolutePath) && fileExists(absolutePath + ".tmp") ?
+        final String newPath = !fileExists(absolutePath) && fileExists(absolutePath + ".tmp") ?
                 absolutePath + ".tmp" :
                 absolutePath;
         return Files.readString(Path.of(newPath));
@@ -115,19 +100,6 @@ public class FilesHandler {
             lastSlashIndex = absolutePath.lastIndexOf("/", lastSlashIndex - 1);
 
         return absolutePath.substring(0, lastSlashIndex + 1);
-    }
-
-    private static int getChmodValue(boolean isReadable, boolean isWriteable, boolean isExecutable) {
-        int chmodValue = 0;
-
-        if (isReadable)
-            chmodValue += 4;
-        if (isWriteable)
-            chmodValue += 2;
-        if (isExecutable)
-            chmodValue += 1;
-
-        return chmodValue * 111;
     }
 
     private static String extractFileNameFromAbsolutePath(String absolutePath) {

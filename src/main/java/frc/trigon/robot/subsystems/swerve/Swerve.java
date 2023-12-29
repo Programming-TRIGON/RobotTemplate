@@ -65,6 +65,28 @@ public class Swerve extends MotorSubsystem {
         return constants;
     }
 
+    public SwerveModulePosition[] getModulePositions() {
+        final SwerveModulePosition[] swerveModulePositions = new SwerveModulePosition[modulesIO.length];
+
+        for (int i = 0; i < modulesIO.length; i++)
+            swerveModulePositions[i] = modulesIO[i].getCurrentPosition();
+
+        return swerveModulePositions;
+    }
+
+    public Rotation2d getHeading() {
+        final double inputtedHeading = MathUtil.inputModulus(swerveInputs.gyroYawDegrees, -180, 180);
+        return Rotation2d.fromDegrees(inputtedHeading);
+    }
+
+    public void setHeading(Rotation2d heading) {
+        swerveIO.setHeading(heading);
+    }
+
+    public ChassisSpeeds getSelfRelativeVelocity() {
+        return constants.getKinematics().toChassisSpeeds(getModuleStates());
+    }
+
     public double getGyroZAcceleration() {
         return swerveInputs.accelerationZ;
     }
@@ -77,21 +99,6 @@ public class Swerve extends MotorSubsystem {
         return swerveInputs.accelerationX;
     }
 
-    public Rotation2d getHeading() {
-        final double heading = swerveInputs.gyroYawDegrees;
-        final double inputtedHeading = MathUtil.inputModulus(heading, -180, 180);
-
-        return Rotation2d.fromDegrees(inputtedHeading);
-    }
-
-    public ChassisSpeeds getSelfRelativeVelocity() {
-        return constants.getKinematics().toChassisSpeeds(getModuleStates());
-    }
-
-    public void setHeading(Rotation2d heading) {
-        swerveIO.setHeading(heading);
-    }
-
     public Rotation2d getPitch() {
         return Rotation2d.fromDegrees(swerveInputs.gyroPitchDegrees);
     }
@@ -100,21 +107,12 @@ public class Swerve extends MotorSubsystem {
         return Rotation2d.fromDegrees(swerveInputs.gyroRollDegrees);
     }
 
-    public Rotation2d getPitchVelocity() {
-        return Rotation2d.fromDegrees(swerveInputs.gyroPitchVelocity);
+    public double getPitchVelocityDegreesPerSecond() {
+        return swerveInputs.gyroPitchVelocity;
     }
 
-    public Rotation2d getRollVelocity() {
-        return Rotation2d.fromDegrees(swerveInputs.gyroRollVelocity);
-    }
-
-    public SwerveModulePosition[] getModulePositions() {
-        final SwerveModulePosition[] swerveModulePositions = new SwerveModulePosition[modulesIO.length];
-
-        for (int i = 0; i < modulesIO.length; i++)
-            swerveModulePositions[i] = modulesIO[i].getCurrentPosition();
-
-        return swerveModulePositions;
+    public double getRollVelocityDegreesPerSecond() {
+        return swerveInputs.gyroRollVelocity;
     }
 
     public boolean atPose(Pose2d pose2d) {
@@ -136,11 +134,6 @@ public class Swerve extends MotorSubsystem {
                 Math.abs(getSelfRelativeVelocity().omegaRadiansPerSecond) < SwerveConstants.ROTATION_VELOCITY_TOLERANCE;
     }
 
-    void initializeDrive(boolean closedLoop) {
-        setClosedLoop(closedLoop);
-        resetRotationController();
-    }
-
     /**
      * Locks the swerve, so it'll be hard to move it. This will make the modules look in the middle of a robot in an "x" shape.
      */
@@ -153,6 +146,11 @@ public class Swerve extends MotorSubsystem {
         modulesIO[1].setTargetState(right);
         modulesIO[2].setTargetState(right);
         modulesIO[3].setTargetState(left);
+    }
+
+    void initializeDrive(boolean closedLoop) {
+        setClosedLoop(closedLoop);
+        resetRotationController();
     }
 
     void resetRotationController() {
@@ -276,9 +274,8 @@ public class Swerve extends MotorSubsystem {
     }
 
     private double calculateProfiledAngleSpeedToTargetAngle(Rotation2d targetAngle) {
-        constants.getProfiledRotationController().setGoal(targetAngle.getDegrees());
         final Rotation2d currentAngle = RobotContainer.POSE_ESTIMATOR.getCurrentPose().toCurrentAlliancePose().getRotation();
-        return Units.degreesToRadians(constants.getProfiledRotationController().calculate(currentAngle.getDegrees()));
+        return Units.degreesToRadians(constants.getProfiledRotationController().calculate(currentAngle.getDegrees(), targetAngle.getDegrees()));
     }
 
     private ChassisSpeeds selfRelativeSpeedsFromFieldRelativePowers(double xPower, double yPower, double thetaPower) {

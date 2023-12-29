@@ -25,7 +25,7 @@ public class T265IO extends RobotPoseSourceIO {
 
     private Pose3d getCameraPose() {
         if (!canUseJsonDump())
-            return new Pose3d();
+            return null;
 
         return getRobotPoseFromJsonDump();
     }
