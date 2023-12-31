@@ -5,7 +5,7 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
-import org.photonvision.PhotonPoseEstimator;
+import frc.trigon.robot.poseestimation.photonposeestimator.PhotonPoseEstimator;
 
 import java.util.HashMap;
 import java.util.function.BiFunction;
@@ -14,7 +14,7 @@ public class PoseSourceConstants {
     public static final HashMap<Integer, Pose3d> TAG_ID_TO_POSE = new HashMap<>();
     static final PhotonPoseEstimator.PoseStrategy
             PRIMARY_POSE_STRATEGY = PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
-            SECONDARY_POSE_STRATEGY = PhotonPoseEstimator.PoseStrategy.LOWEST_AMBIGUITY;
+            SECONDARY_POSE_STRATEGY = PhotonPoseEstimator.PoseStrategy.CLOSEST_TO_HEADING;
     static AprilTagFieldLayout APRIL_TAG_FIELD_LAYOUT = AprilTagFields.k2023ChargedUp.loadAprilTagLayoutField();
 
     static {

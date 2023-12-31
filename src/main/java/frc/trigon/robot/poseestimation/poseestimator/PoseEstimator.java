@@ -55,6 +55,7 @@ public class PoseEstimator implements AutoCloseable {
         putAprilTagsOnFieldWidget();
         configureFieldAllianceUpdateTrigger();
         periodicNotifier.startPeriodic(PoseEstimatorConstants.POSE_ESTIMATOR_UPDATE_RATE);
+        SmartDashboard.putData("Field", field);
     }
 
     @Override
@@ -86,7 +87,6 @@ public class PoseEstimator implements AutoCloseable {
         updatePoseEstimator();
         robotPose = AllianceUtilities.AlliancePose2d.fromBlueAlliancePose(swerveDrivePoseEstimator.getEstimatedPosition());
         Logger.recordOutput("Poses/Robot/RobotPose", robotPose.toCurrentAlliancePose());
-        SmartDashboard.putData("field", field);
     }
 
     private void resetPoseEstimator(Pose2d currentPose) {

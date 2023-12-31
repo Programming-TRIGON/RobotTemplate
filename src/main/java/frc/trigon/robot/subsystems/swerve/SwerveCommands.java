@@ -2,23 +2,24 @@ package frc.trigon.robot.subsystems.swerve;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathConstraints;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import frc.trigon.robot.utilities.AllianceUtilities;
 import frc.trigon.robot.utilities.InitExecuteCommand;
 
-import java.util.Set;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 public class SwerveCommands {
     private static final Swerve SWERVE = Swerve.getInstance();
 
-    public static Command getDriveToPoseCommand(PathConstraints constraints, Pose2d targetPose) {
-        return new InstantCommand(() -> SWERVE.initializeDrive(true))
-                .andThen(new DeferredCommand(() -> AutoBuilder.pathfindToPose(targetPose, constraints), Set.of(SWERVE)));
+    public static Command getDriveToPoseCommand(AllianceUtilities.AlliancePose2d targetPose, PathConstraints constraints) {
+        return new SequentialCommandGroup(
+                new InstantCommand(() -> SWERVE.initializeDrive(true)),
+                AutoBuilder.pathfindToPose(targetPose.toCurrentAlliancePose(), constraints)
+        );
     }
 
     /**

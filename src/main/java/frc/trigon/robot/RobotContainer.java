@@ -21,7 +21,7 @@ public class RobotContainer {
 
     public RobotContainer() {
         configureBindings();
-        Commands.getDelayedCommand(3, this::buildAutoChooser).schedule();
+        buildAutoChooser();
     }
 
     /**

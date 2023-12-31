@@ -1,11 +1,10 @@
 package frc.trigon.robot.poseestimation.robotposesources;
 
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
-import org.photonvision.EstimatedRobotPose;
+import frc.trigon.robot.poseestimation.photonposeestimator.EstimatedRobotPose;
+import frc.trigon.robot.poseestimation.photonposeestimator.PhotonPoseEstimator;
 import org.photonvision.PhotonCamera;
-import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
@@ -27,8 +26,6 @@ public class AprilTagPhotonCameraIO extends RobotPoseSourceIO {
         );
 
         photonPoseEstimator.setMultiTagFallbackStrategy(PoseSourceConstants.SECONDARY_POSE_STRATEGY);
-        if (PoseSourceConstants.SECONDARY_POSE_STRATEGY == PhotonPoseEstimator.PoseStrategy.CLOSEST_TO_REFERENCE_POSE)
-            photonPoseEstimator.setReferencePose(new Pose3d());
     }
 
     @Override

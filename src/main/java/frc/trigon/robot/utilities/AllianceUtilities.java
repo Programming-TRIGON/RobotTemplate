@@ -2,6 +2,7 @@ package frc.trigon.robot.utilities;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.trigon.robot.constants.FieldConstants;
 
@@ -43,16 +44,44 @@ public class AllianceUtilities {
             this.blueAlliancePose = blueAlliancePose;
         }
 
+        public AlliancePose2d() {
+            this.blueAlliancePose = new Pose2d();
+        }
+
         public static AlliancePose2d fromBlueAlliancePose(Pose2d blueAlliancePose) {
             return new AlliancePose2d(blueAlliancePose);
+        }
+
+        public static AlliancePose2d fromBlueAlliancePose(Translation2d translation, Rotation2d rotation) {
+            return fromBlueAlliancePose(new Pose2d(translation, rotation));
+        }
+
+        public static AlliancePose2d fromBlueAlliancePose(double x, double y, Rotation2d rotation) {
+            return fromBlueAlliancePose(new Pose2d(x, y, rotation));
         }
 
         public static AlliancePose2d fromRedAlliancePose(Pose2d redAlliancePose) {
             return new AlliancePose2d(switchAlliance(redAlliancePose));
         }
 
+        public static AlliancePose2d fromRedAlliancePose(Translation2d translation, Rotation2d rotation) {
+            return fromRedAlliancePose(new Pose2d(translation, rotation));
+        }
+
+        public static AlliancePose2d fromRedAlliancePose(double x, double y, Rotation2d rotation) {
+            return fromRedAlliancePose(new Pose2d(x, y, rotation));
+        }
+
         public static AlliancePose2d fromCurrentAlliancePose(Pose2d currentAlliancePose) {
             return new AlliancePose2d(toAlliancePose(currentAlliancePose));
+        }
+
+        public static AlliancePose2d fromCurrentAlliancePose(Translation2d translation, Rotation2d rotation) {
+            return fromCurrentAlliancePose(new Pose2d(translation, rotation));
+        }
+
+        public static AlliancePose2d fromCurrentAlliancePose(double x, double y, Rotation2d rotation) {
+            return fromCurrentAlliancePose(new Pose2d(x, y, rotation));
         }
 
         public Pose2d toBlueAlliancePose() {

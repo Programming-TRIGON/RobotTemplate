@@ -185,7 +185,6 @@ public class TrihardSwerveModuleConstants {
     }
 
     private void setSteerMotorPositionToAbsolute() {
-        // TODO: Check if this works properly
         final double offsettedRevolutions = Conversions.offsetRead(steerEncoder.getAbsolutePosition(), encoderOffset);
         steerMotor.setPosition(offsettedRevolutions);
     }
