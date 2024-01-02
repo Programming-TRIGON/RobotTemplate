@@ -14,7 +14,6 @@ public class SimulationSwerveModuleIO extends SwerveModuleIO {
     private final DCMotorSim driveMotor, steerMotor;
     private final PIDController steerPIDController;
     private double driveAppliedVoltage;
-    private SwerveModuleInputsAutoLogged lastInputs = new SwerveModuleInputsAutoLogged();
 
     SimulationSwerveModuleIO(SimulationSwerveModuleConstants moduleConstants, String moduleName) {
         super(moduleName);
@@ -26,7 +25,7 @@ public class SimulationSwerveModuleIO extends SwerveModuleIO {
                 SimulationSwerveModuleConstants.STEER_MOTOR_I,
                 SimulationSwerveModuleConstants.STEER_MOTOR_D
         );
-        steerPIDController.enableContinuousInput(-180, 180);
+        steerPIDController.enableContinuousInput(-0.5, 0.5);
     }
 
     @Override
@@ -39,8 +38,6 @@ public class SimulationSwerveModuleIO extends SwerveModuleIO {
         inputs.driveDistanceMeters = Conversions.revolutionsToDistance(driveMotor.getAngularPositionRotations(), SimulationSwerveModuleConstants.WHEEL_DIAMETER_METERS);
         inputs.driveVelocityMetersPerSecond = Conversions.revolutionsToDistance(Units.radiansToRotations(driveMotor.getAngularVelocityRadPerSec()), SimulationSwerveModuleConstants.WHEEL_DIAMETER_METERS);
         inputs.driveCurrent = driveMotor.getCurrentDrawAmps();
-
-        lastInputs = inputs;
     }
 
     @Override
@@ -58,8 +55,8 @@ public class SimulationSwerveModuleIO extends SwerveModuleIO {
     @Override
     protected void setTargetAngle(Rotation2d angle) {
         final double pidOutput = steerPIDController.calculate(
-                lastInputs.steerAngleDegrees,
-                angle.getDegrees()
+                steerMotor.getAngularPositionRotations(),
+                angle.getRotations()
         );
 
         setSteerVoltage(pidOutput);

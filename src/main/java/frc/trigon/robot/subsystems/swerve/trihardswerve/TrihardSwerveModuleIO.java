@@ -33,7 +33,7 @@ public class TrihardSwerveModuleIO extends SwerveModuleIO {
     protected void updateInputs(SwerveModuleInputsAutoLogged inputs) {
         inputs.steerAngleDegrees = getAngleDegrees();
 
-        inputs.driveDistanceMeters = getDriveDistance(Rotation2d.fromDegrees(inputs.steerAngleDegrees));;
+        inputs.driveDistanceMeters = getDriveDistance(Rotation2d.fromDegrees(inputs.steerAngleDegrees));
         inputs.driveVelocityMetersPerSecond = Conversions.revolutionsToDistance(moduleConstants.driveVelocitySignal.getValue(), TrihardSwerveModuleConstants.WHEEL_DIAMETER_METERS);
         inputs.driveCurrent = moduleConstants.driveStatorCurrentSignal.refresh().getValue();
     }

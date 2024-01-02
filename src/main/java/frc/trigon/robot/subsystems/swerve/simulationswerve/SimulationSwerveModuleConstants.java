@@ -15,7 +15,7 @@ public class SimulationSwerveModuleConstants {
             DRIVE_MOMENT_OF_INERTIA = 0.003,
             STEER_MOMENT_OF_INERTIA = 0.003;
     static final double
-            STEER_MOTOR_P = 0.2,
+            STEER_MOTOR_P = 0.2 * 360,
             STEER_MOTOR_I = 0,
             STEER_MOTOR_D = 0;
     private static final DCMotor
@@ -34,9 +34,9 @@ public class SimulationSwerveModuleConstants {
 
     static final SimulationSwerveModuleConstants
             FRONT_LEFT_SWERVE_MODULE_CONSTANTS = new SimulationSwerveModuleConstants(
-                    FRONT_LEFT_DRIVE_MOTOR,
-                    FRONT_LEFT_STEER_MOTOR
-            ),
+            FRONT_LEFT_DRIVE_MOTOR,
+            FRONT_LEFT_STEER_MOTOR
+    ),
             FRONT_RIGHT_SWERVE_MODULE_CONSTANTS = new SimulationSwerveModuleConstants(
                     FRONT_RIGHT_DRIVE_MOTOR,
                     FRONT_RIGHT_STEER_MOTOR

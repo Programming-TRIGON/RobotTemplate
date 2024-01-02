@@ -14,7 +14,7 @@ public class TrihardSwerveModuleConstants {
     static final double VOLTAGE_COMPENSATION_SATURATION = 12;
     static final boolean ENABLE_FOC = true;
     static final double
-            DRIVE_GEAR_RATIO = 8.14,
+            DRIVE_GEAR_RATIO = 10.867,
             STEER_GEAR_RATIO = 12.8,
             COUPLING_RATIO = 0.048;
     static final double WHEEL_DIAMETER_METERS = 0.1016;
@@ -86,11 +86,11 @@ public class TrihardSwerveModuleConstants {
 
     static final TrihardSwerveModuleConstants
             FRONT_LEFT_SWERVE_MODULE_CONSTANTS = new TrihardSwerveModuleConstants(
-                    FRONT_LEFT_DRIVE_MOTOR,
-                    FRONT_LEFT_STEER_MOTOR,
-                    FRONT_LEFT_ENCODER,
-                    FRONT_LEFT_ENCODER_OFFSET
-            ),
+            FRONT_LEFT_DRIVE_MOTOR,
+            FRONT_LEFT_STEER_MOTOR,
+            FRONT_LEFT_ENCODER,
+            FRONT_LEFT_ENCODER_OFFSET
+    ),
             FRONT_RIGHT_SWERVE_MODULE_CONSTANTS = new TrihardSwerveModuleConstants(
                     FRONT_RIGHT_DRIVE_MOTOR,
                     FRONT_RIGHT_STEER_MOTOR,

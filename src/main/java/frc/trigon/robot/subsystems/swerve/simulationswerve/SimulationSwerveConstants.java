@@ -3,6 +3,7 @@ package frc.trigon.robot.subsystems.swerve.simulationswerve;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -34,8 +35,9 @@ public class SimulationSwerveConstants extends SwerveConstants {
     };
 
     private static final PIDConstants
-            TRANSLATION_PID_CONSTANTS = new PIDConstants(20, 0, 0),
-            ROTATION_PID_CONSTANTS = new PIDConstants(12, 0, 0),
+            PROFILED_ROTATION_PID_CONSTANTS = new PIDConstants(12, 0, 0),
+            TRANSLATION_PID_CONSTANTS = new PIDConstants(5, 0, 0),
+            AUTO_TRANSLATION_PID_CONSTANTS = new PIDConstants(20, 0, 0),
             AUTO_ROTATION_PID_CONSTANTS = new PIDConstants(6, 0, 0);
     private static final double
             MAX_ROTATION_VELOCITY = 720,
@@ -44,17 +46,22 @@ public class SimulationSwerveConstants extends SwerveConstants {
             MAX_ROTATION_VELOCITY,
             MAX_ROTATION_ACCELERATION
     );
-    private static final ProfiledPIDController PROFILED_PID_CONTROLLER = new ProfiledPIDController(
-            ROTATION_PID_CONSTANTS.kP,
-            ROTATION_PID_CONSTANTS.kI,
-            ROTATION_PID_CONSTANTS.kD,
+    private static final ProfiledPIDController PROFILED_ROTATION_PID_CONTROLLER = new ProfiledPIDController(
+            PROFILED_ROTATION_PID_CONSTANTS.kP,
+            PROFILED_ROTATION_PID_CONSTANTS.kI,
+            PROFILED_ROTATION_PID_CONSTANTS.kD,
             ROTATION_CONSTRAINTS
+    );
+    private static final PIDController TRANSLATION_PID_CONTROLLER = new PIDController(
+            TRANSLATION_PID_CONSTANTS.kP,
+            TRANSLATION_PID_CONSTANTS.kI,
+            TRANSLATION_PID_CONSTANTS.kD
     );
 
     private static final double DRIVE_RADIUS_METERS = Math.hypot(MODULE_XY_DISTANCE_FROM_CENTER_OF_BASE, MODULE_XY_DISTANCE_FROM_CENTER_OF_BASE);
     private static final ReplanningConfig REPLANNING_CONFIG = new ReplanningConfig(true, true);
     private static final HolonomicPathFollowerConfig HOLONOMIC_PATH_FOLLOWER_CONFIG = new HolonomicPathFollowerConfig(
-            TRANSLATION_PID_CONSTANTS,
+            AUTO_TRANSLATION_PID_CONSTANTS,
             AUTO_ROTATION_PID_CONSTANTS,
             MAX_SPEED_METERS_PER_SECOND,
             DRIVE_RADIUS_METERS,
@@ -62,8 +69,7 @@ public class SimulationSwerveConstants extends SwerveConstants {
     );
 
     static {
-        PROFILED_PID_CONTROLLER.enableContinuousInput(-180, 180);
-        PROFILED_PID_CONTROLLER.setIntegratorRange(-30, 30);
+        PROFILED_ROTATION_PID_CONTROLLER.enableContinuousInput(-0.5, 0.5);
     }
 
     @Override
@@ -93,11 +99,16 @@ public class SimulationSwerveConstants extends SwerveConstants {
 
     @Override
     protected ProfiledPIDController getProfiledRotationController() {
-        return PROFILED_PID_CONTROLLER;
+        return PROFILED_ROTATION_PID_CONTROLLER;
     }
 
     @Override
     protected double getRobotSideLength() {
         return MODULE_FROM_MODULE_DISTANCE;
+    }
+
+    @Override
+    protected PIDController getTranslationsController() {
+        return TRANSLATION_PID_CONTROLLER;
     }
 }

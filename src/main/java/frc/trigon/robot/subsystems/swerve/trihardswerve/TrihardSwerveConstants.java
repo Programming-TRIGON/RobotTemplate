@@ -6,6 +6,7 @@ import com.ctre.phoenix6.hardware.Pigeon2;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -41,9 +42,10 @@ public class TrihardSwerveConstants extends SwerveConstants {
     };
 
     private static final PIDConstants
-            TRANSLATION_PID_CONSTANTS = new PIDConstants(3, 0, 0),
-            ROTATION_PID_CONSTANTS = new PIDConstants(5, 0, 0),
-            AUTO_ROTATION_PID_CONSTANTS = new PIDConstants(3, 0.0008, 0.5);
+            TRANSLATION_PID_CONSTANTS = new PIDConstants(5, 0, 0),
+            PROFILED_ROTATION_PID_CONSTANTS = new PIDConstants(5, 0, 0),
+            AUTO_TRANSLATION_PID_CONSTANTS = new PIDConstants(5, 0, 0),
+            AUTO_ROTATION_PID_CONSTANTS = new PIDConstants(3, 0, 0);
     private static final double
             MAX_ROTATION_VELOCITY = 720,
             MAX_ROTATION_ACCELERATION = 720;
@@ -51,11 +53,16 @@ public class TrihardSwerveConstants extends SwerveConstants {
             MAX_ROTATION_VELOCITY,
             MAX_ROTATION_ACCELERATION
     );
-    private static final ProfiledPIDController PROFILED_PID_CONTROLLER = new ProfiledPIDController(
-            ROTATION_PID_CONSTANTS.kP,
-            ROTATION_PID_CONSTANTS.kI,
-            ROTATION_PID_CONSTANTS.kD,
+    private static final ProfiledPIDController PROFILED_ROTATION_PID_CONTROLLER = new ProfiledPIDController(
+            PROFILED_ROTATION_PID_CONSTANTS.kP,
+            PROFILED_ROTATION_PID_CONSTANTS.kI,
+            PROFILED_ROTATION_PID_CONSTANTS.kD,
             ROTATION_CONSTRAINTS
+    );
+    private static final PIDController TRANSLATION_PID_CONTROLLER = new PIDController(
+            TRANSLATION_PID_CONSTANTS.kP,
+            TRANSLATION_PID_CONSTANTS.kI,
+            TRANSLATION_PID_CONSTANTS.kD
     );
 
     private static final int PIGEON_ID = 0;
@@ -71,7 +78,7 @@ public class TrihardSwerveConstants extends SwerveConstants {
     );
     private static final ReplanningConfig REPLANNING_CONFIG = new ReplanningConfig(true, true);
     private static final HolonomicPathFollowerConfig HOLONOMIC_PATH_FOLLOWER_CONFIG = new HolonomicPathFollowerConfig(
-            TRANSLATION_PID_CONSTANTS,
+            AUTO_TRANSLATION_PID_CONSTANTS,
             AUTO_ROTATION_PID_CONSTANTS,
             MAX_SPEED_METERS_PER_SECOND,
             DRIVE_RADIUS_METERS,
@@ -86,8 +93,7 @@ public class TrihardSwerveConstants extends SwerveConstants {
             Z_ACCELERATION_SIGNAL = GYRO.getAccelerationZ().clone();
 
     static {
-        PROFILED_PID_CONTROLLER.enableContinuousInput(-180, 180);
-        PROFILED_PID_CONTROLLER.setIntegratorRange(-30, 30);
+        PROFILED_ROTATION_PID_CONTROLLER.enableContinuousInput(-0.5, 0.5);
 
         if (!RobotConstants.IS_REPLAY)
             configureGyro();
@@ -137,11 +143,16 @@ public class TrihardSwerveConstants extends SwerveConstants {
 
     @Override
     protected ProfiledPIDController getProfiledRotationController() {
-        return PROFILED_PID_CONTROLLER;
+        return PROFILED_ROTATION_PID_CONTROLLER;
     }
 
     @Override
     protected double getRobotSideLength() {
         return MODULE_FROM_MODULE_DISTANCE;
+    }
+
+    @Override
+    protected PIDController getTranslationsController() {
+        return TRANSLATION_PID_CONTROLLER;
     }
 }

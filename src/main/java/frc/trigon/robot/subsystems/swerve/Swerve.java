@@ -115,8 +115,9 @@ public class Swerve extends MotorSubsystem {
         return swerveInputs.gyroRollVelocity;
     }
 
-    public boolean atPose(Pose2d pose2d) {
-        return atXAxisPosition(pose2d.getX()) && atYAxisPosition(pose2d.getY()) && atAngle(pose2d.getRotation());
+    public boolean atPose(AllianceUtilities.AlliancePose2d pose2d) {
+        final Pose2d alliancePose = pose2d.toCurrentAlliancePose();
+        return atXAxisPosition(alliancePose.getX()) && atYAxisPosition(alliancePose.getY()) && atAngle(alliancePose.getRotation());
     }
 
     public boolean atXAxisPosition(double xAxisPosition) {
@@ -146,6 +147,17 @@ public class Swerve extends MotorSubsystem {
         modulesIO[1].setTargetState(right);
         modulesIO[2].setTargetState(right);
         modulesIO[3].setTargetState(left);
+    }
+
+    void pidToPose(AllianceUtilities.AlliancePose2d targetPose) {
+        final Pose2d currentAlliancePose = RobotContainer.POSE_ESTIMATOR.getCurrentPose().toCurrentAlliancePose();
+        final Pose2d targetAlliancePose = targetPose.toCurrentAlliancePose();
+        final ChassisSpeeds targetFieldRelativeSpeeds = new ChassisSpeeds(
+                constants.getTranslationsController().calculate(currentAlliancePose.getX(), targetAlliancePose.getX()),
+                constants.getTranslationsController().calculate(currentAlliancePose.getY(), targetAlliancePose.getY()),
+                constants.getProfiledRotationController().calculate(currentAlliancePose.getRotation().getRotations(), targetAlliancePose.getRotation().getRotations())
+        );
+        selfRelativeDrive(ChassisSpeeds.fromFieldRelativeSpeeds(targetFieldRelativeSpeeds, currentAlliancePose.getRotation()));
     }
 
     void initializeDrive(boolean closedLoop) {
@@ -275,7 +287,7 @@ public class Swerve extends MotorSubsystem {
 
     private double calculateProfiledAngleSpeedToTargetAngle(Rotation2d targetAngle) {
         final Rotation2d currentAngle = RobotContainer.POSE_ESTIMATOR.getCurrentPose().toCurrentAlliancePose().getRotation();
-        return Units.degreesToRadians(constants.getProfiledRotationController().calculate(currentAngle.getDegrees(), targetAngle.getDegrees()));
+        return Units.degreesToRadians(constants.getProfiledRotationController().calculate(currentAngle.getRotations(), targetAngle.getRotations()));
     }
 
     private ChassisSpeeds selfRelativeSpeedsFromFieldRelativePowers(double xPower, double yPower, double thetaPower) {

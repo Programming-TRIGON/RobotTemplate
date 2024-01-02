@@ -1,6 +1,7 @@
 package frc.trigon.robot.subsystems.swerve;
 
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import frc.trigon.robot.constants.RobotConstants;
@@ -33,6 +34,8 @@ public abstract class SwerveConstants {
     protected abstract double getRobotSideLength();
 
     protected abstract ProfiledPIDController getProfiledRotationController();
+
+    protected abstract PIDController getTranslationsController();
 
     protected abstract SwerveModuleIO[] getModulesIO();
 

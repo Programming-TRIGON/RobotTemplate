@@ -5,6 +5,7 @@ import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.trigon.robot.utilities.AllianceUtilities;
 import frc.trigon.robot.utilities.InitExecuteCommand;
@@ -18,7 +19,8 @@ public class SwerveCommands {
     public static Command getDriveToPoseCommand(AllianceUtilities.AlliancePose2d targetPose, PathConstraints constraints) {
         return new SequentialCommandGroup(
                 new InstantCommand(() -> SWERVE.initializeDrive(true)),
-                AutoBuilder.pathfindToPose(targetPose.toCurrentAlliancePose(), constraints)
+                AutoBuilder.pathfindToPose(targetPose.toCurrentAlliancePose(), constraints),
+                getPIDToPoseCommand(targetPose)
         );
     }
 
@@ -118,5 +120,9 @@ public class SwerveCommands {
                 () -> SWERVE.selfRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), thetaSupplier.getAsDouble()),
                 SWERVE
         );
+    }
+
+    private static Command getPIDToPoseCommand(AllianceUtilities.AlliancePose2d targetPose) {
+        return new RunCommand(() -> SWERVE.pidToPose(targetPose)).until(() -> SWERVE.atPose(targetPose));
     }
 }
