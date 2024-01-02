@@ -39,13 +39,16 @@ public class AllianceUtilities {
 
     public static class AlliancePose2d {
         private final Pose2d blueAlliancePose;
+        private final Pose2d redAlliancePose;
+        private Pose2d currentAlliancePose = null;
 
         private AlliancePose2d(Pose2d blueAlliancePose) {
             this.blueAlliancePose = blueAlliancePose;
+            redAlliancePose = switchAlliance(blueAlliancePose);
         }
 
         public AlliancePose2d() {
-            this.blueAlliancePose = new Pose2d();
+            this(new Pose2d());
         }
 
         public static AlliancePose2d fromBlueAlliancePose(Pose2d blueAlliancePose) {
@@ -89,11 +92,13 @@ public class AllianceUtilities {
         }
 
         public Pose2d toRedAlliancePose() {
-            return switchAlliance(blueAlliancePose);
+            return redAlliancePose;
         }
 
         public Pose2d toCurrentAlliancePose() {
-            return toAlliancePose(blueAlliancePose);
+            if (currentAlliancePose == null)
+                currentAlliancePose = toAlliancePose(blueAlliancePose);
+            return currentAlliancePose;
         }
     }
 }
