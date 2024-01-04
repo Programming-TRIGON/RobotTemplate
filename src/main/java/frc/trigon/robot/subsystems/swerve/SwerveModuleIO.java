@@ -3,6 +3,7 @@ package frc.trigon.robot.subsystems.swerve;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import frc.trigon.robot.utilities.Conversions;
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
 
@@ -36,6 +37,26 @@ public class SwerveModuleIO {
 
     protected String getLoggingPath() {
         return "Swerve/" + name + "/";
+    }
+
+    protected double velocityToOpenLoopVoltage(double velocityMetersPerSecond, double wheelDiameterMeters, double steerVelocityRotationsPerSecond, double couplingRatio, double maxSpeedRevolutionsPerSecond, double voltageCompensationSaturation) {
+        final double velocityRevolutionsPerSecond = Conversions.distanceToRevolutions(velocityMetersPerSecond, wheelDiameterMeters);
+        final double optimizedVelocityRevolutionsPerSecond = removeCouplingFromRevolutions(velocityRevolutionsPerSecond, Rotation2d.fromDegrees(steerVelocityRotationsPerSecond), couplingRatio);
+        final double power = optimizedVelocityRevolutionsPerSecond / maxSpeedRevolutionsPerSecond;
+        return Conversions.compensatedPowerToVoltage(power, voltageCompensationSaturation);
+    }
+
+    /**
+     * When the steer motor moves, the drive motor moves as well due to the coupling.
+     * This will affect the current position of the drive motor, so we need to remove the coupling from the position.
+     *
+     * @param drivePosition the position in revolutions
+     * @param moduleAngle   the angle of the module
+     * @return the distance without the coupling
+     */
+    protected double removeCouplingFromRevolutions(double drivePosition, Rotation2d moduleAngle, double couplingRatio) {
+        final double coupledAngle = moduleAngle.getRotations() * couplingRatio;
+        return drivePosition - coupledAngle;
     }
 
     SwerveModulePosition getCurrentPosition() {

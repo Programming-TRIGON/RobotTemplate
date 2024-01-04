@@ -2,14 +2,16 @@ package frc.trigon.robot.subsystems.swerve.simulationswerve;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+import frc.trigon.robot.utilities.Conversions;
 
 public class SimulationSwerveModuleConstants {
-    static final double MAX_MOTOR_VOLTAGE = 12;
+    static final double WHEEL_DIAMETER_METERS = 0.1016;
+    static final double MAX_SPEED_REVOLUTIONS_PER_SECOND = Conversions.distanceToRevolutions(SimulationSwerveConstants.MAX_SPEED_METERS_PER_SECOND, WHEEL_DIAMETER_METERS);
+    static final double VOLTAGE_COMPENSATION_SATURATION = 12;
 
     static final double
             DRIVE_GEAR_RATIO = 8.14,
             STEER_GEAR_RATIO = 12.8;
-    static final double WHEEL_DIAMETER_METERS = 0.1016;
 
     private static final double
             DRIVE_MOMENT_OF_INERTIA = 0.003,

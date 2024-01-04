@@ -1,4 +1,4 @@
-package frc.trigon.robot.subsystems.swerve.trihardswerve;
+package frc.trigon.robot.subsystems.swerve.placeholderswere;
 
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
@@ -17,7 +17,8 @@ import frc.trigon.robot.constants.RobotConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveModuleIO;
 
-public class TrihardSwerveConstants extends SwerveConstants {
+public class PLACEHOLDERSwerveConstants extends SwerveConstants {
+    // TODO: Calibrate values
     static final double
             MAX_SPEED_METERS_PER_SECOND = 4.25,
             MAX_ROTATIONAL_SPEED_RADIANS_PER_SECOND = 12.03;
@@ -33,11 +34,11 @@ public class TrihardSwerveConstants extends SwerveConstants {
     };
     private static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(LOCATIONS);
 
-    private static final TrihardSwerveModuleIO[] MODULES_IO = {
-            new TrihardSwerveModuleIO(TrihardSwerveModuleConstants.FRONT_LEFT_SWERVE_MODULE_CONSTANTS, "FrontLeft"),
-            new TrihardSwerveModuleIO(TrihardSwerveModuleConstants.FRONT_RIGHT_SWERVE_MODULE_CONSTANTS, "FrontRight"),
-            new TrihardSwerveModuleIO(TrihardSwerveModuleConstants.REAR_LEFT_SWERVE_MODULE_CONSTANTS, "RearLeft"),
-            new TrihardSwerveModuleIO(TrihardSwerveModuleConstants.REAR_RIGHT_SWERVE_MODULE_CONSTANTS, "RearRight")
+    private static final PLACEHOLDERSwerveModuleIO[] MODULES_IO = {
+            new PLACEHOLDERSwerveModuleIO(PLACEHOLDERSwerveModuleConstants.FRONT_LEFT_SWERVE_MODULE_CONSTANTS, "FrontLeft"),
+            new PLACEHOLDERSwerveModuleIO(PLACEHOLDERSwerveModuleConstants.FRONT_RIGHT_SWERVE_MODULE_CONSTANTS, "FrontRight"),
+            new PLACEHOLDERSwerveModuleIO(PLACEHOLDERSwerveModuleConstants.REAR_LEFT_SWERVE_MODULE_CONSTANTS, "RearLeft"),
+            new PLACEHOLDERSwerveModuleIO(PLACEHOLDERSwerveModuleConstants.REAR_RIGHT_SWERVE_MODULE_CONSTANTS, "RearRight")
     };
 
     private static final PIDConstants
@@ -66,11 +67,11 @@ public class TrihardSwerveConstants extends SwerveConstants {
 
     private static final int PIGEON_ID = 0;
     private static final Rotation3d GYRO_MOUNT_POSITION = new Rotation3d(
-            Units.degreesToRadians(-0.796127),
-            Units.degreesToRadians(-0.95211),
-            Units.degreesToRadians(90.0146)
+            Units.degreesToRadians(0),
+            Units.degreesToRadians(0),
+            Units.degreesToRadians(0)
     );
-    static final Pigeon2 GYRO = new Pigeon2(PIGEON_ID);
+    static final Pigeon2 GYRO = new Pigeon2(PIGEON_ID, RobotConstants.CANIVORE_NAME);
 
     private static final double DRIVE_RADIUS_METERS = Math.hypot(
             MODULE_XY_DISTANCE_FROM_CENTER_OF_BASE, MODULE_XY_DISTANCE_FROM_CENTER_OF_BASE

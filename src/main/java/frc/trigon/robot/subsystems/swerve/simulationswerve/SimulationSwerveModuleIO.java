@@ -42,8 +42,14 @@ public class SimulationSwerveModuleIO extends SwerveModuleIO {
 
     @Override
     protected void setTargetOpenLoopVelocity(double targetVelocityMetersPerSecond) {
-        final double power = targetVelocityMetersPerSecond / SimulationSwerveConstants.MAX_SPEED_METERS_PER_SECOND;
-        final double voltage = power * SimulationSwerveModuleConstants.MAX_MOTOR_VOLTAGE;
+        final double voltage = velocityToOpenLoopVoltage(
+                targetVelocityMetersPerSecond,
+                SimulationSwerveModuleConstants.WHEEL_DIAMETER_METERS,
+                driveMotor.getAngularVelocityRadPerSec(),
+                SimulationSwerveModuleConstants.DRIVE_GEAR_RATIO,
+                SimulationSwerveModuleConstants.MAX_SPEED_REVOLUTIONS_PER_SECOND,
+                SimulationSwerveModuleConstants.VOLTAGE_COMPENSATION_SATURATION
+        );
         setDriveVoltage(voltage);
     }
 
@@ -80,8 +86,8 @@ public class SimulationSwerveModuleIO extends SwerveModuleIO {
     private double voltageToMaxedVoltage(double voltage) {
         return MathUtil.clamp(
                 voltage,
-                -SimulationSwerveModuleConstants.MAX_MOTOR_VOLTAGE,
-                SimulationSwerveModuleConstants.MAX_MOTOR_VOLTAGE
+                -SimulationSwerveModuleConstants.VOLTAGE_COMPENSATION_SATURATION,
+                SimulationSwerveModuleConstants.VOLTAGE_COMPENSATION_SATURATION
         );
     }
 }
