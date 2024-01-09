@@ -59,8 +59,8 @@ public class CommandConstants {
     }
 
     private static AllianceUtilities.AlliancePose2d changeRotation(AllianceUtilities.AlliancePose2d pose2d, Rotation2d newRotation) {
-        return AllianceUtilities.AlliancePose2d.fromCurrentAlliancePose(
-                new Pose2d(pose2d.toCurrentAlliancePose().getTranslation(), newRotation)
+        return AllianceUtilities.AlliancePose2d.fromAlliancePose(
+                new Pose2d(pose2d.toAlliancePose().getTranslation(), newRotation)
         );
     }
 }

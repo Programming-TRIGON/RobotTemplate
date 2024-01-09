@@ -13,7 +13,7 @@ import frc.trigon.robot.subsystems.swerve.SwerveModuleIO;
 
 public class SimulationSwerveConstants extends SwerveConstants {
     static final double
-            MAX_SPEED_METERS_PER_SECOND = 6,
+            MAX_SPEED_METERS_PER_SECOND = 4,
             MAX_ROTATIONAL_SPEED_RADIANS_PER_SECOND = 12.03;
 
     private static final double
@@ -35,8 +35,8 @@ public class SimulationSwerveConstants extends SwerveConstants {
     };
 
     private static final PIDConstants
-            PROFILED_ROTATION_PID_CONSTANTS = new PIDConstants(12, 0, 0),
             TRANSLATION_PID_CONSTANTS = new PIDConstants(5, 0, 0),
+            PROFILED_ROTATION_PID_CONSTANTS = new PIDConstants(12, 0, 0),
             AUTO_TRANSLATION_PID_CONSTANTS = new PIDConstants(20, 0, 0),
             AUTO_ROTATION_PID_CONSTANTS = new PIDConstants(6, 0, 0);
     private static final double
@@ -67,10 +67,6 @@ public class SimulationSwerveConstants extends SwerveConstants {
             DRIVE_RADIUS_METERS,
             REPLANNING_CONFIG
     );
-
-    static {
-        PROFILED_ROTATION_PID_CONTROLLER.enableContinuousInput(-0.5, 0.5);
-    }
 
     @Override
     public SwerveDriveKinematics getKinematics() {

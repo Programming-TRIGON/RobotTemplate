@@ -19,13 +19,13 @@ public class AprilTagPhotonCameraIO extends RobotPoseSourceIO {
         photonCamera = new PhotonCamera(cameraName);
 
         photonPoseEstimator = new PhotonPoseEstimator(
-                PoseSourceConstants.APRIL_TAG_FIELD_LAYOUT,
-                PoseSourceConstants.PRIMARY_POSE_STRATEGY,
+                RobotPoseSourceConstants.APRIL_TAG_FIELD_LAYOUT,
+                RobotPoseSourceConstants.PRIMARY_POSE_STRATEGY,
                 photonCamera,
                 robotCenterToCamera
         );
 
-        photonPoseEstimator.setMultiTagFallbackStrategy(PoseSourceConstants.SECONDARY_POSE_STRATEGY);
+        photonPoseEstimator.setMultiTagFallbackStrategy(RobotPoseSourceConstants.SECONDARY_POSE_STRATEGY);
     }
 
     @Override

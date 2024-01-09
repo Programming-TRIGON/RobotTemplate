@@ -1,7 +1,8 @@
 package frc.trigon.robot.subsystems.swerve.simulationswerve;
 
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+import frc.trigon.robot.motorsimulation.MotorSimulationConfiguration;
+import frc.trigon.robot.motorsimulation.SimpleMotorSimulation;
 import frc.trigon.robot.utilities.Conversions;
 
 public class SimulationSwerveModuleConstants {
@@ -17,22 +18,22 @@ public class SimulationSwerveModuleConstants {
             DRIVE_MOMENT_OF_INERTIA = 0.003,
             STEER_MOMENT_OF_INERTIA = 0.003;
     static final double
-            STEER_MOTOR_P = 0.2 * 360,
+            STEER_MOTOR_P = 72,
             STEER_MOTOR_I = 0,
             STEER_MOTOR_D = 0;
     private static final DCMotor
             DRIVE_MOTOR_GEARBOX = DCMotor.getFalcon500Foc(1),
             STEER_MOTOR_GEARBOX = DCMotor.getFalcon500Foc(1);
-    private static final DCMotorSim
-            FRONT_LEFT_DRIVE_MOTOR = new DCMotorSim(DRIVE_MOTOR_GEARBOX, DRIVE_GEAR_RATIO, DRIVE_MOMENT_OF_INERTIA),
-            FRONT_RIGHT_DRIVE_MOTOR = new DCMotorSim(DRIVE_MOTOR_GEARBOX, DRIVE_GEAR_RATIO, DRIVE_MOMENT_OF_INERTIA),
-            REAR_LEFT_DRIVE_MOTOR = new DCMotorSim(DRIVE_MOTOR_GEARBOX, DRIVE_GEAR_RATIO, DRIVE_MOMENT_OF_INERTIA),
-            REAR_RIGHT_DRIVE_MOTOR = new DCMotorSim(DRIVE_MOTOR_GEARBOX, DRIVE_GEAR_RATIO, DRIVE_MOMENT_OF_INERTIA);
-    private static final DCMotorSim
-            FRONT_LEFT_STEER_MOTOR = new DCMotorSim(STEER_MOTOR_GEARBOX, STEER_GEAR_RATIO, STEER_MOMENT_OF_INERTIA),
-            FRONT_RIGHT_STEER_MOTOR = new DCMotorSim(STEER_MOTOR_GEARBOX, STEER_GEAR_RATIO, STEER_MOMENT_OF_INERTIA),
-            REAR_LEFT_STEER_MOTOR = new DCMotorSim(STEER_MOTOR_GEARBOX, STEER_GEAR_RATIO, STEER_MOMENT_OF_INERTIA),
-            REAR_RIGHT_STEER_MOTOR = new DCMotorSim(STEER_MOTOR_GEARBOX, STEER_GEAR_RATIO, STEER_MOMENT_OF_INERTIA);
+    private static final SimpleMotorSimulation
+            FRONT_LEFT_DRIVE_MOTOR = new SimpleMotorSimulation(DRIVE_MOTOR_GEARBOX, DRIVE_GEAR_RATIO, DRIVE_MOMENT_OF_INERTIA),
+            FRONT_RIGHT_DRIVE_MOTOR = new SimpleMotorSimulation(DRIVE_MOTOR_GEARBOX, DRIVE_GEAR_RATIO, DRIVE_MOMENT_OF_INERTIA),
+            REAR_LEFT_DRIVE_MOTOR = new SimpleMotorSimulation(DRIVE_MOTOR_GEARBOX, DRIVE_GEAR_RATIO, DRIVE_MOMENT_OF_INERTIA),
+            REAR_RIGHT_DRIVE_MOTOR = new SimpleMotorSimulation(DRIVE_MOTOR_GEARBOX, DRIVE_GEAR_RATIO, DRIVE_MOMENT_OF_INERTIA);
+    private static final SimpleMotorSimulation
+            FRONT_LEFT_STEER_MOTOR = new SimpleMotorSimulation(STEER_MOTOR_GEARBOX, STEER_GEAR_RATIO, STEER_MOMENT_OF_INERTIA),
+            FRONT_RIGHT_STEER_MOTOR = new SimpleMotorSimulation(STEER_MOTOR_GEARBOX, STEER_GEAR_RATIO, STEER_MOMENT_OF_INERTIA),
+            REAR_LEFT_STEER_MOTOR = new SimpleMotorSimulation(STEER_MOTOR_GEARBOX, STEER_GEAR_RATIO, STEER_MOMENT_OF_INERTIA),
+            REAR_RIGHT_STEER_MOTOR = new SimpleMotorSimulation(STEER_MOTOR_GEARBOX, STEER_GEAR_RATIO, STEER_MOMENT_OF_INERTIA);
 
     static final SimulationSwerveModuleConstants
             FRONT_LEFT_SWERVE_MODULE_CONSTANTS = new SimulationSwerveModuleConstants(
@@ -52,10 +53,35 @@ public class SimulationSwerveModuleConstants {
                     REAR_RIGHT_STEER_MOTOR
             );
 
-    final DCMotorSim driveMotor, steerMotor;
+    final SimpleMotorSimulation driveMotor, steerMotor;
 
-    private SimulationSwerveModuleConstants(DCMotorSim driveMotor, DCMotorSim steerMotor) {
+    private SimulationSwerveModuleConstants(SimpleMotorSimulation driveMotor, SimpleMotorSimulation steerMotor) {
         this.driveMotor = driveMotor;
         this.steerMotor = steerMotor;
+
+        configureDriveMotor();
+        configureSteerMotor();
+    }
+
+    private void configureDriveMotor() {
+        final MotorSimulationConfiguration config = new MotorSimulationConfiguration();
+
+        config.conversionFactor = 1;
+        config.voltageCompensationSaturation = VOLTAGE_COMPENSATION_SATURATION;
+
+        driveMotor.applyConfiguration(config);
+    }
+
+    private void configureSteerMotor() {
+        final MotorSimulationConfiguration config = new MotorSimulationConfiguration();
+
+        config.pidConfigs.kP = STEER_MOTOR_P;
+        config.pidConfigs.kI = STEER_MOTOR_I;
+        config.pidConfigs.kD = STEER_MOTOR_D;
+        config.pidConfigs.enableContinuousInput = true;
+        config.voltageCompensationSaturation = VOLTAGE_COMPENSATION_SATURATION;
+        config.conversionFactor = 1;
+
+        steerMotor.applyConfiguration(config);
     }
 }

@@ -7,15 +7,11 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.trigon.robot.poseestimation.robotposesources.PoseSourceConstants;
 import frc.trigon.robot.poseestimation.robotposesources.RobotPoseSource;
+import frc.trigon.robot.poseestimation.robotposesources.RobotPoseSourceConstants;
 import frc.trigon.robot.subsystems.swerve.Swerve;
 import frc.trigon.robot.utilities.AllianceUtilities;
 import org.littletonrobotics.junction.Logger;
@@ -53,7 +49,6 @@ public class PoseEstimator implements AutoCloseable {
         );
 
         putAprilTagsOnFieldWidget();
-        configureFieldAllianceUpdateTrigger();
         periodicNotifier.startPeriodic(PoseEstimatorConstants.POSE_ESTIMATOR_UPDATE_RATE);
         SmartDashboard.putData("Field", field);
     }
@@ -86,7 +81,7 @@ public class PoseEstimator implements AutoCloseable {
     private void periodic() {
         updatePoseEstimator();
         robotPose = AllianceUtilities.AlliancePose2d.fromBlueAlliancePose(swerveDrivePoseEstimator.getEstimatedPosition());
-        Logger.recordOutput("Poses/Robot/RobotPose", robotPose.toCurrentAlliancePose());
+        Logger.recordOutput("Poses/Robot/RobotPose", robotPose.toBlueAlliancePose());
     }
 
     private void resetPoseEstimator(Pose2d currentPose) {
@@ -100,7 +95,7 @@ public class PoseEstimator implements AutoCloseable {
     private void updatePoseEstimator() {
         updatePoseEstimatorStates();
         attemptToUpdateWithRobotPoseSources();
-        field.setRobotPose(getCurrentPose().toCurrentAlliancePose());
+        field.setRobotPose(getCurrentPose().toBlueAlliancePose());
     }
 
     private void attemptToUpdateWithRobotPoseSources() {
@@ -116,7 +111,7 @@ public class PoseEstimator implements AutoCloseable {
         if (robotPose == null)
             return;
 
-        field.getObject(robotPoseSource.getName()).setPose(robotPose.toCurrentAlliancePose());
+        field.getObject(robotPoseSource.getName()).setPose(robotPose.toBlueAlliancePose());
         swerveDrivePoseEstimator.addVisionMeasurement(
                 robotPose.toBlueAlliancePose(),
                 robotPoseSource.getLastResultTimestamp(),
@@ -135,20 +130,12 @@ public class PoseEstimator implements AutoCloseable {
         swerveDrivePoseEstimator.update(swerve.getHeading(), swerve.getModulePositions());
     }
 
-    private void configureFieldAllianceUpdateTrigger() {
-        final Command putAprilTagsOnFieldWidgetCommand = new InstantCommand(this::putAprilTagsOnFieldWidget);
-        final Trigger isRedAllianceTrigger = new Trigger(() -> DriverStation.getAlliance().orElse(DriverStation.Alliance.Red).equals(DriverStation.Alliance.Red));
-
-        isRedAllianceTrigger.onTrue(putAprilTagsOnFieldWidgetCommand);
-        isRedAllianceTrigger.onFalse(putAprilTagsOnFieldWidgetCommand);
-    }
-
     private void putAprilTagsOnFieldWidget() {
-        final HashMap<Integer, Pose3d> tagsIdToPose = PoseSourceConstants.TAG_ID_TO_POSE;
+        final HashMap<Integer, Pose3d> tagsIdToPose = RobotPoseSourceConstants.TAG_ID_TO_POSE;
 
         for (Integer currentID : tagsIdToPose.keySet()) {
             final Pose2d tagPose = tagsIdToPose.get(currentID).toPose2d();
-            field.getObject("Tag " + currentID).setPose(AllianceUtilities.toAlliancePose(tagPose));
+            field.getObject("Tag " + currentID).setPose(tagPose);
         }
     }
 }

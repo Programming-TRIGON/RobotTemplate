@@ -12,8 +12,8 @@ import frc.trigon.robot.subsystems.swerve.trihardswerve.TrihardSwerveConstants;
 public abstract class SwerveConstants {
     static final int MAX_SAVED_PREVIOUS_LOOP_TIMESTAMPS = 10;
     static final double
-            TRANSLATION_TOLERANCE = 0.03,
-            ROTATION_TOLERANCE = 2,
+            TRANSLATION_TOLERANCE_METERS = 0.01,
+            ROTATION_TOLERANCE_DEGREES = 1,
             TRANSLATION_VELOCITY_TOLERANCE = 0.05,
             ROTATION_VELOCITY_TOLERANCE = 0.05;
     static final double

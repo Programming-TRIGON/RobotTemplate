@@ -43,7 +43,7 @@ public class PLACEHOLDERSwerveModuleIO extends SwerveModuleIO {
         final double voltage = velocityToOpenLoopVoltage(
                 targetVelocityMetersPerSecond,
                 PLACEHOLDERSwerveModuleConstants.WHEEL_DIAMETER_METERS,
-                moduleConstants.driveVelocitySignal.getValue(),
+                moduleConstants.steerVelocitySignal.getValue(),
                 PLACEHOLDERSwerveModuleConstants.COUPLING_RATIO,
                 PLACEHOLDERSwerveModuleConstants.MAX_SPEED_REVOLUTIONS_PER_SECOND,
                 PLACEHOLDERSwerveModuleConstants.VOLTAGE_COMPENSATION_SATURATION

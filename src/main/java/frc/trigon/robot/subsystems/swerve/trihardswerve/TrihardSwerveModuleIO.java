@@ -43,7 +43,7 @@ public class TrihardSwerveModuleIO extends SwerveModuleIO {
         final double voltage = velocityToOpenLoopVoltage(
                 targetVelocityMetersPerSecond,
                 TrihardSwerveModuleConstants.WHEEL_DIAMETER_METERS,
-                moduleConstants.driveVelocitySignal.getValue(),
+                moduleConstants.steerVelocitySignal.getValue(),
                 TrihardSwerveModuleConstants.COUPLING_RATIO,
                 TrihardSwerveModuleConstants.MAX_SPEED_REVOLUTIONS_PER_SECOND,
                 TrihardSwerveModuleConstants.VOLTAGE_COMPENSATION_SATURATION

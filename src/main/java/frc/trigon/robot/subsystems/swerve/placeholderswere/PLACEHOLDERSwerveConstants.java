@@ -93,8 +93,6 @@ public class PLACEHOLDERSwerveConstants extends SwerveConstants {
             Z_ACCELERATION_SIGNAL = GYRO.getAccelerationZ().clone();
 
     static {
-        PROFILED_ROTATION_PID_CONTROLLER.enableContinuousInput(-0.5, 0.5);
-
         if (!RobotConstants.IS_REPLAY)
             configureGyro();
     }

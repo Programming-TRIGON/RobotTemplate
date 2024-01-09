@@ -42,7 +42,7 @@ public class TrihardSwerveConstants extends SwerveConstants {
 
     private static final PIDConstants
             TRANSLATION_PID_CONSTANTS = new PIDConstants(5, 0, 0),
-            PROFILED_ROTATION_PID_CONSTANTS = new PIDConstants(5, 0, 0),
+            PROFILED_ROTATION_PID_CONSTANTS = new PIDConstants(6, 0, 0),
             AUTO_TRANSLATION_PID_CONSTANTS = new PIDConstants(5, 0, 0),
             AUTO_ROTATION_PID_CONSTANTS = new PIDConstants(3, 0, 0);
     private static final double
@@ -92,8 +92,6 @@ public class TrihardSwerveConstants extends SwerveConstants {
             Z_ACCELERATION_SIGNAL = GYRO.getAccelerationZ().clone();
 
     static {
-        PROFILED_ROTATION_PID_CONTROLLER.enableContinuousInput(-0.5, 0.5);
-
         if (!RobotConstants.IS_REPLAY)
             configureGyro();
     }

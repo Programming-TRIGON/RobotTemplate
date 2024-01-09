@@ -16,9 +16,9 @@ public class RobotPoseSource {
     private double lastUpdatedTimestamp;
     private AllianceUtilities.AlliancePose2d cachedPose = null;
 
-    public RobotPoseSource(PoseSourceConstants.RobotPoseSourceType robotPoseSourceType, String name, Transform3d robotCenterToCamera) {
+    public RobotPoseSource(RobotPoseSourceConstants.RobotPoseSourceType robotPoseSourceType, String name, Transform3d robotCenterToCamera) {
         this.name = name;
-        if (robotPoseSourceType != PoseSourceConstants.RobotPoseSourceType.PHOTON_CAMERA)
+        if (robotPoseSourceType != RobotPoseSourceConstants.RobotPoseSourceType.PHOTON_CAMERA)
             this.robotCenterToCamera = robotCenterToCamera;
         else
             this.robotCenterToCamera = new Transform3d();
@@ -48,9 +48,9 @@ public class RobotPoseSource {
         Logger.processInputs(name, inputs);
         cachedPose = getUnCachedRobotPose();
         if (!inputs.hasResult || cachedPose == null)
-            Logger.recordOutput("Poses/Robot/" + name + "Pose", new Pose2d(500, 500, new Rotation2d()));
+            Logger.recordOutput("Poses/Robot/" + name + "Pose", RobotPoseSourceConstants.OUT_OF_FIELD_POSE);
         else
-            Logger.recordOutput("Poses/Robot/" + name + "Pose", cachedPose.toCurrentAlliancePose());
+            Logger.recordOutput("Poses/Robot/" + name + "Pose", cachedPose.toBlueAlliancePose());
     }
 
     public int getVisibleTags() {
