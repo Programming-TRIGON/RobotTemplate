@@ -15,6 +15,11 @@ public class ElevatorSimulation extends MotorSimulation {
     }
 
     @Override
+    public double getCurrent() {
+        return elevatorSimulation.getCurrentDrawAmps();
+    }
+
+    @Override
     double calculateFeedforward(MotorSimulationConfiguration.FeedForwardConfigs feedForwardConfiguration, double targetPositionRadians, double targetVelocity) {
         return feedForwardConfiguration.kS * Math.signum(targetVelocity)
                 + feedForwardConfiguration.kG
@@ -23,18 +28,13 @@ public class ElevatorSimulation extends MotorSimulation {
     }
 
     @Override
-    public double getPositionRevolutions() {
+    double getPositionRevolutions() {
         return Conversions.distanceToRevolutions(elevatorSimulation.getPositionMeters(), diameterMeters);
     }
 
     @Override
-    public double getVelocityRevolutionsPerSecond() {
+    double getVelocityRevolutionsPerSecond() {
         return Conversions.distanceToRevolutions(elevatorSimulation.getVelocityMetersPerSecond(), diameterMeters);
-    }
-
-    @Override
-    public double getCurrent() {
-        return elevatorSimulation.getCurrentDrawAmps();
     }
 
     @Override

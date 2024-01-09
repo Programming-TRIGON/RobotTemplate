@@ -21,18 +21,18 @@ public class SingleJointedArmSimulation extends MotorSimulation {
     }
 
     @Override
-    public double getPositionRevolutions() {
+    public double getCurrent() {
+        return armSimulation.getCurrentDrawAmps();
+    }
+
+    @Override
+    double getPositionRevolutions() {
         return Units.radiansToRotations(armSimulation.getAngleRads());
     }
 
     @Override
-    public double getVelocityRevolutionsPerSecond() {
+    double getVelocityRevolutionsPerSecond() {
         return Units.radiansToRotations(armSimulation.getVelocityRadPerSec());
-    }
-
-    @Override
-    public double getCurrent() {
-        return armSimulation.getCurrentDrawAmps();
     }
 
     @Override

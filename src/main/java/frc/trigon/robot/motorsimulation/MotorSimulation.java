@@ -10,8 +10,8 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Notifier;
-import edu.wpi.first.wpilibj.Timer;
 import frc.trigon.robot.constants.RobotConstants;
+import frc.trigon.robot.utilities.Commands;
 import frc.trigon.robot.utilities.Conversions;
 
 import java.util.ArrayList;
@@ -24,7 +24,7 @@ public abstract class MotorSimulation {
     private static final List<MotorSimulation> REGISTERED_SIMULATIONS = new ArrayList<>();
 
     static {
-        new Notifier(MotorSimulation::updateRegisteredSimulations).startPeriodic(RobotConstants.PERIODIC_TIME_SECONDS);
+        Commands.getDelayedCommand(2, () -> new Notifier(MotorSimulation::updateRegisteredSimulations).startPeriodic(RobotConstants.PERIODIC_TIME_SECONDS)).schedule();
     }
 
     private PositionVoltage positionVoltageRequest = null;
@@ -129,6 +129,8 @@ public abstract class MotorSimulation {
         }
     }
 
+    public abstract double getCurrent();
+
     /**
      * Calculates the feedforward.
      *
@@ -142,8 +144,6 @@ public abstract class MotorSimulation {
     abstract double getPositionRevolutions();
 
     abstract double getVelocityRevolutionsPerSecond();
-
-    abstract double getCurrent();
 
     abstract void setInputVoltage(double voltage);
 
