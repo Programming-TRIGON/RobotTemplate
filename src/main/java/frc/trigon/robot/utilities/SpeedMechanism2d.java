@@ -14,8 +14,8 @@ public class SpeedMechanism2d {
 
     public SpeedMechanism2d(String key , double maxVelocity) {
         this.key = key;
-        this.mechanism = new Mechanism2d(maxVelocity, maxVelocity);
-        MechanismRoot2d root = mechanism.getRoot(key, 0.5 * maxVelocity, 0.5 * maxVelocity);
+        this.mechanism = new Mechanism2d(2 * maxVelocity, 2 * maxVelocity);
+        MechanismRoot2d root = mechanism.getRoot(key, maxVelocity, maxVelocity);
         this.ligament = root.append(new MechanismLigament2d(key, maxVelocity, 0, 10, new Color8Bit(Color.kBlue)));
     }
 
