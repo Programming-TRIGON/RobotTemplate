@@ -1,4 +1,4 @@
-package frc.trigon.robot.motorsimulation;
+package frc.trigon.robot.simulation;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
@@ -8,15 +8,8 @@ import frc.trigon.robot.constants.RobotConstants;
 public class SimpleMotorSimulation extends MotorSimulation {
     private final DCMotorSim motorSimulation;
 
-    public SimpleMotorSimulation(DCMotor motor, double gearRatio, double momentOfInertia) {
-        motorSimulation = new DCMotorSim(motor, gearRatio, momentOfInertia);
-    }
-
-    @Override
-    double calculateFeedforward(MotorSimulationConfiguration.FeedForwardConfigs feedForwardConfiguration, double targetPositionRadians, double targetVelocity) {
-        return feedForwardConfiguration.kS * Math.signum(targetVelocity)
-                + feedForwardConfiguration.kV * targetVelocity
-                + feedForwardConfiguration.kA * 0;
+    public SimpleMotorSimulation(DCMotor gearbox, double gearRatio, double momentOfInertia) {
+        motorSimulation = new DCMotorSim(gearbox, gearRatio, momentOfInertia);
     }
 
     @Override
@@ -25,12 +18,12 @@ public class SimpleMotorSimulation extends MotorSimulation {
     }
 
     @Override
-    double getPositionRevolutions() {
+    public double getPositionRevolutions() {
         return Units.radiansToRotations(motorSimulation.getAngularPositionRad());
     }
 
     @Override
-    double getVelocityRevolutionsPerSecond() {
+    public double getVelocityRevolutionsPerSecond() {
         return Units.radiansToRotations(motorSimulation.getAngularVelocityRadPerSec());
     }
 

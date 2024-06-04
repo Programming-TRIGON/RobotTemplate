@@ -9,7 +9,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.trigon.robot.RobotContainer;
-import frc.trigon.robot.utilities.AllianceUtilities;
 import frc.trigon.robot.utilities.InitExecuteCommand;
 
 import java.util.List;
@@ -152,6 +151,6 @@ public class SwerveCommands {
     private static Command getPIDToPoseCommand(AllianceUtilities.AlliancePose2d targetPose) {
         return new InstantCommand(SWERVE::resetRotationController)
                 .andThen(new RunCommand(() -> SWERVE.pidToPose(targetPose.toMirroredAlliancePose()))
-                .until(() -> SWERVE.atPose(targetPose.toMirroredAlliancePose())));
+                        .until(() -> SWERVE.atPose(targetPose.toMirroredAlliancePose())));
     }
 }
