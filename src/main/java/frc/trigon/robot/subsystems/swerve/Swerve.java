@@ -13,6 +13,8 @@ import edu.wpi.first.wpilibj.Timer;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.constants.RobotConstants;
 import frc.trigon.robot.subsystems.MotorSubsystem;
+import frc.trigon.robot.utilities.mirrorable.Mirrorable;
+import frc.trigon.robot.utilities.mirrorable.MirrorableRotation2d;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -127,16 +129,16 @@ public class Swerve extends MotorSubsystem {
 
     public boolean atXAxisPosition(double xAxisPosition) {
         final double currentXAxisVelocity = getFieldRelativeVelocity().vxMetersPerSecond;
-        return atTranslationPosition(RobotContainer.POSE_ESTIMATOR.getCurrentPose().toBlueAlliancePose().getX(), xAxisPosition, currentXAxisVelocity);
+        return atTranslationPosition(RobotContainer.POSE_ESTIMATOR.getCurrentPose().getX(), xAxisPosition, currentXAxisVelocity);
     }
 
     public boolean atYAxisPosition(double yAxisPosition) {
         final double currentYAxisVelocity = getFieldRelativeVelocity().vyMetersPerSecond;
-        return atTranslationPosition(RobotContainer.POSE_ESTIMATOR.getCurrentPose().toBlueAlliancePose().getY(), yAxisPosition, currentYAxisVelocity);
+        return atTranslationPosition(RobotContainer.POSE_ESTIMATOR.getCurrentPose().getY(), yAxisPosition, currentYAxisVelocity);
     }
 
     public boolean atAngle(Rotation2d angle) {
-        return Math.abs(angle.getDegrees() - RobotContainer.POSE_ESTIMATOR.getCurrentPose().toBlueAlliancePose().getRotation().getDegrees()) < SwerveConstants.ROTATION_TOLERANCE_DEGREES &&
+        return Math.abs(angle.getDegrees() - RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation().getDegrees()) < SwerveConstants.ROTATION_TOLERANCE_DEGREES &&
                 Math.abs(getSelfRelativeVelocity().omegaRadiansPerSecond) < SwerveConstants.ROTATION_VELOCITY_TOLERANCE;
     }
 
@@ -160,7 +162,7 @@ public class Swerve extends MotorSubsystem {
      * @param targetPose the target pose, relative to the blue alliance driver station's right corner
      */
     void pidToPose(Pose2d targetPose) {
-        final Pose2d currentPose = RobotContainer.POSE_ESTIMATOR.getCurrentPose().toBlueAlliancePose();
+        final Pose2d currentPose = RobotContainer.POSE_ESTIMATOR.getCurrentPose();
         final ChassisSpeeds targetFieldRelativeSpeeds = new ChassisSpeeds(
                 constants.getTranslationsController().calculate(currentPose.getX(), targetPose.getX()),
                 constants.getTranslationsController().calculate(currentPose.getY(), targetPose.getY()),
@@ -175,7 +177,7 @@ public class Swerve extends MotorSubsystem {
     }
 
     void resetRotationController() {
-        constants.getProfiledRotationController().reset(RobotContainer.POSE_ESTIMATOR.getCurrentPose().toBlueAlliancePose().getRotation().getDegrees());
+        constants.getProfiledRotationController().reset(RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation().getDegrees());
     }
 
     void setClosedLoop(boolean closedLoop) {
@@ -191,7 +193,8 @@ public class Swerve extends MotorSubsystem {
      * @param targetAngle the target angle, relative to the blue alliance's forward position
      */
     void fieldRelativeDrive(double xPower, double yPower, Rotation2d targetAngle) {
-        targetAngle = AllianceUtilities.toMirroredAllianceRotation(targetAngle);
+        MirrorableRotation2d mirrorableTargetAngle = new MirrorableRotation2d(targetAngle, true);
+        targetAngle = mirrorableTargetAngle.get();
         final ChassisSpeeds speeds = selfRelativeSpeedsFromFieldRelativePowers(xPower, yPower, 0);
         speeds.omegaRadiansPerSecond = calculateProfiledAngleSpeedToTargetAngle(targetAngle);
 
@@ -280,17 +283,17 @@ public class Swerve extends MotorSubsystem {
     }
 
     private ChassisSpeeds getFieldRelativeVelocity() {
-        return ChassisSpeeds.fromFieldRelativeSpeeds(getSelfRelativeVelocity(), RobotContainer.POSE_ESTIMATOR.getCurrentPose().toAlliancePose().getRotation());
+        return ChassisSpeeds.fromFieldRelativeSpeeds(getSelfRelativeVelocity(), RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation());
     }
 
     private void configurePathPlanner() {
         AutoBuilder.configureHolonomic(
-                () -> RobotContainer.POSE_ESTIMATOR.getCurrentPose().toBlueAlliancePose(),
-                (pose) -> RobotContainer.POSE_ESTIMATOR.resetPose(AllianceUtilities.AlliancePose2d.fromBlueAlliancePose(pose)),
+                RobotContainer.POSE_ESTIMATOR::getCurrentPose,
+                RobotContainer.POSE_ESTIMATOR::resetPose,
                 this::getSelfRelativeVelocity,
                 this::selfRelativeDrive,
                 constants.getPathFollowerConfig(),
-                () -> !AllianceUtilities.isBlueAlliance(),
+                Mirrorable::isRedAlliance,
                 this
         );
     }
@@ -301,7 +304,7 @@ public class Swerve extends MotorSubsystem {
     }
 
     private double calculateProfiledAngleSpeedToTargetAngle(Rotation2d targetAngle) {
-        final Rotation2d currentAngle = RobotContainer.POSE_ESTIMATOR.getCurrentPose().toBlueAlliancePose().getRotation();
+        final Rotation2d currentAngle = RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation();
         var i = Units.degreesToRadians(constants.getProfiledRotationController().calculate(currentAngle.getDegrees(), targetAngle.getDegrees()));
         Logger.recordOutput("i", i);
         return i;
@@ -313,7 +316,7 @@ public class Swerve extends MotorSubsystem {
     }
 
     private ChassisSpeeds fieldRelativeSpeedsToSelfRelativeSpeeds(ChassisSpeeds fieldRelativeSpeeds) {
-        Rotation2d currentAngle = RobotContainer.POSE_ESTIMATOR.getCurrentPose().toAlliancePose().getRotation();
+        Rotation2d currentAngle = RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation();
         return ChassisSpeeds.fromFieldRelativeSpeeds(fieldRelativeSpeeds, currentAngle);
     }
 

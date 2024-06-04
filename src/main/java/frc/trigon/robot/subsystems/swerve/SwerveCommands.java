@@ -10,6 +10,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.utilities.InitExecuteCommand;
+import frc.trigon.robot.utilities.mirrorable.MirrorablePose2d;
 
 import java.util.List;
 import java.util.Set;
@@ -117,11 +118,11 @@ public class SwerveCommands {
         );
     }
 
-    public static Command getDriveToPoseCommand(Supplier<AllianceUtilities.AlliancePose2d> targetPose, PathConstraints constraints) {
+    public static Command getDriveToPoseCommand(Supplier<MirrorablePose2d> targetPose, PathConstraints constraints) {
         return new DeferredCommand(() -> getCurrentDriveToPoseCommand(targetPose.get(), constraints), Set.of(SWERVE));
     }
 
-    private static Command getCurrentDriveToPoseCommand(AllianceUtilities.AlliancePose2d targetPose, PathConstraints constraints) {
+    private static Command getCurrentDriveToPoseCommand(MirrorablePose2d targetPose, PathConstraints constraints) {
         return new SequentialCommandGroup(
                 new InstantCommand(() -> SWERVE.initializeDrive(true)),
                 getPathfindToPoseCommand(targetPose, constraints),
@@ -129,28 +130,28 @@ public class SwerveCommands {
         );
     }
 
-    private static Command getPathfindToPoseCommand(AllianceUtilities.AlliancePose2d targetPose, PathConstraints pathConstraints) {
-        final Pose2d targetMirroredAlliancePose = targetPose.toMirroredAlliancePose();
-        final Pose2d currentBluePose = RobotContainer.POSE_ESTIMATOR.getCurrentPose().toBlueAlliancePose();
+    private static Command getPathfindToPoseCommand(MirrorablePose2d targetPose, PathConstraints pathConstraints) {
+        final Pose2d targetMirroredAlliancePose = targetPose.get();
+        final Pose2d currentBluePose = RobotContainer.POSE_ESTIMATOR.getCurrentPose();
         if (currentBluePose.getTranslation().getDistance(targetMirroredAlliancePose.getTranslation()) < 0.35)
             return new InstantCommand();
         return AutoBuilder.pathfindToPose(targetMirroredAlliancePose, pathConstraints);
     }
 
-    private static Command getGenerateOnTheFlyPathCommand(AllianceUtilities.AlliancePose2d targetPose, PathConstraints pathConstraints) {
+    private static Command getGenerateOnTheFlyPathCommand(MirrorablePose2d targetPose, PathConstraints pathConstraints) {
         final List<PathPoint> pathPoints = List.of(
-                new PathPoint(RobotContainer.POSE_ESTIMATOR.getCurrentPose().toBlueAlliancePose().getTranslation()),
-                new PathPoint(targetPose.toBlueAlliancePose().getTranslation())
+                new PathPoint(RobotContainer.POSE_ESTIMATOR.getCurrentPose().getTranslation()),
+                new PathPoint(targetPose.get().getTranslation())
         );
         final PathPlannerPath path = PathPlannerPath.fromPathPoints(
-                pathPoints, pathConstraints, new GoalEndState(0, targetPose.toBlueAlliancePose().getRotation())
+                pathPoints, pathConstraints, new GoalEndState(0, targetPose.get().getRotation())
         );
         return AutoBuilder.followPath(path);
     }
 
-    private static Command getPIDToPoseCommand(AllianceUtilities.AlliancePose2d targetPose) {
+    private static Command getPIDToPoseCommand(MirrorablePose2d targetPose) {
         return new InstantCommand(SWERVE::resetRotationController)
-                .andThen(new RunCommand(() -> SWERVE.pidToPose(targetPose.toMirroredAlliancePose()))
-                        .until(() -> SWERVE.atPose(targetPose.toMirroredAlliancePose())));
+                .andThen(new RunCommand(() -> SWERVE.pidToPose(targetPose.get()))
+                        .until(() -> SWERVE.atPose(targetPose.get())));
     }
 }

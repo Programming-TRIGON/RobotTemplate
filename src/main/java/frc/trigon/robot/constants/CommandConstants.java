@@ -1,6 +1,5 @@
 package frc.trigon.robot.constants;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -8,6 +7,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.components.XboxController;
 import frc.trigon.robot.subsystems.swerve.SwerveCommands;
+import frc.trigon.robot.utilities.mirrorable.MirrorablePose2d;
 
 public class CommandConstants {
     private static final XboxController DRIVER_CONTROLLER = OperatorConstants.DRIVER_CONTROLLER;
@@ -57,9 +57,11 @@ public class CommandConstants {
         return Math.sin(-povRadians);
     }
 
-    private static AllianceUtilities.AlliancePose2d changeRotation(AllianceUtilities.AlliancePose2d pose2d, Rotation2d newRotation) {
-        return AllianceUtilities.AlliancePose2d.fromAlliancePose(
-                new Pose2d(pose2d.toAlliancePose().getTranslation(), newRotation)
+    private static MirrorablePose2d changeRotation(MirrorablePose2d pose2d, Rotation2d newRotation) {
+        return new MirrorablePose2d(
+                pose2d.get().getTranslation(),
+                newRotation.getRadians(),
+                false
         );
     }
 }

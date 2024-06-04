@@ -23,10 +23,10 @@ public class Commands {
      */
     public static Command getToggleFieldAndSelfRelativeDriveCommand() {
         return new InstantCommand(() -> {
-            if (RobotContainer.SWERVE.getDefaultCommand().equals(CommandConstants.FIELD_RELATIVE_DRIVE_COMMAND))
-                RobotContainer.SWERVE.setDefaultCommand(CommandConstants.SELF_RELATIVE_DRIVE_COMMAND);
+            if (RobotContainer..getDefaultCommand().equals(CommandConstants.FIELD_RELATIVE_DRIVE_COMMAND))
+            RobotContainer.SWERVE.setDefaultCommand(CommandConstants.SELF_RELATIVE_DRIVE_COMMAND);
             else
-                RobotContainer.SWERVE.setDefaultCommand(CommandConstants.FIELD_RELATIVE_DRIVE_COMMAND);
+            RobotContainer.SWERVE.setDefaultCommand(CommandConstants.FIELD_RELATIVE_DRIVE_COMMAND);
 
             RobotContainer.SWERVE.getDefaultCommand().schedule();
         });
