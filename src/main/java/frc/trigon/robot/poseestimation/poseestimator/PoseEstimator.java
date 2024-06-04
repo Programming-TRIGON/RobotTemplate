@@ -13,7 +13,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.trigon.robot.poseestimation.robotposesources.RobotPoseSource;
 import frc.trigon.robot.poseestimation.robotposesources.RobotPoseSourceConstants;
 import frc.trigon.robot.subsystems.swerve.Swerve;
-import frc.trigon.robot.utilities.AllianceUtilities;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.HashMap;
