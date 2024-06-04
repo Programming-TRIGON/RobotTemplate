@@ -39,9 +39,9 @@ public class SwerveModuleIO {
         return "Swerve/" + name + "/";
     }
 
-    protected double velocityToOpenLoopVoltage(double velocityMetersPerSecond, double wheelDiameterMeters, double steerVelocityRotationsPerSecond, double couplingRatio, double maxSpeedRevolutionsPerSecond, double voltageCompensationSaturation) {
+    protected double velocityToOpenLoopVoltage(double velocityMetersPerSecond, double wheelDiameterMeters, double steerVelocityRevolutionsPerSecond, double couplingRatio, double maxSpeedRevolutionsPerSecond, double voltageCompensationSaturation) {
         final double velocityRevolutionsPerSecond = Conversions.distanceToRevolutions(velocityMetersPerSecond, wheelDiameterMeters);
-        final double optimizedVelocityRevolutionsPerSecond = removeCouplingFromRevolutions(velocityRevolutionsPerSecond, Rotation2d.fromDegrees(steerVelocityRotationsPerSecond), couplingRatio);
+        final double optimizedVelocityRevolutionsPerSecond = removeCouplingFromRevolutions(velocityRevolutionsPerSecond, Rotation2d.fromDegrees(steerVelocityRevolutionsPerSecond), couplingRatio);
         final double power = optimizedVelocityRevolutionsPerSecond / maxSpeedRevolutionsPerSecond;
         return Conversions.compensatedPowerToVoltage(power, voltageCompensationSaturation);
     }
@@ -50,17 +50,31 @@ public class SwerveModuleIO {
      * When the steer motor moves, the drive motor moves as well due to the coupling.
      * This will affect the current position of the drive motor, so we need to remove the coupling from the position.
      *
-     * @param drivePosition the position in revolutions
-     * @param moduleAngle   the angle of the module
+     * @param drivePositionRevolutions the position in revolutions
+     * @param moduleAngle              the angle of the module
      * @return the distance without the coupling
      */
-    protected double removeCouplingFromRevolutions(double drivePosition, Rotation2d moduleAngle, double couplingRatio) {
+    protected double removeCouplingFromRevolutions(double drivePositionRevolutions, Rotation2d moduleAngle, double couplingRatio) {
         final double coupledAngle = moduleAngle.getRotations() * couplingRatio;
-        return drivePosition - coupledAngle;
+        return drivePositionRevolutions - coupledAngle;
     }
 
-    SwerveModulePosition getCurrentPosition() {
-        return new SwerveModulePosition(swerveModuleInputs.driveDistanceMeters, getCurrentAngle());
+    /**
+     * The odometry thread can update itself faster than the main code loop (which is 50 hertz).
+     * Instead of using the latest odometry update, the accumulated odometry positions since the last loop to get a more accurate position.
+     *
+     * @param odometryUpdateIndex the index of the odometry update
+     * @return the position of the module at the given odometry update index
+     */
+    SwerveModulePosition getOdometryPosition(int odometryUpdateIndex) {
+        return new SwerveModulePosition(
+                swerveModuleInputs.odometryUpdatesDriveDistanceMeters[odometryUpdateIndex],
+                Rotation2d.fromDegrees(swerveModuleInputs.odometryUpdatesSteerAngleDegrees[odometryUpdateIndex])
+        );
+    }
+
+    protected int getLastOdometryUpdateIndex() {
+        return swerveModuleInputs.odometryUpdatesSteerAngleDegrees.length - 1;
     }
 
     SwerveModuleState getCurrentState() {
@@ -130,9 +144,13 @@ public class SwerveModuleIO {
     @AutoLog
     public static class SwerveModuleInputs {
         public double steerAngleDegrees = 0;
+        public double[] odometryUpdatesSteerAngleDegrees = new double[0];
+        public double steerVoltage = 0;
 
         public double driveVelocityMetersPerSecond = 0;
         public double driveDistanceMeters = 0;
+        public double[] odometryUpdatesDriveDistanceMeters = new double[0];
         public double driveCurrent = 0;
+        public double driveVoltage = 0;
     }
 }

@@ -16,7 +16,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class RobotContainer {
     public static final PoseEstimator POSE_ESTIMATOR = new PoseEstimator();
-    private final Swerve swerve = Swerve.getInstance();
+    public static final Swerve SWERVE = new Swerve();
     private LoggedDashboardChooser<Command> autoChooser;
 
     public RobotContainer() {
@@ -37,7 +37,7 @@ public class RobotContainer {
     }
 
     private void bindDefaultCommands() {
-        swerve.setDefaultCommand(CommandConstants.FIELD_RELATIVE_DRIVE_COMMAND);
+        SWERVE.setDefaultCommand(CommandConstants.FIELD_RELATIVE_DRIVE_COMMAND);
     }
 
     private void bindControllerCommands() {

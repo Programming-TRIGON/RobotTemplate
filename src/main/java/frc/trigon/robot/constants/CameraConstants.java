@@ -4,12 +4,10 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
-import frc.trigon.robot.components.objectdetectioncamera.ObjectDetectionCamera;
 import frc.trigon.robot.poseestimation.robotposesources.RobotPoseSource;
 import frc.trigon.robot.poseestimation.robotposesources.RobotPoseSourceConstants;
 
 public class CameraConstants {
-    public static final ObjectDetectionCamera NOTE_DETECTION_CAMERA = new ObjectDetectionCamera("Collection Camera");
     private static final Transform3d
             REAR_LEFT_CENTER_TO_CAMERA = new Transform3d(
             new Translation3d(-0.353, 0.298, 0.282),

@@ -19,7 +19,6 @@ import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.jni.CANBusJNI;
 import edu.wpi.first.wpilibj.Timer;
 import frc.trigon.robot.constants.RobotConstants;
-import frc.trigon.robot.subsystems.swerve.Swerve;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.ArrayList;

@@ -15,7 +15,6 @@ package frc.trigon.robot.poseestimation.poseestimator;
 
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.Timer;
-import frc.trigon.robot.subsystems.swerve.Swerve;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.ArrayList;

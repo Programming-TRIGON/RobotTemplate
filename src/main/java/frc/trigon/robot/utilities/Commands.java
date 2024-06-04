@@ -5,13 +5,12 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.trigon.robot.constants.CommandConstants;
 import frc.trigon.robot.subsystems.MotorSubsystem;
-import frc.trigon.robot.subsystems.swerve.Swerve;
 
 public class Commands {
     private static boolean IS_BRAKING = true;
 
     /**
-     * @return a command that toggles between the swerve's default command, from field relative to self relative
+     * @return a command that toggles between the SWERVE's default command, from field relative to self relative
      */
     public static Command getToggleFieldAndSelfRelativeDriveCommand() {
         return new InstantCommand(() -> {
