@@ -17,6 +17,8 @@ import frc.trigon.robot.constants.RobotConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveModuleIO;
 
+import java.util.Optional;
+
 public class TrihardSwerveConstants extends SwerveConstants {
     static final double
             MAX_SPEED_METERS_PER_SECOND = 4.25,
@@ -114,13 +116,23 @@ public class TrihardSwerveConstants extends SwerveConstants {
     }
 
     @Override
+    public double getDriveRadiusMeters() {
+        return DRIVE_RADIUS_METERS;
+    }
+
+    @Override
+    protected Optional<Pigeon2> getPigeon() {
+        return Optional.of(GYRO);
+    }
+
+    @Override
     public SwerveDriveKinematics getKinematics() {
         return KINEMATICS;
     }
 
     @Override
-    protected SwerveModuleIO[] getModulesIO() {
-        return MODULES_IO;
+    protected Optional<SwerveModuleIO[]> getModulesIO() {
+        return Optional.of(MODULES_IO);
     }
 
     @Override
@@ -142,8 +154,7 @@ public class TrihardSwerveConstants extends SwerveConstants {
     protected ProfiledPIDController getProfiledRotationController() {
         return PROFILED_ROTATION_PID_CONTROLLER;
     }
-
-    @Override
+    
     protected double getRobotSideLength() {
         return MODULE_FROM_MODULE_DISTANCE;
     }
