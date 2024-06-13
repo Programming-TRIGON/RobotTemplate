@@ -40,7 +40,6 @@ public class SimulationSwerveModuleIO extends SwerveModuleIO {
                 targetVelocityMetersPerSecond,
                 SimulationSwerveModuleConstants.WHEEL_DIAMETER_METERS,
                 steerMotor.getVelocityRevolutionsPerSecond(),
-                0,
                 SimulationSwerveModuleConstants.MAX_SPEED_REVOLUTIONS_PER_SECOND,
                 SimulationSwerveModuleConstants.VOLTAGE_COMPENSATION_SATURATION
         );

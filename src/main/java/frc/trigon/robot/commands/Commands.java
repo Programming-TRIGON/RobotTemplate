@@ -3,6 +3,7 @@ package frc.trigon.robot.commands;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.constants.CommandConstants;
+import frc.trigon.robot.subsystems.MotorSubsystem;
 
 import java.util.function.BooleanSupplier;
 
@@ -30,6 +31,13 @@ public class Commands {
 
             RobotContainer.SWERVE.getDefaultCommand().schedule();
         });
+    }
+
+    public static Command getToggleBrakeCommand() {
+        return new InstantCommand(() -> {
+            IS_BRAKING = !IS_BRAKING;
+            MotorSubsystem.setAllSubsystemsBrakeAsync(IS_BRAKING);
+        }).ignoringDisable(true);
     }
 
     public static Command getDelayedCommand(double delaySeconds, Runnable toRun) {

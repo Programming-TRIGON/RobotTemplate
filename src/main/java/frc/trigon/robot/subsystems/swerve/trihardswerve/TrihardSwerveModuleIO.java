@@ -33,7 +33,7 @@ public class TrihardSwerveModuleIO extends SwerveModuleIO {
     protected void updateInputs(SwerveModuleInputsAutoLogged inputs) {
         inputs.steerAngleDegrees = getAngleDegrees();
 
-        inputs.driveDistanceMeters = getDriveDistance(Rotation2d.fromDegrees(inputs.steerAngleDegrees));
+        inputs.driveDistanceMeters = getDriveDistance();
         inputs.driveVelocityMetersPerSecond = Conversions.revolutionsToDistance(moduleConstants.driveVelocitySignal.getValue(), TrihardSwerveModuleConstants.WHEEL_DIAMETER_METERS);
         inputs.driveCurrent = moduleConstants.driveStatorCurrentSignal.refresh().getValue();
     }
@@ -44,7 +44,6 @@ public class TrihardSwerveModuleIO extends SwerveModuleIO {
                 targetVelocityMetersPerSecond,
                 TrihardSwerveModuleConstants.WHEEL_DIAMETER_METERS,
                 moduleConstants.steerVelocitySignal.getValue(),
-                TrihardSwerveModuleConstants.COUPLING_RATIO,
                 TrihardSwerveModuleConstants.MAX_SPEED_REVOLUTIONS_PER_SECOND,
                 TrihardSwerveModuleConstants.VOLTAGE_COMPENSATION_SATURATION
         );
@@ -53,12 +52,7 @@ public class TrihardSwerveModuleIO extends SwerveModuleIO {
 
     @Override
     protected void setTargetClosedLoopVelocity(double targetVelocityMetersPerSecond) {
-        final double optimizedVelocityRevolutionsPerSecond = removeCouplingFromRevolutions(
-                targetVelocityMetersPerSecond,
-                Rotation2d.fromDegrees(moduleConstants.steerVelocitySignal.getValue()),
-                TrihardSwerveModuleConstants.COUPLING_RATIO
-        );
-        driveMotor.setControl(driveVelocityRequest.withVelocity(optimizedVelocityRevolutionsPerSecond));
+        driveMotor.setControl(driveVelocityRequest.withVelocity(targetVelocityMetersPerSecond));
     }
 
     @Override
@@ -85,11 +79,10 @@ public class TrihardSwerveModuleIO extends SwerveModuleIO {
         return Conversions.revolutionsToDegrees(latencyCompensatedRevolutions);
     }
 
-    private double getDriveDistance(Rotation2d moduleAngle) {
+    private double getDriveDistance() {
         BaseStatusSignal.refreshAll(moduleConstants.drivePositionSignal, moduleConstants.driveVelocitySignal);
         final double latencyCompensatedRevolutions = BaseStatusSignal.getLatencyCompensatedValue(moduleConstants.drivePositionSignal, moduleConstants.driveVelocitySignal);
-        final double revolutionsWithoutCoupling = removeCouplingFromRevolutions(latencyCompensatedRevolutions, moduleAngle, TrihardSwerveModuleConstants.COUPLING_RATIO);
-        return Conversions.revolutionsToDistance(revolutionsWithoutCoupling, TrihardSwerveModuleConstants.WHEEL_DIAMETER_METERS);
+        return Conversions.revolutionsToDistance(latencyCompensatedRevolutions, TrihardSwerveModuleConstants.WHEEL_DIAMETER_METERS);
     }
 
     private void setBrake(TalonFX motor, NeutralModeValue neutralModeValue) {

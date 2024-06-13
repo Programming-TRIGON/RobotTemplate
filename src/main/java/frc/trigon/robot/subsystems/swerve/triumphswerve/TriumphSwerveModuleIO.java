@@ -57,7 +57,6 @@ public class TriumphSwerveModuleIO extends SwerveModuleIO {
                 targetVelocityMetersPerSecond,
                 TriumphSwerveModuleConstants.WHEEL_DIAMETER_METERS,
                 moduleConstants.steerVelocitySignal.getValue(),
-                TriumphSwerveModuleConstants.COUPLING_RATIO,
                 TriumphSwerveModuleConstants.MAX_SPEED_REVOLUTIONS_PER_SECOND,
                 TriumphSwerveModuleConstants.VOLTAGE_COMPENSATION_SATURATION
         );
@@ -67,12 +66,7 @@ public class TriumphSwerveModuleIO extends SwerveModuleIO {
     @Override
     protected void setTargetClosedLoopVelocity(double targetVelocityMetersPerSecond) {
         final double targetVelocityRevolutionsPerSeconds = Conversions.distanceToRevolutions(targetVelocityMetersPerSecond, TriumphSwerveModuleConstants.WHEEL_DIAMETER_METERS);
-        final double optimizedVelocityRevolutionsPerSecond = removeCouplingFromRevolutions(
-                targetVelocityRevolutionsPerSeconds,
-                Rotation2d.fromRotations(moduleConstants.steerVelocitySignal.getValue()),
-                TriumphSwerveModuleConstants.COUPLING_RATIO
-        );
-        driveMotor.setControl(driveVelocityRequest.withVelocity(optimizedVelocityRevolutionsPerSecond));
+        driveMotor.setControl(driveVelocityRequest.withVelocity(targetVelocityRevolutionsPerSeconds));
     }
 
     @Override
