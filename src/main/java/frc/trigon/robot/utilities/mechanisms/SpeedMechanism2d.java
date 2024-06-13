@@ -1,4 +1,4 @@
-package frc.trigon.robot.utilities;
+package frc.trigon.robot.utilities.mechanisms;
 
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
