@@ -18,7 +18,6 @@ public class SingleJointedArmMechanism2d {
     private static final double
             MECHANISM_LINE_WIDTH = 5,
             MECHANISM_LINE_LENGTH = 10;
-    private final Color8Bit mechanismColor;
     private final String key;
     private final Mechanism2d mechanism;
     private final MechanismLigament2d
@@ -31,7 +30,6 @@ public class SingleJointedArmMechanism2d {
 
     public SingleJointedArmMechanism2d(String key, Color8Bit mechanismColor) {
         this.key = key;
-        this.mechanismColor = mechanismColor;
         this.mechanism = new Mechanism2d(2 * MECHANISM_LINE_LENGTH, 2 * MECHANISM_LINE_LENGTH);
         MechanismRoot2d root = mechanism.getRoot("AngleRoot", MECHANISM_LINE_LENGTH, MECHANISM_LINE_LENGTH);
         this.currentPositionLigament = root.append(new MechanismLigament2d("ZCurrentPositionLigament", MECHANISM_LINE_LENGTH, 0, MECHANISM_LINE_WIDTH, mechanismColor));
@@ -43,7 +41,7 @@ public class SingleJointedArmMechanism2d {
     }
 
     public void updateMechanism(double currentAngleDegrees, double targetAngle) {
-        setTargetPosition(targetAngle);
+        setTargetAngle(targetAngle);
         updateMechanism(currentAngleDegrees);
     }
 
@@ -56,7 +54,7 @@ public class SingleJointedArmMechanism2d {
         Logger.recordOutput(key, mechanism);
     }
 
-    public void setTargetPosition(double targetAngle) {
+    public void setTargetAngle(double targetAngle) {
         targetPositionLigament.setAngle(targetAngle);
     }
 }

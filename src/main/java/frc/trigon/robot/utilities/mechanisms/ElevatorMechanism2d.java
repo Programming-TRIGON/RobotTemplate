@@ -16,7 +16,6 @@ public class ElevatorMechanism2d {
             BLUE = new Color8Bit(Color.kBlue);
     private static final double MECHANISM_LINE_WIDTH = 5;
     private static final double MECHANISM_STARTING_ANGLE = 90;
-    private final Color8Bit mechanismColor;
     private final String key;
     private final Mechanism2d mechanism;
     private final MechanismLigament2d
@@ -29,7 +28,6 @@ public class ElevatorMechanism2d {
 
     public ElevatorMechanism2d(String key, double maximumDisplayablePosition, Color8Bit mechanismColor) {
         this.key = key;
-        this.mechanismColor = mechanismColor;
         this.mechanism = new Mechanism2d(2 * maximumDisplayablePosition, 2 * maximumDisplayablePosition);
 
         MechanismRoot2d currentPositionRoot = mechanism.getRoot("CurrentPositionRoot", 0.5 * maximumDisplayablePosition, 0);
