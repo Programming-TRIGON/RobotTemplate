@@ -15,8 +15,8 @@ import frc.trigon.robot.subsystems.swerve.Swerve;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class RobotContainer {
-    public static final PoseEstimator POSE_ESTIMATOR = new PoseEstimator();
     public static final Swerve SWERVE = new Swerve();
+    public static final PoseEstimator POSE_ESTIMATOR = new PoseEstimator();
     private LoggedDashboardChooser<Command> autoChooser;
 
     public RobotContainer() {
