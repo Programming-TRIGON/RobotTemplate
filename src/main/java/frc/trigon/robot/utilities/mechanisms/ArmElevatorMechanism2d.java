@@ -30,9 +30,26 @@ public class ArmElevatorMechanism2d {
         this.targetPositionLigament = root.append(new MechanismLigament2d("TargetPositionLigament", 0, 0, TARGET_POSITION_LIGAMENT_WIDTH, MechanismConstants.GRAY));
     }
 
+    /**
+     * Updates the mechanism's position and target position as well as the mechanism's angle and target angle, then logs the Mechanism2d object.
+     *
+     * @param currentPosition the current position
+     * @param targetPosition  the target position
+     * @param currentAngle    the current angle
+     * @param targetAngle     the target angle
+     */
     public void updateMechanism(double currentPosition, double targetPosition, Rotation2d currentAngle, Rotation2d targetAngle) {
         updateMechanism(currentPosition, targetPosition, currentAngle.getDegrees(), targetAngle.getDegrees());
     }
+
+    /**
+     * Updates the mechanism's position and target position as well as the mechanism's angle and target angle, then logs the Mechanism2d object.
+     *
+     * @param currentPosition     the current position
+     * @param targetPosition      the target position
+     * @param currentAngleDegrees the current angle in degrees
+     * @param targetAngleDegrees  the target angle in degrees
+     */
 
     public void updateMechanism(double currentPosition, double targetPosition, double currentAngleDegrees, double targetAngleDegrees) {
         setTargetPosition(targetPosition);
@@ -40,36 +57,80 @@ public class ArmElevatorMechanism2d {
         updateMechanism(currentPosition, currentAngleDegrees);
     }
 
+    /**
+     * updates the mechanism's position and angle, then logs the Mechanism2d object.
+     *
+     * @param currentPosition the current position
+     * @param currentAngle    the current angle
+     */
     public void updateMechanism(double currentPosition, Rotation2d currentAngle) {
         updateMechanism(currentPosition, currentAngle.getDegrees());
     }
 
+    /**
+     * updates the mechanism's position and angle, then logs the Mechanism2d object.
+     *
+     * @param currentPosition     the current position
+     * @param currentAngleDegrees the current angle in degrees
+     */
     public void updateMechanism(double currentPosition, double currentAngleDegrees) {
         updateCurrentPosition(currentPosition);
         updateCurrentAngle(currentAngleDegrees);
         Logger.recordOutput(key, mechanism);
     }
 
+    /**
+     * updates the mechanism's position and logs the Mechanism2d object.
+     *
+     * @param currentPosition the current position
+     */
     public void updateCurrentPosition(double currentPosition) {
         currentPositionLigament.setLength(currentPosition);
+        Logger.recordOutput(key, mechanism);
     }
 
+    /**
+     * updates the mechanism's angle and logs the Mechanism2d object.
+     *
+     * @param currentAngle the current angle
+     */
     public void updateCurrentAngle(Rotation2d currentAngle) {
         updateCurrentAngle(currentAngle.getDegrees());
     }
 
+    /**
+     * updates the mechanism's angle and logs the Mechanism2d object.
+     *
+     * @param currentAngleDegrees the current angle in degrees
+     */
     public void updateCurrentAngle(double currentAngleDegrees) {
         currentPositionLigament.setAngle(currentAngleDegrees);
+        Logger.recordOutput(key, mechanism);
     }
 
+    /**
+     * sets the target position of the mechanism.
+     *
+     * @param targetPosition the target position
+     */
     public void setTargetPosition(double targetPosition) {
         targetPositionLigament.setLength(targetPosition);
     }
 
+    /**
+     * sets the target angle of the mechanism.
+     *
+     * @param targetAngle the target angle
+     */
     public void setTargetAngle(Rotation2d targetAngle) {
         setTargetAngle(targetAngle.getDegrees());
     }
 
+    /**
+     * sets the target angle of the mechanism.
+     *
+     * @param targetAngleDegrees the target angle in degrees
+     */
     public void setTargetAngle(double targetAngleDegrees) {
         targetPositionLigament.setAngle(targetAngleDegrees);
     }

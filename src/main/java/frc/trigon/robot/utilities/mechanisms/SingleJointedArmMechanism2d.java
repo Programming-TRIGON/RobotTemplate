@@ -29,25 +29,61 @@ public class SingleJointedArmMechanism2d {
         this.targetPositionLigament = root.append(new MechanismLigament2d("TargetPositionLigament", MechanismConstants.MECHANISM_LINE_LENGTH, 0, MechanismConstants.MECHANISM_LINE_WIDTH, MechanismConstants.GRAY));
     }
 
+    /**
+     * Updates the mechanism's angle and target angle, then logs the Mechanism2d object.
+     *
+     * @param currentAngle the current angle
+     * @param targetAngle  the target angle
+     */
     public void updateMechanism(Rotation2d currentAngle, Rotation2d targetAngle) {
         updateMechanism(currentAngle.getDegrees(), targetAngle.getDegrees());
     }
 
-    public void updateMechanism(double currentAngleDegrees, double targetAngle) {
-        setTargetAngle(targetAngle);
+    /**
+     * Updates the mechanism's angle and target angle, then logs the Mechanism2d object.
+     *
+     * @param currentAngleDegrees the current angle in degrees
+     * @param targetAngleDegrees  the target angle in degrees
+     */
+    public void updateMechanism(double currentAngleDegrees, double targetAngleDegrees) {
+        setTargetAngle(targetAngleDegrees);
         updateMechanism(currentAngleDegrees);
     }
 
+    /**
+     * Updates the mechanism's angle, then logs the Mechanism2d object.
+     *
+     * @param currentAngle the current angle
+     */
     public void updateMechanism(Rotation2d currentAngle) {
         updateMechanism(currentAngle.getDegrees());
     }
 
-    public void updateMechanism(double currentAngle) {
-        currentPositionLigament.setAngle(currentAngle);
+    /**
+     * Updates the mechanism's angle, then logs the Mechanism2d object.
+     *
+     * @param currentAngleDegrees the current angle in degrees
+     */
+    public void updateMechanism(double currentAngleDegrees) {
+        currentPositionLigament.setAngle(currentAngleDegrees);
         Logger.recordOutput(key, mechanism);
     }
 
-    public void setTargetAngle(double targetAngle) {
-        targetPositionLigament.setAngle(targetAngle);
+    /**
+     * Sets the target angle of the mechanism.
+     *
+     * @param targetAngle the target angle
+     */
+    public void setTargetAngle(Rotation2d targetAngle) {
+        setTargetAngle(targetAngle.getDegrees());
+    }
+
+    /**
+     * Sets the target angle of the mechanism.
+     *
+     * @param targetAngleDegrees the target angle in degrees
+     */
+    public void setTargetAngle(double targetAngleDegrees) {
+        targetPositionLigament.setAngle(targetAngleDegrees);
     }
 }

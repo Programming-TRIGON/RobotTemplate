@@ -31,16 +31,32 @@ public class ElevatorMechanism2d {
         this.targetPositionLigament = targetPositionRoot.append(new MechanismLigament2d("TargetPositionLigament", 0, MECHANISM_STARTING_ANGLE, MechanismConstants.MECHANISM_LINE_WIDTH, MechanismConstants.GRAY));
     }
 
+    /**
+     * Updates the mechanism's position and target position, then logs the Mechanism2d object.
+     *
+     * @param currentPosition the current position
+     * @param targetPosition  the target position
+     */
     public void updateMechanism(double currentPosition, double targetPosition) {
         setTargetPosition(targetPosition);
         updateMechanism(currentPosition);
     }
 
+    /**
+     * Updates the mechanism's position, then logs the Mechanism2d object.
+     *
+     * @param currentPosition the current position
+     */
     public void updateMechanism(double currentPosition) {
         currentPositionLigament.setLength(currentPosition);
         Logger.recordOutput(key, mechanism);
     }
 
+    /**
+     * Sets the target position of the mechanism.
+     *
+     * @param targetPosition the target position
+     */
     public void setTargetPosition(double targetPosition) {
         targetPositionLigament.setLength(targetPosition);
     }
