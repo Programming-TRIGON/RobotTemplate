@@ -13,9 +13,7 @@ import org.littletonrobotics.junction.Logger;
 public class SpeedMechanism2d {
     private static final Color8Bit
             GREEN = new Color8Bit(Color.kGreen),
-            RED = new Color8Bit(Color.kRed),
-            BLUE = new Color8Bit(Color.kBlue),
-            GRAY = new Color8Bit(Color.kGray);
+            RED = new Color8Bit(Color.kRed);
     private static final double
             NEGATIVE_TOP_ANGLE = 45,
             NEGATIVE_BOTTOM_ANGLE = 315,
@@ -23,9 +21,7 @@ public class SpeedMechanism2d {
             POSITIVE_BOTTOM_ANGLE = 145,
             ZERO_TOP_ANGLE = 90,
             ZERO_BOTTOM_ANGLE = 270;
-    private static final double
-            MECHANISM_LINE_WIDTH = 5,
-            ARROW_LENGTH_SCALE = 0.2;
+    private static final double ARROW_LENGTH_SCALE = 0.2;
     private final String key;
     private final Mechanism2d mechanism;
     private final MechanismLigament2d
@@ -46,13 +42,13 @@ public class SpeedMechanism2d {
         this.key = key;
         this.mechanism = new Mechanism2d(2 * maximumDisplayableVelocity, 2 * maximumDisplayableVelocity);
         MechanismRoot2d root = mechanism.getRoot("VelocityRoot", maximumDisplayableVelocity, maximumDisplayableVelocity);
-        this.currentVelocityLigament = root.append(new MechanismLigament2d("ZCurrentVelocityLigament", 0, 0, MECHANISM_LINE_WIDTH, new Color8Bit(Color.kBlue)));
-        this.currentVelocityTopArrowLigament = currentVelocityLigament.append(new MechanismLigament2d("ZCurrentVelocityTopArrowLigament", ARROW_LENGTH_SCALE * maximumDisplayableVelocity, ZERO_TOP_ANGLE, MECHANISM_LINE_WIDTH, BLUE));
-        this.currentVelocityBottomArrowLigament = currentVelocityLigament.append(new MechanismLigament2d("ZCurrentVelocityBottomArrowLigament", ARROW_LENGTH_SCALE * maximumDisplayableVelocity, ZERO_BOTTOM_ANGLE, MECHANISM_LINE_WIDTH, BLUE));
+        this.currentVelocityLigament = root.append(new MechanismLigament2d("ZCurrentVelocityLigament", 0, 0, MechanismConstants.MECHANISM_LINE_WIDTH, MechanismConstants.BLUE));
+        this.currentVelocityTopArrowLigament = currentVelocityLigament.append(new MechanismLigament2d("ZCurrentVelocityTopArrowLigament", ARROW_LENGTH_SCALE * maximumDisplayableVelocity, ZERO_TOP_ANGLE, MechanismConstants.MECHANISM_LINE_WIDTH, MechanismConstants.BLUE));
+        this.currentVelocityBottomArrowLigament = currentVelocityLigament.append(new MechanismLigament2d("ZCurrentVelocityBottomArrowLigament", ARROW_LENGTH_SCALE * maximumDisplayableVelocity, ZERO_BOTTOM_ANGLE, MechanismConstants.MECHANISM_LINE_WIDTH, MechanismConstants.BLUE));
 
-        this.targetVelocityLigament = root.append(new MechanismLigament2d("TargetVelocityLigament", 0, 0, MECHANISM_LINE_WIDTH, new Color8Bit(Color.kGray)));
-        this.targetVelocityTopArrowLigament = targetVelocityLigament.append(new MechanismLigament2d("TargetVelocityTopArrowLigament", ARROW_LENGTH_SCALE * maximumDisplayableVelocity, ZERO_TOP_ANGLE, MECHANISM_LINE_WIDTH, GRAY));
-        this.targetVelocityBottomArrowLigament = targetVelocityLigament.append(new MechanismLigament2d("TargetVelocityBottomArrowLigament", ARROW_LENGTH_SCALE * maximumDisplayableVelocity, ZERO_BOTTOM_ANGLE, MECHANISM_LINE_WIDTH, GRAY));
+        this.targetVelocityLigament = root.append(new MechanismLigament2d("TargetVelocityLigament", 0, 0, MechanismConstants.MECHANISM_LINE_WIDTH, MechanismConstants.GRAY));
+        this.targetVelocityTopArrowLigament = targetVelocityLigament.append(new MechanismLigament2d("TargetVelocityTopArrowLigament", ARROW_LENGTH_SCALE * maximumDisplayableVelocity, ZERO_TOP_ANGLE, MechanismConstants.MECHANISM_LINE_WIDTH, MechanismConstants.GRAY));
+        this.targetVelocityBottomArrowLigament = targetVelocityLigament.append(new MechanismLigament2d("TargetVelocityBottomArrowLigament", ARROW_LENGTH_SCALE * maximumDisplayableVelocity, ZERO_BOTTOM_ANGLE, MechanismConstants.MECHANISM_LINE_WIDTH, MechanismConstants.GRAY));
     }
 
     /**
@@ -99,7 +95,7 @@ public class SpeedMechanism2d {
             return GREEN;
         else if (velocity < -deadband)
             return RED;
-        return BLUE;
+        return MechanismConstants.BLUE;
     }
 
     private void setArrowAngle(double velocity, MechanismLigament2d topLigament, MechanismLigament2d bottomLigament) {
