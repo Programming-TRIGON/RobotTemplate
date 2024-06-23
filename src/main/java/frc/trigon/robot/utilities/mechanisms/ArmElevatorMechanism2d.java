@@ -11,23 +11,20 @@ import org.littletonrobotics.junction.Logger;
  * A Mechanism2d object to display the current angle and target angle, and the current position and target position of an arm elevator.
  */
 public class ArmElevatorMechanism2d {
-    private static final double TARGET_POSITION_LIGAMENT_WIDTH = 10;
     private final String key;
     private final Mechanism2d mechanism;
     private final MechanismLigament2d
             currentPositionLigament,
             targetPositionLigament;
+    private final double minimumLength;
 
-    public ArmElevatorMechanism2d(String key, double maximumDisplayablePosition) {
-        this(key, maximumDisplayablePosition, MechanismConstants.BLUE);
-    }
-
-    public ArmElevatorMechanism2d(String key, double maximumDisplayablePosition, Color8Bit mechanismColor) {
+    public ArmElevatorMechanism2d(String key, double maximumLength, double minimumLength, Color8Bit mechanismColor) {
         this.key = key;
-        this.mechanism = new Mechanism2d(2 * maximumDisplayablePosition, 2 * maximumDisplayablePosition);
-        MechanismRoot2d root = mechanism.getRoot("CurrentPositionRoot", maximumDisplayablePosition, maximumDisplayablePosition);
+        this.minimumLength = minimumLength;
+        this.mechanism = new Mechanism2d(2 * maximumLength, 2 * maximumLength);
+        MechanismRoot2d root = mechanism.getRoot("CurrentPositionRoot", maximumLength, maximumLength);
         this.currentPositionLigament = root.append(new MechanismLigament2d("ZCurrentPositionLigament", 0, 0, MechanismConstants.MECHANISM_LINE_WIDTH, mechanismColor));
-        this.targetPositionLigament = root.append(new MechanismLigament2d("TargetPositionLigament", 0, 0, TARGET_POSITION_LIGAMENT_WIDTH, MechanismConstants.GRAY));
+        this.targetPositionLigament = root.append(new MechanismLigament2d("TargetPositionLigament", 0, 0, MechanismConstants.TARGET_POSITION_LIGAMENT_WIDTH, MechanismConstants.GRAY));
     }
 
     /**
@@ -39,22 +36,9 @@ public class ArmElevatorMechanism2d {
      * @param targetAngle     the target angle
      */
     public void updateMechanism(double currentPosition, double targetPosition, Rotation2d currentAngle, Rotation2d targetAngle) {
-        updateMechanism(currentPosition, targetPosition, currentAngle.getDegrees(), targetAngle.getDegrees());
-    }
-
-    /**
-     * Updates the mechanism's position and target position as well as the mechanism's angle and target angle, then logs the Mechanism2d object.
-     *
-     * @param currentPosition     the current position
-     * @param targetPosition      the target position
-     * @param currentAngleDegrees the current angle in degrees
-     * @param targetAngleDegrees  the target angle in degrees
-     */
-
-    public void updateMechanism(double currentPosition, double targetPosition, double currentAngleDegrees, double targetAngleDegrees) {
         setTargetPosition(targetPosition);
-        setTargetAngle(targetAngleDegrees);
-        updateMechanism(currentPosition, currentAngleDegrees);
+        setTargetAngle(targetAngle);
+        updateMechanism(currentPosition, currentAngle);
     }
 
     /**
@@ -64,18 +48,8 @@ public class ArmElevatorMechanism2d {
      * @param currentAngle    the current angle
      */
     public void updateMechanism(double currentPosition, Rotation2d currentAngle) {
-        updateMechanism(currentPosition, currentAngle.getDegrees());
-    }
-
-    /**
-     * updates the mechanism's position and angle, then logs the Mechanism2d object.
-     *
-     * @param currentPosition     the current position
-     * @param currentAngleDegrees the current angle in degrees
-     */
-    public void updateMechanism(double currentPosition, double currentAngleDegrees) {
         updateCurrentPosition(currentPosition);
-        updateCurrentAngle(currentAngleDegrees);
+        updateCurrentAngle(currentAngle);
         Logger.recordOutput(key, mechanism);
     }
 
@@ -85,7 +59,7 @@ public class ArmElevatorMechanism2d {
      * @param currentPosition the current position
      */
     public void updateCurrentPosition(double currentPosition) {
-        currentPositionLigament.setLength(currentPosition);
+        currentPositionLigament.setLength(currentPosition + minimumLength);
         Logger.recordOutput(key, mechanism);
     }
 
@@ -95,17 +69,7 @@ public class ArmElevatorMechanism2d {
      * @param currentAngle the current angle
      */
     public void updateCurrentAngle(Rotation2d currentAngle) {
-        updateCurrentAngle(currentAngle.getDegrees());
-    }
-
-    /**
-     * updates the mechanism's angle and logs the Mechanism2d object.
-     *
-     * @param currentAngleDegrees the current angle in degrees
-     */
-    public void updateCurrentAngle(double currentAngleDegrees) {
-        currentPositionLigament.setAngle(currentAngleDegrees);
-        Logger.recordOutput(key, mechanism);
+        currentPositionLigament.setAngle(currentAngle);
     }
 
     /**
@@ -114,7 +78,7 @@ public class ArmElevatorMechanism2d {
      * @param targetPosition the target position
      */
     public void setTargetPosition(double targetPosition) {
-        targetPositionLigament.setLength(targetPosition);
+        targetPositionLigament.setLength(targetPosition + minimumLength);
     }
 
     /**
@@ -123,15 +87,6 @@ public class ArmElevatorMechanism2d {
      * @param targetAngle the target angle
      */
     public void setTargetAngle(Rotation2d targetAngle) {
-        setTargetAngle(targetAngle.getDegrees());
-    }
-
-    /**
-     * sets the target angle of the mechanism.
-     *
-     * @param targetAngleDegrees the target angle in degrees
-     */
-    public void setTargetAngle(double targetAngleDegrees) {
-        targetPositionLigament.setAngle(targetAngleDegrees);
+        targetPositionLigament.setAngle(targetAngle);
     }
 }

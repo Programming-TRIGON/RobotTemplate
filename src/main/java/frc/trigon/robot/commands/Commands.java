@@ -37,6 +37,11 @@ public class Commands {
         return new InstantCommand(() -> {
             IS_BRAKING = !IS_BRAKING;
             MotorSubsystem.setAllSubsystemsBrakeAsync(IS_BRAKING);
+
+            if (IS_BRAKING)
+                CommandConstants.STATIC_WHITE_LED_COLOR_COMMAND.cancel();
+            else
+                CommandConstants.STATIC_WHITE_LED_COLOR_COMMAND.schedule();
         }).ignoringDisable(true);
     }
 

@@ -19,18 +19,18 @@ public class DoubleJointedArmMechanism2d {
             targetPositionFirstLigament,
             targetPositionSecondLigament;
 
-    public DoubleJointedArmMechanism2d(String key) {
-        this(key, MechanismConstants.BLUE);
+    public DoubleJointedArmMechanism2d(String key, Color8Bit mechanismColor) {
+        this(key, MechanismConstants.MECHANISM_LINE_LENGTH, MechanismConstants.MECHANISM_LINE_LENGTH, mechanismColor);
     }
 
-    private DoubleJointedArmMechanism2d(String key, Color8Bit mechanismColor) {
+    public DoubleJointedArmMechanism2d(String key, double firstJointLength, double secondJointLength, Color8Bit mechanismColor) {
         this.key = key;
-        this.mechanism = new Mechanism2d(4 * MechanismConstants.MECHANISM_LINE_LENGTH, 4 * MechanismConstants.MECHANISM_LINE_LENGTH);
-        MechanismRoot2d root = mechanism.getRoot("AngleRoot", 2 * MechanismConstants.MECHANISM_LINE_LENGTH, 2 * MechanismConstants.MECHANISM_LINE_LENGTH);
-        this.currentPositionFirstLigament = root.append(new MechanismLigament2d("ZCurrentPositionFirstLigament", MechanismConstants.MECHANISM_LINE_LENGTH, 0, MechanismConstants.MECHANISM_LINE_WIDTH, mechanismColor));
-        this.currentPositionSecondLigament = currentPositionFirstLigament.append(new MechanismLigament2d("ZCurrentPositionSecondLigament", MechanismConstants.MECHANISM_LINE_LENGTH, 0, MechanismConstants.MECHANISM_LINE_WIDTH, mechanismColor));
-        this.targetPositionFirstLigament = root.append(new MechanismLigament2d("TargetPositionFirstLigament", MechanismConstants.MECHANISM_LINE_LENGTH, 0, MechanismConstants.MECHANISM_LINE_WIDTH, MechanismConstants.GRAY));
-        this.targetPositionSecondLigament = targetPositionFirstLigament.append(new MechanismLigament2d("TargetPositionSecondLigament", MechanismConstants.MECHANISM_LINE_LENGTH, 0, MechanismConstants.MECHANISM_LINE_WIDTH, MechanismConstants.GRAY));
+        this.mechanism = new Mechanism2d(2 * MechanismConstants.MECHANISM_WIDTH_RATIO * (firstJointLength + firstJointLength), 2 * MechanismConstants.MECHANISM_WIDTH_RATIO * (firstJointLength + secondJointLength));
+        MechanismRoot2d root = mechanism.getRoot("AngleRoot", MechanismConstants.MECHANISM_WIDTH_RATIO * (firstJointLength + firstJointLength), MechanismConstants.MECHANISM_WIDTH_RATIO * (firstJointLength + secondJointLength));
+        this.currentPositionFirstLigament = root.append(new MechanismLigament2d("ZCurrentPositionFirstLigament", firstJointLength, 0, MechanismConstants.MECHANISM_LINE_WIDTH, mechanismColor));
+        this.currentPositionSecondLigament = currentPositionFirstLigament.append(new MechanismLigament2d("ZCurrentPositionSecondLigament", secondJointLength, 0, MechanismConstants.MECHANISM_LINE_WIDTH, mechanismColor));
+        this.targetPositionFirstLigament = root.append(new MechanismLigament2d("TargetPositionFirstLigament", firstJointLength, 0, MechanismConstants.MECHANISM_LINE_WIDTH, MechanismConstants.GRAY));
+        this.targetPositionSecondLigament = targetPositionFirstLigament.append(new MechanismLigament2d("TargetPositionSecondLigament", secondJointLength, 0, MechanismConstants.MECHANISM_LINE_WIDTH, MechanismConstants.GRAY));
     }
 
     /**
@@ -42,20 +42,8 @@ public class DoubleJointedArmMechanism2d {
      * @param secondJointTargetAngle  the target angle of the second joint
      */
     public void updateMechanism(Rotation2d firstJointCurrentAngle, Rotation2d firstJointTargetAngle, Rotation2d secondJointCurrentAngle, Rotation2d secondJointTargetAngle) {
-        updateMechanism(firstJointCurrentAngle.getDegrees(), firstJointTargetAngle.getDegrees(), secondJointCurrentAngle.getDegrees(), secondJointTargetAngle.getDegrees());
-    }
-
-    /**
-     * Updates the angle and target angle of both joints, then logs the Mechanism2d object.
-     *
-     * @param firstJointCurrentAngleDegrees  the current angle of the first joint in degrees
-     * @param firstJointTargetAngleDegrees   the target angle of the first joint in degrees
-     * @param secondJointCurrentAngleDegrees the current angle of the second joint in degrees
-     * @param secondJointTargetAngleDegrees  the target angle of the second joint in degrees
-     */
-    public void updateMechanism(double firstJointCurrentAngleDegrees, double firstJointTargetAngleDegrees, double secondJointCurrentAngleDegrees, double secondJointTargetAngleDegrees) {
-        setTargetAngle(firstJointTargetAngleDegrees, secondJointTargetAngleDegrees);
-        updateMechanism(firstJointCurrentAngleDegrees, secondJointCurrentAngleDegrees);
+        setTargetAngle(firstJointTargetAngle, secondJointTargetAngle);
+        updateMechanism(firstJointCurrentAngle, secondJointCurrentAngle);
     }
 
     /**
@@ -65,40 +53,20 @@ public class DoubleJointedArmMechanism2d {
      * @param secondJointCurrentAngle the current angle of the second joint
      */
     public void updateMechanism(Rotation2d firstJointCurrentAngle, Rotation2d secondJointCurrentAngle) {
-        updateMechanism(firstJointCurrentAngle.getDegrees(), secondJointCurrentAngle.getDegrees());
-    }
-
-    /**
-     * Updates the angle of both joints, then logs the Mechanism2d object.
-     *
-     * @param firstJointCurrentAngleDegrees  the current angle of the first joint in degrees
-     * @param secondJointCurrentAngleDegrees the current angle of the second joint in degrees
-     */
-    public void updateMechanism(double firstJointCurrentAngleDegrees, double secondJointCurrentAngleDegrees) {
-        updateFirstJoint(firstJointCurrentAngleDegrees);
-        updateSecondJoint(secondJointCurrentAngleDegrees);
+        updateFirstJoint(firstJointCurrentAngle);
+        updateSecondJoint(secondJointCurrentAngle);
         Logger.recordOutput(key, mechanism);
     }
 
     /**
-     * Sets the target angle of both joints.
+     * Sets the target angle of both joints, but doesn't log the mechanism.
      *
      * @param firstJointTargetAngle  the target angle of the first joint
      * @param secondJointTargetAngle the target angle of the second joint
      */
     public void setTargetAngle(Rotation2d firstJointTargetAngle, Rotation2d secondJointTargetAngle) {
-        setTargetAngle(firstJointTargetAngle.getDegrees(), secondJointTargetAngle.getDegrees());
-    }
-
-    /**
-     * Sets the target angle of both joints.
-     *
-     * @param firstJointTargetAngleDegrees  the target angle of the first joint in degrees
-     * @param secondJointTargetAngleDegrees the target angle of the second joint in degrees
-     */
-    public void setTargetAngle(double firstJointTargetAngleDegrees, double secondJointTargetAngleDegrees) {
-        setFirstJointTargetAngle(firstJointTargetAngleDegrees);
-        setSecondJointTargetAngle(secondJointTargetAngleDegrees);
+        setFirstJointTargetAngle(firstJointTargetAngle);
+        setSecondJointTargetAngle(secondJointTargetAngle);
     }
 
     /**
@@ -108,18 +76,8 @@ public class DoubleJointedArmMechanism2d {
      * @param firstJointTargetAngle  the target angle of the first joint
      */
     public void updateFirstJoint(Rotation2d firstJointCurrentAngle, Rotation2d firstJointTargetAngle) {
-        updateFirstJoint(firstJointCurrentAngle.getDegrees(), firstJointTargetAngle.getDegrees());
-    }
-
-    /**
-     * Updates the angle and target angle of the first joint, then logs the Mechanism2d object.
-     *
-     * @param firstJointCurrentAngleDegrees the current angle of the first joint in degrees
-     * @param firstJointTargetAngleDegrees  the target angle of the first joint in degrees
-     */
-    public void updateFirstJoint(double firstJointCurrentAngleDegrees, double firstJointTargetAngleDegrees) {
-        updateFirstJoint(firstJointCurrentAngleDegrees);
-        setFirstJointTargetAngle(firstJointTargetAngleDegrees);
+        setFirstJointTargetAngle(firstJointTargetAngle);
+        updateFirstJoint(firstJointCurrentAngle);
     }
 
     /**
@@ -128,16 +86,7 @@ public class DoubleJointedArmMechanism2d {
      * @param firstJointCurrentAngle the current angle of the first joint
      */
     public void updateFirstJoint(Rotation2d firstJointCurrentAngle) {
-        updateFirstJoint(firstJointCurrentAngle.getDegrees());
-    }
-
-    /**
-     * Updates the angle of the first joint, then logs the Mechanism2d object.
-     *
-     * @param firstJointCurrentAngleDegrees the current angle of the first joint in degrees
-     */
-    public void updateFirstJoint(double firstJointCurrentAngleDegrees) {
-        currentPositionFirstLigament.setAngle(firstJointCurrentAngleDegrees);
+        currentPositionFirstLigament.setAngle(firstJointCurrentAngle);
         Logger.recordOutput(key, mechanism);
     }
 
@@ -147,16 +96,7 @@ public class DoubleJointedArmMechanism2d {
      * @param firstJointTargetAngle the target angle of the first joint
      */
     public void setFirstJointTargetAngle(Rotation2d firstJointTargetAngle) {
-        setFirstJointTargetAngle(firstJointTargetAngle.getDegrees());
-    }
-
-    /**
-     * Sets the target angle of the first joint.
-     *
-     * @param firstJointTargetAngleDegrees the target angle of the first joint in degrees
-     */
-    public void setFirstJointTargetAngle(double firstJointTargetAngleDegrees) {
-        targetPositionFirstLigament.setAngle(firstJointTargetAngleDegrees);
+        targetPositionFirstLigament.setAngle(firstJointTargetAngle);
     }
 
     /**
@@ -166,18 +106,8 @@ public class DoubleJointedArmMechanism2d {
      * @param secondJointTargetAngle  the target angle of the second joint
      */
     public void updateSecondJoint(Rotation2d secondJointCurrentAngle, Rotation2d secondJointTargetAngle) {
-        updateSecondJoint(secondJointCurrentAngle.getDegrees(), secondJointTargetAngle.getDegrees());
-    }
-
-    /**
-     * Updates the angle and target angle of the second joint, then logs the Mechanism2d object.
-     *
-     * @param secondJointCurrentAngleDegrees the current angle of the second joint in degrees
-     * @param secondJointTargetAngleDegrees  the target angle of the second joint in degrees
-     */
-    public void updateSecondJoint(double secondJointCurrentAngleDegrees, double secondJointTargetAngleDegrees) {
-        setSecondJointTargetAngle(secondJointTargetAngleDegrees);
-        updateSecondJoint(secondJointCurrentAngleDegrees);
+        setSecondJointTargetAngle(secondJointTargetAngle);
+        updateSecondJoint(secondJointCurrentAngle);
     }
 
     /**
@@ -186,16 +116,7 @@ public class DoubleJointedArmMechanism2d {
      * @param secondJointCurrentAngle the current angle of the second joint
      */
     private void updateSecondJoint(Rotation2d secondJointCurrentAngle) {
-        updateSecondJoint(secondJointCurrentAngle.getDegrees());
-    }
-
-    /**
-     * Updates the angle of the second joint, then logs the Mechanism2d object.
-     *
-     * @param secondJointCurrentAngleDegrees the current angle of the second joint in degrees
-     */
-    private void updateSecondJoint(double secondJointCurrentAngleDegrees) {
-        currentPositionSecondLigament.setAngle(secondJointCurrentAngleDegrees);
+        currentPositionSecondLigament.setAngle(secondJointCurrentAngle);
         Logger.recordOutput(key, mechanism);
     }
 
@@ -205,15 +126,6 @@ public class DoubleJointedArmMechanism2d {
      * @param secondJointTargetAngle the target angle of the second joint
      */
     public void setSecondJointTargetAngle(Rotation2d secondJointTargetAngle) {
-        setSecondJointTargetAngle(secondJointTargetAngle.getDegrees());
-    }
-
-    /**
-     * Sets the target angle of the second joint.
-     *
-     * @param secondJointTargetAngleDegrees the target angle of the second joint in degrees
-     */
-    public void setSecondJointTargetAngle(double secondJointTargetAngleDegrees) {
-        targetPositionSecondLigament.setAngle(secondJointTargetAngleDegrees);
+        targetPositionSecondLigament.setAngle(secondJointTargetAngle);
     }
 }

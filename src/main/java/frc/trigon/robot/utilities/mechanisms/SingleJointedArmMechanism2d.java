@@ -17,16 +17,16 @@ public class SingleJointedArmMechanism2d {
             currentPositionLigament,
             targetPositionLigament;
 
-    public SingleJointedArmMechanism2d(String key) {
-        this(key, MechanismConstants.BLUE);
+    public SingleJointedArmMechanism2d(String key, Color8Bit mechanismColor) {
+        this(key, MechanismConstants.MECHANISM_LINE_LENGTH, mechanismColor);
     }
 
-    public SingleJointedArmMechanism2d(String key, Color8Bit mechanismColor) {
+    public SingleJointedArmMechanism2d(String key, double armLength, Color8Bit mechanismColor) {
         this.key = key;
-        this.mechanism = new Mechanism2d(2 * MechanismConstants.MECHANISM_LINE_LENGTH, 2 * MechanismConstants.MECHANISM_LINE_LENGTH);
-        MechanismRoot2d root = mechanism.getRoot("AngleRoot", MechanismConstants.MECHANISM_LINE_LENGTH, MechanismConstants.MECHANISM_LINE_LENGTH);
-        this.currentPositionLigament = root.append(new MechanismLigament2d("ZCurrentPositionLigament", MechanismConstants.MECHANISM_LINE_LENGTH, 0, MechanismConstants.MECHANISM_LINE_WIDTH, mechanismColor));
-        this.targetPositionLigament = root.append(new MechanismLigament2d("TargetPositionLigament", MechanismConstants.MECHANISM_LINE_LENGTH, 0, MechanismConstants.MECHANISM_LINE_WIDTH, MechanismConstants.GRAY));
+        this.mechanism = new Mechanism2d(2 * MechanismConstants.MECHANISM_WIDTH_RATIO * armLength, 2 * MechanismConstants.MECHANISM_LINE_LENGTH);
+        MechanismRoot2d root = mechanism.getRoot("AngleRoot", armLength, MechanismConstants.MECHANISM_WIDTH_RATIO * MechanismConstants.MECHANISM_LINE_LENGTH);
+        this.currentPositionLigament = root.append(new MechanismLigament2d("ZCurrentPositionLigament", armLength, 0, MechanismConstants.MECHANISM_LINE_WIDTH, mechanismColor));
+        this.targetPositionLigament = root.append(new MechanismLigament2d("TargetPositionLigament", armLength, 0, MechanismConstants.MECHANISM_LINE_WIDTH, MechanismConstants.GRAY));
     }
 
     /**
@@ -36,18 +36,8 @@ public class SingleJointedArmMechanism2d {
      * @param targetAngle  the target angle
      */
     public void updateMechanism(Rotation2d currentAngle, Rotation2d targetAngle) {
-        updateMechanism(currentAngle.getDegrees(), targetAngle.getDegrees());
-    }
-
-    /**
-     * Updates the mechanism's angle and target angle, then logs the Mechanism2d object.
-     *
-     * @param currentAngleDegrees the current angle in degrees
-     * @param targetAngleDegrees  the target angle in degrees
-     */
-    public void updateMechanism(double currentAngleDegrees, double targetAngleDegrees) {
-        setTargetAngle(targetAngleDegrees);
-        updateMechanism(currentAngleDegrees);
+        setTargetAngle(targetAngle);
+        updateMechanism(currentAngle);
     }
 
     /**
@@ -56,16 +46,7 @@ public class SingleJointedArmMechanism2d {
      * @param currentAngle the current angle
      */
     public void updateMechanism(Rotation2d currentAngle) {
-        updateMechanism(currentAngle.getDegrees());
-    }
-
-    /**
-     * Updates the mechanism's angle, then logs the Mechanism2d object.
-     *
-     * @param currentAngleDegrees the current angle in degrees
-     */
-    public void updateMechanism(double currentAngleDegrees) {
-        currentPositionLigament.setAngle(currentAngleDegrees);
+        currentPositionLigament.setAngle(currentAngle);
         Logger.recordOutput(key, mechanism);
     }
 
@@ -75,15 +56,6 @@ public class SingleJointedArmMechanism2d {
      * @param targetAngle the target angle
      */
     public void setTargetAngle(Rotation2d targetAngle) {
-        setTargetAngle(targetAngle.getDegrees());
-    }
-
-    /**
-     * Sets the target angle of the mechanism.
-     *
-     * @param targetAngleDegrees the target angle in degrees
-     */
-    public void setTargetAngle(double targetAngleDegrees) {
-        targetPositionLigament.setAngle(targetAngleDegrees);
+        targetPositionLigament.setAngle(targetAngle);
     }
 }
