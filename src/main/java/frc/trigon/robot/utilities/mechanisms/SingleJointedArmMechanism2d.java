@@ -23,8 +23,9 @@ public class SingleJointedArmMechanism2d {
 
     public SingleJointedArmMechanism2d(String key, double armLength, Color8Bit mechanismColor) {
         this.key = key;
-        this.mechanism = new Mechanism2d(2 * MechanismConstants.MECHANISM_WIDTH_RATIO * armLength, 2 * MechanismConstants.MECHANISM_LINE_LENGTH);
-        MechanismRoot2d root = mechanism.getRoot("AngleRoot", armLength, MechanismConstants.MECHANISM_WIDTH_RATIO * MechanismConstants.MECHANISM_LINE_LENGTH);
+        final double mechanismMiddle = MechanismConstants.LIGAMENT_END_TO_EDGE_RATIO * armLength;
+        this.mechanism = new Mechanism2d(2 * mechanismMiddle, 2 * mechanismMiddle);
+        final MechanismRoot2d root = mechanism.getRoot("AngleRoot", mechanismMiddle, mechanismMiddle);
         this.currentPositionLigament = root.append(new MechanismLigament2d("ZCurrentPositionLigament", armLength, 0, MechanismConstants.MECHANISM_LINE_WIDTH, mechanismColor));
         this.targetPositionLigament = root.append(new MechanismLigament2d("TargetPositionLigament", armLength, 0, MechanismConstants.MECHANISM_LINE_WIDTH, MechanismConstants.GRAY));
     }

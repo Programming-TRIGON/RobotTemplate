@@ -12,7 +12,7 @@ public class MechanismConstants {
     static final double
             MECHANISM_LINE_WIDTH = 5,
             MECHANISM_LINE_LENGTH = 5,
-            TARGET_POSITION_LIGAMENT_WIDTH = 10;
+            TARGET_ELEVATOR_POSITION_LIGAMENT_WIDTH = 10;
     static final double
             NEGATIVE_TOP_ANGLE = 45,
             NEGATIVE_BOTTOM_ANGLE = 315,
@@ -22,5 +22,5 @@ public class MechanismConstants {
             ZERO_BOTTOM_ANGLE = 270;
     static final double ELEVATOR_MECHANISM_STARTING_ANGLE = 90;
     static final double ARROW_LENGTH_SCALE = 0.2;
-    static final double MECHANISM_WIDTH_RATIO = 1.1;
+    static final double LIGAMENT_END_TO_EDGE_RATIO = 1.1;
 }

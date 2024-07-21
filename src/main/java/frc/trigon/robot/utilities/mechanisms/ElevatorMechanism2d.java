@@ -27,10 +27,9 @@ public class ElevatorMechanism2d {
         this.minimumLength = minimumLength;
         this.mechanism = new Mechanism2d(maximumLength, maximumLength);
 
-        MechanismRoot2d currentPositionRoot = mechanism.getRoot("ZCurrentPositionRoot", 0.5 * maximumLength, 0);
-        MechanismRoot2d targetPositionRoot = mechanism.getRoot("TargetPositionRoot", 0.5 * maximumLength, 0);
+        final MechanismRoot2d currentPositionRoot = mechanism.getRoot("ZCurrentPositionRoot", 0.5 * maximumLength, 0);
         this.currentPositionLigament = currentPositionRoot.append(new MechanismLigament2d("ZCurrentPositionLigament", minimumLength, MechanismConstants.ELEVATOR_MECHANISM_STARTING_ANGLE, MechanismConstants.MECHANISM_LINE_WIDTH, mechanismColor));
-        this.targetPositionLigament = targetPositionRoot.append(new MechanismLigament2d("TargetPositionLigament", maximumLength, MechanismConstants.ELEVATOR_MECHANISM_STARTING_ANGLE, MechanismConstants.TARGET_POSITION_LIGAMENT_WIDTH, MechanismConstants.GRAY));
+        this.targetPositionLigament = currentPositionRoot.append(new MechanismLigament2d("TargetPositionLigament", maximumLength, MechanismConstants.ELEVATOR_MECHANISM_STARTING_ANGLE, MechanismConstants.TARGET_ELEVATOR_POSITION_LIGAMENT_WIDTH, MechanismConstants.GRAY));
     }
 
     /**

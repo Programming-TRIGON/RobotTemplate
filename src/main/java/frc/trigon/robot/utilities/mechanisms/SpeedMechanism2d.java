@@ -29,7 +29,7 @@ public class SpeedMechanism2d {
         this.deadband = deadband;
         this.key = key;
         this.mechanism = new Mechanism2d(2 * maximumDisplayableVelocity, 2 * maximumDisplayableVelocity);
-        MechanismRoot2d root = mechanism.getRoot("VelocityRoot", maximumDisplayableVelocity, maximumDisplayableVelocity);
+        final MechanismRoot2d root = mechanism.getRoot("VelocityRoot", maximumDisplayableVelocity, maximumDisplayableVelocity);
         this.currentVelocityLigament = root.append(new MechanismLigament2d("ZCurrentVelocityLigament", 0, 0, MechanismConstants.MECHANISM_LINE_WIDTH, MechanismConstants.BLUE));
         this.currentVelocityTopArrowLigament = currentVelocityLigament.append(new MechanismLigament2d("ZCurrentVelocityTopArrowLigament", MechanismConstants.ARROW_LENGTH_SCALE * maximumDisplayableVelocity, MechanismConstants.ZERO_TOP_ANGLE, MechanismConstants.MECHANISM_LINE_WIDTH, MechanismConstants.BLUE));
         this.currentVelocityBottomArrowLigament = currentVelocityLigament.append(new MechanismLigament2d("ZCurrentVelocityBottomArrowLigament", MechanismConstants.ARROW_LENGTH_SCALE * maximumDisplayableVelocity, MechanismConstants.ZERO_BOTTOM_ANGLE, MechanismConstants.MECHANISM_LINE_WIDTH, MechanismConstants.BLUE));
@@ -42,21 +42,21 @@ public class SpeedMechanism2d {
     /**
      * Updates the mechanism's velocity and target velocity and logs the Mechanism2d object.
      *
-     * @param velocity       the current velocity
-     * @param targetVelocity the target velocity
+     * @param currentVelocity the current velocity
+     * @param targetVelocity  the target velocity
      */
-    public void update(double velocity, double targetVelocity) {
+    public void update(double currentVelocity, double targetVelocity) {
         setTargetVelocity(targetVelocity);
-        update(velocity);
+        update(currentVelocity);
     }
 
     /**
      * Updates the mechanism's velocity and logs the Mechanism2d object.
      *
-     * @param velocity the current velocity
+     * @param currentVelocity the current velocity
      */
-    public void update(double velocity) {
-        setCurrentVelocity(velocity);
+    public void update(double currentVelocity) {
+        setCurrentVelocity(currentVelocity);
         update();
     }
 
@@ -70,12 +70,12 @@ public class SpeedMechanism2d {
     /**
      * Sets the current velocity of the mechanism but doesn't log the Mechanism2d object.
      *
-     * @param velocity the current velocity
+     * @param currentVelocity the current velocity
      */
-    public void setCurrentVelocity(double velocity) {
-        setArrowAngle(velocity, currentVelocityTopArrowLigament, currentVelocityBottomArrowLigament);
-        currentVelocityLigament.setLength(velocity);
-        setCurrentLigamentColor(velocityToColor(velocity));
+    public void setCurrentVelocity(double currentVelocity) {
+        setArrowAngle(currentVelocity, currentVelocityTopArrowLigament, currentVelocityBottomArrowLigament);
+        currentVelocityLigament.setLength(currentVelocity);
+        setCurrentLigamentColor(velocityToColor(currentVelocity));
     }
 
     /**
