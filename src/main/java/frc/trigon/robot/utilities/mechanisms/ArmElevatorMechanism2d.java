@@ -48,32 +48,58 @@ public class ArmElevatorMechanism2d {
      * @param currentAngle    the current angle
      */
     public void updateMechanism(double currentPosition, Rotation2d currentAngle) {
-        updateCurrentPosition(currentPosition);
-        updateCurrentAngle(currentAngle);
-        Logger.recordOutput(key, mechanism);
+        setCurrentPosition(currentPosition);
+        setCurrentAngle(currentAngle);
+        update();
     }
 
     /**
-     * updates the mechanism's position and logs the Mechanism2d object.
+     * Updates the mechanism's position then logs the Mechanism2d object.
      *
      * @param currentPosition the current position
      */
     public void updateCurrentPosition(double currentPosition) {
-        currentPositionLigament.setLength(currentPosition + minimumLength);
-        Logger.recordOutput(key, mechanism);
+        setCurrentPosition(currentPosition);
+        update();
     }
 
     /**
-     * updates the mechanism's angle and logs the Mechanism2d object.
+     * Updates the mechanism's angle then logs the Mechanism2d object.
      *
      * @param currentAngle the current angle
      */
     public void updateCurrentAngle(Rotation2d currentAngle) {
+        setCurrentAngle(currentAngle);
+        update();
+    }
+
+    /**
+     * Logs the Mechanism2d object.
+     */
+    public void update() {
+        Logger.recordOutput(key, mechanism);
+    }
+
+    /**
+     * updates the mechanism's position but doesn't log the Mechanism2d object.
+     *
+     * @param currentPosition the current position
+     */
+    public void setCurrentPosition(double currentPosition) {
+        currentPositionLigament.setLength(currentPosition + minimumLength);
+    }
+
+    /**
+     * updates the mechanism's angle but doesn't log the Mechanism2d object.
+     *
+     * @param currentAngle the current angle
+     */
+    public void setCurrentAngle(Rotation2d currentAngle) {
         currentPositionLigament.setAngle(currentAngle);
     }
 
     /**
-     * sets the target position of the mechanism.
+     * sets the target position of the mechanism but doesn't log the Mechanism2d object.
      *
      * @param targetPosition the target position
      */
@@ -82,7 +108,7 @@ public class ArmElevatorMechanism2d {
     }
 
     /**
-     * sets the target angle of the mechanism.
+     * sets the target angle of the mechanism but doesn't log the Mechanism2d object.
      *
      * @param targetAngle the target angle
      */

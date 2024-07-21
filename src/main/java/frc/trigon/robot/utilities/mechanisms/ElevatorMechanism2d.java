@@ -39,9 +39,9 @@ public class ElevatorMechanism2d {
      * @param currentPosition the current position
      * @param targetPosition  the target position
      */
-    public void updateMechanism(double currentPosition, double targetPosition) {
+    public void update(double currentPosition, double targetPosition) {
         setTargetPosition(targetPosition);
-        updateMechanism(currentPosition);
+        update(currentPosition);
     }
 
     /**
@@ -49,13 +49,29 @@ public class ElevatorMechanism2d {
      *
      * @param currentPosition the current position
      */
-    public void updateMechanism(double currentPosition) {
-        currentPositionLigament.setLength(currentPosition + minimumLength);
+    public void update(double currentPosition) {
+        setCurrentPosition(currentPosition);
+        update();
+    }
+
+    /**
+     * Logs the Mechanism2d object.
+     */
+    public void update() {
         Logger.recordOutput(key, mechanism);
     }
 
     /**
-     * Sets the target position of the mechanism, but doesn't log the Mechanism2d object.
+     * Sets the current position of the mechanism but doesn't log the Mechanism2d object.
+     *
+     * @param currentPosition the current position
+     */
+    public void setCurrentPosition(double currentPosition) {
+        currentPositionLigament.setLength(currentPosition + minimumLength);
+    }
+
+    /**
+     * Sets the target position of the mechanism but doesn't log the Mechanism2d object.
      *
      * @param targetPosition the target position
      */

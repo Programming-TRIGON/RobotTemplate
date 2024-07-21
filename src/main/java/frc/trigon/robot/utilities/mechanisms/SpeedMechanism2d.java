@@ -45,9 +45,9 @@ public class SpeedMechanism2d {
      * @param velocity       the current velocity
      * @param targetVelocity the target velocity
      */
-    public void updateMechanism(double velocity, double targetVelocity) {
+    public void update(double velocity, double targetVelocity) {
         setTargetVelocity(targetVelocity);
-        updateMechanism(velocity);
+        update(velocity);
     }
 
     /**
@@ -55,11 +55,27 @@ public class SpeedMechanism2d {
      *
      * @param velocity the current velocity
      */
-    public void updateMechanism(double velocity) {
+    public void update(double velocity) {
+        setCurrentVelocity(velocity);
+        update();
+    }
+
+    /**
+     * Logs the Mechanism2d object.
+     */
+    public void update() {
+        Logger.recordOutput(key, mechanism);
+    }
+
+    /**
+     * Sets the current velocity of the mechanism but doesn't log the Mechanism2d object.
+     *
+     * @param velocity the current velocity
+     */
+    public void setCurrentVelocity(double velocity) {
         setArrowAngle(velocity, currentVelocityTopArrowLigament, currentVelocityBottomArrowLigament);
         currentVelocityLigament.setLength(velocity);
         setCurrentLigamentColor(velocityToColor(velocity));
-        Logger.recordOutput(key, mechanism);
     }
 
     /**

@@ -35,9 +35,9 @@ public class SingleJointedArmMechanism2d {
      * @param currentAngle the current angle
      * @param targetAngle  the target angle
      */
-    public void updateMechanism(Rotation2d currentAngle, Rotation2d targetAngle) {
+    public void update(Rotation2d currentAngle, Rotation2d targetAngle) {
         setTargetAngle(targetAngle);
-        updateMechanism(currentAngle);
+        update(currentAngle);
     }
 
     /**
@@ -45,9 +45,20 @@ public class SingleJointedArmMechanism2d {
      *
      * @param currentAngle the current angle
      */
-    public void updateMechanism(Rotation2d currentAngle) {
-        currentPositionLigament.setAngle(currentAngle);
+    public void update(Rotation2d currentAngle) {
+        setCurrentAngle(currentAngle);
+        update();
+    }
+
+    /**
+     * Logs the Mechanism2d object.
+     */
+    public void update() {
         Logger.recordOutput(key, mechanism);
+    }
+
+    public void setCurrentAngle(Rotation2d currentAngle) {
+        currentPositionLigament.setAngle(currentAngle);
     }
 
     /**
