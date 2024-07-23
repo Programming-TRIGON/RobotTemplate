@@ -1,4 +1,4 @@
-package frc.trigon.robot.components.objectdetectioncamera;
+package frc.trigon.robot.hardware.objectdetectioncamera;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
