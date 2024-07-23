@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
 import org.littletonrobotics.junction.Logger;
 
 /**
- * A Mechanism2d object to display the current angle and the target angle of a double jointed arm.
+ * A Mechanism2d object to display the current angle and the target angle of a double-jointed arm.
  */
 public class DoubleJointedArmMechanism2d {
     private final String key;

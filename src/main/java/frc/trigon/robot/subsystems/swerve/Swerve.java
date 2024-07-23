@@ -78,10 +78,6 @@ public class Swerve extends MotorSubsystem {
         return ChassisSpeeds.fromRobotRelativeSpeeds(getSelfRelativeVelocity(), RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation());
     }
 
-    public Rotation2d getPitch() {
-        return Rotation2d.fromDegrees(gyro.getSignal(Pigeon2Signal.PITCH));
-    }
-
     /**
      * Checks if the robot is at a pose.
      *

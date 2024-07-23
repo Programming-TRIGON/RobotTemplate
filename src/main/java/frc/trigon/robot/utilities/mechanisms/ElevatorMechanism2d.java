@@ -6,6 +6,9 @@ import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import org.littletonrobotics.junction.Logger;
 
+/**
+ * A Mechanism2d object to display the current position and target position of an elevator.
+ */
 public class ElevatorMechanism2d {
     private final String key;
     private final Mechanism2d mechanism;

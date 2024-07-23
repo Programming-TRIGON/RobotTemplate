@@ -71,10 +71,9 @@ public abstract class SwerveConstants {
     );
 
     static {
-//        GYRO.applyConfiguration(SYSTEM_SPECIFIC_CONSTANTS.generateGyroConfiguration());
+        GYRO.applyConfiguration(SYSTEM_SPECIFIC_CONSTANTS.generateGyroConfiguration());
 
         GYRO.registerThreadedSignal(Pigeon2Signal.YAW, Pigeon2Signal.ANGULAR_VELOCITY_Z_WORLD, PoseEstimatorConstants.ODOMETRY_FREQUENCY_HERTZ);
-        GYRO.registerSignal(Pigeon2Signal.PITCH, 100);
     }
 
     private static SwerveConstants generateConstants() {
