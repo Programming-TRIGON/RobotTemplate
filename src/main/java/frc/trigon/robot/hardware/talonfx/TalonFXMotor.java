@@ -1,0 +1,98 @@
+package frc.trigon.robot.hardware.talonfx;
+
+import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.ControlRequest;
+import com.ctre.phoenix6.hardware.TalonFX;
+import frc.trigon.robot.constants.RobotConstants;
+import frc.trigon.robot.hardware.Phoenix6Inputs;
+import frc.trigon.robot.hardware.talonfx.io.RealTalonFXIO;
+import frc.trigon.robot.hardware.talonfx.io.SimulationTalonFXIO;
+import org.littletonrobotics.junction.Logger;
+
+public class TalonFXMotor {
+    private final String motorName;
+    private final TalonFXIO motorIO;
+    private final Phoenix6Inputs motorInputs;
+
+    public TalonFXMotor(int id, String motorName, MotorSimulationPhysicalProperties physicalProperties) {
+        this(id, motorName, physicalProperties, "");
+    }
+
+    public TalonFXMotor(int id, String motorName, MotorSimulationPhysicalProperties physicalProperties, String canbus) {
+        this.motorName = motorName;
+        this.motorIO = generateIO(id, physicalProperties, canbus);
+        this.motorInputs = new Phoenix6Inputs(motorName);
+        motorIO.optimizeBusUsage();
+    }
+
+    public void update() {
+        motorIO.updateMotor();
+        Logger.processInputs("Motors/" + motorName, motorInputs);
+    }
+
+    public void applyConfigurations(TalonFXConfiguration realConfiguration, TalonFXConfiguration simulationConfiguration) {
+        if (RobotConstants.IS_SIMULATION)
+            motorIO.applyConfiguration(simulationConfiguration);
+        else
+            motorIO.applyConfiguration(realConfiguration);
+    }
+
+    public void applyConfiguration(TalonFXConfiguration simulationAndRealConfiguration) {
+        motorIO.applyConfiguration(simulationAndRealConfiguration);
+    }
+
+    public void applyRealConfiguration(TalonFXConfiguration realConfiguration) {
+        if (!RobotConstants.IS_SIMULATION)
+            motorIO.applyConfiguration(realConfiguration);
+    }
+
+    public void applySimulationConfiguration(TalonFXConfiguration simulationConfiguration) {
+        if (RobotConstants.IS_SIMULATION)
+            motorIO.applyConfiguration(simulationConfiguration);
+    }
+
+    public void stopMotor() {
+        motorIO.stopMotor();
+    }
+
+    public double getSignal(TalonFXSignal signal) {
+        return motorInputs.getSignal(signal.name);
+    }
+
+    public double[] getThreadedSignal(TalonFXSignal signal) {
+        return motorInputs.getThreadedSignal(signal.name);
+    }
+
+    public void registerSignal(TalonFXSignal signal, double updateFrequencyHertz) {
+        motorInputs.registerSignal(motorSignalToStatusSignal(signal), updateFrequencyHertz);
+    }
+
+    public void registerThreadedSignal(TalonFXSignal signal, TalonFXSignal slopeSignal, double updateFrequencyHertz) {
+        motorInputs.registerThreadedSignal(motorSignalToStatusSignal(signal), motorSignalToStatusSignal(slopeSignal), updateFrequencyHertz);
+    }
+
+    public void setControl(ControlRequest request) {
+        motorIO.setControl(request);
+    }
+
+    public void setBrake(boolean brake) {
+        motorIO.setBrake(brake);
+    }
+
+    private BaseStatusSignal motorSignalToStatusSignal(TalonFXSignal signal) {
+        final TalonFX talonFX = motorIO.getTalonFX();
+        if (RobotConstants.IS_REPLAY || talonFX == null)
+            return null;
+
+        return signal.signalFunction.apply(talonFX);
+    }
+
+    private TalonFXIO generateIO(int id, MotorSimulationPhysicalProperties physicalProperties, String canbus) {
+        if (RobotConstants.IS_REPLAY)
+            return new TalonFXIO();
+        if (RobotConstants.IS_SIMULATION)
+            return new SimulationTalonFXIO(id, physicalProperties);
+        return new RealTalonFXIO(id, canbus);
+    }
+}

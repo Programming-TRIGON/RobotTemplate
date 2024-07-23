@@ -10,11 +10,9 @@ public class ObjectDetectionCameraIO {
     static ObjectDetectionCameraIO generateIO(String hostname) {
         if (RobotConstants.IS_REPLAY)
             return new ObjectDetectionCameraIO();
-        if (RobotConstants.ROBOT_TYPE == RobotConstants.RobotType.SIMULATION)
+        if (RobotConstants.IS_SIMULATION)
             return new SimulationObjectDetectionCameraIO(hostname);
-        if (RobotConstants.ROBOT_TYPE == RobotConstants.RobotType.TRIUMPH)
-            return new PhotonObjectDetectionCameraIO(hostname);
-        return new ObjectDetectionCameraIO();
+        return new PhotonObjectDetectionCameraIO(hostname);
     }
 
     protected void updateInputs(ObjectDetectionCameraInputsAutoLogged inputs) {

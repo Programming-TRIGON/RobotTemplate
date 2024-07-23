@@ -61,7 +61,7 @@ public class Robot extends LoggedRobot {
             Logger.addDataReceiver(new WPILOGWriter(logWriterPath));
         } else {
             Logger.addDataReceiver(new NT4Publisher());
-            Logger.addDataReceiver(new WPILOGWriter(RobotConstants.ROBOT_TYPE.loggingPath));
+            Logger.addDataReceiver(new WPILOGWriter(RobotConstants.LOGGING_PATH));
         }
 
         Logger.start();
