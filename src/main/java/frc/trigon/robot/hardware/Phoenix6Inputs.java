@@ -102,9 +102,8 @@ public class Phoenix6Inputs implements LoggableInputs {
         if (latestTable == null)
             return new double[0];
         final LogTable.LogValue value = latestTable.get(signalName + "_Threaded");
-        if (value == null) {
+        if (value == null)
             throw new NoSuchElementException("The device \"" + name + "\" is to retrieve threaded signal \"" + signalName + "\" which doesn't exist.");
-        }
         return value.getDoubleArray();
     }
 }
