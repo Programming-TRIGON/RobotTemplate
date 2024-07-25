@@ -11,7 +11,7 @@ import frc.trigon.robot.hardware.phoenix6.pigeon2.io.RealPigeon2IO;
 import frc.trigon.robot.hardware.phoenix6.pigeon2.io.SimulationPigeon2IO;
 import org.littletonrobotics.junction.Logger;
 
-import java.util.function.Supplier;
+import java.util.function.DoubleSupplier;
 
 public class Pigeon2Gyro {
     private final String gyroName;
@@ -27,11 +27,11 @@ public class Pigeon2Gyro {
         this(id, gyroName, null, canbus);
     }
 
-    public Pigeon2Gyro(int id, String gyroName, Supplier<Double> yawVelocitySupplierRotationsPerSecond) {
+    public Pigeon2Gyro(int id, String gyroName, DoubleSupplier yawVelocitySupplierRotationsPerSecond) {
         this(id, gyroName, yawVelocitySupplierRotationsPerSecond, "");
     }
 
-    public Pigeon2Gyro(int id, String gyroName, Supplier<Double> yawVelocitySupplierRotationsPerSecond, String canbus) {
+    public Pigeon2Gyro(int id, String gyroName, DoubleSupplier yawVelocitySupplierRotationsPerSecond, String canbus) {
         this.gyroName = gyroName;
         this.gyroIO = generateIO(id, yawVelocitySupplierRotationsPerSecond, canbus);
         this.gyroInputs = new Phoenix6Inputs(gyroName);
@@ -97,7 +97,7 @@ public class Pigeon2Gyro {
         return signal.signalFunction.apply(pigeon2);
     }
 
-    private Pigeon2IO generateIO(int id, Supplier<Double> yawVelocitySupplierRotationsPerSecond, String canbus) {
+    private Pigeon2IO generateIO(int id, DoubleSupplier yawVelocitySupplierRotationsPerSecond, String canbus) {
         if (RobotConstants.IS_REPLAY)
             return new Pigeon2IO();
         if (RobotConstants.IS_SIMULATION)

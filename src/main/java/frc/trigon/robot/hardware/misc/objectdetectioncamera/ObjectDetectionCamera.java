@@ -1,6 +1,7 @@
 package frc.trigon.robot.hardware.misc.objectdetectioncamera;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.trigon.robot.constants.RobotConstants;
 import org.littletonrobotics.junction.Logger;
 
 public class ObjectDetectionCamera extends SubsystemBase {
@@ -11,7 +12,7 @@ public class ObjectDetectionCamera extends SubsystemBase {
 
     public ObjectDetectionCamera(String hostname) {
         this.hostname = hostname;
-        objectDetectionCameraIO = ObjectDetectionCameraIO.generateIO(hostname);
+        objectDetectionCameraIO = generateIO(hostname);
     }
 
     @Override
@@ -50,5 +51,13 @@ public class ObjectDetectionCamera extends SubsystemBase {
 
     public void startTrackingBestObject() {
         lastVisibleObjectYaw = getBestObjectYaw();
+    }
+
+    private ObjectDetectionCameraIO generateIO(String hostname) {
+        if (RobotConstants.IS_REPLAY)
+            return new ObjectDetectionCameraIO();
+        if (RobotConstants.IS_SIMULATION)
+            return new SimulationObjectDetectionCameraIO(hostname);
+        return new PhotonObjectDetectionCameraIO(hostname);
     }
 }

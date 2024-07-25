@@ -8,15 +8,15 @@ import frc.trigon.robot.constants.RobotConstants;
 import frc.trigon.robot.hardware.phoenix6.pigeon2.Pigeon2IO;
 import frc.trigon.robot.hardware.simulation.GyroSimulation;
 
-import java.util.function.Supplier;
+import java.util.function.DoubleSupplier;
 
 public class SimulationPigeon2IO extends Pigeon2IO {
     private final Pigeon2 pigeon2;
     private final Pigeon2SimState simState;
-    private final Supplier<Double> yawVelocitySupplier;
+    private final DoubleSupplier yawVelocitySupplier;
     private final GyroSimulation gyroSimulation;
 
-    public SimulationPigeon2IO(int id, Supplier<Double> yawVelocitySupplierRotationsPerSecond) {
+    public SimulationPigeon2IO(int id, DoubleSupplier yawVelocitySupplierRotationsPerSecond) {
         this.pigeon2 = new Pigeon2(id);
         this.simState = pigeon2.getSimState();
         this.yawVelocitySupplier = yawVelocitySupplierRotationsPerSecond;
@@ -27,7 +27,7 @@ public class SimulationPigeon2IO extends Pigeon2IO {
     public void updateGyro() {
         if (yawVelocitySupplier == null)
             return;
-        gyroSimulation.update(yawVelocitySupplier.get(), RobotConstants.PERIODIC_TIME_SECONDS);
+        gyroSimulation.update(yawVelocitySupplier.getAsDouble(), RobotConstants.PERIODIC_TIME_SECONDS);
         simState.setRawYaw(gyroSimulation.getGyroYawDegrees());
     }
 

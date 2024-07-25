@@ -12,7 +12,7 @@ import frc.trigon.robot.hardware.phoenix6.talonfx.TalonFXMotor;
 import frc.trigon.robot.hardware.phoenix6.talonfx.TalonFXSignal;
 import org.littletonrobotics.junction.Logger;
 
-import java.util.function.Supplier;
+import java.util.function.DoubleSupplier;
 
 public class CANcoderEncoder {
     private final String encoderName;
@@ -36,11 +36,11 @@ public class CANcoderEncoder {
         this(id, encoderName, null, null, canbus);
     }
 
-    public CANcoderEncoder(int id, String encoderName, Supplier<Double> positionSupplierRotations, Supplier<Double> velocitySupplierRotationsPerSecond) {
+    public CANcoderEncoder(int id, String encoderName, DoubleSupplier positionSupplierRotations, DoubleSupplier velocitySupplierRotationsPerSecond) {
         this(id, encoderName, positionSupplierRotations, velocitySupplierRotationsPerSecond, "");
     }
 
-    public CANcoderEncoder(int id, String encoderName, Supplier<Double> positionSupplierRotations, Supplier<Double> velocitySupplierRotationsPerSecond, String canbus) {
+    public CANcoderEncoder(int id, String encoderName, DoubleSupplier positionSupplierRotations, DoubleSupplier velocitySupplierRotationsPerSecond, String canbus) {
         this.encoderName = encoderName;
         this.encoderIO = generateIO(id, positionSupplierRotations, velocitySupplierRotationsPerSecond, canbus);
         this.encoderInputs = new Phoenix6Inputs(encoderName);
@@ -102,7 +102,7 @@ public class CANcoderEncoder {
         return signal.signalFunction.apply(cancoder);
     }
 
-    private CANcoderIO generateIO(int id, Supplier<Double> positionSupplierRotations, Supplier<Double> velocitySupplierRotationsPerSecond, String canbus) {
+    private CANcoderIO generateIO(int id, DoubleSupplier positionSupplierRotations, DoubleSupplier velocitySupplierRotationsPerSecond, String canbus) {
         if (RobotConstants.IS_REPLAY)
             return new CANcoderIO();
         if (RobotConstants.IS_SIMULATION)
