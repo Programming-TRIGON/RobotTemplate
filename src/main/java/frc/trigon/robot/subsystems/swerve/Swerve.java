@@ -9,10 +9,9 @@ import edu.wpi.first.math.kinematics.*;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import frc.trigon.robot.RobotContainer;
-import frc.trigon.robot.constants.RobotConstants;
-import frc.trigon.robot.hardware.Phoenix6SignalThread;
-import frc.trigon.robot.hardware.pigeon2.Pigeon2Gyro;
-import frc.trigon.robot.hardware.pigeon2.Pigeon2Signal;
+import frc.trigon.robot.hardware.phoenix6.Phoenix6SignalThread;
+import frc.trigon.robot.hardware.phoenix6.pigeon2.Pigeon2Gyro;
+import frc.trigon.robot.hardware.phoenix6.pigeon2.Pigeon2Signal;
 import frc.trigon.robot.subsystems.MotorSubsystem;
 import frc.trigon.robot.subsystems.swerve.swerveconstants.SwerveConstants;
 import frc.trigon.robot.utilities.mirrorable.Mirrorable;
@@ -22,7 +21,7 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Swerve extends MotorSubsystem {
-    private final Pigeon2Gyro gyro = new Pigeon2Gyro(SwerveConstants.PIGEON_ID, "SwerveGyro", () -> 0.0, RobotConstants.CANIVORE_NAME);
+    private final Pigeon2Gyro gyro = SwerveConstants.GYRO;
     private final SwerveModule[] swerveModules = SwerveConstants.SWERVE_MODULES;
     private final Phoenix6SignalThread phoenix6SignalThread = Phoenix6SignalThread.getInstance();
     private final SwerveConstants systemSpecificConstants = SwerveConstants.SYSTEM_SPECIFIC_CONSTANTS;

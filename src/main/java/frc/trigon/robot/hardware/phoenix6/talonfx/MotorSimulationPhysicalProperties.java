@@ -1,4 +1,4 @@
-package frc.trigon.robot.hardware.talonfx;
+package frc.trigon.robot.hardware.phoenix6.talonfx;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;

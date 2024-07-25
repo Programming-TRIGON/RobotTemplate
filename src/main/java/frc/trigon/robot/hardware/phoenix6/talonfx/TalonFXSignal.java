@@ -1,8 +1,8 @@
-package frc.trigon.robot.hardware.talonfx;
+package frc.trigon.robot.hardware.phoenix6.talonfx;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.hardware.TalonFX;
-import frc.trigon.robot.hardware.Phoenix6Inputs;
+import frc.trigon.robot.hardware.SignalUtilities;
 
 import java.util.function.Function;
 
@@ -19,7 +19,7 @@ public enum TalonFXSignal {
     final Function<TalonFX, BaseStatusSignal> signalFunction;
 
     TalonFXSignal(Function<TalonFX, BaseStatusSignal> signalFunction) {
-        this.name = Phoenix6Inputs.enumNameToSignalName(name());
+        this.name = SignalUtilities.enumNameToSignalName(name());
         this.signalFunction = signalFunction;
     }
 }

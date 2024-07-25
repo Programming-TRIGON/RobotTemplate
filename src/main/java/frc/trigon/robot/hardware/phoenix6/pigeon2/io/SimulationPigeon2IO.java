@@ -1,11 +1,11 @@
-package frc.trigon.robot.hardware.pigeon2.io;
+package frc.trigon.robot.hardware.phoenix6.pigeon2.io;
 
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.sim.Pigeon2SimState;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.trigon.robot.constants.RobotConstants;
-import frc.trigon.robot.hardware.pigeon2.Pigeon2IO;
+import frc.trigon.robot.hardware.phoenix6.pigeon2.Pigeon2IO;
 import frc.trigon.robot.hardware.simulation.GyroSimulation;
 
 import java.util.function.Supplier;

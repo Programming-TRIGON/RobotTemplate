@@ -5,13 +5,12 @@ import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import frc.trigon.robot.constants.RobotConstants;
 import frc.trigon.robot.utilities.Conversions;
 
-public class ElevatorSimulation extends MotorSimulation {
+public class ElevatorSimulation extends MotorPhysicsSimulation {
     private final ElevatorSim elevatorSimulation;
     private final double retractedHeightMeters;
     private final double diameterMeters;
 
-    public ElevatorSimulation(int id, DCMotor gearbox, double gearRatio, double carriageMassKilograms, double drumRadiusMeters, double retractedHeightMeters, double maximumHeightMeters, boolean simulateGravity) {
-        super(id);
+    public ElevatorSimulation(DCMotor gearbox, double gearRatio, double carriageMassKilograms, double drumRadiusMeters, double retractedHeightMeters, double maximumHeightMeters, boolean simulateGravity) {
         diameterMeters = drumRadiusMeters + drumRadiusMeters;
         this.retractedHeightMeters = retractedHeightMeters;
         elevatorSimulation = new ElevatorSim(
@@ -42,12 +41,12 @@ public class ElevatorSimulation extends MotorSimulation {
     }
 
     @Override
-    void setInputVoltage(double voltage) {
+    public void setInputVoltage(double voltage) {
         elevatorSimulation.setInputVoltage(voltage);
     }
 
     @Override
-    void updateMotor() {
+    public void updateMotor() {
         elevatorSimulation.update(RobotConstants.PERIODIC_TIME_SECONDS);
     }
 }

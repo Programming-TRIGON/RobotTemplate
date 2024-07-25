@@ -1,9 +1,9 @@
-package frc.trigon.robot.hardware.pigeon2;
+package frc.trigon.robot.hardware.phoenix6.pigeon2;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.hardware.core.CorePigeon2;
-import frc.trigon.robot.hardware.Phoenix6Inputs;
+import frc.trigon.robot.hardware.SignalUtilities;
 
 import java.util.function.Function;
 
@@ -19,7 +19,7 @@ public enum Pigeon2Signal {
     final Function<Pigeon2, BaseStatusSignal> signalFunction;
 
     Pigeon2Signal(Function<Pigeon2, BaseStatusSignal> signalFunction) {
-        this.name = Phoenix6Inputs.enumNameToSignalName(name());
+        this.name = SignalUtilities.enumNameToSignalName(name());
         this.signalFunction = signalFunction;
     }
 }

@@ -1,4 +1,4 @@
-package frc.trigon.robot.hardware.talonfx;
+package frc.trigon.robot.hardware.phoenix6.talonfx;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.ControlRequest;

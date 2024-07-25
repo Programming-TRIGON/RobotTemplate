@@ -3,7 +3,7 @@ package frc.trigon.robot.subsystems.swerve.swervemoduleconstants;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import edu.wpi.first.math.system.plant.DCMotor;
-import frc.trigon.robot.hardware.talonfx.MotorSimulationPhysicalProperties;
+import frc.trigon.robot.hardware.phoenix6.talonfx.MotorSimulationPhysicalProperties;
 
 public class SimulationSwerveModuleConstants extends SwerveModuleConstants {
     private static final double WHEEL_DIAMETER_METERS = 0.1016;
@@ -22,7 +22,7 @@ public class SimulationSwerveModuleConstants extends SwerveModuleConstants {
             STEER_PROPERTIES = MotorSimulationPhysicalProperties.createSimpleMotorProperties(STEER_MOTOR_GEARBOX, SwerveModuleConstants.STEER_GEAR_RATIO, STEER_MOMENT_OF_INERTIA);
 
     private static final double
-            STEER_MOTOR_P = 72,
+            STEER_MOTOR_P = 75,
             STEER_MOTOR_I = 0,
             STEER_MOTOR_D = 0;
 

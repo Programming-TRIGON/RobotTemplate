@@ -5,11 +5,10 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import frc.trigon.robot.constants.RobotConstants;
 
-public class SimpleMotorSimulation extends MotorSimulation {
+public class SimpleMotorSimulation extends MotorPhysicsSimulation {
     private final DCMotorSim motorSimulation;
 
-    public SimpleMotorSimulation(int id, DCMotor gearbox, double gearRatio, double momentOfInertia) {
-        super(id);
+    public SimpleMotorSimulation(DCMotor gearbox, double gearRatio, double momentOfInertia) {
         motorSimulation = new DCMotorSim(gearbox, gearRatio, momentOfInertia);
     }
 
@@ -29,12 +28,12 @@ public class SimpleMotorSimulation extends MotorSimulation {
     }
 
     @Override
-    void setInputVoltage(double voltage) {
+    public void setInputVoltage(double voltage) {
         motorSimulation.setInputVoltage(voltage);
     }
 
     @Override
-    void updateMotor() {
+    public void updateMotor() {
         motorSimulation.update(RobotConstants.PERIODIC_TIME_SECONDS);
     }
 }

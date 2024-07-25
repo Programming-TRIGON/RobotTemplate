@@ -1,9 +1,9 @@
-package frc.trigon.robot.hardware.pigeon2.io;
+package frc.trigon.robot.hardware.phoenix6.pigeon2.io;
 
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import edu.wpi.first.math.geometry.Rotation2d;
-import frc.trigon.robot.hardware.pigeon2.Pigeon2IO;
+import frc.trigon.robot.hardware.phoenix6.pigeon2.Pigeon2IO;
 
 public class RealPigeon2IO extends Pigeon2IO {
     private final Pigeon2 pigeon2;

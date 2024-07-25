@@ -1,4 +1,4 @@
-package frc.trigon.robot.hardware.pigeon2;
+package frc.trigon.robot.hardware.phoenix6.pigeon2;
 
 
 import com.ctre.phoenix6.BaseStatusSignal;
@@ -6,9 +6,9 @@ import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.trigon.robot.constants.RobotConstants;
-import frc.trigon.robot.hardware.Phoenix6Inputs;
-import frc.trigon.robot.hardware.pigeon2.io.RealPigeon2IO;
-import frc.trigon.robot.hardware.pigeon2.io.SimulationPigeon2IO;
+import frc.trigon.robot.hardware.phoenix6.Phoenix6Inputs;
+import frc.trigon.robot.hardware.phoenix6.pigeon2.io.RealPigeon2IO;
+import frc.trigon.robot.hardware.phoenix6.pigeon2.io.SimulationPigeon2IO;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.function.Supplier;
@@ -17,6 +17,7 @@ public class Pigeon2Gyro {
     private final String gyroName;
     private final Pigeon2IO gyroIO;
     private final Phoenix6Inputs gyroInputs;
+    private final int id;
 
     public Pigeon2Gyro(int id, String gyroName) {
         this(id, gyroName, null, "");
@@ -34,12 +35,17 @@ public class Pigeon2Gyro {
         this.gyroName = gyroName;
         this.gyroIO = generateIO(id, yawVelocitySupplierRotationsPerSecond, canbus);
         this.gyroInputs = new Phoenix6Inputs(gyroName);
+        this.id = id;
         gyroIO.optimizeBusUsage();
     }
 
     public void update() {
         gyroIO.updateGyro();
         Logger.processInputs("Gyros/" + gyroName, gyroInputs);
+    }
+
+    public int getID() {
+        return id;
     }
 
     public void applyConfigurations(Pigeon2Configuration realConfiguration, Pigeon2Configuration simulationConfiguration) {

@@ -12,17 +12,5 @@ public class RobotConstants {
             IS_REPLAY = UNFILTERED_IS_REPLAY && !Robot.IS_REAL;
     public static final double PERIODIC_TIME_SECONDS = 0.02;
     public static final String CANIVORE_NAME = "CANivore";
-    public static final String LOGGING_PATH = IS_SIMULATION ? "/media/sda1/akitlogs/" : FilesHandler.DEPLOY_PATH + "logs/";
-
-    public enum RobotType {
-        TRIUMPH("/media/sda1/akitlogs/"),
-        TRIHARD(FilesHandler.DEPLOY_PATH + "logs/"),
-        SIMULATION(FilesHandler.DEPLOY_PATH + "logs/");
-
-        public final String loggingPath;
-
-        RobotType(String loggingPath) {
-            this.loggingPath = loggingPath;
-        }
-    }
+    public static final String LOGGING_PATH = IS_SIMULATION ? FilesHandler.DEPLOY_PATH + "logs/" : "/media/sda1/akitlogs/";
 }

@@ -1,4 +1,4 @@
-package frc.trigon.robot.hardware.cancoder;
+package frc.trigon.robot.hardware.phoenix6.cancoder;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;

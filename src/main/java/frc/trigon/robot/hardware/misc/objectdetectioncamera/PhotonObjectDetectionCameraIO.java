@@ -1,4 +1,4 @@
-package frc.trigon.robot.hardware.objectdetectioncamera;
+package frc.trigon.robot.hardware.misc.objectdetectioncamera;
 
 import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonPipelineResult;

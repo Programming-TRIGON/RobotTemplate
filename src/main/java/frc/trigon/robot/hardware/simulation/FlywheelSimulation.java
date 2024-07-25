@@ -6,17 +6,15 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import frc.trigon.robot.constants.RobotConstants;
 
-public class FlywheelSimulation extends MotorSimulation {
+public class FlywheelSimulation extends MotorPhysicsSimulation {
     private final FlywheelSim flywheelSimulation;
     private double lastPositionRadians = 0;
 
-    public FlywheelSimulation(int id, DCMotor gearbox, double gearRatio, double momentOfInertia) {
-        super(id);
+    public FlywheelSimulation(DCMotor gearbox, double gearRatio, double momentOfInertia) {
         flywheelSimulation = new FlywheelSim(gearbox, gearRatio, momentOfInertia);
     }
 
-    public FlywheelSimulation(int id, DCMotor gearbox, double gearRatio, double kv, double ka) {
-        super(id);
+    public FlywheelSimulation(DCMotor gearbox, double gearRatio, double kv, double ka) {
         flywheelSimulation = new FlywheelSim(LinearSystemId.identifyVelocitySystem(kv, ka), gearbox, gearRatio);
     }
 
@@ -36,12 +34,12 @@ public class FlywheelSimulation extends MotorSimulation {
     }
 
     @Override
-    void setInputVoltage(double voltage) {
+    public void setInputVoltage(double voltage) {
         flywheelSimulation.setInputVoltage(voltage);
     }
 
     @Override
-    void updateMotor() {
+    public void updateMotor() {
         flywheelSimulation.update(RobotConstants.PERIODIC_TIME_SECONDS);
         lastPositionRadians = lastPositionRadians + flywheelSimulation.getAngularVelocityRadPerSec() * RobotConstants.PERIODIC_TIME_SECONDS;
     }

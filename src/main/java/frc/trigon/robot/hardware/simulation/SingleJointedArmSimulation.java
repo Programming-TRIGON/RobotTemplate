@@ -6,11 +6,10 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import frc.trigon.robot.constants.RobotConstants;
 
-public class SingleJointedArmSimulation extends MotorSimulation {
+public class SingleJointedArmSimulation extends MotorPhysicsSimulation {
     private final SingleJointedArmSim armSimulation;
 
-    public SingleJointedArmSimulation(int id, DCMotor gearbox, double gearRatio, double armLengthMeters, double armMassKilograms, Rotation2d minimumAngle, Rotation2d maximumAngle, boolean simulateGravity) {
-        super(id);
+    public SingleJointedArmSimulation(DCMotor gearbox, double gearRatio, double armLengthMeters, double armMassKilograms, Rotation2d minimumAngle, Rotation2d maximumAngle, boolean simulateGravity) {
         armSimulation = new SingleJointedArmSim(
                 gearbox,
                 gearRatio,
@@ -39,12 +38,12 @@ public class SingleJointedArmSimulation extends MotorSimulation {
     }
 
     @Override
-    void setInputVoltage(double voltage) {
+    public void setInputVoltage(double voltage) {
         armSimulation.setInputVoltage(voltage);
     }
 
     @Override
-    void updateMotor() {
+    public void updateMotor() {
         armSimulation.update(RobotConstants.PERIODIC_TIME_SECONDS);
     }
 }

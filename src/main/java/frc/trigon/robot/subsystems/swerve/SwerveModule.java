@@ -7,10 +7,10 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import frc.trigon.robot.constants.RobotConstants;
-import frc.trigon.robot.hardware.cancoder.CANcoderEncoder;
-import frc.trigon.robot.hardware.cancoder.CANcoderSignal;
-import frc.trigon.robot.hardware.talonfx.TalonFXMotor;
-import frc.trigon.robot.hardware.talonfx.TalonFXSignal;
+import frc.trigon.robot.hardware.phoenix6.cancoder.CANcoderEncoder;
+import frc.trigon.robot.hardware.phoenix6.cancoder.CANcoderSignal;
+import frc.trigon.robot.hardware.phoenix6.talonfx.TalonFXMotor;
+import frc.trigon.robot.hardware.phoenix6.talonfx.TalonFXSignal;
 import frc.trigon.robot.poseestimation.poseestimator.PoseEstimatorConstants;
 import frc.trigon.robot.subsystems.swerve.swervemoduleconstants.RealSwerveModuleConstants;
 import frc.trigon.robot.subsystems.swerve.swervemoduleconstants.SimulationSwerveModuleConstants;
@@ -32,7 +32,7 @@ public class SwerveModule {
     public SwerveModule(int moduleID, double offsetRotations) {
         driveMotor = new TalonFXMotor(moduleID, "Module" + moduleID + "Drive", SimulationSwerveModuleConstants.DRIVE_PROPERTIES, RobotConstants.CANIVORE_NAME);
         steerMotor = new TalonFXMotor(moduleID + 4, "Module" + moduleID + "Steer", SimulationSwerveModuleConstants.STEER_PROPERTIES, RobotConstants.CANIVORE_NAME);
-        steerEncoder = new CANcoderEncoder(moduleID, "Module" + moduleID + "SteerEncoder", () -> steerMotor.getSignal(TalonFXSignal.POSITION), () -> steerMotor.getSignal(TalonFXSignal.VELOCITY), RobotConstants.CANIVORE_NAME);
+        steerEncoder = new CANcoderEncoder(moduleID, "Module" + moduleID + "SteerEncoder", steerMotor, RobotConstants.CANIVORE_NAME);
         configureHardware(offsetRotations);
     }
 
@@ -74,7 +74,7 @@ public class SwerveModule {
     SwerveModulePosition getOdometryPosition(int odometryUpdateIndex) {
         return new SwerveModulePosition(
                 driveRotationsToMeters(latestOdometryDrivePositions[odometryUpdateIndex]),
-                Rotation2d.fromDegrees(latestOdometrySteerPositions[odometryUpdateIndex])
+                Rotation2d.fromRotations(latestOdometrySteerPositions[odometryUpdateIndex])
         );
     }
 
@@ -83,7 +83,7 @@ public class SwerveModule {
     }
 
     SwerveModuleState getCurrentState() {
-        return new SwerveModuleState(driveRotationsToMeters(driveMotor.getSignal(TalonFXSignal.POSITION)), getCurrentAngle());
+        return new SwerveModuleState(driveRotationsToMeters(driveMotor.getSignal(TalonFXSignal.VELOCITY)), getCurrentAngle());
     }
 
     SwerveModuleState getTargetState() {
@@ -132,7 +132,7 @@ public class SwerveModule {
     }
 
     private Rotation2d getCurrentAngle() {
-        return Rotation2d.fromRotations(steerEncoder.getSignal(CANcoderSignal.POSITION));
+        return Rotation2d.fromRotations(steerMotor.getSignal(TalonFXSignal.POSITION));
     }
 
     private void configureHardware(double offsetRotations) {

@@ -1,8 +1,8 @@
-package frc.trigon.robot.hardware.cancoder.io;
+package frc.trigon.robot.hardware.phoenix6.cancoder.io;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
-import frc.trigon.robot.hardware.cancoder.CANcoderIO;
+import frc.trigon.robot.hardware.phoenix6.cancoder.CANcoderIO;
 
 public class RealCANcoderIO extends CANcoderIO {
     private final CANcoder cancoder;

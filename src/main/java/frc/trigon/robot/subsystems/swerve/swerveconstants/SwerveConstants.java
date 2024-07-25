@@ -8,9 +8,10 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.constants.RobotConstants;
-import frc.trigon.robot.hardware.pigeon2.Pigeon2Gyro;
-import frc.trigon.robot.hardware.pigeon2.Pigeon2Signal;
+import frc.trigon.robot.hardware.phoenix6.pigeon2.Pigeon2Gyro;
+import frc.trigon.robot.hardware.phoenix6.pigeon2.Pigeon2Signal;
 import frc.trigon.robot.poseestimation.poseestimator.PoseEstimatorConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveModule;
 import frc.trigon.robot.utilities.Conversions;
@@ -19,7 +20,7 @@ public abstract class SwerveConstants {
     public static final SwerveConstants SYSTEM_SPECIFIC_CONSTANTS = generateConstants();
 
     public static final int PIGEON_ID = 0;
-    public static final Pigeon2Gyro GYRO = new Pigeon2Gyro(SwerveConstants.PIGEON_ID, "SwerveGyro", () -> 0.0, RobotConstants.CANIVORE_NAME);
+    public static final Pigeon2Gyro GYRO = new Pigeon2Gyro(SwerveConstants.PIGEON_ID, "SwerveGyro", () -> RobotContainer.SWERVE.getSelfRelativeVelocity().omegaRadiansPerSecond, RobotConstants.CANIVORE_NAME);
 
     private static final double
             FRONT_LEFT_STEER_ENCODER_OFFSET = -Conversions.degreesToRevolutions(225.263672 - 360),

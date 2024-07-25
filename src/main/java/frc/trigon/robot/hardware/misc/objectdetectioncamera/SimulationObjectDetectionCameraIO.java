@@ -1,4 +1,4 @@
-package frc.trigon.robot.hardware.objectdetectioncamera;
+package frc.trigon.robot.hardware.misc.objectdetectioncamera;
 
 import edu.wpi.first.math.geometry.*;
 import frc.trigon.robot.RobotContainer;
