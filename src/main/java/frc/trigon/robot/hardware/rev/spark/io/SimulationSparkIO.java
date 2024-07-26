@@ -103,4 +103,11 @@ public class SimulationSparkIO extends SparkIO {
     public void burnFlash() {
         motor.burnFlash();
     }
+
+    @Override
+    public void enablePIDWrapping(double minInput, double maxInput) {
+        pidController.setPositionPIDWrappingEnabled(true);
+        pidController.setPositionPIDWrappingMinInput(minInput);
+        pidController.setPositionPIDWrappingMaxInput(maxInput);
+    }
 }

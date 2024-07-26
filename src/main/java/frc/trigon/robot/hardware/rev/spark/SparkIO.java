@@ -54,6 +54,9 @@ public class SparkIO {
     public void burnFlash() {
     }
 
+    public void enablePIDWrapping(double minInput, double maxInput) {
+    }
+
     public CANSparkBase getMotor() {
         return null;
     }
