@@ -7,6 +7,7 @@ public class RelativeSparkEncoder extends SparkEncoder {
 
     public RelativeSparkEncoder(RelativeEncoder encoder) {
         this.encoder = encoder;
+        setConversionsFactor(1);
     }
 
     public double getPositionRevolutions() {

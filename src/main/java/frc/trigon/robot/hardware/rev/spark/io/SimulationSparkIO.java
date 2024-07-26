@@ -14,7 +14,7 @@ public class SimulationSparkIO extends SparkIO {
         motor = new CANSparkMax(id, CANSparkMax.MotorType.kBrushless);
         REVPhysicsSim.getInstance().addSparkMax(motor, gearbox);
         pidController = motor.getPIDController();
-        encoder = SparkEncoder.createEncoder(motor);
+        encoder = SparkEncoder.createRelativeEncoder(motor);
     }
 
     @Override

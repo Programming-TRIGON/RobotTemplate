@@ -25,12 +25,16 @@ public class SparkMotor {
         motorIO = createSparkIO(id, sparkType, simulationMotor);
     }
 
-    public void updateMotor() {
+    public void update() {
         Logger.processInputs("Motors/" + motorName, motorInputs);
     }
 
     public int getID() {
         return id;
+    }
+
+    public void registerSignal(SparkSignal signal) {
+        this.registerSignal(signal, false);
     }
 
     public void registerSignal(SparkSignal signal, boolean isThreaded) {
@@ -39,6 +43,14 @@ public class SparkMotor {
             motorInputs.registerThreadedSignal(statusSignal);
         else
             motorInputs.registerSignal(statusSignal);
+    }
+
+    public double getSignal(SparkSignal signal) {
+        return motorInputs.getSignal(signal.name);
+    }
+
+    public void getThreadedSignal(SparkSignal signal) {
+        motorInputs.getThreadedSignal(signal.name);
     }
 
     public void setReference(double value, CANSparkBase.ControlType ctrl) {
@@ -99,6 +111,10 @@ public class SparkMotor {
 
     public void restoreFactoryDefaults() {
         motorIO.restoreFactoryDefaults();
+    }
+
+    public void enablePIDWrapping(double minInput, double maxInput) {
+        motorIO.enablePIDWrapping(minInput, maxInput);
     }
 
     public void burnFlash() {

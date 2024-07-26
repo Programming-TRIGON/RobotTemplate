@@ -12,8 +12,8 @@ public abstract class SparkEncoder {
             return new RelativeSparkEncoder(spark.getEncoder());
     }
 
-    protected SparkEncoder() {
-        setConversionsFactor(1);
+    public static SparkEncoder createRelativeEncoder(CANSparkBase spark) {
+        return new RelativeSparkEncoder(spark.getEncoder());
     }
 
     public abstract double getPositionRevolutions();

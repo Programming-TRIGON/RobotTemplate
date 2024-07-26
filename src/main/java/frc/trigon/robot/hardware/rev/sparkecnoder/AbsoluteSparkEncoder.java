@@ -7,6 +7,7 @@ public class AbsoluteSparkEncoder extends SparkEncoder {
 
     public AbsoluteSparkEncoder(SparkAbsoluteEncoder encoder) {
         this.encoder = encoder;
+        setConversionsFactor(1);
     }
 
     public double getPositionRevolutions() {
