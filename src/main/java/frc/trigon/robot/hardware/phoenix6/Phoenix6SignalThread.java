@@ -17,8 +17,8 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import edu.wpi.first.wpilibj.Timer;
 import frc.trigon.robot.constants.RobotConstants;
+import frc.trigon.robot.hardware.SignalThreadBase;
 import frc.trigon.robot.poseestimation.poseestimator.PoseEstimatorConstants;
-import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.ArrayList;
@@ -28,12 +28,10 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.locks.ReentrantLock;
 
 
-public class Phoenix6SignalThread extends Thread {
+public class Phoenix6SignalThread extends SignalThreadBase {
     public static ReentrantLock SIGNALS_LOCK = new ReentrantLock();
     private static final boolean IS_CAN_FD = true;
     private final List<Queue<Double>> queues = new ArrayList<>();
-    private final Queue<Double> timestamps = new ArrayBlockingQueue<>(100);
-    private final ThreadInputsAutoLogged threadInputs = new ThreadInputsAutoLogged();
     private BaseStatusSignal[] signals = new BaseStatusSignal[0];
 
     private static Phoenix6SignalThread INSTANCE = null;
@@ -46,28 +44,12 @@ public class Phoenix6SignalThread extends Thread {
     }
 
     private Phoenix6SignalThread() {
+        super("Phoenix6SignalThread");
         if (RobotConstants.IS_REPLAY)
             return;
         setName("Phoenix6SignalThread");
         setDaemon(true);
         start();
-    }
-
-    @AutoLog
-    public static class ThreadInputs {
-        public double[] timestamps;
-    }
-
-    public void updateLatestTimestamps() {
-        if (!RobotConstants.IS_REPLAY) {
-            threadInputs.timestamps = timestamps.stream().mapToDouble(Double::doubleValue).toArray();
-            timestamps.clear();
-        }
-        Logger.processInputs("Phoenix6SignalThread", threadInputs);
-    }
-
-    public double[] getLatestTimestamps() {
-        return threadInputs.timestamps;
     }
 
     public Queue<Double> registerSignal(BaseStatusSignal signal, BaseStatusSignal slopeSignal) {
