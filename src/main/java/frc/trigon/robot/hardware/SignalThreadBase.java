@@ -1,7 +1,6 @@
 package frc.trigon.robot.hardware;
 
 import frc.trigon.robot.constants.RobotConstants;
-import frc.trigon.robot.hardware.phoenix6.ThreadInputsAutoLogged;
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
 
