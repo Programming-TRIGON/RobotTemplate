@@ -12,9 +12,6 @@ import frc.trigon.robot.hardware.phoenix6.cancoder.CANcoderSignal;
 import frc.trigon.robot.hardware.phoenix6.talonfx.TalonFXMotor;
 import frc.trigon.robot.hardware.phoenix6.talonfx.TalonFXSignal;
 import frc.trigon.robot.poseestimation.poseestimator.PoseEstimatorConstants;
-import frc.trigon.robot.subsystems.swerve.swervemoduleconstants.RealSwerveModuleConstants;
-import frc.trigon.robot.subsystems.swerve.swervemoduleconstants.SimulationSwerveModuleConstants;
-import frc.trigon.robot.subsystems.swerve.swervemoduleconstants.SwerveModuleConstants;
 import frc.trigon.robot.utilities.Conversions;
 
 public class SwerveModule {
@@ -91,7 +88,7 @@ public class SwerveModule {
     }
 
     private double driveRotationsToMeters(double rotations) {
-        return Conversions.revolutionsToDistance(rotations, SwerveModuleConstants.SYSTEM_SPECIFIC_CONSTANTS.getWheelDiameterMeters());
+        return Conversions.revolutionsToDistance(rotations, SwerveModuleConstants.WHEEL_DIAMETER_METERS);
     }
 
     private void setTargetAngle(Rotation2d angle) {
@@ -106,7 +103,7 @@ public class SwerveModule {
      */
     private void setTargetVelocity(double targetVelocityMetersPerSecond, Rotation2d targetSteerAngle) {
         targetVelocityMetersPerSecond = reduceSkew(targetVelocityMetersPerSecond, targetSteerAngle);
-        final double targetVelocityRotationsPerSecond = Conversions.distanceToRevolutions(targetVelocityMetersPerSecond, SwerveModuleConstants.SYSTEM_SPECIFIC_CONSTANTS.getWheelDiameterMeters());
+        final double targetVelocityRotationsPerSecond = Conversions.distanceToRevolutions(targetVelocityMetersPerSecond, SwerveModuleConstants.WHEEL_DIAMETER_METERS);
 
         if (driveMotorClosedLoop) {
             driveMotor.setControl(driveVelocityRequest.withVelocity(targetVelocityRotationsPerSecond));
@@ -136,13 +133,13 @@ public class SwerveModule {
     }
 
     private void configureHardware(double offsetRotations) {
-        driveMotor.applyConfigurations(RealSwerveModuleConstants.DRIVE_CONFIGURATION, SimulationSwerveModuleConstants.DRIVE_CONFIGURATION);
-        steerMotor.applyConfigurations(RealSwerveModuleConstants.STEER_CONFIGURATION, SimulationSwerveModuleConstants.STEER_CONFIGURATION);
-        RealSwerveModuleConstants.STEER_ENCODER_CONFIGURATION.MagnetSensor.MagnetOffset = offsetRotations;
-        steerEncoder.applyConfigurations(RealSwerveModuleConstants.STEER_ENCODER_CONFIGURATION, SimulationSwerveModuleConstants.STEER_ENCODER_CONFIGURATION);
+        driveMotor.applyConfiguration(SwerveModuleConstants.DRIVE_CONFIGURATION);
+        steerMotor.applyConfiguration(SwerveModuleConstants.STEER_CONFIGURATION);
+        SwerveModuleConstants.STEER_ENCODER_CONFIGURATION.MagnetSensor.MagnetOffset = offsetRotations;
+        steerEncoder.applyConfiguration(SwerveModuleConstants.STEER_ENCODER_CONFIGURATION);
 
-        driveMotor.setPhysicsSimulation(SimulationSwerveModuleConstants.DRIVE_SIMULATION);
-        steerMotor.setPhysicsSimulation(SimulationSwerveModuleConstants.STEER_SIMULATION);
+        driveMotor.setPhysicsSimulation(SwerveModuleConstants.DRIVE_SIMULATION);
+        steerMotor.setPhysicsSimulation(SwerveModuleConstants.STEER_SIMULATION);
         steerEncoder.setSimulationInputsFromTalonFX(steerMotor);
 
         configureSignals();

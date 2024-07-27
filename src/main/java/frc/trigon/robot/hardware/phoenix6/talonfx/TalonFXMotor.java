@@ -38,8 +38,8 @@ public class TalonFXMotor {
         return id;
     }
 
-    public void setPhysicsSimulation(MotorPhysicsSimulation simulation) {
-        motorIO.setSimulation(simulation);
+    public void setPhysicsSimulation(MotorPhysicsSimulation physicsSimulation) {
+        motorIO.setPhysicsSimulation(physicsSimulation);
     }
 
     public void applyConfigurations(TalonFXConfiguration realConfiguration, TalonFXConfiguration simulationConfiguration) {

@@ -13,7 +13,6 @@ import frc.trigon.robot.hardware.phoenix6.Phoenix6SignalThread;
 import frc.trigon.robot.hardware.phoenix6.pigeon2.Pigeon2Gyro;
 import frc.trigon.robot.hardware.phoenix6.pigeon2.Pigeon2Signal;
 import frc.trigon.robot.subsystems.MotorSubsystem;
-import frc.trigon.robot.subsystems.swerve.swerveconstants.SwerveConstants;
 import frc.trigon.robot.utilities.mirrorable.Mirrorable;
 import frc.trigon.robot.utilities.mirrorable.MirrorablePose2d;
 import frc.trigon.robot.utilities.mirrorable.MirrorableRotation2d;
@@ -24,13 +23,12 @@ public class Swerve extends MotorSubsystem {
     private final Pigeon2Gyro gyro = SwerveConstants.GYRO;
     private final SwerveModule[] swerveModules = SwerveConstants.SWERVE_MODULES;
     private final Phoenix6SignalThread phoenix6SignalThread = Phoenix6SignalThread.getInstance();
-    private final SwerveConstants systemSpecificConstants = SwerveConstants.SYSTEM_SPECIFIC_CONSTANTS;
     private double lastTimestamp = Timer.getFPGATimestamp();
 
     public Swerve() {
         setName("Swerve");
         configurePathPlanner();
-        systemSpecificConstants.getProfiledRotationController().enableContinuousInput(-180, 180);
+        SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER.enableContinuousInput(-180, 180);
     }
 
     @Override
@@ -54,10 +52,6 @@ public class Swerve extends MotorSubsystem {
     public void setBrake(boolean brake) {
         for (SwerveModule currentModule : swerveModules)
             currentModule.setBrake(brake);
-    }
-
-    public SwerveConstants getSystemSpecificConstants() {
-        return systemSpecificConstants;
     }
 
     public Rotation2d getHeading() {
@@ -139,8 +133,8 @@ public class Swerve extends MotorSubsystem {
     void pidToPose(MirrorablePose2d targetPose) {
         final Pose2d currentPose = RobotContainer.POSE_ESTIMATOR.getCurrentPose();
         final Pose2d mirroredTargetPose = targetPose.get();
-        final double xSpeed = systemSpecificConstants.getTranslationsController().calculate(currentPose.getX(), mirroredTargetPose.getX());
-        final double ySpeed = systemSpecificConstants.getTranslationsController().calculate(currentPose.getY(), mirroredTargetPose.getY());
+        final double xSpeed = SwerveConstants.TRANSLATION_PID_CONTROLLER.calculate(currentPose.getX(), mirroredTargetPose.getX());
+        final double ySpeed = SwerveConstants.TRANSLATION_PID_CONTROLLER.calculate(currentPose.getY(), mirroredTargetPose.getY());
         final int direction = Mirrorable.isRedAlliance() ? -1 : 1;
         final ChassisSpeeds targetFieldRelativeSpeeds = new ChassisSpeeds(
                 xSpeed * direction,
@@ -156,7 +150,7 @@ public class Swerve extends MotorSubsystem {
     }
 
     void resetRotationController() {
-        systemSpecificConstants.getProfiledRotationController().reset(RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation().getDegrees());
+        SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER.reset(RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation().getDegrees());
     }
 
     void setClosedLoop(boolean closedLoop) {
@@ -174,10 +168,6 @@ public class Swerve extends MotorSubsystem {
     void fieldRelativeDrive(double xPower, double yPower, MirrorableRotation2d targetAngle) {
         final ChassisSpeeds speeds = selfRelativeSpeedsFromFieldRelativePowers(xPower, yPower, 0);
         speeds.omegaRadiansPerSecond = calculateProfiledAngleSpeedToTargetAngle(targetAngle);
-        Logger.recordOutput("Swerve/AnglePID/TargetAngle", MathUtil.inputModulus(targetAngle.get().getDegrees(), 0, 360));
-        Logger.recordOutput("Swerve/AnglePID/AngleSetpoint", MathUtil.inputModulus(systemSpecificConstants.getProfiledRotationController().getSetpoint().position, 0, 360));
-        Logger.recordOutput("Swerve/AnglePID/CurrentAngle", MathUtil.inputModulus(RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation().getDegrees(), 0, 360));
-
         selfRelativeDrive(speeds);
     }
 
@@ -215,10 +205,6 @@ public class Swerve extends MotorSubsystem {
     void selfRelativeDrive(double xPower, double yPower, MirrorableRotation2d targetAngle) {
         final ChassisSpeeds speeds = powersToSpeeds(xPower, yPower, 0);
         speeds.omegaRadiansPerSecond = calculateProfiledAngleSpeedToTargetAngle(targetAngle);
-        Logger.recordOutput("Stuff/TargetAngle", MathUtil.inputModulus(targetAngle.get().getDegrees(), 0, 360));
-        Logger.recordOutput("Stuff/AngleSetpoint", MathUtil.inputModulus(systemSpecificConstants.getProfiledRotationController().getSetpoint().position, 0, 360));
-        Logger.recordOutput("Stuff/CurrentAngle", MathUtil.inputModulus(RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation().getDegrees(), 0, 360));
-
         selfRelativeDrive(speeds);
     }
 
@@ -234,7 +220,7 @@ public class Swerve extends MotorSubsystem {
     }
 
     private void setTargetModuleStates(SwerveModuleState[] swerveModuleStates) {
-        SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, systemSpecificConstants.getMaxSpeedMetersPerSecond());
+        SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, SwerveConstants.MAX_SPEED_METERS_PER_SECOND);
         for (int i = 0; i < swerveModules.length; i++)
             swerveModules[i].setTargetState(swerveModuleStates[i]);
     }
@@ -286,7 +272,6 @@ public class Swerve extends MotorSubsystem {
     private void configurePathPlanner() {
         AutoBuilder.configureHolonomic(
                 () -> RobotContainer.POSE_ESTIMATOR.getCurrentPose(),
-//                (pose) -> RobotContainer.POSE_ESTIMATOR.resetPose(RobotContainer.POSE_ESTIMATOR.getCurrentPose()),
                 (pose) -> {
                 },
                 this::getSelfRelativeVelocity,
@@ -305,7 +290,7 @@ public class Swerve extends MotorSubsystem {
 
     private double calculateProfiledAngleSpeedToTargetAngle(MirrorableRotation2d targetAngle) {
         final Rotation2d currentAngle = RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation();
-        return Units.degreesToRadians(systemSpecificConstants.getProfiledRotationController().calculate(currentAngle.getDegrees(), targetAngle.get().getDegrees()));
+        return Units.degreesToRadians(SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER.calculate(currentAngle.getDegrees(), targetAngle.get().getDegrees()));
     }
 
     private ChassisSpeeds selfRelativeSpeedsFromFieldRelativePowers(double xPower, double yPower, double thetaPower) {
@@ -324,9 +309,9 @@ public class Swerve extends MotorSubsystem {
 
     private ChassisSpeeds powersToSpeeds(double xPower, double yPower, double thetaPower) {
         return new ChassisSpeeds(
-                xPower * systemSpecificConstants.getMaxSpeedMetersPerSecond(),
-                yPower * systemSpecificConstants.getMaxSpeedMetersPerSecond(),
-                Math.pow(thetaPower, 2) * Math.signum(thetaPower) * systemSpecificConstants.getMaxRotationalSpeedRadiansPerSecond()
+                xPower * SwerveConstants.MAX_SPEED_METERS_PER_SECOND,
+                yPower * SwerveConstants.MAX_SPEED_METERS_PER_SECOND,
+                Math.pow(thetaPower, 2) * Math.signum(thetaPower) * SwerveConstants.MAX_ROTATIONAL_SPEED_RADIANS_PER_SECOND
         );
     }
 

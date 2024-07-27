@@ -1,4 +1,4 @@
-package frc.trigon.robot.subsystems.swerve.swerveconstants;
+package frc.trigon.robot.subsystems.swerve;
 
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
@@ -8,19 +8,25 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.constants.RobotConstants;
 import frc.trigon.robot.hardware.phoenix6.pigeon2.Pigeon2Gyro;
 import frc.trigon.robot.hardware.phoenix6.pigeon2.Pigeon2Signal;
 import frc.trigon.robot.poseestimation.poseestimator.PoseEstimatorConstants;
-import frc.trigon.robot.subsystems.swerve.SwerveModule;
 import frc.trigon.robot.utilities.Conversions;
 
 public abstract class SwerveConstants {
-    public static final SwerveConstants SYSTEM_SPECIFIC_CONSTANTS = generateConstants();
+    public static final double
+            MAX_SPEED_METERS_PER_SECOND = RobotConstants.IS_SIMULATION ? 4.5 : 4.04502,
+            MAX_ROTATIONAL_SPEED_RADIANS_PER_SECOND = RobotConstants.IS_SIMULATION ? 12.03 : 12.03;
 
     public static final int PIGEON_ID = 0;
     public static final Pigeon2Gyro GYRO = new Pigeon2Gyro(SwerveConstants.PIGEON_ID, "SwerveGyro", RobotConstants.CANIVORE_NAME);
+    private static final double
+            GYRO_MOUNT_POSITION_YAW = 0,
+            GYRO_MOUNT_POSITION_PITCH = 0,
+            GYRO_MOUNT_POSITION_ROLL = 0;
 
     private static final double
             FRONT_LEFT_STEER_ENCODER_OFFSET = -Conversions.degreesToRevolutions(225.263672 - 360),
@@ -62,39 +68,55 @@ public abstract class SwerveConstants {
             DRIVE_NEUTRAL_DEADBAND = 0.2,
             ROTATION_NEUTRAL_DEADBAND = 0.2;
 
+    private static final PIDConstants
+            TRANSLATION_PID_CONSTANTS = RobotConstants.IS_SIMULATION ?
+            new PIDConstants(5, 0, 0) :
+            new PIDConstants(5, 0, 0),
+            PROFILED_ROTATION_PID_CONSTANTS = RobotConstants.IS_SIMULATION ?
+                    new PIDConstants(12, 0, 0) :
+                    new PIDConstants(5, 0, 0),
+            AUTO_TRANSLATION_PID_CONSTANTS = RobotConstants.IS_SIMULATION ?
+                    new PIDConstants(9, 0, 0) :
+                    new PIDConstants(6.5, 0, 0),
+            AUTO_ROTATION_PID_CONSTANTS = RobotConstants.IS_SIMULATION ?
+                    new PIDConstants(8.9, 0, 0) :
+                    new PIDConstants(3, 0, 0);
+    private static final double
+            MAX_ROTATION_VELOCITY = RobotConstants.IS_SIMULATION ? 720 : 720,
+            MAX_ROTATION_ACCELERATION = RobotConstants.IS_SIMULATION ? 720 : 720;
+    private static final TrapezoidProfile.Constraints ROTATION_CONSTRAINTS = new TrapezoidProfile.Constraints(
+            MAX_ROTATION_VELOCITY,
+            MAX_ROTATION_ACCELERATION
+    );
+    static final ProfiledPIDController PROFILED_ROTATION_PID_CONTROLLER = new ProfiledPIDController(
+            PROFILED_ROTATION_PID_CONSTANTS.kP,
+            PROFILED_ROTATION_PID_CONSTANTS.kI,
+            PROFILED_ROTATION_PID_CONSTANTS.kD,
+            ROTATION_CONSTRAINTS
+    );
+    static final PIDController TRANSLATION_PID_CONTROLLER = new PIDController(
+            TRANSLATION_PID_CONSTANTS.kP,
+            TRANSLATION_PID_CONSTANTS.kI,
+            TRANSLATION_PID_CONSTANTS.kD
+    );
+
     private static final ReplanningConfig REPLANNING_CONFIG = new ReplanningConfig(true, false);
     public static final HolonomicPathFollowerConfig HOLONOMIC_PATH_FOLLOWER_CONFIG = new HolonomicPathFollowerConfig(
-            SYSTEM_SPECIFIC_CONSTANTS.getAutoTranslationPIDConstants(),
-            SYSTEM_SPECIFIC_CONSTANTS.getAutoRotationPIDConstants(),
-            SYSTEM_SPECIFIC_CONSTANTS.getMaxRotationalSpeedRadiansPerSecond(),
+            AUTO_TRANSLATION_PID_CONSTANTS,
+            AUTO_ROTATION_PID_CONSTANTS,
+            MAX_ROTATIONAL_SPEED_RADIANS_PER_SECOND,
             SwerveConstants.DRIVE_RADIUS_METERS,
             REPLANNING_CONFIG
     );
 
     static {
-        GYRO.applyConfiguration(SYSTEM_SPECIFIC_CONSTANTS.generateGyroConfiguration());
+        final Pigeon2Configuration config = new Pigeon2Configuration();
+        config.MountPose.MountPoseYaw = GYRO_MOUNT_POSITION_YAW;
+        config.MountPose.MountPosePitch = GYRO_MOUNT_POSITION_PITCH;
+        config.MountPose.MountPoseRoll = GYRO_MOUNT_POSITION_ROLL;
+        GYRO.applyConfiguration(config);
         GYRO.setSimulationYawVelocitySupplier(() -> RobotContainer.SWERVE.getSelfRelativeVelocity().omegaRadiansPerSecond);
 
         GYRO.registerThreadedSignal(Pigeon2Signal.YAW, Pigeon2Signal.ANGULAR_VELOCITY_Z_WORLD, PoseEstimatorConstants.ODOMETRY_FREQUENCY_HERTZ);
     }
-
-    private static SwerveConstants generateConstants() {
-        if (RobotConstants.IS_SIMULATION)
-            return new SimulationSwerveConstants();
-        return new RealSwerveConstants();
-    }
-
-    public abstract double getMaxSpeedMetersPerSecond();
-
-    public abstract double getMaxRotationalSpeedRadiansPerSecond();
-
-    public abstract ProfiledPIDController getProfiledRotationController();
-
-    public abstract PIDController getTranslationsController();
-
-    public abstract PIDConstants getAutoTranslationPIDConstants();
-
-    public abstract PIDConstants getAutoRotationPIDConstants();
-
-    protected abstract Pigeon2Configuration generateGyroConfiguration();
 }

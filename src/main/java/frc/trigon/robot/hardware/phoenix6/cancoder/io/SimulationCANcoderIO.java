@@ -34,6 +34,7 @@ public class SimulationCANcoderIO extends CANcoderIO {
 
     @Override
     public void applyConfiguration(CANcoderConfiguration configuration) {
+        configuration.MagnetSensor.MagnetOffset = 0;
         cancoder.getConfigurator().apply(configuration);
     }
 
