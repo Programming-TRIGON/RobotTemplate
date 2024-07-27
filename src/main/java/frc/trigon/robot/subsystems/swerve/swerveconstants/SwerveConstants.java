@@ -20,7 +20,7 @@ public abstract class SwerveConstants {
     public static final SwerveConstants SYSTEM_SPECIFIC_CONSTANTS = generateConstants();
 
     public static final int PIGEON_ID = 0;
-    public static final Pigeon2Gyro GYRO = new Pigeon2Gyro(SwerveConstants.PIGEON_ID, "SwerveGyro", () -> RobotContainer.SWERVE.getSelfRelativeVelocity().omegaRadiansPerSecond, RobotConstants.CANIVORE_NAME);
+    public static final Pigeon2Gyro GYRO = new Pigeon2Gyro(SwerveConstants.PIGEON_ID, "SwerveGyro", RobotConstants.CANIVORE_NAME);
 
     private static final double
             FRONT_LEFT_STEER_ENCODER_OFFSET = -Conversions.degreesToRevolutions(225.263672 - 360),
@@ -73,6 +73,7 @@ public abstract class SwerveConstants {
 
     static {
         GYRO.applyConfiguration(SYSTEM_SPECIFIC_CONSTANTS.generateGyroConfiguration());
+        GYRO.setSimulationYawVelocitySupplier(() -> RobotContainer.SWERVE.getSelfRelativeVelocity().omegaRadiansPerSecond);
 
         GYRO.registerThreadedSignal(Pigeon2Signal.YAW, Pigeon2Signal.ANGULAR_VELOCITY_Z_WORLD, PoseEstimatorConstants.ODOMETRY_FREQUENCY_HERTZ);
     }

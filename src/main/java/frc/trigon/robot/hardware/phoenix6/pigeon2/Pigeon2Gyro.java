@@ -20,20 +20,12 @@ public class Pigeon2Gyro {
     private final int id;
 
     public Pigeon2Gyro(int id, String gyroName) {
-        this(id, gyroName, null, "");
+        this(id, gyroName, "");
     }
 
     public Pigeon2Gyro(int id, String gyroName, String canbus) {
-        this(id, gyroName, null, canbus);
-    }
-
-    public Pigeon2Gyro(int id, String gyroName, DoubleSupplier yawVelocitySupplierRotationsPerSecond) {
-        this(id, gyroName, yawVelocitySupplierRotationsPerSecond, "");
-    }
-
-    public Pigeon2Gyro(int id, String gyroName, DoubleSupplier yawVelocitySupplierRotationsPerSecond, String canbus) {
         this.gyroName = gyroName;
-        this.gyroIO = generateIO(id, yawVelocitySupplierRotationsPerSecond, canbus);
+        this.gyroIO = generateIO(id, canbus);
         this.gyroInputs = new Phoenix6Inputs(gyroName);
         this.id = id;
         gyroIO.optimizeBusUsage();
@@ -46,6 +38,10 @@ public class Pigeon2Gyro {
 
     public int getID() {
         return id;
+    }
+
+    public void setSimulationYawVelocitySupplier(DoubleSupplier yawVelocitySupplierDegreesPerSecond) {
+        gyroIO.setSimulationYawVelocitySupplier(yawVelocitySupplierDegreesPerSecond);
     }
 
     public void applyConfigurations(Pigeon2Configuration realConfiguration, Pigeon2Configuration simulationConfiguration) {
@@ -97,11 +93,11 @@ public class Pigeon2Gyro {
         return signal.signalFunction.apply(pigeon2);
     }
 
-    private Pigeon2IO generateIO(int id, DoubleSupplier yawVelocitySupplierRotationsPerSecond, String canbus) {
+    private Pigeon2IO generateIO(int id, String canbus) {
         if (RobotConstants.IS_REPLAY)
             return new Pigeon2IO();
         if (RobotConstants.IS_SIMULATION)
-            return new SimulationPigeon2IO(id, yawVelocitySupplierRotationsPerSecond);
+            return new SimulationPigeon2IO(id);
         return new RealPigeon2IO(id, canbus);
     }
 }

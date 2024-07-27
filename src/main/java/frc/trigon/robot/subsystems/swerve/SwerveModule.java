@@ -30,9 +30,9 @@ public class SwerveModule {
     private SwerveModuleState targetState = new SwerveModuleState();
 
     public SwerveModule(int moduleID, double offsetRotations) {
-        driveMotor = new TalonFXMotor(moduleID, "Module" + moduleID + "Drive", SimulationSwerveModuleConstants.DRIVE_PROPERTIES, RobotConstants.CANIVORE_NAME);
-        steerMotor = new TalonFXMotor(moduleID + 4, "Module" + moduleID + "Steer", SimulationSwerveModuleConstants.STEER_PROPERTIES, RobotConstants.CANIVORE_NAME);
-        steerEncoder = new CANcoderEncoder(moduleID, "Module" + moduleID + "SteerEncoder", steerMotor, RobotConstants.CANIVORE_NAME);
+        driveMotor = new TalonFXMotor(moduleID, "Module" + moduleID + "Drive", RobotConstants.CANIVORE_NAME);
+        steerMotor = new TalonFXMotor(moduleID + 4, "Module" + moduleID + "Steer", RobotConstants.CANIVORE_NAME);
+        steerEncoder = new CANcoderEncoder(moduleID, "Module" + moduleID + "SteerEncoder", RobotConstants.CANIVORE_NAME);
         configureHardware(offsetRotations);
     }
 
@@ -140,6 +140,11 @@ public class SwerveModule {
         steerMotor.applyConfigurations(RealSwerveModuleConstants.STEER_CONFIGURATION, SimulationSwerveModuleConstants.STEER_CONFIGURATION);
         RealSwerveModuleConstants.STEER_ENCODER_CONFIGURATION.MagnetSensor.MagnetOffset = offsetRotations;
         steerEncoder.applyConfigurations(RealSwerveModuleConstants.STEER_ENCODER_CONFIGURATION, SimulationSwerveModuleConstants.STEER_ENCODER_CONFIGURATION);
+
+        driveMotor.setPhysicsSimulation(SimulationSwerveModuleConstants.DRIVE_SIMULATION);
+        steerMotor.setPhysicsSimulation(SimulationSwerveModuleConstants.STEER_SIMULATION);
+        steerEncoder.setSimulationInputsFromTalonFX(steerMotor);
+
         configureSignals();
     }
 

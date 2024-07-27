@@ -20,29 +20,13 @@ public class CANcoderEncoder {
     private final Phoenix6Inputs encoderInputs;
     private final int id;
 
-    public CANcoderEncoder(int id, String encoderName, TalonFXMotor simulationMotor) {
-        this(id, encoderName, simulationMotor, "");
-    }
-
-    public CANcoderEncoder(int id, String encoderName, TalonFXMotor simulationMotor, String canbus) {
-        this(id, encoderName, () -> simulationMotor.getSignal(TalonFXSignal.POSITION), () -> simulationMotor.getSignal(TalonFXSignal.VELOCITY), canbus);
-    }
-
     public CANcoderEncoder(int id, String encoderName) {
-        this(id, encoderName, null, null, "");
+        this(id, encoderName, "");
     }
 
     public CANcoderEncoder(int id, String encoderName, String canbus) {
-        this(id, encoderName, null, null, canbus);
-    }
-
-    public CANcoderEncoder(int id, String encoderName, DoubleSupplier positionSupplierRotations, DoubleSupplier velocitySupplierRotationsPerSecond) {
-        this(id, encoderName, positionSupplierRotations, velocitySupplierRotationsPerSecond, "");
-    }
-
-    public CANcoderEncoder(int id, String encoderName, DoubleSupplier positionSupplierRotations, DoubleSupplier velocitySupplierRotationsPerSecond, String canbus) {
         this.encoderName = encoderName;
-        this.encoderIO = generateIO(id, positionSupplierRotations, velocitySupplierRotationsPerSecond, canbus);
+        this.encoderIO = generateIO(id, canbus);
         this.encoderInputs = new Phoenix6Inputs(encoderName);
         this.id = id;
         encoderIO.optimizeBusUsage();
@@ -55,6 +39,14 @@ public class CANcoderEncoder {
 
     public int getID() {
         return id;
+    }
+
+    public void setSimulationInputsFromTalonFX(TalonFXMotor motor) {
+        encoderIO.setSimulationInputSuppliers(() -> motor.getSignal(TalonFXSignal.POSITION), () -> motor.getSignal(TalonFXSignal.VELOCITY));
+    }
+
+    public void setSimulationInputsSuppliers(DoubleSupplier positionSupplierRotations, DoubleSupplier velocitySupplierRotationsPerSecond) {
+        encoderIO.setSimulationInputSuppliers(positionSupplierRotations, velocitySupplierRotationsPerSecond);
     }
 
     public void applyConfigurations(CANcoderConfiguration realConfiguration, CANcoderConfiguration simulationConfiguration) {
@@ -102,11 +94,11 @@ public class CANcoderEncoder {
         return signal.signalFunction.apply(cancoder);
     }
 
-    private CANcoderIO generateIO(int id, DoubleSupplier positionSupplierRotations, DoubleSupplier velocitySupplierRotationsPerSecond, String canbus) {
+    private CANcoderIO generateIO(int id, String canbus) {
         if (RobotConstants.IS_REPLAY)
             return new CANcoderIO();
         if (RobotConstants.IS_SIMULATION)
-            return new SimulationCANcoderIO(id, positionSupplierRotations, velocitySupplierRotationsPerSecond);
+            return new SimulationCANcoderIO(id);
         return new RealCANcoderIO(id, canbus);
     }
 }

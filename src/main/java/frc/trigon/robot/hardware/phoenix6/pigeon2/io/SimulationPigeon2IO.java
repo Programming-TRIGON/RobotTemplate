@@ -13,13 +13,12 @@ import java.util.function.DoubleSupplier;
 public class SimulationPigeon2IO extends Pigeon2IO {
     private final Pigeon2 pigeon2;
     private final Pigeon2SimState simState;
-    private final DoubleSupplier yawVelocitySupplier;
     private final GyroSimulation gyroSimulation;
+    private DoubleSupplier yawVelocitySupplier = null;
 
-    public SimulationPigeon2IO(int id, DoubleSupplier yawVelocitySupplierRotationsPerSecond) {
+    public SimulationPigeon2IO(int id) {
         this.pigeon2 = new Pigeon2(id);
         this.simState = pigeon2.getSimState();
-        this.yawVelocitySupplier = yawVelocitySupplierRotationsPerSecond;
         this.gyroSimulation = new GyroSimulation();
     }
 
@@ -29,6 +28,11 @@ public class SimulationPigeon2IO extends Pigeon2IO {
             return;
         gyroSimulation.update(yawVelocitySupplier.getAsDouble(), RobotConstants.PERIODIC_TIME_SECONDS);
         simState.setRawYaw(gyroSimulation.getGyroYawDegrees());
+    }
+
+    @Override
+    public void setSimulationYawVelocitySupplier(DoubleSupplier yawVelocitySupplierDegreesPerSecond) {
+        this.yawVelocitySupplier = yawVelocitySupplierDegreesPerSecond;
     }
 
     @Override

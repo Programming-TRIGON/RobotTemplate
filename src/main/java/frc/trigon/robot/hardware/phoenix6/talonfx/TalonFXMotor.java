@@ -8,6 +8,7 @@ import frc.trigon.robot.constants.RobotConstants;
 import frc.trigon.robot.hardware.phoenix6.Phoenix6Inputs;
 import frc.trigon.robot.hardware.phoenix6.talonfx.io.RealTalonFXIO;
 import frc.trigon.robot.hardware.phoenix6.talonfx.io.SimulationTalonFXIO;
+import frc.trigon.robot.hardware.simulation.MotorPhysicsSimulation;
 import org.littletonrobotics.junction.Logger;
 
 public class TalonFXMotor {
@@ -16,13 +17,13 @@ public class TalonFXMotor {
     private final Phoenix6Inputs motorInputs;
     private final int id;
 
-    public TalonFXMotor(int id, String motorName, MotorSimulationPhysicalProperties physicalProperties) {
-        this(id, motorName, physicalProperties, "");
+    public TalonFXMotor(int id, String motorName) {
+        this(id, motorName, "");
     }
 
-    public TalonFXMotor(int id, String motorName, MotorSimulationPhysicalProperties physicalProperties, String canbus) {
+    public TalonFXMotor(int id, String motorName, String canbus) {
         this.motorName = motorName;
-        this.motorIO = generateIO(id, physicalProperties, canbus);
+        this.motorIO = generateIO(id, canbus);
         this.motorInputs = new Phoenix6Inputs(motorName);
         this.id = id;
         motorIO.optimizeBusUsage();
@@ -35,6 +36,10 @@ public class TalonFXMotor {
 
     public int getID() {
         return id;
+    }
+
+    public void setPhysicsSimulation(MotorPhysicsSimulation simulation) {
+        motorIO.setSimulation(simulation);
     }
 
     public void applyConfigurations(TalonFXConfiguration realConfiguration, TalonFXConfiguration simulationConfiguration) {
@@ -94,11 +99,11 @@ public class TalonFXMotor {
         return signal.signalFunction.apply(talonFX);
     }
 
-    private TalonFXIO generateIO(int id, MotorSimulationPhysicalProperties physicalProperties, String canbus) {
+    private TalonFXIO generateIO(int id, String canbus) {
         if (RobotConstants.IS_REPLAY)
             return new TalonFXIO();
         if (RobotConstants.IS_SIMULATION)
-            return new SimulationTalonFXIO(id, physicalProperties);
+            return new SimulationTalonFXIO(id);
         return new RealTalonFXIO(id, canbus);
     }
 }
