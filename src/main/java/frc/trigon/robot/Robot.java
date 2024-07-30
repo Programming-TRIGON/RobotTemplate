@@ -5,9 +5,11 @@
 
 package frc.trigon.robot;
 
+import com.pathplanner.lib.pathfinding.Pathfinding;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.trigon.robot.constants.RobotConstants;
+import frc.trigon.robot.utilities.LocalADStarAK;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -23,6 +25,7 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void robotInit() {
+        Pathfinding.setPathfinder(new LocalADStarAK());
         configLogger();
         robotContainer = new RobotContainer();
     }
@@ -48,7 +51,28 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void testInit() {
-        CommandScheduler.getInstance().cancelAll();
+        commandScheduler.cancelAll();
+    }
+
+    @Override
+    public void simulationPeriodic() {
+    }
+
+    @Override
+    public void disabledPeriodic() {
+    }
+
+    @Override
+    public void autonomousPeriodic() {
+//        REVPhysicsSim.getInstance().run();
+    }
+
+    @Override
+    public void teleopPeriodic() {
+    }
+
+    @Override
+    public void testPeriodic() {
     }
 
     private void configLogger() {
@@ -61,7 +85,7 @@ public class Robot extends LoggedRobot {
             Logger.addDataReceiver(new WPILOGWriter(logWriterPath));
         } else {
             Logger.addDataReceiver(new NT4Publisher());
-            Logger.addDataReceiver(new WPILOGWriter(RobotConstants.ROBOT_TYPE.loggingPath));
+            Logger.addDataReceiver(new WPILOGWriter(RobotConstants.LOGGING_PATH));
         }
 
         Logger.start();

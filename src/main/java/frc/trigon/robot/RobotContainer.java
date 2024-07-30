@@ -7,16 +7,16 @@ package frc.trigon.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.trigon.robot.commands.Commands;
 import frc.trigon.robot.constants.CommandConstants;
 import frc.trigon.robot.constants.OperatorConstants;
 import frc.trigon.robot.poseestimation.poseestimator.PoseEstimator;
 import frc.trigon.robot.subsystems.swerve.Swerve;
-import frc.trigon.robot.utilities.Commands;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class RobotContainer {
+    public static final Swerve SWERVE = new Swerve();
     public static final PoseEstimator POSE_ESTIMATOR = new PoseEstimator();
-    private final Swerve swerve = Swerve.getInstance();
     private LoggedDashboardChooser<Command> autoChooser;
 
     public RobotContainer() {
@@ -37,7 +37,7 @@ public class RobotContainer {
     }
 
     private void bindDefaultCommands() {
-        swerve.setDefaultCommand(CommandConstants.FIELD_RELATIVE_DRIVE_COMMAND);
+        SWERVE.setDefaultCommand(CommandConstants.FIELD_RELATIVE_DRIVE_COMMAND);
     }
 
     private void bindControllerCommands() {

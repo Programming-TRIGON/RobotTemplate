@@ -2,7 +2,6 @@ package frc.trigon.robot.poseestimation.robotposesources;
 
 import edu.wpi.first.math.geometry.*;
 import frc.trigon.robot.Robot;
-import frc.trigon.robot.utilities.AllianceUtilities;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -14,7 +13,7 @@ public class RobotPoseSource {
     private final Transform3d robotCenterToCamera;
     private final RobotPoseSourceIO robotPoseSourceIO;
     private double lastUpdatedTimestamp;
-    private AllianceUtilities.AlliancePose2d cachedPose = null;
+    private Pose2d cachedPose = null;
 
     public RobotPoseSource(RobotPoseSourceConstants.RobotPoseSourceType robotPoseSourceType, String name, Transform3d robotCenterToCamera) {
         this.name = name;
@@ -45,12 +44,12 @@ public class RobotPoseSource {
 
     public void update() {
         robotPoseSourceIO.updateInputs(inputs);
-        Logger.processInputs(name, inputs);
+        Logger.processInputs("Cameras/" + name, inputs);
         cachedPose = getUnCachedRobotPose();
-        if (!inputs.hasResult || cachedPose == null)
-            Logger.recordOutput("Poses/Robot/" + name + "Pose", RobotPoseSourceConstants.OUT_OF_FIELD_POSE);
+        if (!inputs.hasResult || inputs.averageDistanceFromTags == 0 || cachedPose == null)
+            Logger.recordOutput("Poses/Robot/" + name + "Pose", RobotPoseSourceConstants.EMPTY_POSE_LIST);
         else
-            Logger.recordOutput("Poses/Robot/" + name + "Pose", cachedPose.toBlueAlliancePose());
+            Logger.recordOutput("Poses/Robot/" + name + "Pose", cachedPose);
     }
 
     public int getVisibleTags() {
@@ -62,10 +61,10 @@ public class RobotPoseSource {
     }
 
     public boolean hasNewResult() {
-        return isNewTimestamp() && inputs.hasResult;
+        return (inputs.hasResult && inputs.averageDistanceFromTags != 0) && isNewTimestamp();
     }
 
-    public AllianceUtilities.AlliancePose2d getRobotPose() {
+    public Pose2d getRobotPose() {
         return cachedPose;
     }
 
@@ -77,12 +76,12 @@ public class RobotPoseSource {
         return inputs.lastResultTimestamp;
     }
 
-    private AllianceUtilities.AlliancePose2d getUnCachedRobotPose() {
+    private Pose2d getUnCachedRobotPose() {
         final Pose3d cameraPose = doubleArrayToPose3d(inputs.cameraPose);
         if (cameraPose == null)
             return null;
 
-        return AllianceUtilities.AlliancePose2d.fromBlueAlliancePose(cameraPose.transformBy(robotCenterToCamera.inverse()).toPose2d());
+        return cameraPose.transformBy(robotCenterToCamera.inverse()).toPose2d();
     }
 
     private boolean isNewTimestamp() {
