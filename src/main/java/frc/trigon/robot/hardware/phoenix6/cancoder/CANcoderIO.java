@@ -6,19 +6,19 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import java.util.function.DoubleSupplier;
 
 public class CANcoderIO {
-    public void updateEncoder() {
+    protected void updateEncoder() {
     }
 
-    public void applyConfiguration(CANcoderConfiguration configuration) {
+    protected void applyConfiguration(CANcoderConfiguration configuration) {
     }
 
-    public void optimizeBusUsage() {
+    protected void optimizeBusUsage() {
     }
 
-    public void setSimulationInputSuppliers(DoubleSupplier positionSupplierRotations, DoubleSupplier velocitySupplierRotationsPerSecond) {
+    protected void setSimulationInputSuppliers(DoubleSupplier positionSupplierRotations, DoubleSupplier velocitySupplierRotationsPerSecond) {
     }
 
-    public CANcoder getCANcoder() {
+    protected CANcoder getCANcoder() {
         return null;
     }
 }

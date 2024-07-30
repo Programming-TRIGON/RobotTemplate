@@ -7,22 +7,22 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import java.util.function.DoubleSupplier;
 
 public class Pigeon2IO {
-    public void updateGyro() {
+    protected void updateGyro() {
     }
 
-    public void applyConfiguration(Pigeon2Configuration configuration) {
+    protected void applyConfiguration(Pigeon2Configuration configuration) {
     }
 
-    public void optimizeBusUsage() {
+    protected void optimizeBusUsage() {
     }
 
-    public void setYaw(Rotation2d currentYaw) {
+    protected void setYaw(Rotation2d currentYaw) {
     }
 
-    public void setSimulationYawVelocitySupplier(DoubleSupplier yawVelocitySupplierDegreesPerSecond) {
+    protected void setSimulationYawVelocitySupplier(DoubleSupplier yawVelocitySupplierDegreesPerSecond) {
     }
 
-    public Pigeon2 getPigeon2() {
+    protected Pigeon2 getPigeon2() {
         return null;
     }
 }
