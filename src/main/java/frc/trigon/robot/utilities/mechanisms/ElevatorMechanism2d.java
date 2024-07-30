@@ -6,6 +6,9 @@ import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import org.littletonrobotics.junction.Logger;
 
+/**
+ * A Mechanism2d object to display the current position and target position of an elevator.
+ */
 public class ElevatorMechanism2d {
     private final String key;
     private final Mechanism2d mechanism;
@@ -17,13 +20,13 @@ public class ElevatorMechanism2d {
     /**
      * Constructs an ElevatorMechanism2d object.
      *
-     * @param key            the key of the mechanism
+     * @param name           the name of the mechanism
      * @param maximumLength  the maximum length of the elevator
      * @param minimumLength  the minimum length of the elevator
      * @param mechanismColor the color of the mechanism
      */
-    public ElevatorMechanism2d(String key, double maximumLength, double minimumLength, Color8Bit mechanismColor) {
-        this.key = key;
+    public ElevatorMechanism2d(String name, double maximumLength, double minimumLength, Color8Bit mechanismColor) {
+        this.key = "Mechanisms/" + name;
         this.minimumLength = minimumLength;
         this.mechanism = new Mechanism2d(maximumLength, maximumLength);
 

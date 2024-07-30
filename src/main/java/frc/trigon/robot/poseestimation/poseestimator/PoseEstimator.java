@@ -28,7 +28,6 @@ public class PoseEstimator implements AutoCloseable {
     private final Field2d field = new Field2d();
     private final RobotPoseSource[] robotPoseSources;
     private final PoseEstimator6328 poseEstimator6328 = PoseEstimator6328.getInstance();
-    private Pose2d robotPose = PoseEstimatorConstants.DEFAULT_POSE;
 
     /**
      * Constructs a new PoseEstimator.

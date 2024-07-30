@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
 import org.littletonrobotics.junction.Logger;
 
 /**
- * A Mechanism2d object to display the current angle and the target angle of a double jointed arm.
+ * A Mechanism2d object to display the current angle and the target angle of a double-jointed arm.
  */
 public class DoubleJointedArmMechanism2d {
     private final String key;
@@ -19,12 +19,26 @@ public class DoubleJointedArmMechanism2d {
             targetPositionFirstLigament,
             targetPositionSecondLigament;
 
+    /**
+     * Constructs a SingleJointedArmMechanism2d object.
+     *
+     * @param key            the key of the mechanism
+     * @param mechanismColor the color of the mechanism
+     */
     public DoubleJointedArmMechanism2d(String key, Color8Bit mechanismColor) {
         this(key, MechanismConstants.MECHANISM_LINE_LENGTH, MechanismConstants.MECHANISM_LINE_LENGTH, mechanismColor);
     }
 
-    public DoubleJointedArmMechanism2d(String key, double firstJointLength, double secondJointLength, Color8Bit mechanismColor) {
-        this.key = key;
+    /**
+     * Constructs a SingleJointedArmMechanism2d object.
+     *
+     * @param name              the name of the mechanism
+     * @param firstJointLength  the length of the first joint
+     * @param secondJointLength the length of the second joint
+     * @param mechanismColor    the color of the mechanism
+     */
+    public DoubleJointedArmMechanism2d(String name, double firstJointLength, double secondJointLength, Color8Bit mechanismColor) {
+        this.key = "Mechanisms/" + name;
         final double mechanismMiddle = MechanismConstants.LIGAMENT_END_TO_EDGE_RATIO * (firstJointLength + secondJointLength);
         this.mechanism = new Mechanism2d(2 * mechanismMiddle, 2 * mechanismMiddle);
         final MechanismRoot2d root = mechanism.getRoot("AngleRoot", mechanismMiddle, mechanismMiddle);
