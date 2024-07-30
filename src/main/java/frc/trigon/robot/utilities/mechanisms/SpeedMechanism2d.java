@@ -21,13 +21,25 @@ public class SpeedMechanism2d {
             targetVelocityBottomArrowLigament;
     private final double deadband;
 
+    /**
+     * Constructs a SpeedMechanism2d object.
+     *
+     * @param key                        the key of the mechanism
+     * @param maximumDisplayableVelocity the maximum displayable velocity
+     */
     public SpeedMechanism2d(String key, double maximumDisplayableVelocity) {
         this(key, maximumDisplayableVelocity, 0.001);
     }
 
-    public SpeedMechanism2d(String key, double maximumDisplayableVelocity, double deadband) {
+    /**
+     * Constructs a SpeedMechanism2d object.
+     *
+     * @param name                       the name of the mechanism
+     * @param maximumDisplayableVelocity the maximum displayable velocity
+     */
+    public SpeedMechanism2d(String name, double maximumDisplayableVelocity, double deadband) {
         this.deadband = deadband;
-        this.key = key;
+        this.key = "Mechanisms/" + name;
         this.mechanism = new Mechanism2d(2 * maximumDisplayableVelocity, 2 * maximumDisplayableVelocity);
         final MechanismRoot2d root = mechanism.getRoot("VelocityRoot", maximumDisplayableVelocity, maximumDisplayableVelocity);
         this.currentVelocityLigament = root.append(new MechanismLigament2d("ZCurrentVelocityLigament", 0, 0, MechanismConstants.MECHANISM_LINE_WIDTH, MechanismConstants.BLUE));

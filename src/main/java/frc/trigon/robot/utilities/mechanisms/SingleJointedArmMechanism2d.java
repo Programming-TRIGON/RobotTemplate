@@ -17,12 +17,25 @@ public class SingleJointedArmMechanism2d {
             currentPositionLigament,
             targetPositionLigament;
 
+    /**
+     * Constructs a SingleJointedArmMechanism2d object.
+     *
+     * @param key            the key of the mechanism
+     * @param mechanismColor the color of the mechanism
+     */
     public SingleJointedArmMechanism2d(String key, Color8Bit mechanismColor) {
         this(key, MechanismConstants.MECHANISM_LINE_LENGTH, mechanismColor);
     }
 
-    public SingleJointedArmMechanism2d(String key, double armLength, Color8Bit mechanismColor) {
-        this.key = key;
+    /**
+     * Constructs a SingleJointedArmMechanism2d object.
+     *
+     * @param name           the name of the mechanism
+     * @param armLength      the length of the arm
+     * @param mechanismColor the color of the mechanism
+     */
+    public SingleJointedArmMechanism2d(String name, double armLength, Color8Bit mechanismColor) {
+        this.key = "Mechanisms/" + name;
         final double mechanismMiddle = MechanismConstants.LIGAMENT_END_TO_EDGE_RATIO * armLength;
         this.mechanism = new Mechanism2d(2 * mechanismMiddle, 2 * mechanismMiddle);
         final MechanismRoot2d root = mechanism.getRoot("AngleRoot", mechanismMiddle, mechanismMiddle);
