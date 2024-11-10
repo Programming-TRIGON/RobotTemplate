@@ -168,13 +168,17 @@ out/
 # Fleet
 .fleet
 
-
 # Simulation GUI and other tools window save file
+networktables.json
+simgui.json
 *-window.json
 
-networktables.json
-*.wpilog
-simgui.json
-simgui-ds.json
+# Simulation data log directory
+logs/
 
-ctre_sim
+# Folder that has CTRE Phoenix Sim device config storage
+ctre_sim/
+
+# clangd
+/.cache
+compile_commands.json

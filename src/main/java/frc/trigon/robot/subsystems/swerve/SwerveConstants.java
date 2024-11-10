@@ -1,35 +1,40 @@
 package frc.trigon.robot.subsystems.swerve;
 
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
-import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
-import com.pathplanner.lib.util.PIDConstants;
-import com.pathplanner.lib.util.ReplanningConfig;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PathFollowingController;
+import com.pathplanner.lib.trajectory.PathPlannerTrajectoryState;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.constants.RobotConstants;
 import frc.trigon.robot.poseestimation.poseestimator.PoseEstimatorConstants;
+import org.json.simple.parser.ParseException;
 import org.trigon.hardware.RobotHardwareStats;
 import org.trigon.hardware.phoenix6.pigeon2.Pigeon2Gyro;
 import org.trigon.hardware.phoenix6.pigeon2.Pigeon2Signal;
 
+import java.io.IOException;
 import java.util.function.DoubleSupplier;
 
 public class SwerveConstants {
     private static final int PIGEON_ID = 0;
     static final Pigeon2Gyro GYRO = new Pigeon2Gyro(SwerveConstants.PIGEON_ID, "SwerveGyro", RobotConstants.CANIVORE_NAME);
     private static final double
-            GYRO_MOUNT_POSITION_YAW = 86.152039 ,
-            GYRO_MOUNT_POSITION_PITCH = 0.087891 ,
-            GYRO_MOUNT_POSITION_ROLL = -0.351562 ;
+            GYRO_MOUNT_POSITION_YAW = 0,
+            GYRO_MOUNT_POSITION_PITCH = 0,
+            GYRO_MOUNT_POSITION_ROLL = 0;
     private static final double
-            FRONT_LEFT_STEER_ENCODER_OFFSET = -1.561,
-            FRONT_RIGHT_STEER_ENCODER_OFFSET = -3.431,
-            REAR_LEFT_STEER_ENCODER_OFFSET = -0.971 + 0.437,
-            REAR_RIGHT_STEER_ENCODER_OFFSET = -2.008;
+            FRONT_LEFT_STEER_ENCODER_OFFSET = 0,
+            FRONT_RIGHT_STEER_ENCODER_OFFSET = 0,
+            REAR_LEFT_STEER_ENCODER_OFFSET = 0,
+            REAR_RIGHT_STEER_ENCODER_OFFSET = 0;
     private static final int
             FRONT_LEFT_ID = 1,
             FRONT_RIGHT_ID = 2,
@@ -103,14 +108,32 @@ public class SwerveConstants {
             TRANSLATION_PID_CONSTANTS.kD
     );
 
-    private static final ReplanningConfig REPLANNING_CONFIG = new ReplanningConfig(true, false);
-    static final HolonomicPathFollowerConfig HOLONOMIC_PATH_FOLLOWER_CONFIG = new HolonomicPathFollowerConfig(
-            AUTO_TRANSLATION_PID_CONSTANTS,
-            AUTO_ROTATION_PID_CONSTANTS,
-            MAX_ROTATIONAL_SPEED_RADIANS_PER_SECOND,
-            SwerveConstants.FURTHEST_MODULE_DISTANCE_FROM_CENTER,
-            REPLANNING_CONFIG
-    );
+    static final RobotConfig ROBOT_CONFIG;
+
+    static {
+        try {
+            ROBOT_CONFIG = RobotConfig.fromGUISettings();
+        } catch (IOException | ParseException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    static final PathFollowingController PATH_FOLLOWING_CONTROLLER = new PathFollowingController() {
+        @Override
+        public ChassisSpeeds calculateRobotRelativeSpeeds(Pose2d currentPose, PathPlannerTrajectoryState targetState) {
+            return null;
+        }
+
+        @Override
+        public void reset(Pose2d currentPose, ChassisSpeeds currentSpeeds) {
+
+        }
+
+        @Override
+        public boolean isHolonomic() {
+            return false;
+        }
+    };
 
     static {
         final Pigeon2Configuration config = new Pigeon2Configuration();

@@ -1,11 +1,8 @@
 package frc.trigon.robot.subsystems.swerve;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.path.GoalEndState;
-import com.pathplanner.lib.path.PathConstraints;
-import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.path.*;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.trigon.robot.RobotContainer;
 import org.trigon.commands.InitExecuteCommand;
@@ -162,14 +159,15 @@ public class SwerveCommands {
     }
 
     private static Command createOnTheFlyPathCommand(MirrorablePose2d targetPose, PathConstraints constraints) {
-        List<Translation2d> bezierPoints = PathPlannerPath.bezierFromPoses(
+        List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
                 RobotContainer.POSE_ESTIMATOR.getCurrentPose(),
                 targetPose.get()
         );
 
         PathPlannerPath path = new PathPlannerPath(
-                bezierPoints,
+                waypoints,
                 constraints,
+                new IdealStartingState(0, SWERVE.getHeading()),
                 new GoalEndState(0, targetPose.get().getRotation())
         );
 

@@ -4,10 +4,13 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathfindingCommand;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.*;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.Measure;
-import edu.wpi.first.units.Voltage;
+import edu.wpi.first.units.VoltageUnit;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -64,7 +67,7 @@ public class Swerve extends MotorSubsystem {
     }
 
     @Override
-    public void drive(Measure<Voltage> voltageMeasure) {
+    public void drive(Measure<VoltageUnit> voltageMeasure) {
         for (SwerveModule swerveModule : swerveModules) {
             swerveModule.setTargetDriveMotorCurrent(voltageMeasure.in(edu.wpi.first.units.Units.Volts));
             swerveModule.setTargetAngle(new Rotation2d());
@@ -274,7 +277,7 @@ public class Swerve extends MotorSubsystem {
     private void updatePoseEstimatorStates() {
         final double[] odometryUpdatesYawDegrees = gyro.getThreadedSignal(Pigeon2Signal.YAW);
         final int odometryUpdates = odometryUpdatesYawDegrees.length;
-        final SwerveDriveWheelPositions[] swerveWheelPositions = new SwerveDriveWheelPositions[odometryUpdates];
+        final SwerveModulePosition[][] swerveWheelPositions = new SwerveModulePosition[odometryUpdates][];
         final Rotation2d[] gyroRotations = new Rotation2d[odometryUpdates];
 
         for (int i = 0; i < odometryUpdates; i++) {
@@ -285,11 +288,11 @@ public class Swerve extends MotorSubsystem {
         RobotContainer.POSE_ESTIMATOR.updatePoseEstimatorStates(swerveWheelPositions, gyroRotations, phoenix6SignalThread.getLatestTimestamps());
     }
 
-    private SwerveDriveWheelPositions getSwerveWheelPositions(int odometryUpdateIndex) {
+    private SwerveModulePosition[] getSwerveWheelPositions(int odometryUpdateIndex) {
         final SwerveModulePosition[] swerveModulePositions = new SwerveModulePosition[swerveModules.length];
         for (int i = 0; i < swerveModules.length; i++)
             swerveModulePositions[i] = swerveModules[i].getOdometryPosition(odometryUpdateIndex);
-        return new SwerveDriveWheelPositions(swerveModulePositions);
+        return swerveModulePositions;
     }
 
     private void updateHardware() {
@@ -302,13 +305,14 @@ public class Swerve extends MotorSubsystem {
     }
 
     private void configurePathPlanner() {
-        AutoBuilder.configureHolonomic(
+        AutoBuilder.configure(
                 RobotContainer.POSE_ESTIMATOR::getCurrentPose,
                 (pose) -> {
                 },
                 this::getSelfRelativeVelocity,
-                this::selfRelativeDrive,
-                SwerveConstants.HOLONOMIC_PATH_FOLLOWER_CONFIG,
+                (speeds, feedforwards) -> selfRelativeDrive(speeds),
+                SwerveConstants.PATH_FOLLOWING_CONTROLLER,
+                SwerveConstants.ROBOT_CONFIG,
                 Mirrorable::isRedAlliance,
                 this
         );
