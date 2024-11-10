@@ -15,27 +15,26 @@ import frc.trigon.robot.poseestimation.poseestimator.PoseEstimatorConstants;
 import org.trigon.hardware.RobotHardwareStats;
 import org.trigon.hardware.phoenix6.pigeon2.Pigeon2Gyro;
 import org.trigon.hardware.phoenix6.pigeon2.Pigeon2Signal;
-import org.trigon.utilities.Conversions;
 
 import java.util.function.DoubleSupplier;
 
-public abstract class SwerveConstants {
+public class SwerveConstants {
     private static final int PIGEON_ID = 0;
     static final Pigeon2Gyro GYRO = new Pigeon2Gyro(SwerveConstants.PIGEON_ID, "SwerveGyro", RobotConstants.CANIVORE_NAME);
     private static final double
-            GYRO_MOUNT_POSITION_YAW = 0,
-            GYRO_MOUNT_POSITION_PITCH = 0,
-            GYRO_MOUNT_POSITION_ROLL = 0;
+            GYRO_MOUNT_POSITION_YAW = 86.152039 ,
+            GYRO_MOUNT_POSITION_PITCH = 0.087891 ,
+            GYRO_MOUNT_POSITION_ROLL = -0.351562 ;
     private static final double
-            FRONT_LEFT_STEER_ENCODER_OFFSET = -Conversions.degreesToRotations(225.263672 - 360),
-            FRONT_RIGHT_STEER_ENCODER_OFFSET = -Conversions.degreesToRotations(-256.904297 + 360),
-            REAR_LEFT_STEER_ENCODER_OFFSET = -Conversions.degreesToRotations(108.369141),
-            REAR_RIGHT_STEER_ENCODER_OFFSET = -Conversions.degreesToRotations(-36.035156);
+            FRONT_LEFT_STEER_ENCODER_OFFSET = -1.561,
+            FRONT_RIGHT_STEER_ENCODER_OFFSET = -3.431,
+            REAR_LEFT_STEER_ENCODER_OFFSET = -0.971 + 0.437,
+            REAR_RIGHT_STEER_ENCODER_OFFSET = -2.008;
     private static final int
-            FRONT_LEFT_ID = 0,
-            FRONT_RIGHT_ID = 1,
-            REAR_LEFT_ID = 2,
-            REAR_RIGHT_ID = 3;
+            FRONT_LEFT_ID = 1,
+            FRONT_RIGHT_ID = 2,
+            REAR_LEFT_ID = 3,
+            REAR_RIGHT_ID = 4;
     static final SwerveModule[] SWERVE_MODULES = {
             new SwerveModule(FRONT_LEFT_ID, FRONT_LEFT_STEER_ENCODER_OFFSET),
             new SwerveModule(FRONT_RIGHT_ID, FRONT_RIGHT_STEER_ENCODER_OFFSET),
@@ -46,17 +45,18 @@ public abstract class SwerveConstants {
     private static final DoubleSupplier SIMULATION_YAW_VELOCITY_SUPPLIER = () -> RobotContainer.SWERVE.getSelfRelativeVelocity().omegaRadiansPerSecond;
 
     private static final double
-            MODULE_X_DISTANCE_FROM_CENTER = 0.6457 / 2,
-            MODULE_Y_DISTANCE_FROM_CENTER = 0.5357 / 2;
-    private static final Translation2d[] LOCATIONS = {
-            new Translation2d(MODULE_X_DISTANCE_FROM_CENTER, MODULE_Y_DISTANCE_FROM_CENTER),
-            new Translation2d(MODULE_X_DISTANCE_FROM_CENTER, -MODULE_Y_DISTANCE_FROM_CENTER),
-            new Translation2d(-MODULE_X_DISTANCE_FROM_CENTER, MODULE_Y_DISTANCE_FROM_CENTER),
-            new Translation2d(-MODULE_X_DISTANCE_FROM_CENTER, -MODULE_Y_DISTANCE_FROM_CENTER)
+            MODULE_Y_DISTANCE_FROM_CENTER = 0.27285,
+            FRONT_MODULE_X_DISTANCE_FROM_CENTER = 0.17215,
+            REAR_MODULE_X_DISTANCE_FROM_CENTER = -0.24285;
+    public static final Translation2d[] MODULE_LOCATIONS = {
+            new Translation2d(FRONT_MODULE_X_DISTANCE_FROM_CENTER, MODULE_Y_DISTANCE_FROM_CENTER),
+            new Translation2d(FRONT_MODULE_X_DISTANCE_FROM_CENTER, -MODULE_Y_DISTANCE_FROM_CENTER),
+            new Translation2d(REAR_MODULE_X_DISTANCE_FROM_CENTER, MODULE_Y_DISTANCE_FROM_CENTER),
+            new Translation2d(REAR_MODULE_X_DISTANCE_FROM_CENTER, -MODULE_Y_DISTANCE_FROM_CENTER)
     };
-    public static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(LOCATIONS);
-    public static final double DRIVE_RADIUS_METERS = Math.hypot(
-            MODULE_X_DISTANCE_FROM_CENTER, MODULE_Y_DISTANCE_FROM_CENTER
+    public static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(MODULE_LOCATIONS);
+    private static final double FURTHEST_MODULE_DISTANCE_FROM_CENTER = Math.hypot(
+            REAR_MODULE_X_DISTANCE_FROM_CENTER, MODULE_Y_DISTANCE_FROM_CENTER
     );
 
     static final double
@@ -76,14 +76,14 @@ public abstract class SwerveConstants {
             new PIDConstants(5, 0, 0) :
             new PIDConstants(5, 0, 0),
             PROFILED_ROTATION_PID_CONSTANTS = RobotHardwareStats.isSimulation() ?
-                    new PIDConstants(8, 0, 0) :
-                    new PIDConstants(5, 0, 0),
+                    new PIDConstants(4, 0, 0.05) :
+                    new PIDConstants(3, 0, 0),
             AUTO_TRANSLATION_PID_CONSTANTS = RobotHardwareStats.isSimulation() ?
-                    new PIDConstants(9, 0, 0) :
-                    new PIDConstants(6.5, 0, 0),
+                    new PIDConstants(5, 0, 0.1) :
+                    new PIDConstants(2, 0, 0.1),
             AUTO_ROTATION_PID_CONSTANTS = RobotHardwareStats.isSimulation() ?
-                    new PIDConstants(8.9, 0, 0) :
-                    new PIDConstants(3, 0, 0);
+                    new PIDConstants(2.5, 0, 0.2) :
+                    new PIDConstants(6.5, 0, 0);
     private static final double
             MAX_ROTATION_VELOCITY = RobotHardwareStats.isSimulation() ? 720 : 720,
             MAX_ROTATION_ACCELERATION = RobotHardwareStats.isSimulation() ? 720 : 720;
@@ -108,7 +108,7 @@ public abstract class SwerveConstants {
             AUTO_TRANSLATION_PID_CONSTANTS,
             AUTO_ROTATION_PID_CONSTANTS,
             MAX_ROTATIONAL_SPEED_RADIANS_PER_SECOND,
-            SwerveConstants.DRIVE_RADIUS_METERS,
+            SwerveConstants.FURTHEST_MODULE_DISTANCE_FROM_CENTER,
             REPLANNING_CONFIG
     );
 
@@ -120,6 +120,6 @@ public abstract class SwerveConstants {
         GYRO.applyConfiguration(config);
         GYRO.setSimulationYawVelocitySupplier(SIMULATION_YAW_VELOCITY_SUPPLIER);
 
-        GYRO.registerThreadedSignal(Pigeon2Signal.YAW, Pigeon2Signal.ANGULAR_VELOCITY_Z_WORLD, PoseEstimatorConstants.ODOMETRY_FREQUENCY_HERTZ);
+        GYRO.registerThreadedSignal(Pigeon2Signal.YAW, PoseEstimatorConstants.ODOMETRY_FREQUENCY_HERTZ);
     }
 }

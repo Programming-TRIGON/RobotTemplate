@@ -26,7 +26,7 @@ public class AprilTagPhotonCameraIO extends AprilTagCameraIO {
 
     @Override
     protected void updateInputs(AprilTagCameraInputsAutoLogged inputs) {
-        final PhotonPipelineResult latestResult = photonCamera.getLatestResult();
+        final PhotonPipelineResult latestResult = photonCamera.getAllUnreadResults().get(photonCamera.getAllUnreadResults().size());
 
         inputs.hasResult = latestResult.hasTargets() && !latestResult.getTargets().isEmpty();
         if (inputs.hasResult)
@@ -82,8 +82,8 @@ public class AprilTagPhotonCameraIO extends AprilTagCameraIO {
      * @return the estimated pose
      */
     private Pose3d getSolvePNPPose(PhotonPipelineResult result) {
-        if (result.getMultiTagResult().estimatedPose.isPresent) {
-            final Transform3d cameraPoseTransform = result.getMultiTagResult().estimatedPose.best;
+        if (result.getMultiTagResult().isPresent()) {
+            final Transform3d cameraPoseTransform = result.getMultiTagResult().get().estimatedPose.best;
             return new Pose3d().plus(cameraPoseTransform).relativeTo(FieldConstants.APRIL_TAG_FIELD_LAYOUT.getOrigin());
         }
 
@@ -95,7 +95,7 @@ public class AprilTagPhotonCameraIO extends AprilTagCameraIO {
 
     private int[] getVisibleTagIDs(PhotonPipelineResult result) {
         final int[] visibleTagIDs = new int[result.getTargets().size()];
-        
+
         for (int i = 1; i < visibleTagIDs.length; i++)
             visibleTagIDs[i] = result.getTargets().get(i).getFiducialId();
         return visibleTagIDs;
