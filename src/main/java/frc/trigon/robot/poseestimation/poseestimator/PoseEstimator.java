@@ -81,6 +81,9 @@ public class PoseEstimator implements AutoCloseable {
             poseEstimator6328.addOdometryObservation(new PoseEstimator6328.OdometryObservation(swerveWheelPositions[i], gyroRotations[i], timestamps[i]));
     }
 
+    /**
+     * Because we rely on the gyro for the robot's heading, we need to use solve PNP to reset the gyro's assumed heading.
+     */
     public void setGyroHeadingToBestSolvePNPHeading() {
         int closestCameraToTag = 0;
         for (int i = 0; i < aprilTagCameras.length; i++) {
