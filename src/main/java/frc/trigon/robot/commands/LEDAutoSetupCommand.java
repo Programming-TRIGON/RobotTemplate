@@ -14,7 +14,6 @@ import org.trigon.utilities.mirrorable.MirrorablePose2d;
 
 import java.awt.*;
 import java.io.IOException;
-import java.util.function.Supplier;
 
 /**
  * A command that sets the LED strips to a color based on the robot's position and orientation relative to the starting
@@ -25,17 +24,9 @@ public class LEDAutoSetupCommand extends SequentialCommandGroup {
     private static final double
             TOLERANCE_METERS = 0.1,
             TOLERANCE_DEGREES = 2;
-    private final Supplier<String> autoName;
     private Pose2d autoStartPose;
 
-    /**
-     * Constructs a new LEDAutoSetupCommand.
-     *
-     * @param autoName a supplier that returns the name of the selected autonomous path
-     */
-    public LEDAutoSetupCommand(Supplier<String> autoName) {
-        this.autoName = autoName;
-
+    public LEDAutoSetupCommand() {
         addCommands(
                 getUpdateAutoStartPoseCommand(),
                 LEDStripCommands.getThreeSectionColorCommand(
@@ -63,7 +54,8 @@ public class LEDAutoSetupCommand extends SequentialCommandGroup {
         return new InstantCommand(
                 () -> {
                     try {
-                        this.autoStartPose = new MirrorablePose2d(PathPlannerPath.fromPathFile(PathPlannerAuto.currentPathName).getStartingHolonomicPose().get(), true).get();
+                        final Pose2d nonMirroredAutoStartPose = PathPlannerPath.fromPathFile(PathPlannerAuto.currentPathName).getStartingHolonomicPose().get();
+                        this.autoStartPose = new MirrorablePose2d(nonMirroredAutoStartPose, true).get();
                     } catch (IOException | ParseException e) {
                         throw new RuntimeException(e);
                     }
