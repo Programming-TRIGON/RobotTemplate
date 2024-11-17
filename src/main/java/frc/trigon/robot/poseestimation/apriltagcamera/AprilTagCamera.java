@@ -44,10 +44,11 @@ public class AprilTagCamera {
         this.thetaStandardDeviationExponent = thetaStandardDeviationExponent;
         this.translationStandardDeviationExponent = translationStandardDeviationExponent;
 
-        if (Robot.IS_REAL)
+        if (Robot.IS_REAL) {
             aprilTagCameraIO = aprilTagCameraType.createIOFunction.apply(name);
-        else
-            aprilTagCameraIO = new AprilTagCameraIO();
+            return;
+        }
+        aprilTagCameraIO = new AprilTagCameraIO();
     }
 
     public void update() {

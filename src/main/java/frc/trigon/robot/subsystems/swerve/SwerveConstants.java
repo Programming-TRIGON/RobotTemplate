@@ -118,22 +118,7 @@ public class SwerveConstants {
         }
     }
 
-    static final PathFollowingController PATH_FOLLOWING_CONTROLLER = new PathFollowingController() {
-        @Override
-        public ChassisSpeeds calculateRobotRelativeSpeeds(Pose2d currentPose, PathPlannerTrajectoryState targetState) {
-            return null;
-        }
-
-        @Override
-        public void reset(Pose2d currentPose, ChassisSpeeds currentSpeeds) {
-
-        }
-
-        @Override
-        public boolean isHolonomic() {
-            return false;
-        }
-    };
+    static final PathFollowingController PATH_FOLLOWING_CONTROLLER = generatePathFollowingController();
 
     static {
         final Pigeon2Configuration config = new Pigeon2Configuration();
@@ -144,5 +129,25 @@ public class SwerveConstants {
         GYRO.setSimulationYawVelocitySupplier(SIMULATION_YAW_VELOCITY_SUPPLIER);
 
         GYRO.registerThreadedSignal(Pigeon2Signal.YAW, PoseEstimatorConstants.ODOMETRY_FREQUENCY_HERTZ);
+    }
+
+    private static PathFollowingController generatePathFollowingController() {
+        return new PathFollowingController() {
+
+            @Override
+            public ChassisSpeeds calculateRobotRelativeSpeeds(Pose2d currentPose, PathPlannerTrajectoryState targetState) {
+                return null;
+            }
+
+            @Override
+            public void reset(Pose2d currentPose, ChassisSpeeds currentSpeeds) {
+
+            }
+
+            @Override
+            public boolean isHolonomic() {
+                return false;
+            }
+        }
     }
 }

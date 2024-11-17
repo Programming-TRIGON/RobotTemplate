@@ -21,10 +21,11 @@ public class AprilTagLimelightIO extends AprilTagCameraIO {
 
         inputs.hasResult = results.targets_Fiducials.length > 0;
 
-        if (inputs.hasResult)
+        if (inputs.hasResult) {
             updateHasResultInputs(inputs, results);
-        else
-            updateNoResultInputs(inputs);
+            return;
+        }
+        updateNoResultInputs(inputs);
     }
 
     private void updateHasResultInputs(AprilTagCameraInputsAutoLogged inputs, LimelightHelpers.LimelightResults results) {
