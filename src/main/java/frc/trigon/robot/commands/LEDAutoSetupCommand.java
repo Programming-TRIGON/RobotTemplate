@@ -55,7 +55,8 @@ public class LEDAutoSetupCommand extends SequentialCommandGroup {
                 () -> {
                     try {
                         final Pose2d nonMirroredAutoStartPose = PathPlannerPath.fromPathFile(PathPlannerAuto.currentPathName).getStartingHolonomicPose().get();
-                        this.autoStartPose = new MirrorablePose2d(nonMirroredAutoStartPose, true).get();
+                        final MirrorablePose2d mirroredAutoStartPose = new MirrorablePose2d(nonMirroredAutoStartPose, true);
+                        this.autoStartPose = mirroredAutoStartPose.get();
                     } catch (IOException | ParseException e) {
                         throw new RuntimeException(e);
                     }
