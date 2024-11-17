@@ -148,6 +148,6 @@ public class SwerveConstants {
             public boolean isHolonomic() {
                 return false;
             }
-        }
+        };
     }
 }
