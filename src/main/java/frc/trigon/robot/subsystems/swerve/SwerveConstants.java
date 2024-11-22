@@ -3,13 +3,9 @@ package frc.trigon.robot.subsystems.swerve;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
-import com.pathplanner.lib.controllers.PathFollowingController;
-import com.pathplanner.lib.trajectory.PathPlannerTrajectoryState;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.trigon.robot.RobotContainer;
@@ -117,9 +113,7 @@ public class SwerveConstants {
             throw new RuntimeException(e);
         }
     }
-
-    static final PathFollowingController PATH_FOLLOWING_CONTROLLER = generatePathFollowingController();
-
+    
     static {
         final Pigeon2Configuration config = new Pigeon2Configuration();
         config.MountPose.MountPoseYaw = GYRO_MOUNT_POSITION_YAW;
@@ -129,25 +123,5 @@ public class SwerveConstants {
         GYRO.setSimulationYawVelocitySupplier(SIMULATION_YAW_VELOCITY_SUPPLIER);
 
         GYRO.registerThreadedSignal(Pigeon2Signal.YAW, PoseEstimatorConstants.ODOMETRY_FREQUENCY_HERTZ);
-    }
-
-    private static PathFollowingController generatePathFollowingController() {
-        return new PathFollowingController() {
-
-            @Override
-            public ChassisSpeeds calculateRobotRelativeSpeeds(Pose2d currentPose, PathPlannerTrajectoryState targetState) {
-                return null;
-            }
-
-            @Override
-            public void reset(Pose2d currentPose, ChassisSpeeds currentSpeeds) {
-
-            }
-
-            @Override
-            public boolean isHolonomic() {
-                return false;
-            }
-        };
     }
 }

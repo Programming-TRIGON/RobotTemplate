@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.trigon.robot.RobotContainer;
+import frc.trigon.robot.misc.PathFollowingController;
 import frc.trigon.robot.poseestimation.poseestimator.PoseEstimatorConstants;
 import frc.trigon.robot.subsystems.MotorSubsystem;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -311,7 +312,7 @@ public class Swerve extends MotorSubsystem {
                 },
                 this::getSelfRelativeVelocity,
                 (speeds, feedforwards) -> selfRelativeDrive(speeds),
-                SwerveConstants.PATH_FOLLOWING_CONTROLLER,
+                new PathFollowingController(),
                 SwerveConstants.ROBOT_CONFIG,
                 Mirrorable::isRedAlliance,
                 this
