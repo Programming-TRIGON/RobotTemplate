@@ -40,8 +40,9 @@ public class AprilTagLimelightIO extends AprilTagCameraIO {
     }
 
     private void updateNoResultInputs(AprilTagCameraInputsAutoLogged inputs) {
-        inputs.visibleTagIDs = new int[0];
         inputs.cameraSolvePNPPose = new Pose3d();
+        inputs.visibleTagIDs = new int[0];
+        inputs.distanceFromBestTag = Double.POSITIVE_INFINITY;
     }
 
     private int[] getVisibleTagIDs(LimelightHelpers.LimelightResults results) {

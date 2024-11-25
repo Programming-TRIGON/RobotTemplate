@@ -10,7 +10,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.constants.FieldConstants;
 import frc.trigon.robot.poseestimation.apriltagcamera.AprilTagCamera;
+import frc.trigon.robot.poseestimation.apriltagcamera.AprilTagCameraConstants;
 import org.littletonrobotics.junction.Logger;
+import org.trigon.hardware.RobotHardwareStats;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -34,11 +36,8 @@ public class PoseEstimator implements AutoCloseable {
         this.aprilTagCameras = aprilTagCameras;
         putAprilTagsOnFieldWidget();
         SmartDashboard.putData("Field", field);
-        PathPlannerLogging.setLogActivePathCallback((pose) -> {
-            field.getObject("path").setPoses(pose);
-            Logger.recordOutput("Path", pose.toArray(new Pose2d[0]));
-        });
-        PathPlannerLogging.setLogTargetPoseCallback((pose) -> Logger.recordOutput("TargetPPPose", pose));
+
+        logTargetPath();
     }
 
     @Override
@@ -48,7 +47,9 @@ public class PoseEstimator implements AutoCloseable {
 
     public void periodic() {
         updateFromVision();
-        field.setRobotPose(getCurrentPose());
+        field.setRobotPose(getCurrentEstimatedPose());
+        if (RobotHardwareStats.isSimulation())
+            AprilTagCameraConstants.VISION_SIMULATION.update(RobotContainer.POSE_ESTIMATOR.getCurrentOdometryPose());
     }
 
     /**
@@ -64,8 +65,15 @@ public class PoseEstimator implements AutoCloseable {
     /**
      * @return the estimated pose of the robot, relative to the blue alliance's driver station right corner
      */
-    public Pose2d getCurrentPose() {
+    public Pose2d getCurrentEstimatedPose() {
         return poseEstimator6328.getEstimatedPose();
+    }
+
+    /**
+     * @return the odometry's estimated pose of the robot, relative to the blue alliance's driver station right corner
+     */
+    public Pose2d getCurrentOdometryPose() {
+        return poseEstimator6328.getOdometryPose();
     }
 
     /**
@@ -81,18 +89,23 @@ public class PoseEstimator implements AutoCloseable {
             poseEstimator6328.addOdometryObservation(new PoseEstimator6328.OdometryObservation(swerveWheelPositions[i], gyroRotations[i], timestamps[i]));
     }
 
-    /**
-     * Because we rely on the gyro for the robot's heading, we need to use solve PNP to reset the gyro's assumed heading.
-     */
     public void setGyroHeadingToBestSolvePNPHeading() {
         int closestCameraToTag = 0;
         for (int i = 0; i < aprilTagCameras.length; i++) {
-            if (aprilTagCameras[i].hasResult() && aprilTagCameras[i].getDistanceToBestTagMeters() < aprilTagCameras[closestCameraToTag].getDistanceToBestTagMeters())
+            if (aprilTagCameras[i].getDistanceToBestTagMeters() < aprilTagCameras[closestCameraToTag].getDistanceToBestTagMeters())
                 closestCameraToTag = i;
         }
 
-        final Rotation2d bestCameraHeading = aprilTagCameras[closestCameraToTag].getSolvePNPHeading();
-        resetPose(new Pose2d(getCurrentPose().getTranslation(), bestCameraHeading));
+        final Rotation2d bestRobotHeading = aprilTagCameras[closestCameraToTag].getSolvePNPHeading();
+        resetPose(new Pose2d(getCurrentEstimatedPose().getTranslation(), bestRobotHeading));
+    }
+
+    private void logTargetPath() {
+        PathPlannerLogging.setLogActivePathCallback((pose) -> {
+            field.getObject("path").setPoses(pose);
+            Logger.recordOutput("Path", pose.toArray(new Pose2d[0]));
+        });
+        PathPlannerLogging.setLogTargetPoseCallback((pose) -> Logger.recordOutput("TargetPPPose", pose));
     }
 
     private void updateFromVision() {
