@@ -3,6 +3,7 @@ package frc.trigon.robot.subsystems.swerve;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -105,6 +106,10 @@ public class SwerveConstants {
     );
 
     static final RobotConfig ROBOT_CONFIG;
+    static final PPHolonomicDriveController AUTO_PATH_FOLLOWING_CONTROLLER = new PPHolonomicDriveController(
+            AUTO_TRANSLATION_PID_CONSTANTS,
+            AUTO_ROTATION_PID_CONSTANTS
+    );
 
     static {
         try {
@@ -113,7 +118,7 @@ public class SwerveConstants {
             throw new RuntimeException(e);
         }
     }
-    
+
     static {
         final Pigeon2Configuration config = new Pigeon2Configuration();
         config.MountPose.MountPoseYaw = GYRO_MOUNT_POSITION_YAW;

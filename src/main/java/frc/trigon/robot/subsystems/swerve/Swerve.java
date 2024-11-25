@@ -311,7 +311,7 @@ public class Swerve extends MotorSubsystem {
                 },
                 this::getSelfRelativeVelocity,
                 (speeds, feedforwards) -> selfRelativeDrive(speeds),
-                new PathFollowingController(),
+                SwerveConstants.AUTO_PATH_FOLLOWING_CONTROLLER,
                 SwerveConstants.ROBOT_CONFIG,
                 Mirrorable::isRedAlliance,
                 this
