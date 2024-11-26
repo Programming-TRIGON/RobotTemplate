@@ -30,15 +30,15 @@ public class LEDAutoSetupCommand extends SequentialCommandGroup {
         addCommands(
                 getUpdateAutoStartPoseCommand(),
                 LEDStripCommands.getThreeSectionColorCommand(
-                        () -> getLeftStripColor(this.autoStartPose.getRotation().getDegrees() - getCurrentRobotPose().getRotation().getDegrees(), TOLERANCE_DEGREES),
-                        () -> getLeftStripColor(this.autoStartPose.getX() - getCurrentRobotPose().getX(), TOLERANCE_METERS),
-                        () -> getLeftStripColor(this.autoStartPose.getY() - getCurrentRobotPose().getY(), TOLERANCE_METERS),
+                        () -> getLeftStripColor(this.autoStartPose.getRotation().getDegrees() - RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getRotation().getDegrees(), TOLERANCE_DEGREES),
+                        () -> getLeftStripColor(this.autoStartPose.getX() - RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getX(), TOLERANCE_METERS),
+                        () -> getLeftStripColor(this.autoStartPose.getY() - RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getY(), TOLERANCE_METERS),
                         LEDStripConstants.REAR_RIGHT_STRIP, LEDStripConstants.FRONT_RIGHT_STRIP
                 ).alongWith(
                         LEDStripCommands.getThreeSectionColorCommand(
-                                () -> getRightStripColor(this.autoStartPose.getRotation().getDegrees() - getCurrentRobotPose().getRotation().getDegrees(), TOLERANCE_DEGREES),
-                                () -> getRightStripColor(this.autoStartPose.getX() - getCurrentRobotPose().getX(), TOLERANCE_METERS),
-                                () -> getRightStripColor(this.autoStartPose.getY() - getCurrentRobotPose().getY(), TOLERANCE_METERS),
+                                () -> getRightStripColor(this.autoStartPose.getRotation().getDegrees() - RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getRotation().getDegrees(), TOLERANCE_DEGREES),
+                                () -> getRightStripColor(this.autoStartPose.getX() - RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getX(), TOLERANCE_METERS),
+                                () -> getRightStripColor(this.autoStartPose.getY() - RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getY(), TOLERANCE_METERS),
                                 LEDStripConstants.REAR_LEFT_STRIP, LEDStripConstants.FRONT_LEFT_STRIP
                         )
                 )
@@ -78,9 +78,5 @@ public class LEDAutoSetupCommand extends SequentialCommandGroup {
         else if (difference < -tolerance)
             return Color.red;
         return Color.green;
-    }
-
-    private Pose2d getCurrentRobotPose() {
-        return RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose();
     }
 }
