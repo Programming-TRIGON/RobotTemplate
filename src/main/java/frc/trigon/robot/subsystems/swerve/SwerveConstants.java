@@ -47,18 +47,19 @@ public class SwerveConstants {
     private static final DoubleSupplier SIMULATION_YAW_VELOCITY_SUPPLIER = () -> RobotContainer.SWERVE.getSelfRelativeVelocity().omegaRadiansPerSecond;
 
     private static final double
-            MODULE_Y_DISTANCE_FROM_CENTER = 0,
             FRONT_MODULE_X_DISTANCE_FROM_CENTER = 0,
-            REAR_MODULE_X_DISTANCE_FROM_CENTER = 0;
+            FRONT_MODULE_Y_DISTANCE_FROM_CENTER = 0,
+            REAR_MODULE_X_DISTANCE_FROM_CENTER = 0,
+            REAR_MODULE_Y_DISTANCE_FROM_CENTER = 0;
     public static final Translation2d[] MODULE_LOCATIONS = {
-            new Translation2d(FRONT_MODULE_X_DISTANCE_FROM_CENTER, MODULE_Y_DISTANCE_FROM_CENTER),
-            new Translation2d(FRONT_MODULE_X_DISTANCE_FROM_CENTER, -MODULE_Y_DISTANCE_FROM_CENTER),
-            new Translation2d(REAR_MODULE_X_DISTANCE_FROM_CENTER, MODULE_Y_DISTANCE_FROM_CENTER),
-            new Translation2d(REAR_MODULE_X_DISTANCE_FROM_CENTER, -MODULE_Y_DISTANCE_FROM_CENTER)
+            new Translation2d(FRONT_MODULE_X_DISTANCE_FROM_CENTER, FRONT_MODULE_Y_DISTANCE_FROM_CENTER),
+            new Translation2d(FRONT_MODULE_X_DISTANCE_FROM_CENTER, -FRONT_MODULE_Y_DISTANCE_FROM_CENTER),
+            new Translation2d(REAR_MODULE_X_DISTANCE_FROM_CENTER, REAR_MODULE_Y_DISTANCE_FROM_CENTER),
+            new Translation2d(REAR_MODULE_X_DISTANCE_FROM_CENTER, -REAR_MODULE_Y_DISTANCE_FROM_CENTER)
     };
     public static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(MODULE_LOCATIONS);
     private static final double FURTHEST_MODULE_DISTANCE_FROM_CENTER = Math.hypot(
-            REAR_MODULE_X_DISTANCE_FROM_CENTER, MODULE_Y_DISTANCE_FROM_CENTER
+            REAR_MODULE_X_DISTANCE_FROM_CENTER, FRONT_MODULE_Y_DISTANCE_FROM_CENTER
     );
 
     static final double
@@ -78,13 +79,13 @@ public class SwerveConstants {
             new PIDConstants(5, 0, 0) :
             new PIDConstants(5, 0, 0),
             PROFILED_ROTATION_PID_CONSTANTS = RobotHardwareStats.isSimulation() ?
-                    new PIDConstants(4, 0, 0.05) :
+                    new PIDConstants(4, 0, 0) :
                     new PIDConstants(3, 0, 0),
             AUTO_TRANSLATION_PID_CONSTANTS = RobotHardwareStats.isSimulation() ?
-                    new PIDConstants(5, 0, 0.1) :
-                    new PIDConstants(2, 0, 0.1),
+                    new PIDConstants(5, 0, 0) :
+                    new PIDConstants(2, 0, 0),
             AUTO_ROTATION_PID_CONSTANTS = RobotHardwareStats.isSimulation() ?
-                    new PIDConstants(2.5, 0, 0.2) :
+                    new PIDConstants(2.5, 0, 0) :
                     new PIDConstants(6.5, 0, 0);
     private static final double
             MAX_ROTATION_VELOCITY = RobotHardwareStats.isSimulation() ? 720 : 720,
