@@ -30,7 +30,9 @@ public class SwerveModuleConstants {
     private static final double
             STEER_MOTOR_P = RobotHardwareStats.isSimulation() ? 75 : 75,
             STEER_MOTOR_I = 0,
-            STEER_MOTOR_D = 0;
+            STEER_MOTOR_D = 0,
+            STEER_MOTOR_KV = 1,
+            STEER_MOTOR_KA = 1;
     private static final double
             DRIVE_MOTOR_P = RobotHardwareStats.isSimulation() ? 20 : 52,
             DRIVE_MOTOR_I = 0,
@@ -64,11 +66,11 @@ public class SwerveModuleConstants {
     static final double VOLTAGE_COMPENSATION_SATURATION = 12;
 
     static SimpleMotorSimulation createDriveSimulation() {
-        return new SimpleMotorSimulation(DRIVE_MOTOR_GEARBOX, DRIVE_GEAR_RATIO, DRIVE_MOMENT_OF_INERTIA);
+        return new SimpleMotorSimulation(DRIVE_MOTOR_GEARBOX, DRIVE_GEAR_RATIO, DRIVE_MOTOR_KV, DRIVE_MOTOR_KA);
     }
 
     static SimpleMotorSimulation createSteerSimulation() {
-        return new SimpleMotorSimulation(STEER_MOTOR_GEARBOX, STEER_GEAR_RATIO, STEER_MOMENT_OF_INERTIA);
+        return new SimpleMotorSimulation(STEER_MOTOR_GEARBOX, STEER_GEAR_RATIO, STEER_MOTOR_KV, STEER_MOTOR_KA);
     }
 
     private static TalonFXConfiguration generateDriveConfiguration() {
