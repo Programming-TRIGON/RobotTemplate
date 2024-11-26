@@ -47,9 +47,9 @@ public class SwerveConstants {
     private static final DoubleSupplier SIMULATION_YAW_VELOCITY_SUPPLIER = () -> RobotContainer.SWERVE.getSelfRelativeVelocity().omegaRadiansPerSecond;
 
     private static final double
-            MODULE_Y_DISTANCE_FROM_CENTER = 0.27285,
-            FRONT_MODULE_X_DISTANCE_FROM_CENTER = 0.17215,
-            REAR_MODULE_X_DISTANCE_FROM_CENTER = -0.24285;
+            MODULE_Y_DISTANCE_FROM_CENTER = 0,
+            FRONT_MODULE_X_DISTANCE_FROM_CENTER = 0,
+            REAR_MODULE_X_DISTANCE_FROM_CENTER = 0;
     public static final Translation2d[] MODULE_LOCATIONS = {
             new Translation2d(FRONT_MODULE_X_DISTANCE_FROM_CENTER, MODULE_Y_DISTANCE_FROM_CENTER),
             new Translation2d(FRONT_MODULE_X_DISTANCE_FROM_CENTER, -MODULE_Y_DISTANCE_FROM_CENTER),
@@ -112,14 +112,6 @@ public class SwerveConstants {
     );
 
     static {
-        try {
-            ROBOT_CONFIG = RobotConfig.fromGUISettings();
-        } catch (IOException | ParseException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    static {
         final Pigeon2Configuration config = new Pigeon2Configuration();
         config.MountPose.MountPoseYaw = GYRO_MOUNT_POSITION_YAW;
         config.MountPose.MountPosePitch = GYRO_MOUNT_POSITION_PITCH;
@@ -128,5 +120,11 @@ public class SwerveConstants {
         GYRO.setSimulationYawVelocitySupplier(SIMULATION_YAW_VELOCITY_SUPPLIER);
 
         GYRO.registerThreadedSignal(Pigeon2Signal.YAW, PoseEstimatorConstants.ODOMETRY_FREQUENCY_HERTZ);
+
+        try {
+            ROBOT_CONFIG = RobotConfig.fromGUISettings();
+        } catch (IOException | ParseException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
