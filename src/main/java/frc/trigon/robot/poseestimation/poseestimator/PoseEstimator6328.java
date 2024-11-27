@@ -143,9 +143,15 @@ public class PoseEstimator6328 {
         estimatedPose = estimateAtTime.plus(scaledTransform).plus(sampleToOdometryTransform);
     }
 
+    /**
+     * Gets the estimated pose of the robot at the target timestamp.
+     *
+     * @param timestamp the target timestamp
+     * @return the robot's estimated pose at the timestamp
+     */
     public Pose2d samplePose(double timestamp) {
-        Pose2d sample = poseBuffer.getSample(timestamp).orElse(new Pose2d());
-        Transform2d odometryToSampleTransform = new Transform2d(odometryPose, sample);
+        final Pose2d sample = poseBuffer.getSample(timestamp).orElse(new Pose2d());
+        final Transform2d odometryToSampleTransform = new Transform2d(odometryPose, sample);
 
         return estimatedPose.plus(odometryToSampleTransform);
     }

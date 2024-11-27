@@ -51,17 +51,19 @@ public class LEDAutoSetupCommand extends SequentialCommandGroup {
     }
 
     private Command getUpdateAutoStartPoseCommand() {
-        return new InstantCommand(
-                () -> {
-                    try {
-                        final Pose2d nonMirroredAutoStartPose = PathPlannerPath.fromPathFile(PathPlannerAuto.currentPathName).getStartingHolonomicPose().get();
-                        final MirrorablePose2d mirroredAutoStartPose = new MirrorablePose2d(nonMirroredAutoStartPose, true);
-                        this.autoStartPose = mirroredAutoStartPose.get();
-                    } catch (IOException | ParseException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-        ).ignoringDisable(true);
+        return new InstantCommand(() -> {
+            try {
+                this.autoStartPose = getAutoStartPose();
+            } catch (IOException | ParseException e) {
+                throw new RuntimeException(e);
+            }
+        }).ignoringDisable(true);
+    }
+
+    private Pose2d getAutoStartPose() throws IOException, ParseException {
+        final Pose2d nonMirroredAutoStartPose = PathPlannerPath.fromPathFile(PathPlannerAuto.currentPathName).getStartingHolonomicPose().get();
+        final MirrorablePose2d mirroredAutoStartPose = new MirrorablePose2d(nonMirroredAutoStartPose, true);
+        return mirroredAutoStartPose.get();
     }
 
     private Color getLeftStripColor(double difference, double tolerance) {

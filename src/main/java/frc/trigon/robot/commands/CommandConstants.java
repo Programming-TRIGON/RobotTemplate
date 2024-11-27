@@ -40,10 +40,23 @@ public class CommandConstants {
             ),
             STATIC_WHITE_LED_COLOR_COMMAND = LEDStripCommands.getStaticColorCommand(Color.white, LEDStripConstants.LED_STRIPS);
 
+
+    /**
+     * Calculates the target drive power from an axis value.
+     *
+     * @param axisValue the stick's value
+     * @return the drive power
+     */
     public static double calculateDriveStickAxisValue(double axisValue) {
         return axisValue / OperatorConstants.STICKS_SPEED_DIVIDER / calculateShiftModeValue(MINIMUM_TRANSLATION_SHIFT_POWER);
     }
 
+    /**
+     * Calculates the target rotation power from an axis value.
+     *
+     * @param axisValue the stick's value
+     * @return the rotation power
+     */
     public static double calculateRotationStickAxisValue(double axisValue) {
         return axisValue / OperatorConstants.STICKS_SPEED_DIVIDER / calculateShiftModeValue(MINIMUM_ROTATION_SHIFT_POWER);
     }
