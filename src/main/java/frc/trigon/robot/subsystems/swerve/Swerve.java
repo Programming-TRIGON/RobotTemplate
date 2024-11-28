@@ -35,7 +35,7 @@ public class Swerve extends MotorSubsystem {
     public Swerve() {
         setName("Swerve");
         configurePathPlanner();
-        phoenix6SignalThread.setOdometryFrequencyHertz(PoseEstimatorConstants.ODOMETRY_FREQUENCY_HERTZ);
+        phoenix6SignalThread.setThreadFrequencyHertz(PoseEstimatorConstants.ODOMETRY_FREQUENCY_HERTZ);
         SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER.enableContinuousInput(-180, 180);
     }
 
