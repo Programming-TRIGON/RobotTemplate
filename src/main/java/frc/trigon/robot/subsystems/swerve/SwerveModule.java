@@ -35,7 +35,7 @@ public class SwerveModule {
         driveMotor = new TalonFXMotor(moduleID, "Module" + moduleID + "Drive", RobotConstants.CANIVORE_NAME);
         steerMotor = new TalonFXMotor(moduleID + 4, "Module" + moduleID + "Steer", RobotConstants.CANIVORE_NAME);
         steerEncoder = new CANcoderEncoder(moduleID + 4, "Module" + moduleID + "SteerEncoder", RobotConstants.CANIVORE_NAME);
-        wheelDiameterMeters = SwerveModuleConstants.WHEEL_DIAMETERS_METERS[moduleID];
+        wheelDiameterMeters = SwerveModuleConstants.WHEEL_DIAMETERS_METERS[moduleID - 1];
         configureHardware(offsetRotations);
     }
 
