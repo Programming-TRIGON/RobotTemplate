@@ -3,17 +3,18 @@ package frc.trigon.robot.commands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.trigon.robot.RobotContainer;
-import frc.trigon.robot.subsystems.ledstrip.LEDStripCommands;
-import frc.trigon.robot.subsystems.ledstrip.LEDStripConstants;
 import org.json.simple.parser.ParseException;
+import org.trigon.hardware.misc.leds.LEDCommands;
+import org.trigon.hardware.misc.leds.LEDStrip;
 import org.trigon.utilities.mirrorable.MirrorablePose2d;
 
-import java.awt.*;
 import java.io.IOException;
+import java.util.function.Supplier;
 
 /**
  * A command that sets the LED strips to a color based on the robot's position and orientation relative to the starting
@@ -27,21 +28,14 @@ public class LEDAutoSetupCommand extends SequentialCommandGroup {
     private Pose2d autoStartPose;
 
     public LEDAutoSetupCommand() {
+        final Supplier<Color>[] LEDColors = new Supplier[]{
+                () -> getDesiredLEDColorFromRobotPose(this.autoStartPose.getRotation().getDegrees() - RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getRotation().getDegrees(), TOLERANCE_DEGREES),
+                () -> getDesiredLEDColorFromRobotPose(this.autoStartPose.getX() - RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getX(), TOLERANCE_METERS),
+                () -> getDesiredLEDColorFromRobotPose(this.autoStartPose.getY() - RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getY(), TOLERANCE_METERS)
+        };
         addCommands(
                 getUpdateAutoStartPoseCommand(),
-                LEDStripCommands.getThreeSectionColorCommand(
-                        () -> getLeftStripColor(this.autoStartPose.getRotation().getDegrees() - RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getRotation().getDegrees(), TOLERANCE_DEGREES),
-                        () -> getLeftStripColor(this.autoStartPose.getX() - RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getX(), TOLERANCE_METERS),
-                        () -> getLeftStripColor(this.autoStartPose.getY() - RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getY(), TOLERANCE_METERS),
-                        LEDStripConstants.REAR_RIGHT_STRIP, LEDStripConstants.FRONT_RIGHT_STRIP
-                ).alongWith(
-                        LEDStripCommands.getThreeSectionColorCommand(
-                                () -> getRightStripColor(this.autoStartPose.getRotation().getDegrees() - RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getRotation().getDegrees(), TOLERANCE_DEGREES),
-                                () -> getRightStripColor(this.autoStartPose.getX() - RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getX(), TOLERANCE_METERS),
-                                () -> getRightStripColor(this.autoStartPose.getY() - RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getY(), TOLERANCE_METERS),
-                                LEDStripConstants.REAR_LEFT_STRIP, LEDStripConstants.FRONT_LEFT_STRIP
-                        )
-                )
+                LEDCommands.getSectionColorCommand(LEDColors, LEDStrip.LED_STRIPS)
         );
     }
 
@@ -66,19 +60,11 @@ public class LEDAutoSetupCommand extends SequentialCommandGroup {
         return mirroredAutoStartPose.get();
     }
 
-    private Color getLeftStripColor(double difference, double tolerance) {
+    private Color getDesiredLEDColorFromRobotPose(double difference, double tolerance) {
         if (difference < -tolerance)
-            return Color.black;
+            return Color.kBlack;
         else if (difference > tolerance)
-            return Color.red;
-        return Color.green;
-    }
-
-    private Color getRightStripColor(double difference, double tolerance) {
-        if (difference > tolerance)
-            return Color.black;
-        else if (difference < -tolerance)
-            return Color.red;
-        return Color.green;
+            return Color.kRed;
+        return Color.kGreen;
     }
 }
