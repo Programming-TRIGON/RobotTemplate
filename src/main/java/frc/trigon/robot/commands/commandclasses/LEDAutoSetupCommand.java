@@ -71,7 +71,7 @@ public class LEDAutoSetupCommand extends SequentialCommandGroup {
      *
      * @param differenceMeters the difference between the robot's position and the auto's start position
      * @param toleranceMeters  the maximum distance from the auto start position to display as the correct start position
-     * @return
+     * @return the desired color
      */
     private Color getDesiredLEDColorFromRobotPose(double differenceMeters, double toleranceMeters) {
         if (differenceMeters < -toleranceMeters)
