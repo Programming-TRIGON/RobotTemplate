@@ -170,10 +170,10 @@ out/
 
 # Simulation GUI and other tools window save file
 networktables.json
-.wpilog
 simgui.json
 simgui-ds.json
 *-window.json
+*.wpilog
 
 # Simulation data log directory
 logs/
