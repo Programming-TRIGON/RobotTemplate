@@ -8,10 +8,8 @@ package frc.trigon.robot;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.trigon.robot.commands.CommandConstants;
-import frc.trigon.robot.commands.commandclasses.LEDAutoSetupCommand;
 import frc.trigon.robot.commands.commandfactories.GeneralCommands;
 import frc.trigon.robot.constants.LEDConstants;
 import frc.trigon.robot.constants.OperatorConstants;
@@ -28,6 +26,7 @@ public class RobotContainer {
 
     public RobotContainer() {
         buildAutoChooser();
+        init();
         configureBindings();
     }
 
@@ -39,7 +38,6 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        initiate();
         bindDefaultCommands();
         bindControllerCommands();
     }
@@ -48,8 +46,8 @@ public class RobotContainer {
         SWERVE.setDefaultCommand(CommandConstants.FIELD_RELATIVE_DRIVE_COMMAND);
     }
 
-    private void initiate() {
-        Mirrorable.initializeMirrorable();
+    private void init() {
+        Mirrorable.init();
         LEDConstants.init();
     }
 
