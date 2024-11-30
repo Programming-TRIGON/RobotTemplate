@@ -1,7 +1,5 @@
 package frc.trigon.robot.subsystems.swerve;
 
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.commands.PathfindingCommand;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -34,7 +32,6 @@ public class Swerve extends MotorSubsystem {
 
     public Swerve() {
         setName("Swerve");
-        configurePathPlanner();
         phoenix6SignalThread.setThreadFrequencyHertz(PoseEstimatorConstants.ODOMETRY_FREQUENCY_HERTZ);
         SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER.enableContinuousInput(-180, 180);
     }
@@ -302,21 +299,6 @@ public class Swerve extends MotorSubsystem {
             currentModule.update();
 
         phoenix6SignalThread.updateLatestTimestamps();
-    }
-
-    private void configurePathPlanner() {
-        AutoBuilder.configure(
-                RobotContainer.POSE_ESTIMATOR::getCurrentEstimatedPose,
-                (pose) -> {
-                },
-                this::getSelfRelativeVelocity,
-                (speeds, feedforwards) -> selfRelativeDrive(speeds),
-                SwerveConstants.AUTO_PATH_FOLLOWING_CONTROLLER,
-                SwerveConstants.ROBOT_CONFIG,
-                Mirrorable::isRedAlliance,
-                this
-        );
-        PathfindingCommand.warmupCommand().schedule();
     }
 
     private boolean atTranslationPosition(double currentTranslationPosition, double targetTranslationPosition, double currentTranslationVelocity) {

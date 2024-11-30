@@ -5,7 +5,6 @@
 
 package frc.trigon.robot;
 
-import com.pathplanner.lib.pathfinding.Pathfinding;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.trigon.robot.constants.RobotConstants;
@@ -16,7 +15,6 @@ import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 import org.trigon.hardware.RobotHardwareStats;
-import org.trigon.utilities.LocalADStarAK;
 
 public class Robot extends LoggedRobot {
     public static final boolean IS_REAL = Robot.isReal();
@@ -27,7 +25,6 @@ public class Robot extends LoggedRobot {
     @Override
     public void robotInit() {
         RobotConstants.init();
-        Pathfinding.setPathfinder(new LocalADStarAK());
         configLogger();
         robotContainer = new RobotContainer();
     }

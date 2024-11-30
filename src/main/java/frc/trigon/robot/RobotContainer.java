@@ -13,6 +13,7 @@ import frc.trigon.robot.commands.CommandConstants;
 import frc.trigon.robot.commands.commandfactories.GeneralCommands;
 import frc.trigon.robot.constants.LEDConstants;
 import frc.trigon.robot.constants.OperatorConstants;
+import frc.trigon.robot.misc.pathplanner.PathPlannerConstants;
 import frc.trigon.robot.poseestimation.poseestimator.PoseEstimator;
 import frc.trigon.robot.subsystems.MotorSubsystem;
 import frc.trigon.robot.subsystems.swerve.Swerve;
@@ -44,12 +45,12 @@ public class RobotContainer {
 
     private void bindDefaultCommands() {
         SWERVE.setDefaultCommand(CommandConstants.FIELD_RELATIVE_DRIVE_COMMAND);
-        LEDConstants.init();
     }
 
     private void init() {
         Mirrorable.init();
         LEDConstants.init();
+        PathPlannerConstants.init();
     }
 
     private void bindControllerCommands() {
@@ -70,6 +71,7 @@ public class RobotContainer {
 
 
     private void buildAutoChooser() {
+        PathPlannerConstants.configureAutoBuilder();
         autoChooser = new LoggedDashboardChooser<>("AutoChooser", AutoBuilder.buildAutoChooser());
     }
 }

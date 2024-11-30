@@ -2,8 +2,6 @@ package frc.trigon.robot.subsystems.swerve;
 
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.pathplanner.lib.config.PIDConstants;
-import com.pathplanner.lib.config.RobotConfig;
-import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -12,12 +10,10 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.constants.RobotConstants;
 import frc.trigon.robot.poseestimation.poseestimator.PoseEstimatorConstants;
-import org.json.simple.parser.ParseException;
 import org.trigon.hardware.RobotHardwareStats;
 import org.trigon.hardware.phoenix6.pigeon2.Pigeon2Gyro;
 import org.trigon.hardware.phoenix6.pigeon2.Pigeon2Signal;
 
-import java.io.IOException;
 import java.util.function.DoubleSupplier;
 
 public class SwerveConstants {
@@ -85,13 +81,7 @@ public class SwerveConstants {
             new PIDConstants(5, 0, 0),
             PROFILED_ROTATION_PID_CONSTANTS = RobotHardwareStats.isSimulation() ?
                     new PIDConstants(4, 0, 0) :
-                    new PIDConstants(3, 0, 0),
-            AUTO_TRANSLATION_PID_CONSTANTS = RobotHardwareStats.isSimulation() ?
-                    new PIDConstants(5, 0, 0) :
-                    new PIDConstants(2, 0, 0),
-            AUTO_ROTATION_PID_CONSTANTS = RobotHardwareStats.isSimulation() ?
-                    new PIDConstants(2.5, 0, 0) :
-                    new PIDConstants(6.5, 0, 0);
+                    new PIDConstants(3, 0, 0);
     private static final double
             MAX_ROTATION_VELOCITY = RobotHardwareStats.isSimulation() ? 720 : 720,
             MAX_ROTATION_ACCELERATION = RobotHardwareStats.isSimulation() ? 720 : 720;
@@ -111,12 +101,6 @@ public class SwerveConstants {
             TRANSLATION_PID_CONSTANTS.kD
     );
 
-    static final RobotConfig ROBOT_CONFIG;
-    static final PPHolonomicDriveController AUTO_PATH_FOLLOWING_CONTROLLER = new PPHolonomicDriveController(
-            AUTO_TRANSLATION_PID_CONSTANTS,
-            AUTO_ROTATION_PID_CONSTANTS
-    );
-
     static {
         final Pigeon2Configuration config = new Pigeon2Configuration();
         config.MountPose.MountPoseYaw = GYRO_MOUNT_POSITION_YAW;
@@ -126,11 +110,5 @@ public class SwerveConstants {
         GYRO.setSimulationYawVelocitySupplier(SIMULATION_YAW_VELOCITY_SUPPLIER);
 
         GYRO.registerThreadedSignal(Pigeon2Signal.YAW, PoseEstimatorConstants.ODOMETRY_FREQUENCY_HERTZ);
-
-        try {
-            ROBOT_CONFIG = RobotConfig.fromGUISettings();
-        } catch (IOException | ParseException e) {
-            throw new RuntimeException(e);
-        }
     }
 }
