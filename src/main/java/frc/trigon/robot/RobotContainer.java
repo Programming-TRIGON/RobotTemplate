@@ -26,8 +26,8 @@ public class RobotContainer {
     private LoggedDashboardChooser<Command> autoChooser;
 
     public RobotContainer() {
+        initializeGeneralSystems();
         buildAutoChooser();
-        init();
         configureBindings();
     }
 
@@ -47,7 +47,10 @@ public class RobotContainer {
         SWERVE.setDefaultCommand(CommandConstants.FIELD_RELATIVE_DRIVE_COMMAND);
     }
 
-    private void init() {
+    /**
+     * Initializes the general systems of the robot.
+     */
+    private void initializeGeneralSystems() {
         Mirrorable.init();
         LEDConstants.init();
         PathPlannerConstants.init();
@@ -69,9 +72,7 @@ public class RobotContainer {
         subsystem.setDefaultCommand(Commands.idle(subsystem));
     }
 
-
     private void buildAutoChooser() {
-        PathPlannerConstants.configureAutoBuilder();
         autoChooser = new LoggedDashboardChooser<>("AutoChooser", AutoBuilder.buildAutoChooser());
     }
 }

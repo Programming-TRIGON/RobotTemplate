@@ -7,7 +7,6 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import frc.trigon.robot.RobotContainer;
-import frc.trigon.robot.subsystems.swerve.SwerveCommands;
 import org.json.simple.parser.ParseException;
 import org.trigon.hardware.RobotHardwareStats;
 import org.trigon.utilities.LocalADStarAK;
@@ -30,16 +29,17 @@ public class PathPlannerConstants {
     );
 
     public static void init() {
+        configureAutoBuilder();
         Pathfinding.setPathfinder(new LocalADStarAK());
         PathfindingCommand.warmupCommand().schedule();
     }
 
-    public static void configureAutoBuilder() {
+    private static void configureAutoBuilder() {
         AutoBuilder.configure(
                 RobotContainer.POSE_ESTIMATOR::getCurrentEstimatedPose,
                 null,
                 RobotContainer.SWERVE::getSelfRelativeVelocity,
-                (speeds, feedforwards) -> SwerveCommands.getClosedLoopSelfRelativeDriveCommand(() -> speeds.vxMetersPerSecond, () -> speeds.vyMetersPerSecond, () -> speeds.omegaRadiansPerSecond),
+                (speeds, feedforwards) -> RobotContainer.SWERVE.selfRelativeDrive(speeds),
                 AUTO_PATH_FOLLOWING_CONTROLLER,
                 getRobotConfig(),
                 Mirrorable::isRedAlliance,

@@ -9,7 +9,7 @@ import java.util.function.BooleanSupplier;
 
 /**
  * A class that contains the general commands of the robot, such as commands that alter a command or commands that affect all subsystems.
- * These are different from CommandConstants because they don't necessarily have the same effect every usage.
+ * These are different from CommandConstants because they use logic to determine what will run.
  */
 public class GeneralCommands {
     public static Command withoutRequirements(Command command) {

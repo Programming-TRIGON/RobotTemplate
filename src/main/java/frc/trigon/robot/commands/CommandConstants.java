@@ -14,8 +14,8 @@ import org.trigon.hardware.misc.leds.LEDStrip;
 import org.trigon.utilities.mirrorable.MirrorablePose2d;
 
 /**
- * A class that contains commands that run the exact same command each time.
- * These are different from GeneralCommands because they don't need to be sent any parameters and always do the same thing.
+ * A class that contains commands that only use parameters and don't require logic.
+ * These are different from GeneralCommands and command factories because they don't calculate anything and they run the same command every time.
  */
 public class CommandConstants {
     private static final XboxController DRIVER_CONTROLLER = OperatorConstants.DRIVER_CONTROLLER;

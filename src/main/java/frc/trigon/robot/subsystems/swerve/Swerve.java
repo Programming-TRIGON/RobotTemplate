@@ -144,6 +144,22 @@ public class Swerve extends MotorSubsystem {
     }
 
     /**
+     * Drives the swerve with the given chassis speeds, relative to the robot's frame of reference.
+     *
+     * @param chassisSpeeds the target chassis speeds
+     */
+    public void selfRelativeDrive(ChassisSpeeds chassisSpeeds) {
+        chassisSpeeds = discretize(chassisSpeeds);
+        if (isStill(chassisSpeeds)) {
+            stop();
+            return;
+        }
+
+        final SwerveModuleState[] swerveModuleStates = SwerveConstants.KINEMATICS.toSwerveModuleStates(chassisSpeeds);
+        setTargetModuleStates(swerveModuleStates);
+    }
+
+    /**
      * Locks the swerve, so it'll be hard to move it. This will make the modules look in the middle of a robot in an "x" shape.
      */
     void lockSwerve() {
@@ -238,17 +254,6 @@ public class Swerve extends MotorSubsystem {
         final ChassisSpeeds speeds = powersToSpeeds(xPower, yPower, 0);
         speeds.omegaRadiansPerSecond = calculateProfiledAngleSpeedToTargetAngle(targetAngle);
         selfRelativeDrive(speeds);
-    }
-
-    private void selfRelativeDrive(ChassisSpeeds chassisSpeeds) {
-        chassisSpeeds = discretize(chassisSpeeds);
-        if (isStill(chassisSpeeds)) {
-            stop();
-            return;
-        }
-
-        final SwerveModuleState[] swerveModuleStates = SwerveConstants.KINEMATICS.toSwerveModuleStates(chassisSpeeds);
-        setTargetModuleStates(swerveModuleStates);
     }
 
     private void setTargetModuleStates(SwerveModuleState[] swerveModuleStates) {

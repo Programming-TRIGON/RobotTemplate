@@ -10,6 +10,7 @@ import frc.trigon.robot.RobotContainer;
 import org.json.simple.parser.ParseException;
 import org.trigon.hardware.misc.leds.LEDCommands;
 import org.trigon.hardware.misc.leds.LEDStrip;
+import org.trigon.utilities.mirrorable.MirrorablePose2d;
 
 import java.io.IOException;
 import java.util.function.Supplier;
@@ -59,8 +60,8 @@ public class LEDAutoSetupCommand extends SequentialCommandGroup {
     private Pose2d getAutoStartPose() {
         try {
             final Pose2d nonMirroredAutoStartPose = PathPlannerAuto.getPathGroupFromAutoFile(autoName.get()).get(0).getStartingHolonomicPose().get();
-//        final MirrorablePose2d mirroredAutoStartPose = new MirrorablePose2d(nonMirroredAutoStartPose, true);
-            return nonMirroredAutoStartPose;
+            final MirrorablePose2d mirroredAutoStartPose = new MirrorablePose2d(nonMirroredAutoStartPose, true);
+            return mirroredAutoStartPose.get();
         } catch (IOException | ParseException e) {
             throw new RuntimeException(e);
         }
