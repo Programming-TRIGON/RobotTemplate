@@ -66,7 +66,6 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void autonomousPeriodic() {
-//        REVPhysicsSim.getInstance().run();
     }
 
     @Override
