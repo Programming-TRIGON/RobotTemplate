@@ -1,4 +1,4 @@
-package frc.trigon.robot.commands.factories;
+package frc.trigon.robot.commands.commandfactories;
 
 import edu.wpi.first.wpilibj2.command.*;
 import frc.trigon.robot.RobotContainer;
@@ -57,10 +57,25 @@ public class GeneralCommands {
         ).repeatedly();
     }
 
+    /**
+     * A command that only runs when a condition is met.
+     *
+     * @param command   the command to run
+     * @param condition the condition that needs to be met for the command to run
+     * @return the command
+     */
     public static Command runWhen(Command command, BooleanSupplier condition) {
         return new WaitUntilCommand(condition).andThen(command);
     }
 
+    /**
+     * A command that only runs when a condition is met for a certain amount of time.
+     *
+     * @param command             the command to run
+     * @param condition           the condition that needs to be met for the command to run
+     * @param debounceTimeSeconds the time that the condition needs to be true for the command to run
+     * @return the command
+     */
     public static Command runWhen(Command command, BooleanSupplier condition, double debounceTimeSeconds) {
         return new WaitUntilCommand(condition).andThen(new WaitCommand(debounceTimeSeconds).andThen(command.onlyIf(condition)));
     }

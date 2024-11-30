@@ -12,7 +12,7 @@ import org.littletonrobotics.junction.Logger;
 import org.trigon.hardware.RobotHardwareStats;
 
 /**
- * An april tag camera is a class that provides the robot's pose, from a camera using one or multiple apriltags.
+ * An april tag camera is a class that provides the robot's pose from a camera using one or multiple apriltags.
  * An april tag is like a 2D barcode used to find the robot's position on the field.
  * Since the tag's position on the field is known, we can calculate our position relative to it, therefore estimating our position on the field.
  */
@@ -157,6 +157,11 @@ public class AprilTagCamera {
         return new Translation2d(robotPlaneCameraDistanceToUsedTagMeters, Rotation2d.fromRadians(headingOffsetToUsedTagRadians));
     }
 
+    /**
+     * Gets the target yaw relative to the robot from the target yaw relative to the camera and the camera's mount position.
+     *
+     * @return the target yaw in radians
+     */
     private double getRobotPlaneTargetYawRadians() {
         double targetYawRadians = -inputs.bestTargetRelativeYawRadians;
         for (int i = 0; i < AprilTagCameraConstants.CALCULATE_YAW_ITERATIONS; i++) {

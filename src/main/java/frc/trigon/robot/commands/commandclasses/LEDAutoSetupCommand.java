@@ -1,4 +1,4 @@
-package frc.trigon.robot.commands;
+package frc.trigon.robot.commands.commandclasses;
 
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -26,17 +26,22 @@ public class LEDAutoSetupCommand extends SequentialCommandGroup {
     private final Supplier<String> autoName;
     private Pose2d autoStartPose;
 
+    /**
+     * Constructs a new LEDAutoSetupCommand.
+     *
+     * @param autoName a supplier that returns the name of the selected autonomous path
+     */
     public LEDAutoSetupCommand(Supplier<String> autoName) {
         this.autoName = autoName;
-        
-        final Supplier<Color>[] LEDColors = new Supplier[]{
+
+        final Supplier<Color>[] ledColors = new Supplier[]{
                 () -> getDesiredLEDColorFromRobotPose(this.autoStartPose.getRotation().getDegrees() - RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getRotation().getDegrees(), TOLERANCE_DEGREES),
                 () -> getDesiredLEDColorFromRobotPose(this.autoStartPose.getX() - RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getX(), TOLERANCE_METERS),
                 () -> getDesiredLEDColorFromRobotPose(this.autoStartPose.getY() - RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getY(), TOLERANCE_METERS)
         };
         addCommands(
                 getUpdateAutoStartPoseCommand(),
-                LEDCommands.getSectionColorCommand(LEDColors, LEDStrip.LED_STRIPS)
+                LEDCommands.getSectionColorCommand(ledColors, LEDStrip.LED_STRIPS)
         );
     }
 

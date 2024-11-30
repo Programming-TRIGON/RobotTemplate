@@ -13,6 +13,9 @@ import org.trigon.hardware.misc.leds.LEDCommands;
 import org.trigon.hardware.misc.leds.LEDStrip;
 import org.trigon.utilities.mirrorable.MirrorablePose2d;
 
+/**
+ * A class that contains commands that run with the same values every usage.
+ */
 public class CommandConstants {
     private static final XboxController DRIVER_CONTROLLER = OperatorConstants.DRIVER_CONTROLLER;
     private static final double

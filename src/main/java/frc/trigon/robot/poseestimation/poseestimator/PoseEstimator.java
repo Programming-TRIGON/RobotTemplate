@@ -30,7 +30,7 @@ public class PoseEstimator implements AutoCloseable {
     /**
      * Constructs a new PoseEstimator.
      *
-     * @param aprilTagCameras the sources that should update the pose estimator apart from the odometry. This should be cameras etc.
+     * @param aprilTagCameras the cameras that should be used to update the pose estimator.
      */
     public PoseEstimator(AprilTagCamera... aprilTagCameras) {
         this.aprilTagCameras = aprilTagCameras;

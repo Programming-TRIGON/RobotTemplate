@@ -5,17 +5,17 @@ import frc.trigon.robot.poseestimation.apriltagcamera.AprilTagCameraConstants;
 import org.photonvision.simulation.PhotonCameraSim;
 
 public class AprilTagSimulationCameraIO extends AprilTagPhotonCameraIO {
-    private final PhotonCameraSim cameraSim;
+    private final PhotonCameraSim cameraSimulation;
 
     public AprilTagSimulationCameraIO(String cameraName) {
         super(cameraName);
 
-        cameraSim = new PhotonCameraSim(photonCamera, AprilTagCameraConstants.SIMULATION_CAMERA_PROPERTIES);
-        cameraSim.enableDrawWireframe(true);
+        cameraSimulation = new PhotonCameraSim(photonCamera, AprilTagCameraConstants.SIMULATION_CAMERA_PROPERTIES);
+        cameraSimulation.enableDrawWireframe(true);
     }
 
     @Override
     protected void addSimulatedCameraToVisionSimulation(Transform3d robotToCamera) {
-        AprilTagCameraConstants.VISION_SIMULATION.addCamera(cameraSim, robotToCamera);
+        AprilTagCameraConstants.VISION_SIMULATION.addCamera(cameraSimulation, robotToCamera);
     }
 }
