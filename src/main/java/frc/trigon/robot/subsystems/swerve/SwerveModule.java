@@ -31,11 +31,11 @@ public class SwerveModule {
             latestOdometrySteerPositions = new double[0];
     private SwerveModuleState targetState = new SwerveModuleState();
 
-    public SwerveModule(int moduleID, double offsetRotations) {
+    public SwerveModule(int moduleID, double offsetRotations, double wheelDiameterMeters) {
         driveMotor = new TalonFXMotor(moduleID, "Module" + moduleID + "Drive", RobotConstants.CANIVORE_NAME);
         steerMotor = new TalonFXMotor(moduleID + 4, "Module" + moduleID + "Steer", RobotConstants.CANIVORE_NAME);
         steerEncoder = new CANcoderEncoder(moduleID + 4, "Module" + moduleID + "SteerEncoder", RobotConstants.CANIVORE_NAME);
-        wheelDiameterMeters = SwerveModuleConstants.WHEEL_DIAMETERS_METERS[moduleID - 1];
+        this.wheelDiameterMeters = wheelDiameterMeters;
         configureHardware(offsetRotations);
     }
 
@@ -43,7 +43,7 @@ public class SwerveModule {
         driveMotor.setControl(driveTorqueCurrentFOCRequest.withOutput(targetCurrent));
     }
 
-    void driveMotorUpdateLog(SysIdRoutineLog log) {
+    void udpateDriveMotorLog(SysIdRoutineLog log) {
         log.motor("Module" + driveMotor.getID() + "Drive")
                 .angularPosition(Units.Rotations.of(driveMotor.getSignal(TalonFXSignal.POSITION)))
                 .angularVelocity(Units.RotationsPerSecond.of(driveMotor.getSignal(TalonFXSignal.VELOCITY)))

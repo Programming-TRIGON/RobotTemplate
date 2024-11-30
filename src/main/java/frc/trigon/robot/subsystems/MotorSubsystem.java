@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.trigon.robot.commands.CommandConstants;
-import frc.trigon.robot.commands.commandfactories.GeneralCommands;
 import org.littletonrobotics.junction.networktables.LoggedDashboardBoolean;
 import org.trigon.hardware.RobotHardwareStats;
 
@@ -24,6 +23,7 @@ import java.util.function.Consumer;
  * If a subsystem doesn't need to ever brake (i.e. shooter, flywheel, etc.), then it should override the {@link #setBrake(boolean)} method and do nothing.
  */
 public abstract class MotorSubsystem extends edu.wpi.first.wpilibj2.command.SubsystemBase {
+    public static boolean IS_BRAKING = true;
     private static final List<MotorSubsystem> REGISTERED_SUBSYSTEMS = new ArrayList<>();
     private static final Trigger DISABLED_TRIGGER = new Trigger(DriverStation::isDisabled);
     private static final LoggedDashboardBoolean ENABLE_EXTENSIVE_LOGGING = new LoggedDashboardBoolean("EnableExtensiveLogging", true);
@@ -33,7 +33,7 @@ public abstract class MotorSubsystem extends edu.wpi.first.wpilibj2.command.Subs
         DISABLED_TRIGGER.onFalse(new InstantCommand(() -> {
             setAllSubsystemsBrakeAsync(true);
             CommandConstants.STATIC_WHITE_LED_COLOR_COMMAND.cancel();
-            GeneralCommands.IS_BRAKING = true;
+            IS_BRAKING = true;
         }).ignoringDisable(true));
     }
 

@@ -100,10 +100,13 @@ public class PoseEstimator implements AutoCloseable {
         resetPose(new Pose2d(getCurrentEstimatedPose().getTranslation(), bestRobotHeading));
     }
 
+    /**
+     * Logs and updates the field widget with the target PathPlanner path as an array of Pose2ds.
+     */
     private void logTargetPath() {
-        PathPlannerLogging.setLogActivePathCallback((pose) -> {
-            field.getObject("path").setPoses(pose);
-            Logger.recordOutput("Path", pose.toArray(new Pose2d[0]));
+        PathPlannerLogging.setLogActivePathCallback((pathPoses) -> {
+            field.getObject("path").setPoses(pathPoses);
+            Logger.recordOutput("Path", pathPoses.toArray(new Pose2d[0]));
         });
         PathPlannerLogging.setLogTargetPoseCallback((pose) -> Logger.recordOutput("TargetPPPose", pose));
     }

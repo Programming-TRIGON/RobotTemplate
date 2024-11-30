@@ -52,24 +52,31 @@ public class LEDAutoSetupCommand extends SequentialCommandGroup {
 
     private Command getUpdateAutoStartPoseCommand() {
         return new InstantCommand(() -> {
-            try {
-                this.autoStartPose = getAutoStartPose();
-            } catch (IOException | ParseException e) {
-                throw new RuntimeException(e);
-            }
+            this.autoStartPose = getAutoStartPose();
         });
     }
 
-    private Pose2d getAutoStartPose() throws IOException, ParseException {
-        final Pose2d nonMirroredAutoStartPose = PathPlannerAuto.getPathGroupFromAutoFile(autoName.get()).get(0).getStartingHolonomicPose().get();
+    private Pose2d getAutoStartPose() {
+        try {
+            final Pose2d nonMirroredAutoStartPose = PathPlannerAuto.getPathGroupFromAutoFile(autoName.get()).get(0).getStartingHolonomicPose().get();
 //        final MirrorablePose2d mirroredAutoStartPose = new MirrorablePose2d(nonMirroredAutoStartPose, true);
-        return nonMirroredAutoStartPose;
+            return nonMirroredAutoStartPose;
+        } catch (IOException | ParseException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    private Color getDesiredLEDColorFromRobotPose(double difference, double tolerance) {
-        if (difference < -tolerance)
+    /**
+     * Gets the correct color of a section of the LED based on the difference of between the auto start pose and the current robot pose.
+     *
+     * @param differenceMeters the difference between the robot's position and the auto's start position
+     * @param toleranceMeters  the maximum distance from the auto start position to display as the correct start position
+     * @return
+     */
+    private Color getDesiredLEDColorFromRobotPose(double differenceMeters, double toleranceMeters) {
+        if (differenceMeters < -toleranceMeters)
             return Color.kBlack;
-        else if (difference > tolerance)
+        else if (differenceMeters > toleranceMeters)
             return Color.kRed;
         return Color.kGreen;
     }

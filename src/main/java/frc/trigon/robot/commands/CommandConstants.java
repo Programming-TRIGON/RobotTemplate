@@ -14,7 +14,8 @@ import org.trigon.hardware.misc.leds.LEDStrip;
 import org.trigon.utilities.mirrorable.MirrorablePose2d;
 
 /**
- * A class that contains commands that run with the same values every usage.
+ * A class that contains commands that run the exact same command each time.
+ * These are different from GeneralCommands because they don't need to be sent any parameters and always do the same thing.
  */
 public class CommandConstants {
     private static final XboxController DRIVER_CONTROLLER = OperatorConstants.DRIVER_CONTROLLER;
@@ -44,7 +45,7 @@ public class CommandConstants {
 
 
     /**
-     * Calculates the target drive power from an axis value.
+     * Calculates the target drive power from an axis value by dividing it by the shift mode value.
      *
      * @param axisValue the stick's value
      * @return the drive power
@@ -54,7 +55,7 @@ public class CommandConstants {
     }
 
     /**
-     * Calculates the target rotation power from an axis value.
+     * Calculates the target rotation power from an axis value by dividing it by the shift mode value.
      *
      * @param axisValue the stick's value
      * @return the rotation power

@@ -7,9 +7,11 @@ import frc.trigon.robot.subsystems.MotorSubsystem;
 
 import java.util.function.BooleanSupplier;
 
+/**
+ * A class that contains the general commands of the robot, such as commands that alter a command or commands that affect all subsystems.
+ * These are different from CommandConstants because they don't necessarily have the same effect every usage.
+ */
 public class GeneralCommands {
-    public static boolean IS_BRAKING = true;
-
     public static Command withoutRequirements(Command command) {
         return new FunctionalCommand(
                 command::initialize,
@@ -35,10 +37,10 @@ public class GeneralCommands {
 
     public static Command getToggleBrakeCommand() {
         return new InstantCommand(() -> {
-            IS_BRAKING = !IS_BRAKING;
-            MotorSubsystem.setAllSubsystemsBrakeAsync(IS_BRAKING);
+            MotorSubsystem.IS_BRAKING = !MotorSubsystem.IS_BRAKING;
+            MotorSubsystem.setAllSubsystemsBrakeAsync(MotorSubsystem.IS_BRAKING);
 
-            if (IS_BRAKING)
+            if (MotorSubsystem.IS_BRAKING)
                 CommandConstants.STATIC_WHITE_LED_COLOR_COMMAND.cancel();
             else
                 CommandConstants.STATIC_WHITE_LED_COLOR_COMMAND.schedule();
@@ -77,7 +79,7 @@ public class GeneralCommands {
      * @return the command
      */
     public static Command runWhen(Command command, BooleanSupplier condition, double debounceTimeSeconds) {
-        return new WaitUntilCommand(condition).andThen(new WaitCommand(debounceTimeSeconds).andThen(command.onlyIf(condition)));
+        return runWhen(new WaitCommand(debounceTimeSeconds).andThen(command.onlyIf(condition)), condition);
     }
 
     public static Command duplicate(Command command) {

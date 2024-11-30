@@ -77,7 +77,7 @@ public class Swerve extends MotorSubsystem {
     @Override
     public void updateLog(SysIdRoutineLog log) {
         for (SwerveModule swerveModule : swerveModules)
-            swerveModule.driveMotorUpdateLog(log);
+            swerveModule.udpateDriveMotorLog(log);
     }
 
     @Override
