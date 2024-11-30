@@ -1,7 +1,6 @@
 package frc.trigon.robot.commands;
 
 import com.pathplanner.lib.commands.PathPlannerAuto;
-import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -11,7 +10,6 @@ import frc.trigon.robot.RobotContainer;
 import org.json.simple.parser.ParseException;
 import org.trigon.hardware.misc.leds.LEDCommands;
 import org.trigon.hardware.misc.leds.LEDStrip;
-import org.trigon.utilities.mirrorable.MirrorablePose2d;
 
 import java.io.IOException;
 import java.util.function.Supplier;
@@ -25,9 +23,12 @@ public class LEDAutoSetupCommand extends SequentialCommandGroup {
     private static final double
             TOLERANCE_METERS = 0.1,
             TOLERANCE_DEGREES = 2;
+    private final Supplier<String> autoName;
     private Pose2d autoStartPose;
 
-    public LEDAutoSetupCommand() {
+    public LEDAutoSetupCommand(Supplier<String> autoName) {
+        this.autoName = autoName;
+        
         final Supplier<Color>[] LEDColors = new Supplier[]{
                 () -> getDesiredLEDColorFromRobotPose(this.autoStartPose.getRotation().getDegrees() - RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getRotation().getDegrees(), TOLERANCE_DEGREES),
                 () -> getDesiredLEDColorFromRobotPose(this.autoStartPose.getX() - RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getX(), TOLERANCE_METERS),
@@ -51,13 +52,13 @@ public class LEDAutoSetupCommand extends SequentialCommandGroup {
             } catch (IOException | ParseException e) {
                 throw new RuntimeException(e);
             }
-        }).ignoringDisable(true);
+        });
     }
 
     private Pose2d getAutoStartPose() throws IOException, ParseException {
-        final Pose2d nonMirroredAutoStartPose = PathPlannerPath.fromPathFile(PathPlannerAuto.currentPathName).getStartingHolonomicPose().get();
-        final MirrorablePose2d mirroredAutoStartPose = new MirrorablePose2d(nonMirroredAutoStartPose, true);
-        return mirroredAutoStartPose.get();
+        final Pose2d nonMirroredAutoStartPose = PathPlannerAuto.getPathGroupFromAutoFile(autoName.get()).get(0).getStartingHolonomicPose().get();
+//        final MirrorablePose2d mirroredAutoStartPose = new MirrorablePose2d(nonMirroredAutoStartPose, true);
+        return nonMirroredAutoStartPose;
     }
 
     private Color getDesiredLEDColorFromRobotPose(double difference, double tolerance) {
