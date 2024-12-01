@@ -24,7 +24,7 @@ public class SimulationObjectDetectionCameraIO extends ObjectDetectionCameraIO {
             new Translation2d(0, 0)// TODO: Set game piece positions
     ));
     private final String hostname;
-    private Pose3d heldObject = null;
+    private Pose3d[] heldObject = new Pose3d[0];
     private boolean isDelayingEjection = false;
 
     protected SimulationObjectDetectionCameraIO(String hostname) {
@@ -166,13 +166,13 @@ public class SimulationObjectDetectionCameraIO extends ObjectDetectionCameraIO {
      * Also regenerates picked up game pieces.
      */
     private void updateObjectCollection() {
-        if (heldObject != null || !isCollecting())
+        if (heldObject.length > 0 || !isCollecting())
             return;
         final Pose2d robotPose = RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose();
         final Translation2d robotTranslation = robotPose.getTranslation();
         for (Translation2d objectPlacement : objectsOnField) {
             if (objectPlacement.getDistance(robotTranslation) <= PICKING_UP_TOLERANCE_METERS) {
-                heldObject = calculateHeldObjectPose(robotPose);
+                heldObject = new Pose3d[]{calculateHeldObjectPose(robotPose)};
                 objectsOnField.remove(objectPlacement);
                 GeneralCommands.getDelayedCommand(10, () -> objectsOnField.add(objectPlacement)).schedule();
                 break;
@@ -184,7 +184,7 @@ public class SimulationObjectDetectionCameraIO extends ObjectDetectionCameraIO {
      * Handles when a game piece should eject from the robot by checking the state of the necessary subsystems.
      */
     private void updateObjectEjection() {
-        if (heldObject == null || !isEjecting() || isDelayingEjection)
+        if (heldObject.length > 0 || !isEjecting() || isDelayingEjection)
             return;
         isDelayingEjection = true;
         GeneralCommands.getDelayedCommand(0.04, () -> {
@@ -197,9 +197,9 @@ public class SimulationObjectDetectionCameraIO extends ObjectDetectionCameraIO {
      * Updates the position of the held game piece so that it stays inside the robot.
      */
     private void updateHeldObjectPose() {
-        if (heldObject == null)
+        if (heldObject.length == 0)
             return;
-        heldObject = calculateHeldObjectPose(RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose());
+        heldObject = new Pose3d[]{calculateHeldObjectPose(RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose())};
     }
 
     private boolean isCollecting() {
