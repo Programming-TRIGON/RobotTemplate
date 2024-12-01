@@ -1,5 +1,6 @@
 package frc.trigon.robot.subsystems.swerve;
 
+import com.pathplanner.lib.util.DriveFeedforwards;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -144,11 +145,12 @@ public class Swerve extends MotorSubsystem {
     }
 
     /**
-     * Drives the swerve with the given chassis speeds, relative to the robot's frame of reference.
+     * Drives the swerve with the given chassis speeds and feedforwards, relative to the robot's frame of reference.
      *
      * @param chassisSpeeds the target chassis speeds
+     * @param feedforwards  the target feedforwards
      */
-    public void selfRelativeDrive(ChassisSpeeds chassisSpeeds) {
+    public void selfRelativeDrive(ChassisSpeeds chassisSpeeds, DriveFeedforwards feedforwards) {
         chassisSpeeds = discretize(chassisSpeeds);
         if (isStill(chassisSpeeds)) {
             stop();
@@ -254,6 +256,17 @@ public class Swerve extends MotorSubsystem {
         final ChassisSpeeds speeds = powersToSpeeds(xPower, yPower, 0);
         speeds.omegaRadiansPerSecond = calculateProfiledAngleSpeedToTargetAngle(targetAngle);
         selfRelativeDrive(speeds);
+    }
+
+    private void selfRelativeDrive(ChassisSpeeds chassisSpeeds) {
+        chassisSpeeds = discretize(chassisSpeeds);
+        if (isStill(chassisSpeeds)) {
+            stop();
+            return;
+        }
+
+        final SwerveModuleState[] swerveModuleStates = SwerveConstants.KINEMATICS.toSwerveModuleStates(chassisSpeeds);
+        setTargetModuleStates(swerveModuleStates);
     }
 
     private void setTargetModuleStates(SwerveModuleState[] swerveModuleStates) {

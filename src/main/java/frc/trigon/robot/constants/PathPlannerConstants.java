@@ -37,9 +37,10 @@ public class PathPlannerConstants {
     private static void configureAutoBuilder() {
         AutoBuilder.configure(
                 RobotContainer.POSE_ESTIMATOR::getCurrentEstimatedPose,
-                null,
+                (pose) -> {
+                },
                 RobotContainer.SWERVE::getSelfRelativeVelocity,
-                (speeds, feedforwards) -> RobotContainer.SWERVE.selfRelativeDrive(speeds),
+                RobotContainer.SWERVE::selfRelativeDrive,
                 AUTO_PATH_FOLLOWING_CONTROLLER,
                 getRobotConfig(),
                 Mirrorable::isRedAlliance,
