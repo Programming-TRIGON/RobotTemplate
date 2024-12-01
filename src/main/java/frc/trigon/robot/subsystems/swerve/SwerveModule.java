@@ -79,6 +79,13 @@ public class SwerveModule {
         setTargetVelocity(this.targetState.speedMetersPerSecond, this.targetState.angle);
     }
 
+    /**
+     * Sets the target angle and speed of the module from a target module state for the angle, and a target current for the drive speed.
+     * This is used for PathPlanner to follow a path using feedforwards as well as chassisSpeeds.
+     *
+     * @param swerveModuleState the target module state. Only uses the angles
+     * @param targetCurrent     the target current of the drive motor
+     */
     void setTargetState(SwerveModuleState swerveModuleState, double targetCurrent) {
         final Rotation2d unoptimizedAngle = swerveModuleState.angle;
         swerveModuleState.optimize(getCurrentAngle());
