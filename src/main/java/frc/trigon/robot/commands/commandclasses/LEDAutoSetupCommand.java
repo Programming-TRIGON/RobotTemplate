@@ -1,18 +1,15 @@
 package frc.trigon.robot.commands.commandclasses;
 
-import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.trigon.robot.RobotContainer;
-import org.json.simple.parser.ParseException;
+import frc.trigon.robot.commands.commandfactories.AutonomousCommands;
 import org.trigon.hardware.misc.leds.LEDCommands;
 import org.trigon.hardware.misc.leds.LEDStrip;
-import org.trigon.utilities.mirrorable.MirrorablePose2d;
 
-import java.io.IOException;
 import java.util.function.Supplier;
 
 /**
@@ -53,18 +50,8 @@ public class LEDAutoSetupCommand extends SequentialCommandGroup {
 
     private Command getUpdateAutoStartPoseCommand() {
         return new InstantCommand(() -> {
-            this.autoStartPose = getAutoStartPose();
+            this.autoStartPose = AutonomousCommands.getAutoStartPose(autoName.get());
         });
-    }
-
-    private Pose2d getAutoStartPose() {
-        try {
-            final Pose2d nonMirroredAutoStartPose = PathPlannerAuto.getPathGroupFromAutoFile(autoName.get()).get(0).getStartingHolonomicPose().get();
-            final MirrorablePose2d mirroredAutoStartPose = new MirrorablePose2d(nonMirroredAutoStartPose, true);
-            return mirroredAutoStartPose.get();
-        } catch (IOException | ParseException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     /**

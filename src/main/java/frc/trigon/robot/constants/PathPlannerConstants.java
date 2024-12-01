@@ -28,6 +28,9 @@ public class PathPlannerConstants {
             AUTO_ROTATION_PID_CONSTANTS
     );
 
+    /**
+     * Initializes PathPlanner. This needs to be called before any PathPlanner function can be used.
+     */
     public static void init() {
         Pathfinding.setPathfinder(new LocalADStarAK());
         configureAutoBuilder();
@@ -40,7 +43,7 @@ public class PathPlannerConstants {
                 (pose) -> {
                 },
                 RobotContainer.SWERVE::getSelfRelativeVelocity,
-                RobotContainer.SWERVE::selfRelativeDrive,
+                RobotContainer.SWERVE::selfRelativeFeedForwardDrive,
                 AUTO_PATH_FOLLOWING_CONTROLLER,
                 getRobotConfig(),
                 Mirrorable::isRedAlliance,

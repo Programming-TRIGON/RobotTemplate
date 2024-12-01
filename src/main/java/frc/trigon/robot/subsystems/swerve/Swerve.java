@@ -146,19 +146,12 @@ public class Swerve extends MotorSubsystem {
 
     /**
      * Drives the swerve with the given chassis speeds and feedforwards, relative to the robot's frame of reference.
+     * This is used for PathPlanner paths so that each path is as optimized as it can be.
      *
      * @param chassisSpeeds the target chassis speeds
-     * @param feedforwards  the target feedforwards
+     * @param feedforwards  the target feedforwards for each module
      */
-    public void selfRelativeDrive(ChassisSpeeds chassisSpeeds, DriveFeedforwards feedforwards) {
-        chassisSpeeds = discretize(chassisSpeeds);
-        if (isStill(chassisSpeeds)) {
-            stop();
-            return;
-        }
-
-        final SwerveModuleState[] swerveModuleStates = SwerveConstants.KINEMATICS.toSwerveModuleStates(chassisSpeeds);
-        setTargetModuleStates(swerveModuleStates);
+    public void selfRelativeFeedForwardDrive(ChassisSpeeds chassisSpeeds, DriveFeedforwards feedforwards) {
     }
 
     /**

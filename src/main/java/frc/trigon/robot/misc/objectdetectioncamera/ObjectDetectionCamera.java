@@ -12,7 +12,6 @@ public class ObjectDetectionCamera extends SubsystemBase {
     private final ObjectDetectionCameraInputsAutoLogged objectDetectionCameraInputs = new ObjectDetectionCameraInputsAutoLogged();
     private final ObjectDetectionCameraIO objectDetectionCameraIO;
     private final String hostname;
-    private Rotation2d lastTrackedTargetYaw = new Rotation2d();
     private Rotation2d trackedObjectYaw = new Rotation2d();
     private boolean wasVisible = false;
 
@@ -29,6 +28,9 @@ public class ObjectDetectionCamera extends SubsystemBase {
 
     /**
      * Starts the tracking of the best visible target and remains tracking that target until it is no longer visible.
+     * Tracking an object is locking on to one target and allows you to stay locked on to one target.
+     * This is used when there is more than one target that might change as the robot moves to stabilize the result and ensure that it is following the same target that it started with.
+     * This needs to be called each time you want to track a new object.
      */
     public void trackObject() {
         if (hasTargets() && !wasVisible) {
@@ -67,28 +69,27 @@ public class ObjectDetectionCamera extends SubsystemBase {
      * It remains tracking the object until it is no longer visible.
      */
     public void startTrackingBestObject() {
-        lastTrackedTargetYaw = getBestObjectYaw();
+        trackedObjectYaw = getBestObjectYaw();
     }
 
     /**
-     * Calculates the yaw (x-axis position) of the object that it is currently tracking.
+     * Calculates the yaw (x-axis position) of the object that the camera is currently tracking.
      *
      * @return the yaw of the tracked object
      */
     private Rotation2d calculateTrackedObjectYaw() {
-        double closestTargetToLastVisibleTargetYawDifference = Double.POSITIVE_INFINITY;
+        double closestTargetToTrackedTargetYawDifference = Double.POSITIVE_INFINITY;
         Rotation2d closestToTrackedTargetYaw = new Rotation2d();
+
         for (Rotation2d currentObjectYaw : objectDetectionCameraInputs.visibleObjectsYaw) {
-            final double currentObjectToLastVisibleTargetYawDifference = Math.abs(currentObjectYaw.getRadians() - lastTrackedTargetYaw.getRadians());
-            if (currentObjectToLastVisibleTargetYawDifference < closestTargetToLastVisibleTargetYawDifference) {
-                closestTargetToLastVisibleTargetYawDifference = currentObjectToLastVisibleTargetYawDifference;
+            final double currentObjectToTrackedTargetYawDifference = Math.abs(currentObjectYaw.getRadians() - trackedObjectYaw.getRadians());
+            if (currentObjectToTrackedTargetYawDifference < closestTargetToTrackedTargetYawDifference) {
+                closestTargetToTrackedTargetYawDifference = currentObjectToTrackedTargetYawDifference;
                 closestToTrackedTargetYaw = currentObjectYaw;
             }
         }
-        if (closestTargetToLastVisibleTargetYawDifference != Double.POSITIVE_INFINITY)
-            lastTrackedTargetYaw = closestToTrackedTargetYaw;
 
-        return lastTrackedTargetYaw;
+        return closestToTrackedTargetYaw;
     }
 
     private ObjectDetectionCameraIO generateIO(String hostname) {

@@ -8,6 +8,9 @@ import org.littletonrobotics.junction.Logger;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A simulation object detection camera simulates an object detection camera as well as game pieces on the field and allows for interaction with the game pieces.
+ */
 public class SimulationObjectDetectionCameraIO extends ObjectDetectionCameraIO {
     public static boolean HAS_OBJECTS = true;
     private static final Rotation2d CAMERA_HORIZONTAL_FOV = Rotation2d.fromDegrees(75);
@@ -15,11 +18,11 @@ public class SimulationObjectDetectionCameraIO extends ObjectDetectionCameraIO {
             MAXIMUM_VISIBLE_DISTANCE_METERS = 5,
             MINIMUM_VISIBLE_DISTANCE_METERS = 0.05;
     private static final double PICKING_UP_TOLERANCE_METERS = 0.3;
+    private static final double GAME_PIECE_CENTER_DISTANCE_FROM_GROUND = 0;//TODO: Change depending on height of game piece
 
     private final ArrayList<Translation2d> objectsOnField = new ArrayList<>(List.of(
             new Translation2d(0, 0)// TODO: Set game piece positions
     ));
-    private final double gamePieceCenterDistanceFromGround = 0;//TODO: Change depending on height of game piece
     private final String hostname;
     private Pose3d heldObject = null;
     private boolean isDelayingEjection = false;
@@ -30,7 +33,7 @@ public class SimulationObjectDetectionCameraIO extends ObjectDetectionCameraIO {
 
     @Override
     protected void updateInputs(ObjectDetectionCameraInputsAutoLogged inputs) {
-        final Rotation2d closestObjectYaw = getClosestVisibleObjectYaw(RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose());
+        final Rotation2d closestObjectYaw = calculateClosestVisibleObjectYaw(RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose());
         if (closestObjectYaw == null) {
             inputs.hasTargets = false;
         } else {
@@ -45,44 +48,44 @@ public class SimulationObjectDetectionCameraIO extends ObjectDetectionCameraIO {
     }
 
     /**
-     * Gets the yaw relative to the robot of the closest visible object.
+     * Calculates the yaw of the closest visible object relative to the camera by calculating the yaw of all objects visible to the camera and returning the one with the smallest yaw deviation from the camera's center.
      *
      * @param robotPose the pose of the robot on the field
      * @return the yaw of the closest visible object
      */
-    private Rotation2d getClosestVisibleObjectYaw(Pose2d robotPose) {
+    private Rotation2d calculateClosestVisibleObjectYaw(Pose2d robotPose) {
         Translation2d closestObject = null;
         Rotation2d closestObjectYaw = null;
         double closestObjectDistance = Double.POSITIVE_INFINITY;
 
-        List<Translation2d> visibleObjectsPlacements = getVisibleObjectsPlacements(robotPose);
+        final List<Translation2d> visibleObjectsPlacements = calculateVisibleObjectsPlacements(robotPose);
 
         for (Translation2d objectPlacement : visibleObjectsPlacements) {
-            final double robotDistanceToObject = getObjectDistance(objectPlacement, robotPose);
+            final double robotDistanceToObject = calculateObjectDistance(objectPlacement, robotPose);
             if (robotDistanceToObject < closestObjectDistance) {
                 closestObject = objectPlacement;
-                closestObjectYaw = getRobotYawToObject(objectPlacement, robotPose).minus(robotPose.getRotation());
+                closestObjectYaw = calculateCameraYawToObject(objectPlacement, robotPose).minus(robotPose.getRotation());
                 closestObjectDistance = robotDistanceToObject;
             }
         }
 
-        logObjectPlacement(closestObject);
+        logClosestObjectPlacement(closestObject);
         return closestObjectYaw;
     }
 
     /**
-     * Gets the placements of all visible objects by checking if they are within range and within the horizontal FOV.
+     * Calculates the placements of all visible objects by checking if they are within range and within the horizontal FOV.
      *
      * @param robotPose the position of the robot on the field
      * @return the placements of the visible objects
      */
-    private List<Translation2d> getVisibleObjectsPlacements(Pose2d robotPose) {
+    private List<Translation2d> calculateVisibleObjectsPlacements(Pose2d robotPose) {
         final List<Translation2d> visibleObjects = new ArrayList<>();
         int currentIndex = 0;
 
         for (Translation2d currentObject : objectsOnField) {
-            final Rotation2d robotYawToObject = getRobotYawToObject(currentObject, robotPose);
-            if (!isWithinHorizontalFOV(robotYawToObject, robotPose) || !isWithinDistance(objectsOnField.get(0), robotPose))
+            final Rotation2d cameraYawToObject = calculateCameraYawToObject(currentObject, robotPose);
+            if (!isWithinHorizontalFOV(cameraYawToObject, robotPose) || !isWithinDistance(objectsOnField.get(0), robotPose))
                 continue;
             visibleObjects.add(currentIndex, currentObject);
             currentIndex++;
@@ -91,58 +94,58 @@ public class SimulationObjectDetectionCameraIO extends ObjectDetectionCameraIO {
     }
 
     /**
-     * Gets the yaw of an object relative to the robot.
+     * Calculates the difference in yaw from an object to the camera's yaw.
      *
      * @param objectPlacement the placement of the object on the field
      * @param robotPose       the position of the robot on the field
-     * @return the yaw of the object relative to the robot
+     * @return the yaw of the object relative to the camera
      */
-    private Rotation2d getRobotYawToObject(Translation2d objectPlacement, Pose2d robotPose) {
+    private Rotation2d calculateCameraYawToObject(Translation2d objectPlacement, Pose2d robotPose) {
         final Translation2d robotToObject = objectPlacement.minus(robotPose.getTranslation());
         return robotToObject.getAngle();
     }
 
     /**
-     * Checks if an object is within the field-of-view of the robot.
+     * Checks if an object is within the field-of-view of the camera.
      *
      * @param objectYaw the yaw of the object relative to the camera
      * @param robotPose the position of the robot on the field
-     * @return if the object is within the field-of-view of the robot
+     * @return if the object is within the field-of-view of the camera
      */
     private boolean isWithinHorizontalFOV(Rotation2d objectYaw, Pose2d robotPose) {
         return Math.abs(objectYaw.minus(robotPose.getRotation()).getRadians()) <= CAMERA_HORIZONTAL_FOV.getRadians() / 2;
     }
 
     /**
-     * Checks if an object is within the distance range of the robot.
+     * Checks if an object is within the distance range of the camera.
+     * The distance range is set at the top of this class as MAXIMUM and MINIMUM VISIBLE_DISTANCE_METERS.
      *
      * @param objectPlacement the placement of the object on the field
      * @param robotPose       the position of the robot on the field
-     * @return if the object is withing the distance range of the robot
+     * @return if the object is withing the distance range of the camera
      */
     private boolean isWithinDistance(Translation2d objectPlacement, Pose2d robotPose) {
-        final double robotToObjectDistanceMeters = getObjectDistance(objectPlacement, robotPose);
+        final double robotToObjectDistanceMeters = calculateObjectDistance(objectPlacement, robotPose);
         return robotToObjectDistanceMeters <= MAXIMUM_VISIBLE_DISTANCE_METERS && robotToObjectDistanceMeters >= MINIMUM_VISIBLE_DISTANCE_METERS;
     }
 
     /**
-     * Gets the distance between the robot and an object.
+     * Calculates the distance between the robot and an object.
      *
      * @param objectPlacement the placement of the object on the field
      * @param robotPose       the position of the robot on the field
      * @return the distance between the robot and the object
      */
-    private double getObjectDistance(Translation2d objectPlacement, Pose2d robotPose) {
-        final Translation2d robotToObject = objectPlacement.minus(robotPose.getTranslation());
-        return robotToObject.getNorm();
+    private double calculateObjectDistance(Translation2d objectPlacement, Pose2d robotPose) {
+        return robotPose.getTranslation().getDistance(objectPlacement);
     }
 
     /**
-     * Logs an object's placement on the field.
+     * Logs the closest object's placement on the field.
      *
-     * @param objectPlacement the placement of the object
+     * @param objectPlacement the placement of the closest object
      */
-    private void logObjectPlacement(Translation2d objectPlacement) {
+    private void logClosestObjectPlacement(Translation2d objectPlacement) {
         if (objectPlacement != null)
             Logger.recordOutput(hostname + "/ClosestObject", objectPlacement);
         else
@@ -159,7 +162,8 @@ public class SimulationObjectDetectionCameraIO extends ObjectDetectionCameraIO {
     }
 
     /**
-     * Handles when a game piece should collect.
+     * Handles when a game piece should collect by checking the state of the necessary subsystems of the robot and the position of the robot relative to the game piees.
+     * Also regenerates picked up game pieces.
      */
     private void updateObjectCollection() {
         if (heldObject != null || !isCollecting())
@@ -168,7 +172,7 @@ public class SimulationObjectDetectionCameraIO extends ObjectDetectionCameraIO {
         final Translation2d robotTranslation = robotPose.getTranslation();
         for (Translation2d objectPlacement : objectsOnField) {
             if (objectPlacement.getDistance(robotTranslation) <= PICKING_UP_TOLERANCE_METERS) {
-                heldObject = getHeldObjectPose(robotPose);
+                heldObject = calculateHeldObjectPose(robotPose);
                 objectsOnField.remove(objectPlacement);
                 GeneralCommands.getDelayedCommand(10, () -> objectsOnField.add(objectPlacement)).schedule();
                 break;
@@ -177,7 +181,7 @@ public class SimulationObjectDetectionCameraIO extends ObjectDetectionCameraIO {
     }
 
     /**
-     * Handles when a game piece should eject from the robot.
+     * Handles when a game piece should eject from the robot by checking the state of the necessary subsystems.
      */
     private void updateObjectEjection() {
         if (heldObject == null || !isEjecting() || isDelayingEjection)
@@ -190,12 +194,12 @@ public class SimulationObjectDetectionCameraIO extends ObjectDetectionCameraIO {
     }
 
     /**
-     * Updates the position of the held game piece so that it stays relative to the robot.
+     * Updates the position of the held game piece so that it stays inside the robot.
      */
     private void updateHeldObjectPose() {
         if (heldObject == null)
             return;
-        heldObject = getHeldObjectPose(RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose());
+        heldObject = calculateHeldObjectPose(RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose());
     }
 
     private boolean isCollecting() {
@@ -207,12 +211,12 @@ public class SimulationObjectDetectionCameraIO extends ObjectDetectionCameraIO {
     }
 
     /**
-     * Gets the position of the game piece relative to the field.
+     * Calculate the position of the game piece relative to the field.
      *
      * @param robotPose the position of the robot on the field
      * @return the position of the game piece relative to the field
      */
-    private Pose3d getHeldObjectPose(Pose2d robotPose) {
+    private Pose3d calculateHeldObjectPose(Pose2d robotPose) {
         final Pose3d robotPose3d = new Pose3d(robotPose);
         final Pose3d robotRelativeHeldGamePiecePosition = new Pose3d();// TODO:Set position
         return robotPose3d.plus(toTransform(robotRelativeHeldGamePiecePosition));
@@ -237,7 +241,7 @@ public class SimulationObjectDetectionCameraIO extends ObjectDetectionCameraIO {
     }
 
     /**
-     * Changes a list of Translation2ds to an array of Pose3ds
+     * Changes a list of Translation2ds to an array of Pose3ds.
      *
      * @param translationsList the list of Translation2ds
      * @return the array of Pose3ds
@@ -246,7 +250,7 @@ public class SimulationObjectDetectionCameraIO extends ObjectDetectionCameraIO {
         final Pose3d[] posesArray = new Pose3d[translationsList.size()];
         for (int i = 0; i < translationsList.size(); i++) {
             final Translation2d translation = translationsList.get(i);
-            posesArray[i] = new Pose3d(translation.getX(), translation.getY(), gamePieceCenterDistanceFromGround, new Rotation3d());
+            posesArray[i] = new Pose3d(translation.getX(), translation.getY(), GAME_PIECE_CENTER_DISTANCE_FROM_GROUND, new Rotation3d());
         }
         return posesArray;
     }
