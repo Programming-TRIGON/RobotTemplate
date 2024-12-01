@@ -79,6 +79,18 @@ public class SwerveModule {
         setTargetVelocity(this.targetState.speedMetersPerSecond, this.targetState.angle);
     }
 
+    void setTargetState(SwerveModuleState swerveModuleState, double targetCurrent) {
+        final Rotation2d unoptimizedAngle = swerveModuleState.angle;
+        swerveModuleState.optimize(getCurrentAngle());
+        setTargetAngle(swerveModuleState.angle);
+
+        if (!swerveModuleState.angle.equals(unoptimizedAngle)) {
+            setTargetDriveMotorCurrent(-targetCurrent);
+            return;
+        }
+        setTargetDriveMotorCurrent(targetCurrent);
+    }
+
     void setTargetAngle(Rotation2d angle) {
         steerMotor.setControl(steerPositionRequest.withPosition(angle.getRotations()));
     }

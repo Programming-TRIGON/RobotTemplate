@@ -159,10 +159,8 @@ public class Swerve extends MotorSubsystem {
         }
 
         final SwerveModuleState[] swerveModuleStates = SwerveConstants.KINEMATICS.toSwerveModuleStates(chassisSpeeds);
-        for (int i = 0; i < swerveModules.length; i++) {
-            swerveModules[i].setTargetAngle(swerveModuleStates[i].angle);
-            swerveModules[i].setTargetDriveMotorCurrent(feedforwards.torqueCurrents()[i].in(edu.wpi.first.units.Units.Amps));
-        }
+        for (int i = 0; i < swerveModules.length; i++)
+            swerveModules[i].setTargetState(swerveModuleStates[i], feedforwards.torqueCurrents()[i].in(edu.wpi.first.units.Units.Amps));
     }
 
     /**
