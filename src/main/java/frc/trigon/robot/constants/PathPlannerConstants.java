@@ -1,4 +1,4 @@
-package frc.trigon.robot.misc.pathplanner;
+package frc.trigon.robot.constants;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathfindingCommand;
@@ -29,8 +29,8 @@ public class PathPlannerConstants {
     );
 
     public static void init() {
-        configureAutoBuilder();
         Pathfinding.setPathfinder(new LocalADStarAK());
+        configureAutoBuilder();
         PathfindingCommand.warmupCommand().schedule();
     }
 

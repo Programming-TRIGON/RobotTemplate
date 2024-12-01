@@ -34,7 +34,7 @@ public class SimulationObjectDetectionCameraIO extends ObjectDetectionCameraIO {
             inputs.hasTargets = false;
         } else {
             inputs.hasTargets = true;
-            inputs.visibleObjectsYaw = new double[]{closestObjectYaw.getDegrees()};
+            inputs.visibleObjectsYaw = new Rotation2d[]{closestObjectYaw};
         }
 
         updateHeldGamePiece();

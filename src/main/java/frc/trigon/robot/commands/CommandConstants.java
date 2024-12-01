@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.trigon.robot.RobotContainer;
+import frc.trigon.robot.commands.commandfactories.GeneralCommands;
 import frc.trigon.robot.constants.OperatorConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveCommands;
 import org.trigon.hardware.misc.XboxController;
@@ -15,7 +16,8 @@ import org.trigon.utilities.mirrorable.MirrorablePose2d;
 
 /**
  * A class that contains commands that only use parameters and don't require logic.
- * These are different from GeneralCommands and command factories because they don't calculate anything and they run the same command every time.
+ * These are different from {@link GeneralCommands} and command factories because they don't contain any logic, and only run an existing command with parameters.
+ * For example, the static LED command always changes all the LED strips to the same LED mode with the same settings.
  */
 public class CommandConstants {
     private static final XboxController DRIVER_CONTROLLER = OperatorConstants.DRIVER_CONTROLLER;

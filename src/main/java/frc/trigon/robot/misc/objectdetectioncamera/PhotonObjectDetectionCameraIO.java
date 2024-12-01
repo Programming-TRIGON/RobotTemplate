@@ -1,5 +1,6 @@
 package frc.trigon.robot.misc.objectdetectioncamera;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
@@ -31,15 +32,15 @@ public class PhotonObjectDetectionCameraIO extends ObjectDetectionCameraIO {
         return unreadResults.isEmpty() ? null : unreadResults.get(unreadResults.size() - 1);
     }
 
-    private double[] getVisibleObjectsYaw(PhotonPipelineResult result) {
+    private Rotation2d[] getVisibleObjectsYaw(PhotonPipelineResult result) {
         final List<PhotonTrackedTarget> targets = result.getTargets();
-        final double[] visibleObjectsYaw = new double[targets.size()];
+        final Rotation2d[] visibleObjectsYaw = new Rotation2d[targets.size()];
         visibleObjectsYaw[0] = getBestTargetYaw(result);
 
         boolean hasSeenBestTarget = false;
         for (int i = 0; i < visibleObjectsYaw.length; i++) {
-            final double targetYaw = -targets.get(i).getYaw();
-            if (targetYaw == visibleObjectsYaw[0]) {
+            final Rotation2d targetYaw = Rotation2d.fromDegrees(-targets.get(i).getYaw());
+            if (targetYaw.equals(visibleObjectsYaw[0])) {
                 hasSeenBestTarget = true;
                 continue;
             }
@@ -48,14 +49,14 @@ public class PhotonObjectDetectionCameraIO extends ObjectDetectionCameraIO {
         return visibleObjectsYaw;
     }
 
-    private double getBestTargetYaw(PhotonPipelineResult result) {
+    private Rotation2d getBestTargetYaw(PhotonPipelineResult result) {
         double closestTargetDistance = Double.POSITIVE_INFINITY;
-        double bestTargetYaw = 0;
+        Rotation2d bestTargetYaw = new Rotation2d();
         for (PhotonTrackedTarget target : result.getTargets()) {
             final double currentTargetDistance = Math.abs(target.getYaw()) + Math.abs(target.getPitch());
             if (closestTargetDistance > currentTargetDistance) {
                 closestTargetDistance = currentTargetDistance;
-                bestTargetYaw = -target.getYaw();
+                bestTargetYaw = Rotation2d.fromDegrees(-target.getYaw());
             }
         }
         return bestTargetYaw;

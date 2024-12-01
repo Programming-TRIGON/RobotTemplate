@@ -13,7 +13,7 @@ import frc.trigon.robot.commands.CommandConstants;
 import frc.trigon.robot.commands.commandfactories.GeneralCommands;
 import frc.trigon.robot.constants.LEDConstants;
 import frc.trigon.robot.constants.OperatorConstants;
-import frc.trigon.robot.misc.pathplanner.PathPlannerConstants;
+import frc.trigon.robot.constants.PathPlannerConstants;
 import frc.trigon.robot.poseestimation.poseestimator.PoseEstimator;
 import frc.trigon.robot.subsystems.MotorSubsystem;
 import frc.trigon.robot.subsystems.swerve.Swerve;
@@ -49,6 +49,8 @@ public class RobotContainer {
 
     /**
      * Initializes the general systems of the robot.
+     * Some systems need to be initialized at the start of the robot code so that others can use their functions.
+     * For example, the LEDConstants need to be initialized so that the other systems can use them.
      */
     private void initializeGeneralSystems() {
         Mirrorable.init();
