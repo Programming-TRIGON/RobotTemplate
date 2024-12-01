@@ -13,9 +13,13 @@ import java.io.IOException;
 import java.util.function.Supplier;
 
 /**
- * A class that contains commands that are used during the 15-second autonomous period at the start of each match.
+ * A class that contains command factories for commands that are used during the 15-second autonomous period at the start of each match.
  */
 public class AutonomousCommands {
+    /**
+     * @param autoName the name of the autonomous
+     * @return a command that resets the robot's pose estimator pose to the start position of the given autonomous
+     */
     public static Command getResetPoseToAutoPoseCommand(Supplier<String> autoName) {
         return new InstantCommand(
                 () -> {
@@ -26,6 +30,12 @@ public class AutonomousCommands {
         );
     }
 
+    /**
+     * Gets the starting position of the target PathPlanner autonomous.
+     *
+     * @param autoName the name of the autonomous group
+     * @return the staring pose of the autonomous
+     */
     public static Pose2d getAutoStartPose(String autoName) {
         try {
             final Pose2d nonMirroredAutoStartPose = PathPlannerAuto.getPathGroupFromAutoFile(autoName).get(0).getStartingHolonomicPose().get();

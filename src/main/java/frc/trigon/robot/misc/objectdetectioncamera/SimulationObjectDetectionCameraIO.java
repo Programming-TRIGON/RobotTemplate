@@ -241,7 +241,7 @@ public class SimulationObjectDetectionCameraIO extends ObjectDetectionCameraIO {
     }
 
     /**
-     * Changes a list of Translation2ds to an array of Pose3ds.
+     * Changes a list of Translation2ds to an array of Pose3ds with the height of {@link #GAME_PIECE_CENTER_DISTANCE_FROM_GROUND}.
      *
      * @param translationsList the list of Translation2ds
      * @return the array of Pose3ds

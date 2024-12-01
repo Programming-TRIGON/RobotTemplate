@@ -13,7 +13,7 @@ public class ObjectDetectionCamera extends SubsystemBase {
     private final ObjectDetectionCameraIO objectDetectionCameraIO;
     private final String hostname;
     private Rotation2d trackedObjectYaw = new Rotation2d();
-    private boolean wasVisible = false;
+    private boolean trackedTargetWasVisible = false;
 
     public ObjectDetectionCamera(String hostname) {
         this.hostname = hostname;
@@ -30,17 +30,16 @@ public class ObjectDetectionCamera extends SubsystemBase {
      * Starts tracking the best visible target and remains tracking that target until it is no longer visible.
      * Tracking an object is locking on to one target and allows for you to remain locked on to one target even when there are more objects visible.
      * This is used when there is more than one visible object and the best target might change as the robot moves.
-     * This needs to be called each time you want to track a new object.
+     * When no objects are visible, the tracking resets to the best target the next time an object is visible.
      */
     public void trackObject() {
-        if (hasTargets() && !wasVisible) {
-            wasVisible = true;
-            startTrackingBestObject();
-            trackedObjectYaw = calculateTrackedObjectYaw();
+        if (hasTargets() && !trackedTargetWasVisible) {
+            trackedTargetWasVisible = true;
+            trackedObjectYaw = getBestObjectYaw();
             return;
         }
         if (!hasTargets()) {
-            wasVisible = false;
+            trackedTargetWasVisible = false;
             return;
         }
         trackedObjectYaw = calculateTrackedObjectYaw();
@@ -65,15 +64,7 @@ public class ObjectDetectionCamera extends SubsystemBase {
     }
 
     /**
-     * Start tracking of the best visible object.
-     * It remains tracking the object until it is no longer visible.
-     */
-    public void startTrackingBestObject() {
-        trackedObjectYaw = getBestObjectYaw();
-    }
-
-    /**
-     * Calculates the yaw (x-axis position) of the object that the camera is currently tracking.
+     * Calculates the yaw (x-axis position) of the object that the camera is currently tracking by finding the target with the least yaw deviation and assuming that it is the same target.
      *
      * @return the yaw of the tracked object
      */

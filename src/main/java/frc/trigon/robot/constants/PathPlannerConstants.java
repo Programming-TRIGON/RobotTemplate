@@ -5,6 +5,7 @@ import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import frc.trigon.robot.RobotContainer;
 import org.json.simple.parser.ParseException;
@@ -15,6 +16,8 @@ import org.trigon.utilities.mirrorable.Mirrorable;
 import java.io.IOException;
 
 public class PathPlannerConstants {
+    public static final PathConstraints REAL_TIME_PATH_CONSTRAINTS = new PathConstraints(2.5, 2.5, 4, 4);
+
     private static final PIDConstants
             AUTO_TRANSLATION_PID_CONSTANTS = RobotHardwareStats.isSimulation() ?
             new PIDConstants(5, 0, 0) :
@@ -35,6 +38,7 @@ public class PathPlannerConstants {
         Pathfinding.setPathfinder(new LocalADStarAK());
         configureAutoBuilder();
         PathfindingCommand.warmupCommand().schedule();
+        registerCommands();
     }
 
     private static void configureAutoBuilder() {
@@ -57,5 +61,9 @@ public class PathPlannerConstants {
         } catch (IOException | ParseException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static void registerCommands() {
+//        NamedCommands.registerCommand(name, command);//TODO:Implement NamedCommands
     }
 }
