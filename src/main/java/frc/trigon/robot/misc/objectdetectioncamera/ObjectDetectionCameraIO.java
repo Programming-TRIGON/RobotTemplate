@@ -12,7 +12,9 @@ public class ObjectDetectionCameraIO {
     @AutoLog
     public static class ObjectDetectionCameraInputs {
         public boolean hasTargets = false;
-        public double bestObjectYaw = 0;
+        /**
+         * An array that contains the yaw of all visible targets. The best target is first.
+         */
         public double[] visibleObjectsYaw = new double[0];
     }
 }

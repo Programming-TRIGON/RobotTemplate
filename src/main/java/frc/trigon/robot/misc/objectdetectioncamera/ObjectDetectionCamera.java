@@ -9,7 +9,7 @@ public class ObjectDetectionCamera extends SubsystemBase {
     private final ObjectDetectionCameraInputsAutoLogged objectDetectionCameraInputs = new ObjectDetectionCameraInputsAutoLogged();
     private final ObjectDetectionCameraIO objectDetectionCameraIO;
     private final String hostname;
-    private double lastVisibleObjectYaw = 0;
+    private double lastVisibleObjectYawDegrees = 0;
     private Rotation2d trackedObjectYaw = new Rotation2d();
     private boolean wasVisible = false;
 
@@ -45,33 +45,32 @@ public class ObjectDetectionCamera extends SubsystemBase {
     /**
      * @return the yaw (x-axis position) of the target object
      */
-    public double getBestObjectYaw() {
-        return objectDetectionCameraInputs.bestObjectYaw;
+    public double getBestObjectYawDegrees() {
+        return objectDetectionCameraInputs.visibleObjectsYaw[0];
     }
 
     public Rotation2d getTrackedObjectYaw() {
         return trackedObjectYaw;
     }
 
-    private Rotation2d calculateTrackedObjectYaw() {
-        double closestYawDifference = 10000000;
-        double closestYaw = 10000000;
-        for (double currentYaw : objectDetectionCameraInputs.visibleObjectsYaw) {
-            final double yawDifference = Math.abs(currentYaw - lastVisibleObjectYaw);
-            if (yawDifference < closestYawDifference) {
-                closestYawDifference = yawDifference;
-                closestYaw = currentYaw;
-            }
-        }
-        if (closestYawDifference != 10000000) {
-            lastVisibleObjectYaw = closestYaw;
-            return Rotation2d.fromDegrees(lastVisibleObjectYaw);
-        }
-        return Rotation2d.fromDegrees(lastVisibleObjectYaw);
+    public void startTrackingBestObject() {
+        lastVisibleObjectYawDegrees = getBestObjectYawDegrees();
     }
 
-    public void startTrackingBestObject() {
-        lastVisibleObjectYaw = getBestObjectYaw();
+    private Rotation2d calculateTrackedObjectYaw() {
+        double closestTargetToLastVisibleTargetYawDifference = Double.POSITIVE_INFINITY;
+        double closestTargetYaw = Double.POSITIVE_INFINITY;
+        for (double currentObjectYaw : objectDetectionCameraInputs.visibleObjectsYaw) {
+            final double currentObjectToLastVisibleTargetYawDifference = Math.abs(currentObjectYaw - lastVisibleObjectYawDegrees);
+            if (currentObjectToLastVisibleTargetYawDifference < closestTargetToLastVisibleTargetYawDifference) {
+                closestTargetToLastVisibleTargetYawDifference = currentObjectToLastVisibleTargetYawDifference;
+                closestTargetYaw = currentObjectYaw;
+            }
+        }
+        if (closestTargetToLastVisibleTargetYawDifference != Double.POSITIVE_INFINITY)
+            lastVisibleObjectYawDegrees = closestTargetYaw;
+        
+        return Rotation2d.fromDegrees(lastVisibleObjectYawDegrees);
     }
 
     private ObjectDetectionCameraIO generateIO(String hostname) {

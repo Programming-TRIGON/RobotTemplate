@@ -20,10 +20,9 @@ public class PhotonObjectDetectionCameraIO extends ObjectDetectionCameraIO {
             return;
         final PhotonPipelineResult result = getLatestPipelineResult();
 
-        inputs.hasTargets = result.hasTargets();
+        inputs.hasTargets = result != null && result.hasTargets();
         if (inputs.hasTargets) {
-            inputs.bestObjectYaw = getBestTargetYaw(result);
-            inputs.visibleObjectsYaw = result.getTargets().stream().mapToDouble((target) -> -target.getYaw()).toArray();
+            inputs.visibleObjectsYaw = getVisibleObjectsYaw(result);
         }
     }
 
@@ -32,16 +31,33 @@ public class PhotonObjectDetectionCameraIO extends ObjectDetectionCameraIO {
         return unreadResults.isEmpty() ? null : unreadResults.get(unreadResults.size() - 1);
     }
 
+    private double[] getVisibleObjectsYaw(PhotonPipelineResult result) {
+        final List<PhotonTrackedTarget> targets = result.getTargets();
+        final double[] visibleObjectsYaw = new double[targets.size()];
+        visibleObjectsYaw[0] = getBestTargetYaw(result);
+
+        boolean hasSeenBestTarget = false;
+        for (int i = 0; i < visibleObjectsYaw.length; i++) {
+            final double targetYaw = -targets.get(i).getYaw();
+            if (targetYaw == visibleObjectsYaw[0]) {
+                hasSeenBestTarget = true;
+                continue;
+            }
+            visibleObjectsYaw[hasSeenBestTarget ? i : i + 1] = targetYaw;
+        }
+        return visibleObjectsYaw;
+    }
+
     private double getBestTargetYaw(PhotonPipelineResult result) {
-        double lowestSum = 100000;
-        double chosenOne = 0;
+        double closestTargetDistance = Double.POSITIVE_INFINITY;
+        double bestTargetYaw = 0;
         for (PhotonTrackedTarget target : result.getTargets()) {
-            final double current = Math.abs(target.getYaw()) + Math.abs(target.getPitch());
-            if (lowestSum > current) {
-                lowestSum = current;
-                chosenOne = -target.getYaw();
+            final double currentTargetDistance = Math.abs(target.getYaw()) + Math.abs(target.getPitch());
+            if (closestTargetDistance > currentTargetDistance) {
+                closestTargetDistance = currentTargetDistance;
+                bestTargetYaw = -target.getYaw();
             }
         }
-        return chosenOne;
+        return bestTargetYaw;
     }
 }
