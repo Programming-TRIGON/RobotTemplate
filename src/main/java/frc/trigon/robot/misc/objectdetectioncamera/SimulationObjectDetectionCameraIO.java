@@ -118,7 +118,7 @@ public class SimulationObjectDetectionCameraIO extends ObjectDetectionCameraIO {
 
     /**
      * Checks if an object is within the distance range of the camera.
-     * The distance range is set at the top of this class as MAXIMUM and MINIMUM VISIBLE_DISTANCE_METERS.
+     * The distance range is set at the top of this class as {@link #MINIMUM_VISIBLE_DISTANCE_METERS} and {@link #MINIMUM_VISIBLE_DISTANCE_METERS}.
      *
      * @param objectPlacement the placement of the object on the field
      * @param robotPose       the position of the robot on the field
