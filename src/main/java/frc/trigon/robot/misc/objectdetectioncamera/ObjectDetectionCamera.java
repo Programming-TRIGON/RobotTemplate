@@ -29,6 +29,7 @@ public class ObjectDetectionCamera extends SubsystemBase {
     /**
      * Starts tracking the best visible target and remains tracking that target until it is no longer visible.
      * Tracking an object is locking on to one target and allows for you to remain locked on to one target even when there are more objects visible.
+     * This should be called periodically.
      * This is used when there is more than one visible object and the best target might change as the robot moves.
      * When no objects are visible, the tracking resets to the best target the next time an object is visible.
      */
@@ -38,10 +39,12 @@ public class ObjectDetectionCamera extends SubsystemBase {
             trackedObjectYaw = getBestObjectYaw();
             return;
         }
+
         if (!hasTargets()) {
             trackedTargetWasVisible = false;
             return;
         }
+
         trackedObjectYaw = calculateTrackedObjectYaw();
     }
 

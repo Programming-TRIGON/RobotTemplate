@@ -17,6 +17,8 @@ import java.util.function.Supplier;
  */
 public class AutonomousCommands {
     /**
+     * Creates a command that resets the pose estimator's pose to the starting pose of the given autonomous as long as the robot is not enabled.
+     *
      * @param autoName the name of the autonomous
      * @return a command that resets the robot's pose estimator pose to the start position of the given autonomous
      */
@@ -27,7 +29,7 @@ public class AutonomousCommands {
                         return;
                     RobotContainer.POSE_ESTIMATOR.resetPose(getAutoStartPose(autoName.get()));
                 }
-        );
+        ).ignoringDisable(true);
     }
 
     /**

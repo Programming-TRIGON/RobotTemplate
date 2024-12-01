@@ -15,6 +15,9 @@ import org.trigon.utilities.mirrorable.Mirrorable;
 
 import java.io.IOException;
 
+/**
+ * A class that contains the constants for everything related to PathPlanner.
+ */
 public class PathPlannerConstants {
     public static final PathConstraints REAL_TIME_PATH_CONSTRAINTS = new PathConstraints(2.5, 2.5, 4, 4);
 
