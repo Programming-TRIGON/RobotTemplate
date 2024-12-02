@@ -7,21 +7,28 @@ package frc.trigon.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.trigon.robot.commands.Commands;
-import frc.trigon.robot.constants.CommandConstants;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.trigon.robot.commands.CommandConstants;
+import frc.trigon.robot.commands.commandfactories.GeneralCommands;
+import frc.trigon.robot.constants.LEDConstants;
 import frc.trigon.robot.constants.OperatorConstants;
+import frc.trigon.robot.constants.PathPlannerConstants;
 import frc.trigon.robot.poseestimation.poseestimator.PoseEstimator;
+import frc.trigon.robot.subsystems.MotorSubsystem;
 import frc.trigon.robot.subsystems.swerve.Swerve;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+import org.trigon.utilities.mirrorable.Mirrorable;
 
 public class RobotContainer {
-    public static final Swerve SWERVE = new Swerve();
     public static final PoseEstimator POSE_ESTIMATOR = new PoseEstimator();
+    public static final Swerve SWERVE = new Swerve();
     private LoggedDashboardChooser<Command> autoChooser;
 
     public RobotContainer() {
-        configureBindings();
+        initializeGeneralSystems();
         buildAutoChooser();
+        configureBindings();
     }
 
     /**
@@ -40,11 +47,31 @@ public class RobotContainer {
         SWERVE.setDefaultCommand(CommandConstants.FIELD_RELATIVE_DRIVE_COMMAND);
     }
 
+    /**
+     * Initializes the general systems of the robot.
+     * Some systems need to be initialized at the start of the robot code so that others can use their functions.
+     * For example, the LEDConstants need to be initialized so that the other systems can use them.
+     */
+    private void initializeGeneralSystems() {
+        Mirrorable.init();
+        LEDConstants.init();
+        PathPlannerConstants.init();
+    }
+
     private void bindControllerCommands() {
         OperatorConstants.RESET_HEADING_TRIGGER.onTrue(CommandConstants.RESET_HEADING_COMMAND);
+        OperatorConstants.SET_GYRO_HEADING_TO_SOLVE_PNP_HEADING_TRIGGER.onTrue(CommandConstants.SET_GYRO_HEADING_TO_SOLVE_PNP_HEADING_COMMAND);
         OperatorConstants.DRIVE_FROM_DPAD_TRIGGER.whileTrue(CommandConstants.SELF_RELATIVE_DRIVE_FROM_DPAD_COMMAND);
-        OperatorConstants.TOGGLE_FIELD_AND_SELF_RELATIVE_DRIVE_TRIGGER.onTrue(Commands.getToggleFieldAndSelfRelativeDriveCommand());
-        OperatorConstants.TOGGLE_BRAKE_TRIGGER.onTrue(Commands.getToggleBrakeCommand());
+        OperatorConstants.TOGGLE_FIELD_AND_SELF_RELATIVE_DRIVE_TRIGGER.onTrue(GeneralCommands.getToggleFieldAndSelfRelativeDriveCommand());
+        OperatorConstants.TOGGLE_BRAKE_TRIGGER.onTrue(GeneralCommands.getToggleBrakeCommand());
+    }
+
+    private void configureSysIdBindings(MotorSubsystem subsystem) {
+        OperatorConstants.FORWARD_QUASISTATIC_CHARACTERIZATION_TRIGGER.whileTrue(subsystem.getQuasistaticCharacterizationCommand(SysIdRoutine.Direction.kForward));
+        OperatorConstants.BACKWARD_QUASISTATIC_CHARACTERIZATION_TRIGGER.whileTrue(subsystem.getQuasistaticCharacterizationCommand(SysIdRoutine.Direction.kReverse));
+        OperatorConstants.FORWARD_DYNAMIC_CHARACTERIZATION_TRIGGER.whileTrue(subsystem.getQuasistaticCharacterizationCommand(SysIdRoutine.Direction.kForward));
+        OperatorConstants.BACKWARD_DYNAMIC_CHARACTERIZATION_TRIGGER.whileTrue(subsystem.getQuasistaticCharacterizationCommand(SysIdRoutine.Direction.kReverse));
+        subsystem.setDefaultCommand(Commands.idle(subsystem));
     }
 
     private void buildAutoChooser() {

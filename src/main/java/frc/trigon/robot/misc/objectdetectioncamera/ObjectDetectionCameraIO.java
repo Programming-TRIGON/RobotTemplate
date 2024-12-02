@@ -1,5 +1,6 @@
 package frc.trigon.robot.misc.objectdetectioncamera;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.AutoLog;
 
 public class ObjectDetectionCameraIO {
@@ -12,7 +13,9 @@ public class ObjectDetectionCameraIO {
     @AutoLog
     public static class ObjectDetectionCameraInputs {
         public boolean hasTargets = false;
-        public double bestObjectYaw = 0;
-        public double[] visibleObjectsYaw = new double[0];
+        /**
+         * An array that contains the yaw of all visible targets. The best target is first.
+         */
+        public Rotation2d[] visibleObjectsYaw = new Rotation2d[0];
     }
 }

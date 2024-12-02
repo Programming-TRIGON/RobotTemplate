@@ -2,8 +2,13 @@ package frc.trigon.robot.subsystems.swerve;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.signals.*;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.units.Units;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.trigon.hardware.RobotHardwareStats;
 import org.trigon.hardware.simulation.SimpleMotorSimulation;
 
@@ -18,13 +23,13 @@ public class SwerveModuleConstants {
             DRIVE_MOTOR_INVERTED_VALUE = InvertedValue.CounterClockwise_Positive,
             STEER_MOTOR_INVERTED_VALUE = InvertedValue.CounterClockwise_Positive;
     private static final SensorDirectionValue STEER_ENCODER_DIRECTION = SensorDirectionValue.CounterClockwise_Positive;
-    private static final AbsoluteSensorRangeValue STEER_ENCODER_RANGE = AbsoluteSensorRangeValue.Signed_PlusMinusHalf;
+    private static final double STEER_ENCODER_RANGE = 0.5;
     private static final NeutralModeValue
             DRIVE_MOTOR_NEUTRAL_MODE_VALUE = NeutralModeValue.Brake,
             STEER_MOTOR_NEUTRAL_MODE_VALUE = NeutralModeValue.Brake;
     private static final double
-            DRIVE_SLIP_CURRENT = RobotHardwareStats.isSimulation() ? 1000 : 100,
-            STEER_CURRENT_LIMIT = RobotHardwareStats.isSimulation() ? 1000 : 50;
+            DRIVE_SLIP_CURRENT = RobotHardwareStats.isSimulation() ? 1000 : 80,
+            STEER_CURRENT_LIMIT = RobotHardwareStats.isSimulation() ? 1000 : 30;
     private static final double
             STEER_MOTOR_P = RobotHardwareStats.isSimulation() ? 75 : 75,
             STEER_MOTOR_I = 0,
@@ -32,16 +37,19 @@ public class SwerveModuleConstants {
     private static final double
             DRIVE_MOTOR_P = RobotHardwareStats.isSimulation() ? 50 : 50,
             DRIVE_MOTOR_I = 0,
-            DRIVE_MOTOR_D = 0;
+            DRIVE_MOTOR_D = 0,
+            DRIVE_MOTOR_KS = RobotHardwareStats.isSimulation() ? 1 : 0,
+            DRIVE_MOTOR_KV = RobotHardwareStats.isSimulation() ? 1 : 0,
+            DRIVE_MOTOR_KA = RobotHardwareStats.isSimulation() ? 1 : 0;
     static final boolean ENABLE_FOC = true;
     static final TalonFXConfiguration
             DRIVE_MOTOR_CONFIGURATION = generateDriveConfiguration(),
             STEER_MOTOR_CONFIGURATION = generateSteerConfiguration();
-    static final CANcoderConfiguration STEER_ENCODER_CONFIGURATION = generateSteerEncoderConfiguration();
-
     private static final double
             DRIVE_MOMENT_OF_INERTIA = 0.03,
             STEER_MOMENT_OF_INERTIA = 0.003;
+    static final CANcoderConfiguration STEER_ENCODER_CONFIGURATION = generateSteerEncoderConfiguration();
+
     private static final int
             DRIVE_MOTOR_AMOUNT = 1,
             STEER_MOTOR_AMOUNT = 1;
@@ -49,7 +57,12 @@ public class SwerveModuleConstants {
             DRIVE_MOTOR_GEARBOX = DCMotor.getKrakenX60Foc(DRIVE_MOTOR_AMOUNT),
             STEER_MOTOR_GEARBOX = DCMotor.getFalcon500Foc(STEER_MOTOR_AMOUNT);
 
-    static final double WHEEL_DIAMETER_METERS = RobotHardwareStats.isSimulation() ? 0.1016 : 0.049149 * 2;
+    static final SysIdRoutine.Config DRIVE_MOTOR_SYSID_CONFIG = new SysIdRoutine.Config(
+            Units.Volts.of(5).per(Units.Second),
+            Units.Volts.of(8),
+            Units.Second.of(1000)
+    );
+
     static final double VOLTAGE_COMPENSATION_SATURATION = 12;
 
     static SimpleMotorSimulation createDriveSimulation() {
@@ -80,6 +93,9 @@ public class SwerveModuleConstants {
         config.Slot0.kP = DRIVE_MOTOR_P;
         config.Slot0.kI = DRIVE_MOTOR_I;
         config.Slot0.kD = DRIVE_MOTOR_D;
+        config.Slot0.kS = DRIVE_MOTOR_KS;
+        config.Slot0.kV = DRIVE_MOTOR_KV;
+        config.Slot0.kA = DRIVE_MOTOR_KA;
 
         return config;
     }
@@ -109,7 +125,7 @@ public class SwerveModuleConstants {
     private static CANcoderConfiguration generateSteerEncoderConfiguration() {
         final CANcoderConfiguration config = new CANcoderConfiguration();
 
-        config.MagnetSensor.AbsoluteSensorRange = STEER_ENCODER_RANGE;
+        config.MagnetSensor.AbsoluteSensorDiscontinuityPoint = STEER_ENCODER_RANGE;
         config.MagnetSensor.SensorDirection = STEER_ENCODER_DIRECTION;
 
         return config;

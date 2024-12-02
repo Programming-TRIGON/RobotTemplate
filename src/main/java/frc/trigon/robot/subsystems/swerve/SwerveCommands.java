@@ -1,11 +1,8 @@
 package frc.trigon.robot.subsystems.swerve;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.path.GoalEndState;
-import com.pathplanner.lib.path.PathConstraints;
-import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.path.*;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.trigon.robot.RobotContainer;
 import org.trigon.commands.InitExecuteCommand;
@@ -149,7 +146,7 @@ public class SwerveCommands {
 
     private static Command getPathfindToPoseCommand(MirrorablePose2d targetPose, PathConstraints pathConstraints) {
         final Pose2d targetMirroredPose = targetPose.get();
-        final Pose2d currentPose = RobotContainer.POSE_ESTIMATOR.getCurrentPose();
+        final Pose2d currentPose = RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose();
         if (currentPose.getTranslation().getDistance(targetMirroredPose.getTranslation()) < 0.35)
             return createOnTheFlyPathCommand(targetPose, pathConstraints);
         return AutoBuilder.pathfindToPose(targetMirroredPose, pathConstraints);
@@ -162,14 +159,15 @@ public class SwerveCommands {
     }
 
     private static Command createOnTheFlyPathCommand(MirrorablePose2d targetPose, PathConstraints constraints) {
-        List<Translation2d> bezierPoints = PathPlannerPath.bezierFromPoses(
-                RobotContainer.POSE_ESTIMATOR.getCurrentPose(),
+        List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
+                RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose(),
                 targetPose.get()
         );
 
         PathPlannerPath path = new PathPlannerPath(
-                bezierPoints,
+                waypoints,
                 constraints,
+                new IdealStartingState(0, SWERVE.getHeading()),
                 new GoalEndState(0, targetPose.get().getRotation())
         );
 

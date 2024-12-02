@@ -15,7 +15,6 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.interpolation.TimeInterpolatableBuffer;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveDriveWheelPositions;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
@@ -26,7 +25,7 @@ import java.util.NoSuchElementException;
 
 public class PoseEstimator6328 {
     public record OdometryObservation(
-            SwerveDriveWheelPositions wheelPositions, Rotation2d gyroAngle, double timestamp) {
+            SwerveModulePosition[] wheelPositions, Rotation2d gyroAngle, double timestamp) {
     }
 
     public record VisionObservation(Pose2d visionPose, double timestamp, Matrix<N3, N1> stdDevs) {
@@ -49,14 +48,13 @@ public class PoseEstimator6328 {
     private final Matrix<N3, N1> qStdDevs = new Matrix<>(Nat.N3(), Nat.N1());
     // Odometry
     private final SwerveDriveKinematics kinematics;
-    private SwerveDriveWheelPositions lastWheelPositions =
-            new SwerveDriveWheelPositions(
-                    new SwerveModulePosition[]{
-                            new SwerveModulePosition(),
-                            new SwerveModulePosition(),
-                            new SwerveModulePosition(),
-                            new SwerveModulePosition()
-                    });
+    private SwerveModulePosition[] lastWheelPositions =
+            new SwerveModulePosition[]{
+                    new SwerveModulePosition(),
+                    new SwerveModulePosition(),
+                    new SwerveModulePosition(),
+                    new SwerveModulePosition()
+            };
     private Rotation2d lastGyroAngle = new Rotation2d();
 
     private PoseEstimator6328() {
@@ -143,6 +141,19 @@ public class PoseEstimator6328 {
         // Recalculate current estimate by applying scaled transform to old estimate
         // then replaying odometry data
         estimatedPose = estimateAtTime.plus(scaledTransform).plus(sampleToOdometryTransform);
+    }
+
+    /**
+     * Gets the estimated pose of the robot at the target timestamp.
+     *
+     * @param timestamp the target timestamp
+     * @return the robot's estimated pose at the timestamp
+     */
+    public Pose2d samplePose(double timestamp) {
+        final Pose2d sample = poseBuffer.getSample(timestamp).orElse(new Pose2d());
+        final Transform2d odometryToSampleTransform = new Transform2d(odometryPose, sample);
+
+        return estimatedPose.plus(odometryToSampleTransform);
     }
 
     /**

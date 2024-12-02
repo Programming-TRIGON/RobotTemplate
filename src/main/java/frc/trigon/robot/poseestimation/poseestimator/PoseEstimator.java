@@ -1,20 +1,18 @@
 package frc.trigon.robot.poseestimation.poseestimator;
 
 import com.pathplanner.lib.util.PathPlannerLogging;
-import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.SwerveDriveWheelPositions;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.trigon.robot.RobotContainer;
-import frc.trigon.robot.poseestimation.robotposesources.RobotPoseSource;
-import frc.trigon.robot.poseestimation.robotposesources.RobotPoseSourceConstants;
+import frc.trigon.robot.constants.FieldConstants;
+import frc.trigon.robot.poseestimation.apriltagcamera.AprilTagCamera;
+import frc.trigon.robot.poseestimation.apriltagcamera.AprilTagCameraConstants;
 import org.littletonrobotics.junction.Logger;
+import org.trigon.hardware.RobotHardwareStats;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -26,22 +24,20 @@ import java.util.Map;
  */
 public class PoseEstimator implements AutoCloseable {
     private final Field2d field = new Field2d();
-    private final RobotPoseSource[] robotPoseSources;
+    private final AprilTagCamera[] aprilTagCameras;
     private final PoseEstimator6328 poseEstimator6328 = PoseEstimator6328.getInstance();
 
     /**
      * Constructs a new PoseEstimator.
      *
-     * @param robotPoseSources the sources that should update the pose estimator apart from the odometry. This should be cameras etc.
+     * @param aprilTagCameras the cameras that should be used to update the pose estimator.
      */
-    public PoseEstimator(RobotPoseSource... robotPoseSources) {
-        this.robotPoseSources = robotPoseSources;
+    public PoseEstimator(AprilTagCamera... aprilTagCameras) {
+        this.aprilTagCameras = aprilTagCameras;
         putAprilTagsOnFieldWidget();
         SmartDashboard.putData("Field", field);
-        PathPlannerLogging.setLogActivePathCallback((pose) -> {
-            field.getObject("path").setPoses(pose);
-            Logger.recordOutput("Path", pose.toArray(new Pose2d[0]));
-        });
+
+        logTargetPath();
     }
 
     @Override
@@ -51,7 +47,9 @@ public class PoseEstimator implements AutoCloseable {
 
     public void periodic() {
         updateFromVision();
-        field.setRobotPose(getCurrentPose());
+        field.setRobotPose(getCurrentEstimatedPose());
+        if (RobotHardwareStats.isSimulation())
+            AprilTagCameraConstants.VISION_SIMULATION.update(RobotContainer.POSE_ESTIMATOR.getCurrentOdometryPose());
     }
 
     /**
@@ -67,8 +65,15 @@ public class PoseEstimator implements AutoCloseable {
     /**
      * @return the estimated pose of the robot, relative to the blue alliance's driver station right corner
      */
-    public Pose2d getCurrentPose() {
+    public Pose2d getCurrentEstimatedPose() {
         return poseEstimator6328.getEstimatedPose();
+    }
+
+    /**
+     * @return the odometry's estimated pose of the robot, relative to the blue alliance's driver station right corner
+     */
+    public Pose2d getCurrentOdometryPose() {
+        return poseEstimator6328.getOdometryPose();
     }
 
     /**
@@ -79,9 +84,33 @@ public class PoseEstimator implements AutoCloseable {
      * @param swerveWheelPositions the SWERVE wheel positions accumulated since the last update
      * @param gyroRotations        the gyro rotations accumulated since the last update
      */
-    public void updatePoseEstimatorStates(SwerveDriveWheelPositions[] swerveWheelPositions, Rotation2d[] gyroRotations, double[] timestamps) {
+    public void updatePoseEstimatorStates(SwerveModulePosition[][] swerveWheelPositions, Rotation2d[] gyroRotations, double[] timestamps) {
         for (int i = 0; i < swerveWheelPositions.length; i++)
             poseEstimator6328.addOdometryObservation(new PoseEstimator6328.OdometryObservation(swerveWheelPositions[i], gyroRotations[i], timestamps[i]));
+    }
+
+    public void setGyroHeadingToBestSolvePNPHeading() {
+        if (aprilTagCameras.length == 0)
+            return;
+        int closestCameraToTag = 0;
+        for (int i = 0; i < aprilTagCameras.length; i++) {
+            if (aprilTagCameras[i].getDistanceToBestTagMeters() < aprilTagCameras[closestCameraToTag].getDistanceToBestTagMeters())
+                closestCameraToTag = i;
+        }
+
+        final Rotation2d bestRobotHeading = aprilTagCameras[closestCameraToTag].getSolvePNPHeading();
+        resetPose(new Pose2d(getCurrentEstimatedPose().getTranslation(), bestRobotHeading));
+    }
+
+    /**
+     * Logs and updates the field widget with the target PathPlanner path as an array of Pose2ds.
+     */
+    private void logTargetPath() {
+        PathPlannerLogging.setLogActivePathCallback((pathPoses) -> {
+            field.getObject("path").setPoses(pathPoses);
+            Logger.recordOutput("Path", pathPoses.toArray(new Pose2d[0]));
+        });
+        PathPlannerLogging.setLogTargetPoseCallback((pose) -> Logger.recordOutput("TargetPPPose", pose));
     }
 
     private void updateFromVision() {
@@ -92,38 +121,31 @@ public class PoseEstimator implements AutoCloseable {
 
     private List<PoseEstimator6328.VisionObservation> getViableVisionObservations() {
         List<PoseEstimator6328.VisionObservation> viableVisionObservations = new ArrayList<>();
-        for (RobotPoseSource robotPoseSource : robotPoseSources) {
-            final PoseEstimator6328.VisionObservation visionObservation = getVisionObservation(robotPoseSource);
+        for (AprilTagCamera aprilTagCamera : aprilTagCameras) {
+            final PoseEstimator6328.VisionObservation visionObservation = getVisionObservation(aprilTagCamera);
             if (visionObservation != null)
                 viableVisionObservations.add(visionObservation);
         }
         return viableVisionObservations;
     }
 
-    private PoseEstimator6328.VisionObservation getVisionObservation(RobotPoseSource robotPoseSource) {
-        robotPoseSource.update();
-        if (!robotPoseSource.hasNewResult())
+    private PoseEstimator6328.VisionObservation getVisionObservation(AprilTagCamera aprilTagCamera) {
+        aprilTagCamera.update();
+        if (!aprilTagCamera.hasNewResult())
             return null;
-        final Pose2d robotPose = robotPoseSource.getRobotPose();
-        if (robotPose == null)
+        final Pose2d robotPose = aprilTagCamera.getEstimatedRobotPose();
+        if (robotPose == null || robotPose.getTranslation() == null || robotPose.getRotation() == null)
             return null;
 
         return new PoseEstimator6328.VisionObservation(
                 robotPose,
-                robotPoseSource.getLastResultTimestamp(),
-                averageDistanceToStdDevs(robotPoseSource.getAverageDistanceFromTags(), robotPoseSource.getVisibleTags())
+                aprilTagCamera.getLatestResultTimestampSeconds(),
+                aprilTagCamera.calculateStandardDeviations()
         );
     }
 
-    private Matrix<N3, N1> averageDistanceToStdDevs(double averageDistance, int visibleTags) {
-        final double translationStd = PoseEstimatorConstants.TRANSLATIONS_STD_EXPONENT * Math.pow(averageDistance, 2) / (visibleTags * visibleTags);
-        final double thetaStd = PoseEstimatorConstants.THETA_STD_EXPONENT * Math.pow(averageDistance, 2) / visibleTags;
-
-        return VecBuilder.fill(translationStd, translationStd, thetaStd);
-    }
-
     private void putAprilTagsOnFieldWidget() {
-        for (Map.Entry<Integer, Pose3d> entry : RobotPoseSourceConstants.TAG_ID_TO_POSE.entrySet()) {
+        for (Map.Entry<Integer, Pose3d> entry : FieldConstants.TAG_ID_TO_POSE.entrySet()) {
             final Pose2d tagPose = entry.getValue().toPose2d();
             field.getObject("Tag " + entry.getKey()).setPose(tagPose);
         }

@@ -1,11 +1,14 @@
 package frc.trigon.robot.subsystems.swerve;
 
 import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.units.Units;
+import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import frc.trigon.robot.constants.RobotConstants;
 import frc.trigon.robot.poseestimation.poseestimator.PoseEstimatorConstants;
 import org.trigon.hardware.phoenix6.cancoder.CANcoderEncoder;
@@ -17,20 +20,34 @@ import org.trigon.utilities.Conversions;
 public class SwerveModule {
     private final TalonFXMotor driveMotor, steerMotor;
     private final CANcoderEncoder steerEncoder;
+    private final double wheelDiameterMeters;
     private final PositionVoltage steerPositionRequest = new PositionVoltage(0).withEnableFOC(SwerveModuleConstants.ENABLE_FOC);
     private final VelocityTorqueCurrentFOC driveVelocityRequest = new VelocityTorqueCurrentFOC(0);
     private final VoltageOut driveVoltageRequest = new VoltageOut(0);
+    private final TorqueCurrentFOC driveTorqueCurrentFOCRequest = new TorqueCurrentFOC(0);
     private boolean driveMotorClosedLoop = false;
     private double[]
             latestOdometryDrivePositions = new double[0],
             latestOdometrySteerPositions = new double[0];
     private SwerveModuleState targetState = new SwerveModuleState();
 
-    public SwerveModule(int moduleID, double offsetRotations) {
+    public SwerveModule(int moduleID, double offsetRotations, double wheelDiameterMeters) {
         driveMotor = new TalonFXMotor(moduleID, "Module" + moduleID + "Drive", RobotConstants.CANIVORE_NAME);
         steerMotor = new TalonFXMotor(moduleID + 4, "Module" + moduleID + "Steer", RobotConstants.CANIVORE_NAME);
-        steerEncoder = new CANcoderEncoder(moduleID, "Module" + moduleID + "SteerEncoder", RobotConstants.CANIVORE_NAME);
+        steerEncoder = new CANcoderEncoder(moduleID + 4, "Module" + moduleID + "SteerEncoder", RobotConstants.CANIVORE_NAME);
+        this.wheelDiameterMeters = wheelDiameterMeters;
         configureHardware(offsetRotations);
+    }
+
+    void setTargetDriveMotorCurrent(double targetCurrent) {
+        driveMotor.setControl(driveTorqueCurrentFOCRequest.withOutput(targetCurrent));
+    }
+
+    void udpateDriveMotorLog(SysIdRoutineLog log) {
+        log.motor("Module" + driveMotor.getID() + "Drive")
+                .angularPosition(Units.Rotations.of(driveMotor.getSignal(TalonFXSignal.POSITION)))
+                .angularVelocity(Units.RotationsPerSecond.of(driveMotor.getSignal(TalonFXSignal.VELOCITY)))
+                .voltage(Units.Volts.of(driveMotor.getSignal(TalonFXSignal.TORQUE_CURRENT)));
     }
 
     void stop() {
@@ -56,9 +73,37 @@ public class SwerveModule {
     }
 
     void setTargetState(SwerveModuleState targetState) {
-        this.targetState = SwerveModuleState.optimize(targetState, getCurrentAngle());
+        targetState.optimize(getCurrentAngle());
+        this.targetState = targetState;
         setTargetAngle(this.targetState.angle);
         setTargetVelocity(this.targetState.speedMetersPerSecond, this.targetState.angle);
+    }
+
+    /**
+     * Sets the target angle and speed of the module from a target module state for the angle, and a target current for the drive speed.
+     * This is used for PathPlanner to follow a path using feedforwards as well as chassisSpeeds.
+     *
+     * @param swerveModuleState the target module state. Only uses the angles
+     * @param targetCurrent     the target current of the drive motor
+     */
+    void setTargetState(SwerveModuleState swerveModuleState, double targetCurrent) {
+        final Rotation2d unoptimizedAngle = swerveModuleState.angle;
+        swerveModuleState.optimize(getCurrentAngle());
+        setTargetAngle(swerveModuleState.angle);
+
+        if (!swerveModuleState.angle.equals(unoptimizedAngle)) {
+            setTargetDriveMotorCurrent(-targetCurrent);
+            return;
+        }
+        setTargetDriveMotorCurrent(targetCurrent);
+    }
+
+    void setTargetAngle(Rotation2d angle) {
+        steerMotor.setControl(steerPositionRequest.withPosition(angle.getRotations()));
+    }
+
+    double getDriveWheelPosition() {
+        return edu.wpi.first.math.util.Units.rotationsToRadians(driveMotor.getSignal(TalonFXSignal.POSITION));
     }
 
     /**
@@ -88,11 +133,7 @@ public class SwerveModule {
     }
 
     private double driveRotationsToMeters(double rotations) {
-        return Conversions.rotationsToDistance(rotations, SwerveModuleConstants.WHEEL_DIAMETER_METERS);
-    }
-
-    private void setTargetAngle(Rotation2d angle) {
-        steerMotor.setControl(steerPositionRequest.withPosition(angle.getRotations()));
+        return Conversions.rotationsToDistance(rotations, wheelDiameterMeters);
     }
 
     /**
@@ -111,7 +152,7 @@ public class SwerveModule {
     }
 
     private void setTargetClosedLoopVelocity(double targetVelocityMetersPerSecond) {
-        final double targetVelocityRotationsPerSecond = Conversions.distanceToRotations(targetVelocityMetersPerSecond, SwerveModuleConstants.WHEEL_DIAMETER_METERS);
+        final double targetVelocityRotationsPerSecond = Conversions.distanceToRotations(targetVelocityMetersPerSecond, wheelDiameterMeters);
         driveMotor.setControl(driveVelocityRequest.withVelocity(targetVelocityRotationsPerSecond));
     }
 
@@ -155,11 +196,15 @@ public class SwerveModule {
     }
 
     private void configureSignals() {
-        driveMotor.registerThreadedSignal(TalonFXSignal.POSITION, TalonFXSignal.VELOCITY, PoseEstimatorConstants.ODOMETRY_FREQUENCY_HERTZ);
+        driveMotor.registerSignal(TalonFXSignal.VELOCITY, 100);
         driveMotor.registerSignal(TalonFXSignal.TORQUE_CURRENT, 100);
         driveMotor.registerSignal(TalonFXSignal.MOTOR_VOLTAGE, 100);
-        steerMotor.registerThreadedSignal(TalonFXSignal.POSITION, TalonFXSignal.VELOCITY, PoseEstimatorConstants.ODOMETRY_FREQUENCY_HERTZ);
+        driveMotor.registerThreadedSignal(TalonFXSignal.POSITION, PoseEstimatorConstants.ODOMETRY_FREQUENCY_HERTZ);
+
+        steerMotor.registerSignal(TalonFXSignal.VELOCITY, 100);
         steerMotor.registerSignal(TalonFXSignal.MOTOR_VOLTAGE, 100);
+        steerMotor.registerThreadedSignal(TalonFXSignal.POSITION, PoseEstimatorConstants.ODOMETRY_FREQUENCY_HERTZ);
+
         steerEncoder.registerSignal(CANcoderSignal.POSITION, 100);
         steerEncoder.registerSignal(CANcoderSignal.VELOCITY, 100);
     }
