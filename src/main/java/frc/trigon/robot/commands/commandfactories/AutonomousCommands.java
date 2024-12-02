@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.function.Supplier;
 
 /**
- * A class that contains command factories for commands that are used during the 15-second autonomous period at the start of each match.
+ * A class that contains command factories for preparation commands and commands used during the 15-second autonomous period at the start of each match.
  */
 public class AutonomousCommands {
     /**

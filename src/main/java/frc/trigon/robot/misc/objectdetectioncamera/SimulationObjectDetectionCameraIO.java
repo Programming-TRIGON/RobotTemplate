@@ -34,9 +34,9 @@ public class SimulationObjectDetectionCameraIO extends ObjectDetectionCameraIO {
     @Override
     protected void updateInputs(ObjectDetectionCameraInputsAutoLogged inputs) {
         final Rotation2d closestObjectYaw = calculateClosestVisibleObjectYaw(RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose());
-        if (closestObjectYaw == null) {
+        if (closestObjectYaw == null)
             inputs.hasTargets = false;
-        } else {
+        else {
             inputs.hasTargets = true;
             inputs.visibleObjectsYaw = new Rotation2d[]{closestObjectYaw};
         }
