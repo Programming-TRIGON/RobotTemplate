@@ -1,13 +1,9 @@
 package frc.trigon.robot.poseestimation.apriltagcamera;
 
-import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.*;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.constants.FieldConstants;
-import frc.trigon.robot.poseestimation.poseestimator.PoseEstimator6328;
+import frc.trigon.robot.poseestimation.poseestimator.SwervePoseEstimator;
 import org.littletonrobotics.junction.Logger;
 import org.trigon.hardware.RobotHardwareStats;
 
@@ -86,11 +82,11 @@ public class AprilTagCamera {
      *
      * @return the standard deviations for the pose estimation strategy used
      */
-    public Matrix<N3, N1> calculateStandardDeviations() {
+    public double[] calculateStandardDeviations() {
         final double translationStandardDeviation = calculateStandardDeviations(translationStandardDeviationExponent, inputs.distanceFromBestTag, inputs.visibleTagIDs.length);
         final double thetaStandardDeviation = isWithinBestTagRangeForSolvePNP() ? calculateStandardDeviations(thetaStandardDeviationExponent, inputs.distanceFromBestTag, inputs.visibleTagIDs.length) : Double.POSITIVE_INFINITY;
 
-        return VecBuilder.fill(translationStandardDeviation, translationStandardDeviation, thetaStandardDeviation);
+        return new double[]{translationStandardDeviation, translationStandardDeviation, thetaStandardDeviation};
     }
 
     public double getDistanceToBestTagMeters() {
@@ -106,7 +102,7 @@ public class AprilTagCamera {
      * @return the robot's pose
      */
     private Pose2d calculateBestRobotPose() {
-        final Rotation2d gyroHeadingAtTimestamp = RobotHardwareStats.isSimulation() ? RobotContainer.POSE_ESTIMATOR.getCurrentOdometryPose().getRotation() : PoseEstimator6328.getInstance().samplePose(inputs.latestResultTimestampSeconds).getRotation();
+        final Rotation2d gyroHeadingAtTimestamp = RobotHardwareStats.isSimulation() ? RobotContainer.POSE_ESTIMATOR.getCurrentOdometryPose().getRotation() : SwervePoseEstimator.getInstance().samplePose(inputs.latestResultTimestampSeconds).getRotation();
         return calculateAssumedRobotHeadingPose(gyroHeadingAtTimestamp);
     }
 
