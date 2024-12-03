@@ -24,7 +24,9 @@ public class SwervePoseEstimator {
     private static SwervePoseEstimator instance;
 
     public static SwervePoseEstimator getInstance() {
-        return instance == null ? getInstance() : instance;
+        if (instance == null)
+            instance = new SwervePoseEstimator();
+        return instance;
     }
 
     public void addOdometryObservation(OdometryObservation observation) {
