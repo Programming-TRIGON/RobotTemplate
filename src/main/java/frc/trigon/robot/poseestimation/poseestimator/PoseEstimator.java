@@ -25,7 +25,7 @@ import java.util.Map;
 public class PoseEstimator implements AutoCloseable {
     private final Field2d field = new Field2d();
     private final AprilTagCamera[] aprilTagCameras;
-    private final PoseEstimator6328 poseEstimator6328 = PoseEstimator6328.getInstance();
+    private final CorePoseEstimator corePoseEstimator = CorePoseEstimator.getInstance();
 
     /**
      * Constructs a new PoseEstimator.
@@ -59,21 +59,21 @@ public class PoseEstimator implements AutoCloseable {
      */
     public void resetPose(Pose2d currentPose) {
         RobotContainer.SWERVE.setHeading(currentPose.getRotation());
-        poseEstimator6328.resetPose(currentPose);
+        corePoseEstimator.resetPose(currentPose);
     }
 
     /**
      * @return the estimated pose of the robot, relative to the blue alliance's driver station right corner
      */
     public Pose2d getCurrentEstimatedPose() {
-        return poseEstimator6328.getEstimatedPose();
+        return corePoseEstimator.getEstimatedPose();
     }
 
     /**
      * @return the odometry's estimated pose of the robot, relative to the blue alliance's driver station right corner
      */
     public Pose2d getCurrentOdometryPose() {
-        return poseEstimator6328.getOdometryPose();
+        return corePoseEstimator.getOdometryPose();
     }
 
     /**
@@ -86,7 +86,7 @@ public class PoseEstimator implements AutoCloseable {
      */
     public void updatePoseEstimatorStates(SwerveModulePosition[][] swerveWheelPositions, Rotation2d[] gyroRotations, double[] timestamps) {
         for (int i = 0; i < swerveWheelPositions.length; i++)
-            poseEstimator6328.addOdometryObservation(new PoseEstimator6328.OdometryObservation(swerveWheelPositions[i], gyroRotations[i], timestamps[i]));
+            corePoseEstimator.updateEstimatedOdometryPose(new CorePoseEstimator.OdometryEstimatedPose(swerveWheelPositions[i], gyroRotations[i], timestamps[i]));
     }
 
     public void setGyroHeadingToBestSolvePNPHeading() {
@@ -115,21 +115,21 @@ public class PoseEstimator implements AutoCloseable {
 
     private void updateFromVision() {
         getViableVisionObservations().stream()
-                .sorted(Comparator.comparingDouble(PoseEstimator6328.VisionObservation::timestamp))
-                .forEach(poseEstimator6328::addVisionObservation);
+                .sorted(Comparator.comparingDouble(CorePoseEstimator.VisionEstimatedPose::timestamp))
+                .forEach(corePoseEstimator::updateEstimatedVisionPose);
     }
 
-    private List<PoseEstimator6328.VisionObservation> getViableVisionObservations() {
-        List<PoseEstimator6328.VisionObservation> viableVisionObservations = new ArrayList<>();
+    private List<CorePoseEstimator.VisionEstimatedPose> getViableVisionObservations() {
+        List<CorePoseEstimator.VisionEstimatedPose> viableVisionObservations = new ArrayList<>();
         for (AprilTagCamera aprilTagCamera : aprilTagCameras) {
-            final PoseEstimator6328.VisionObservation visionObservation = getVisionObservation(aprilTagCamera);
+            final CorePoseEstimator.VisionEstimatedPose visionObservation = getVisionObservation(aprilTagCamera);
             if (visionObservation != null)
                 viableVisionObservations.add(visionObservation);
         }
         return viableVisionObservations;
     }
 
-    private PoseEstimator6328.VisionObservation getVisionObservation(AprilTagCamera aprilTagCamera) {
+    private CorePoseEstimator.VisionEstimatedPose getVisionObservation(AprilTagCamera aprilTagCamera) {
         aprilTagCamera.update();
         if (!aprilTagCamera.hasNewResult())
             return null;
@@ -137,7 +137,7 @@ public class PoseEstimator implements AutoCloseable {
         if (robotPose == null || robotPose.getTranslation() == null || robotPose.getRotation() == null)
             return null;
 
-        return new PoseEstimator6328.VisionObservation(
+        return new CorePoseEstimator.VisionEstimatedPose(
                 robotPose,
                 aprilTagCamera.getLatestResultTimestampSeconds(),
                 aprilTagCamera.calculateStandardDeviations()
