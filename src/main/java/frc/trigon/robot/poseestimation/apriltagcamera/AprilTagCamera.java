@@ -3,8 +3,8 @@ package frc.trigon.robot.poseestimation.apriltagcamera;
 import edu.wpi.first.math.geometry.*;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.constants.FieldConstants;
+import frc.trigon.robot.poseestimation.poseestimator.PoseEstimator;
 import frc.trigon.robot.poseestimation.poseestimator.PoseEstimatorConstants;
-import frc.trigon.robot.poseestimation.poseestimator.SwervePoseEstimator;
 import org.littletonrobotics.junction.Logger;
 import org.trigon.hardware.RobotHardwareStats;
 
@@ -103,7 +103,7 @@ public class AprilTagCamera {
      * @return the robot's pose
      */
     private Pose2d calculateBestRobotPose() {
-        final Rotation2d gyroHeadingAtTimestamp = RobotHardwareStats.isSimulation() ? RobotContainer.POSE_ESTIMATOR.getCurrentOdometryPose().getRotation() : SwervePoseEstimator.getInstance().samplePose(inputs.latestResultTimestampSeconds).getRotation();
+        final Rotation2d gyroHeadingAtTimestamp = RobotHardwareStats.isSimulation() ? RobotContainer.POSE_ESTIMATOR.getCurrentOdometryPose().getRotation() : PoseEstimator.getInstance().samplePose(inputs.latestResultTimestampSeconds).getRotation();
         return calculateAssumedRobotHeadingPose(gyroHeadingAtTimestamp);
     }
 
