@@ -32,8 +32,9 @@ public class CorePoseEstimator {
     private final SwerveDriveKinematics swerveDriveKinematics;
     private SwerveModulePosition[] lastWheelPositions = new SwerveModulePosition[4];
     private Rotation2d lastGyroYaw = new Rotation2d();
-    private Pose2d odometryPose = new Pose2d();
-    private Pose2d estimatedPose = new Pose2d();
+    private Pose2d
+            odometryPose = new Pose2d(),
+            estimatedPose = new Pose2d();
 
     private CorePoseEstimator() {
         for (int i = 0; i < standardDeviations.getNumRows(); i++)
@@ -44,39 +45,39 @@ public class CorePoseEstimator {
     /**
      * Updates the estimated pose of the robot based on the odometry position.
      *
-     * @param currentOdometryPosition the odometry position to update the estimated pose with
+     * @param currentOdometryPose the odometry position to update the estimated pose with
      */
-    public void updateEstimatedOdometryPose(OdometryEstimatedPose currentOdometryPosition) {
-        final Twist2d odometryTwist = swerveDriveKinematics.toTwist2d(lastWheelPositions, currentOdometryPosition.wheelPositions());
-        lastWheelPositions = currentOdometryPosition.wheelPositions();
+    public void updateEstimatedOdometryPose(OdometryEstimatedPose currentOdometryPose) {
+        final Twist2d odometryTwist = swerveDriveKinematics.toTwist2d(lastWheelPositions, currentOdometryPose.wheelPositions());
+        lastWheelPositions = currentOdometryPose.wheelPositions();
 
-        if (currentOdometryPosition.gyroYaw() != null) {
-            odometryTwist.dtheta = currentOdometryPosition.gyroYaw().minus(lastGyroYaw).getRadians();
-            lastGyroYaw = currentOdometryPosition.gyroYaw();
+        if (currentOdometryPose.gyroYaw() != null) {
+            odometryTwist.dtheta = currentOdometryPose.gyroYaw().minus(lastGyroYaw).getRadians();
+            lastGyroYaw = currentOdometryPose.gyroYaw();
         }
 
         odometryPose = odometryPose.exp(odometryTwist);
         estimatedPose = estimatedPose.exp(odometryTwist);
-        poseBuffer.addSample(currentOdometryPosition.timestamp(), odometryPose);
+        poseBuffer.addSample(currentOdometryPose.timestamp(), odometryPose);
     }
 
     /**
      * Update the estimated pose of the robot based on the vision position.
      *
-     * @param currentVisionPosition the vision position to update the estimated pose with
+     * @param currentVisionPose the vision position to update the estimated pose with
      */
-    public void updateEstimatedVisionPose(VisionEstimatedPose currentVisionPosition) {
-        if (!isPositionInBufferRange(currentVisionPosition.timestamp()))
+    public void updateEstimatedVisionPose(VisionEstimatedPose currentVisionPose) {
+        if (!isPositionInBufferRange(currentVisionPose.timestamp()))
             return;
 
-        final Optional<Pose2d> currentPose = poseBuffer.getSample(currentVisionPosition.timestamp());
+        final Optional<Pose2d> currentPose = poseBuffer.getSample(currentVisionPose.timestamp());
         if (currentPose.isEmpty())
             return;
 
         final Matrix<N3, N3> visionKalmanGains = getVisionKalmanGains();
         final Transform2d currentPoseToOdometryPose = new Transform2d(currentPose.get(), odometryPose);
         final Pose2d currentEstimatedPose = estimatedPose.plus(currentPoseToOdometryPose.inverse());
-        final Transform2d estimatedPoseToVisionPose = new Transform2d(currentEstimatedPose, currentVisionPosition.visionPosition());
+        final Transform2d estimatedPoseToVisionPose = new Transform2d(currentEstimatedPose, currentVisionPose.visionPosition());
         final Matrix<N3, N1> visionCorrectionMatrix = visionKalmanGains.times(VecBuilder.fill(estimatedPoseToVisionPose.getX(), estimatedPoseToVisionPose.getY(), estimatedPoseToVisionPose.getRotation().getRadians()));
         Transform2d scaledEstimatedPoseToVisionPose = new Transform2d(visionCorrectionMatrix.get(0, 0), visionCorrectionMatrix.get(1, 0), Rotation2d.fromRadians(visionCorrectionMatrix.get(2, 0)));
         estimatedPose = estimatedPose.plus(scaledEstimatedPoseToVisionPose).plus(currentPoseToOdometryPose);
