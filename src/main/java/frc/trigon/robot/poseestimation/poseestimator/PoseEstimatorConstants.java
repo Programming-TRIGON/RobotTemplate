@@ -14,5 +14,5 @@ public class PoseEstimatorConstants {
      * Increase these numbers to trust the estimate less.
      */
     static final Vector<N3> ODOMETRY_AMBIGUITY = VecBuilder.fill(0.003, 0.003, 0.0002);
+    static final double POSE_BUFFER_SIZE_SECONDS = 2.0;
 }
-

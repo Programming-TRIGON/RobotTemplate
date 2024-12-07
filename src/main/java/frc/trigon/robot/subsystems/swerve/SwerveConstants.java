@@ -18,7 +18,7 @@ import java.util.function.DoubleSupplier;
 
 public class SwerveConstants {
     private static final int PIGEON_ID = 0;
-    static final Pigeon2Gyro GYRO = new Pigeon2Gyro(PIGEON_ID, "SwerveGyro", RobotConstants.CANIVORE_NAME);
+    public static final Pigeon2Gyro GYRO = new Pigeon2Gyro(PIGEON_ID, "SwerveGyro", RobotConstants.CANIVORE_NAME);
     private static final double
             GYRO_MOUNT_POSITION_YAW = 0,
             GYRO_MOUNT_POSITION_PITCH = 0,
