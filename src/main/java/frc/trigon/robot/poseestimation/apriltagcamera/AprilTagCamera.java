@@ -3,6 +3,7 @@ package frc.trigon.robot.poseestimation.apriltagcamera;
 import edu.wpi.first.math.geometry.*;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.constants.FieldConstants;
+import frc.trigon.robot.poseestimation.poseestimator.PoseEstimatorConstants;
 import frc.trigon.robot.poseestimation.poseestimator.SwervePoseEstimator;
 import org.littletonrobotics.junction.Logger;
 import org.trigon.hardware.RobotHardwareStats;
@@ -82,11 +83,11 @@ public class AprilTagCamera {
      *
      * @return the standard deviations for the pose estimation strategy used
      */
-    public double[] calculateStandardDeviations() {
+    public PoseEstimatorConstants.StandardDeviations calculateStandardDeviations() {
         final double translationStandardDeviation = calculateStandardDeviations(translationStandardDeviationExponent, inputs.distanceFromBestTag, inputs.visibleTagIDs.length);
         final double thetaStandardDeviation = isWithinBestTagRangeForSolvePNP() ? calculateStandardDeviations(thetaStandardDeviationExponent, inputs.distanceFromBestTag, inputs.visibleTagIDs.length) : Double.POSITIVE_INFINITY;
 
-        return new double[]{translationStandardDeviation, translationStandardDeviation, thetaStandardDeviation};
+        return new PoseEstimatorConstants.StandardDeviations(translationStandardDeviation, thetaStandardDeviation);
     }
 
     public double getDistanceToBestTagMeters() {

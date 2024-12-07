@@ -14,9 +14,6 @@ import frc.trigon.robot.poseestimation.apriltagcamera.AprilTagCameraConstants;
 import org.littletonrobotics.junction.Logger;
 import org.trigon.hardware.RobotHardwareStats;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -86,7 +83,7 @@ public class PoseEstimator implements AutoCloseable {
      */
     public void updatePoseEstimatorStates(SwerveModulePosition[][] swerveWheelPositions, Rotation2d[] gyroRotations, double[] timestamps) {
         for (int i = 0; i < swerveWheelPositions.length; i++)
-            swervePoseEstimator.addOdometryObservation(new SwervePoseEstimator.OdometryObservation(swerveWheelPositions[i], gyroRotations[i], timestamps[i]));
+            swervePoseEstimator.addOdometryObservation(swerveWheelPositions[i], gyroRotations[i], timestamps[i]);
     }
 
     public void setGyroHeadingToBestSolvePNPHeading() {
@@ -114,34 +111,39 @@ public class PoseEstimator implements AutoCloseable {
     }
 
     private void updateFromVision() {
-        getViableVisionObservations().stream()
-                .sorted(Comparator.comparingDouble(SwervePoseEstimator.VisionObservation::timestamp))
-                .forEach(swervePoseEstimator::addVisionObservation);
+        updateAllCameras();
+        sortCamerasByLastTargetTimestamp();
+        addVisionObservations();
     }
 
-    private List<SwervePoseEstimator.VisionObservation> getViableVisionObservations() {
-        List<SwervePoseEstimator.VisionObservation> viableVisionObservations = new ArrayList<>();
+    private void updateAllCameras() {
         for (AprilTagCamera aprilTagCamera : aprilTagCameras) {
-            final SwervePoseEstimator.VisionObservation visionObservation = getVisionObservation(aprilTagCamera);
-            if (visionObservation != null)
-                viableVisionObservations.add(visionObservation);
+            aprilTagCamera.update();
         }
-        return viableVisionObservations;
     }
 
-    private SwervePoseEstimator.VisionObservation getVisionObservation(AprilTagCamera aprilTagCamera) {
-        aprilTagCamera.update();
-        if (!aprilTagCamera.hasNewResult())
-            return null;
+    private void sortCamerasByLastTargetTimestamp() {
+        VisionObservationSorter.quickSortByDoubleValue(aprilTagCameras, (aprilTagCamera) -> ((AprilTagCamera) aprilTagCamera).getLatestResultTimestampSeconds());
+    }
+
+    private void addVisionObservations() {
+        for (AprilTagCamera aprilTagCamera : aprilTagCameras) {
+            if (!aprilTagCamera.hasNewResult())
+                continue;
+
+            swervePoseEstimator.addVisionObservation(
+                    getCameraEstimatedPose(aprilTagCamera),
+                    aprilTagCamera.calculateStandardDeviations(),
+                    aprilTagCamera.getLatestResultTimestampSeconds()
+            );
+        }
+    }
+
+    private Pose2d getCameraEstimatedPose(AprilTagCamera aprilTagCamera) {
         final Pose2d robotPose = aprilTagCamera.getEstimatedRobotPose();
         if (robotPose == null || robotPose.getTranslation() == null || robotPose.getRotation() == null)
             return null;
-
-        return new SwervePoseEstimator.VisionObservation(
-                robotPose,
-                aprilTagCamera.getLatestResultTimestampSeconds(),
-                aprilTagCamera.calculateStandardDeviations()
-        );
+        return robotPose;
     }
 
     private void putAprilTagsOnFieldWidget() {

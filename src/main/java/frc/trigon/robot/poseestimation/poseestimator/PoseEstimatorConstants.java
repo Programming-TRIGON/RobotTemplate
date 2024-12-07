@@ -5,12 +5,17 @@ public class PoseEstimatorConstants {
 
     static final double POSE_BUFFER_SIZE_SECONDS = 2;
 
+    static final StandardDeviations ODOMETRY_STANDARD_DEVIATIONS = new StandardDeviations(0.003, 0.0002);
+
+
     /**
-     * Each number represents how ambiguous a value of the odometry is.
-     * The first number represents how ambiguous the x is,
-     * the second one is for the y, and the third one is for the theta (rotation).
-     * The greater these numbers are, the less we trust the estimation.
+     * A record that stores how ambiguous the odometry is.
+     * The greater the number, the less trustworthy the estimated pose is.
+     *
+     * @param translation the ambiguity of the translation
+     * @param theta       the ambiguity of the rotation
      */
-    static final double[] AMBIGUITY = {0.003, 0.003, 0.0002};
+    public record StandardDeviations(double translation, double theta) {
+    }
 }
 
