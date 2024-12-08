@@ -139,7 +139,7 @@ public class PoseEstimator implements AutoCloseable {
         if (currentPose.isEmpty())
             return;
 
-        final Matrix<N3, N3> visionKalmanGains = getVisionKalmanGains();
+        final Matrix<N3, N3> visionKalmanGains = getVisionKalmanGains(currentVisionPose.standardDeviations());
         final Transform2d currentPoseToOdometryPose = new Transform2d(currentPose.get(), odometryPose);
         final Pose2d currentEstimatedPose = estimatedPose.plus(currentPoseToOdometryPose.inverse());
         final Transform2d estimatedPoseToVisionPose = new Transform2d(currentEstimatedPose, currentVisionPose.visionPosition());
@@ -236,7 +236,7 @@ public class PoseEstimator implements AutoCloseable {
         return true;
     }
 
-    private Matrix<N3, N3> getVisionKalmanGains() {
+    private Matrix<N3, N3> getVisionKalmanGains(Matrix<N3, N1> standardDeviations) {
         final double[] noiseMeasurements = getNoiseMeasurements(standardDeviations);
         final Matrix<N3, N3> visionKalmanGains = new Matrix<>(Nat.N3(), Nat.N3());
         for (int row = 0; row < visionKalmanGains.getNumRows(); row++) {
