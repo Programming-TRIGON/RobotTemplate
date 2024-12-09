@@ -100,7 +100,7 @@ dependencies {
     simulationRelease wpi.sim.enableRelease()
 
     implementation 'com.google.code.gson:gson:2.10.1'
-    implementation 'com.github.Programming-TRIGON:TRIGONLib:update-advantage-kit-SNAPSHOT'
+    implementation 'com.github.Programming-TRIGON:TRIGONLib:v2025.0.1'
 
     def akitJson = new groovy.json.JsonSlurper().parseText(new File(projectDir.getAbsolutePath() + "/vendordeps/AdvantageKit.json").text)
     annotationProcessor "org.littletonrobotics.akit:akit-autolog:$akitJson.version"
