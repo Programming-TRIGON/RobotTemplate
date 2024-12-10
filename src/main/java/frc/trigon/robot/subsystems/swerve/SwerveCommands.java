@@ -1,22 +1,14 @@
 package frc.trigon.robot.subsystems.swerve;
 
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.path.*;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.wpilibj2.command.*;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.trigon.robot.RobotContainer;
 import org.trigon.commands.InitExecuteCommand;
-import org.trigon.utilities.mirrorable.MirrorablePose2d;
 import org.trigon.utilities.mirrorable.MirrorableRotation2d;
 
-import java.util.List;
-import java.util.Set;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 public class SwerveCommands {
-    private static final Swerve SWERVE = RobotContainer.SWERVE;
-
     /**
      * Creates a command that drives the swerve with the given powers, relative to the field's frame of reference, in closed loop mode.
      *
@@ -27,9 +19,9 @@ public class SwerveCommands {
      */
     public static Command getClosedLoopFieldRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier thetaSupplier) {
         return new InitExecuteCommand(
-                () -> SWERVE.initializeDrive(true),
-                () -> SWERVE.fieldRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), thetaSupplier.getAsDouble()),
-                SWERVE
+                () -> RobotContainer.SWERVE.initializeDrive(true),
+                () -> RobotContainer.SWERVE.fieldRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), thetaSupplier.getAsDouble()),
+                RobotContainer.SWERVE
         );
     }
 
@@ -44,14 +36,14 @@ public class SwerveCommands {
      */
     public static Command getClosedLoopFieldRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, Supplier<MirrorableRotation2d> angleSupplier) {
         return new InitExecuteCommand(
-                () -> SWERVE.initializeDrive(true),
-                () -> SWERVE.fieldRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), angleSupplier.get()),
-                SWERVE
+                () -> RobotContainer.SWERVE.initializeDrive(true),
+                () -> RobotContainer.SWERVE.fieldRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), angleSupplier.get()),
+                RobotContainer.SWERVE
         );
     }
 
     /**
-     * Creates a command that drives the swerve with the given powers, relative to the field's frame of reference, in closed open mode.
+     * Creates a command that drives the swerve with the given powers, relative to the field's frame of reference, in closed loop mode.
      *
      * @param xSupplier     the target forwards power
      * @param ySupplier     the target leftwards power
@@ -60,9 +52,9 @@ public class SwerveCommands {
      */
     public static Command getOpenLoopFieldRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier thetaSupplier) {
         return new InitExecuteCommand(
-                () -> SWERVE.initializeDrive(false),
-                () -> SWERVE.fieldRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), thetaSupplier.getAsDouble()),
-                SWERVE
+                () -> RobotContainer.SWERVE.initializeDrive(false),
+                () -> RobotContainer.SWERVE.fieldRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), thetaSupplier.getAsDouble()),
+                RobotContainer.SWERVE
         );
     }
 
@@ -77,9 +69,9 @@ public class SwerveCommands {
      */
     public static Command getOpenLoopFieldRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, Supplier<MirrorableRotation2d> angleSupplier) {
         return new InitExecuteCommand(
-                () -> SWERVE.initializeDrive(false),
-                () -> SWERVE.fieldRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), angleSupplier.get()),
-                SWERVE
+                () -> RobotContainer.SWERVE.initializeDrive(false),
+                () -> RobotContainer.SWERVE.fieldRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), angleSupplier.get()),
+                RobotContainer.SWERVE
         );
     }
 
@@ -93,9 +85,9 @@ public class SwerveCommands {
      */
     public static Command getClosedLoopSelfRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier thetaSupplier) {
         return new InitExecuteCommand(
-                () -> SWERVE.initializeDrive(true),
-                () -> SWERVE.selfRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), thetaSupplier.getAsDouble()),
-                SWERVE
+                () -> RobotContainer.SWERVE.initializeDrive(true),
+                () -> RobotContainer.SWERVE.selfRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), thetaSupplier.getAsDouble()),
+                RobotContainer.SWERVE
         );
     }
 
@@ -110,9 +102,9 @@ public class SwerveCommands {
      */
     public static Command getClosedLoopSelfRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, Supplier<MirrorableRotation2d> angleSupplier) {
         return new InitExecuteCommand(
-                () -> SWERVE.initializeDrive(true),
-                () -> SWERVE.selfRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), angleSupplier.get()),
-                SWERVE
+                () -> RobotContainer.SWERVE.initializeDrive(true),
+                () -> RobotContainer.SWERVE.selfRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), angleSupplier.get()),
+                RobotContainer.SWERVE
         );
     }
 
@@ -126,53 +118,9 @@ public class SwerveCommands {
      */
     public static Command getOpenLoopSelfRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier thetaSupplier) {
         return new InitExecuteCommand(
-                () -> SWERVE.initializeDrive(false),
-                () -> SWERVE.selfRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), thetaSupplier.getAsDouble()),
-                SWERVE
+                () -> RobotContainer.SWERVE.initializeDrive(false),
+                () -> RobotContainer.SWERVE.selfRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), thetaSupplier.getAsDouble()),
+                RobotContainer.SWERVE
         );
-    }
-
-    public static Command getDriveToPoseCommand(Supplier<MirrorablePose2d> targetPose, PathConstraints constraints) {
-        return new DeferredCommand(() -> getCurrentDriveToPoseCommand(targetPose.get(), constraints), Set.of(SWERVE));
-    }
-
-    private static Command getCurrentDriveToPoseCommand(MirrorablePose2d targetPose, PathConstraints constraints) {
-        return new SequentialCommandGroup(
-                new InstantCommand(() -> SWERVE.initializeDrive(true)),
-                getPathfindToPoseCommand(targetPose, constraints),
-                getPIDToPoseCommand(targetPose)
-        );
-    }
-
-    private static Command getPathfindToPoseCommand(MirrorablePose2d targetPose, PathConstraints pathConstraints) {
-        final Pose2d targetMirroredPose = targetPose.get();
-        final Pose2d currentPose = RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose();
-        if (currentPose.getTranslation().getDistance(targetMirroredPose.getTranslation()) < 0.35)
-            return createOnTheFlyPathCommand(targetPose, pathConstraints);
-        return AutoBuilder.pathfindToPose(targetMirroredPose, pathConstraints);
-    }
-
-    private static Command getPIDToPoseCommand(MirrorablePose2d targetPose) {
-        return new InstantCommand(SWERVE::resetRotationController)
-                .andThen(new RunCommand(() -> SWERVE.pidToPose(targetPose))
-                        .until(() -> SWERVE.atPose(targetPose)));
-    }
-
-    private static Command createOnTheFlyPathCommand(MirrorablePose2d targetPose, PathConstraints constraints) {
-        List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
-                RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose(),
-                targetPose.get()
-        );
-
-        PathPlannerPath path = new PathPlannerPath(
-                waypoints,
-                constraints,
-                new IdealStartingState(0, SWERVE.getHeading()),
-                new GoalEndState(0, targetPose.get().getRotation())
-        );
-
-        path.preventFlipping = true;
-
-        return AutoBuilder.followPath(path);
     }
 }
