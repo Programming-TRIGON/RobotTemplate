@@ -7,9 +7,9 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.constants.RobotConstants;
 import frc.trigon.robot.poseestimation.poseestimator.PoseEstimatorConstants;
+import frc.trigon.robot.subsystems.swerve.swervemodule.SwerveModule;
 import org.trigon.hardware.RobotHardwareStats;
 import org.trigon.hardware.phoenix6.pigeon2.Pigeon2Gyro;
 import org.trigon.hardware.phoenix6.pigeon2.Pigeon2Signal;
@@ -17,6 +17,10 @@ import org.trigon.hardware.phoenix6.pigeon2.Pigeon2Signal;
 import java.util.function.DoubleSupplier;
 
 public class SwerveConstants {
+    public static final double
+            MAXIMUM_SPEED_METERS_PER_SECOND = RobotHardwareStats.isSimulation() ? 4.9 : 4.04502,
+            MAXIMUM_ROTATIONAL_SPEED_RADIANS_PER_SECOND = RobotHardwareStats.isSimulation() ? 12.03 : 12.03;
+
     private static final int PIGEON_ID = 0;
     static final Pigeon2Gyro GYRO = new Pigeon2Gyro(PIGEON_ID, "SwerveGyro", RobotConstants.CANIVORE_NAME);
     private static final double
@@ -45,8 +49,7 @@ public class SwerveConstants {
             new SwerveModule(REAR_RIGHT_ID, REAR_RIGHT_STEER_ENCODER_OFFSET, REAR_RIGHT_WHEEL_DIAMETER_METERS)
     };
 
-    private static final DoubleSupplier SIMULATION_YAW_VELOCITY_SUPPLIER = () -> RobotContainer.SWERVE.getSelfRelativeVelocity().omegaRadiansPerSecond;
-
+    private static final DoubleSupplier SIMULATION_YAW_VELOCITY_SUPPLIER = () -> 0;
     private static final double
             FRONT_MODULE_X_DISTANCE_FROM_CENTER = 0,
             FRONT_MODULE_Y_DISTANCE_FROM_CENTER = 0,
@@ -59,10 +62,6 @@ public class SwerveConstants {
             new Translation2d(REAR_MODULE_X_DISTANCE_FROM_CENTER, -REAR_MODULE_Y_DISTANCE_FROM_CENTER)
     };
     public static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(MODULE_LOCATIONS);
-    private static final double FURTHEST_MODULE_DISTANCE_FROM_CENTER = Math.hypot(
-            REAR_MODULE_X_DISTANCE_FROM_CENTER, FRONT_MODULE_Y_DISTANCE_FROM_CENTER
-    );
-
     static final double
             TRANSLATION_TOLERANCE_METERS = 0.05,
             ROTATION_TOLERANCE_DEGREES = 2,
@@ -71,9 +70,6 @@ public class SwerveConstants {
     static final double
             DRIVE_NEUTRAL_DEADBAND = 0.2,
             ROTATION_NEUTRAL_DEADBAND = 0.2;
-    static final double
-            MAX_SPEED_METERS_PER_SECOND = RobotHardwareStats.isSimulation() ? 4.9 : 4.04502,
-            MAX_ROTATIONAL_SPEED_RADIANS_PER_SECOND = RobotHardwareStats.isSimulation() ? 12.03 : 12.03;
 
     private static final PIDConstants
             TRANSLATION_PID_CONSTANTS = RobotHardwareStats.isSimulation() ?
@@ -83,12 +79,15 @@ public class SwerveConstants {
                     new PIDConstants(4, 0, 0) :
                     new PIDConstants(3, 0, 0);
     private static final double
-            MAX_ROTATION_VELOCITY = RobotHardwareStats.isSimulation() ? 720 : 720,
-            MAX_ROTATION_ACCELERATION = RobotHardwareStats.isSimulation() ? 720 : 720;
+            MAXIMUM_ROTATION_VELOCITY = RobotHardwareStats.isSimulation() ? 720 : 720,
+            MAXIMUM_ROTATION_ACCELERATION = RobotHardwareStats.isSimulation() ? 720 : 720;
     private static final TrapezoidProfile.Constraints ROTATION_CONSTRAINTS = new TrapezoidProfile.Constraints(
-            MAX_ROTATION_VELOCITY,
-            MAX_ROTATION_ACCELERATION
+            MAXIMUM_ROTATION_VELOCITY,
+            MAXIMUM_ROTATION_ACCELERATION
     );
+    static final double
+            MAXIMUM_PID_ANGLE = 180,
+            MINIMUM_PID_ANGLE = -180;
     static final ProfiledPIDController PROFILED_ROTATION_PID_CONTROLLER = new ProfiledPIDController(
             PROFILED_ROTATION_PID_CONSTANTS.kP,
             PROFILED_ROTATION_PID_CONSTANTS.kI,
