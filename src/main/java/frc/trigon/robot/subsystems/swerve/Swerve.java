@@ -245,7 +245,7 @@ public class Swerve extends MotorSubsystem {
      * @param chassisSpeeds the chassis speeds to fix skewing for
      */
     private void discretize(ChassisSpeeds chassisSpeeds) {
-        final double currentTimestamp = Timer.getFPGATimestamp();
+        final double currentTimestamp = Timer.getTimestamp();
         final double difference = currentTimestamp - lastTimestamp;
         lastTimestamp = currentTimestamp;
         chassisSpeeds.discretize(difference);
