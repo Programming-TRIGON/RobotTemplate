@@ -56,10 +56,10 @@ public class SwerveModule {
         setTargetAngle(swerveModuleState.angle);
 
         if (!swerveModuleState.angle.equals(unoptimizedAngle)) {
-            setTargetDriveMotorCurrent(-targetCurrent);
+            setDriveMotorTargetCurrent(-targetCurrent);
             return;
         }
-        setTargetDriveMotorCurrent(targetCurrent);
+        setDriveMotorTargetCurrent(targetCurrent);
     }
 
     public void setTargetState(SwerveModuleState targetState) {
@@ -72,10 +72,6 @@ public class SwerveModule {
     public void setBrake(boolean brake) {
         driveMotor.setBrake(brake);
         steerMotor.setBrake(brake);
-    }
-
-    public void setDriveMotorTargetCurrent(double targetCurrent) {
-        driveMotor.setControl(driveTorqueCurrentFOCRequest.withOutput(targetCurrent));
     }
 
     public void updateLog(SysIdRoutineLog log) {
@@ -107,7 +103,7 @@ public class SwerveModule {
         this.shouldDriveMotorUseClosedLoop = shouldDriveMotorUseClosedLoop;
     }
 
-    public void setTargetDriveMotorCurrent(double targetCurrent) {
+    public void setDriveMotorTargetCurrent(double targetCurrent) {
         driveMotor.setControl(driveTorqueCurrentFOCRequest.withOutput(targetCurrent));
     }
 
