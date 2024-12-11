@@ -32,14 +32,6 @@ public class PoseEstimator implements AutoCloseable {
     private SwerveModulePosition[] lastSwerveModulePositions = new SwerveModulePosition[4];
     private Rotation2d lastGyroHeading = new Rotation2d();
 
-    private static PoseEstimator instance;
-
-    public static PoseEstimator getInstance() {
-        if (instance == null)
-            instance = new PoseEstimator();
-        return instance;
-    }
-
     /**
      * Constructs a new PoseEstimator.
      *
@@ -138,10 +130,17 @@ public class PoseEstimator implements AutoCloseable {
         PathPlannerLogging.setLogTargetPoseCallback((pose) -> Logger.recordOutput("TargetPPPose", pose));
     }
 
+    /**
+     * Sets the odometry position at a given timestamp.
+     *
+     * @param swerveModulePositions the positions of each swerve module
+     * @param gyroHeading           the heading of the gyro
+     * @param timestamp             the timestamp of the odometry observation
+     */
     private void addOdometryObservation(SwerveModulePosition[] swerveModulePositions, Rotation2d gyroHeading, double timestamp) {
-        final Twist2d odometryDifferenceTwist2d = calculateOdometryDifferenceTwist2d(swerveModulePositions, gyroHeading);
+        final Twist2d newOdometryPoseDifference = calculateNewOdometryPoseDifference(swerveModulePositions, gyroHeading);
         updateOdometryPositions(swerveModulePositions, gyroHeading);
-        updateRobotPosesFromOdometryDifferenceTwist2d(odometryDifferenceTwist2d, timestamp);
+        updateRobotPosesFromNewOdometryPoseDifference(newOdometryPoseDifference, timestamp);
     }
 
     private void updateFromVision() {
@@ -160,6 +159,9 @@ public class PoseEstimator implements AutoCloseable {
         VisionObservationSorter.quickSortByDoubleValue(aprilTagCameras, (aprilTagCamera) -> ((AprilTagCamera) aprilTagCamera).getLatestResultTimestampSeconds());
     }
 
+    /**
+     * Sets the estimated vision pose at the timestamps of the results from the cameras.
+     */
     private void addVisionObservations() {
         for (AprilTagCamera aprilTagCamera : aprilTagCameras) {
             if (!aprilTagCamera.hasNewResult())
@@ -184,7 +186,7 @@ public class PoseEstimator implements AutoCloseable {
         if (isVisionObservationTooOld(timestamp))
             return;
 
-        final Pose2d odometrySample = samplePose(timestamp);
+        final Pose2d odometrySample = getPoseSample(timestamp);
         if (odometrySample == null)
             return;
 
@@ -212,7 +214,7 @@ public class PoseEstimator implements AutoCloseable {
      * @param timestamp the target timestamp
      * @return the robot's estimated pose at the timestamp
      */
-    public Pose2d samplePose(double timestamp) {
+    public Pose2d getPoseSample(double timestamp) {
         final Pose2d samplePose = previousOdometryPoses.getSample(timestamp).orElse(new Pose2d());
         final Transform2d odometryPoseToSamplePoseTransform = new Transform2d(odometryPose, samplePose);
 
@@ -234,6 +236,13 @@ public class PoseEstimator implements AutoCloseable {
         );
     }
 
+    /**
+     * Combines a standard deviation value of the odometry and of the vision result to get a new standard deviation.
+     *
+     * @param odometryStandardDeviation a standard deviation value of the estimated odometry pose
+     * @param visionStandardDeviation   a standard deviation value of the estimated vision pose
+     * @return the combined standard deviation
+     */
     private double combineOdometryAndVisionStandardDeviation(double odometryStandardDeviation, double visionStandardDeviation) {
         return odometryStandardDeviation / (odometryStandardDeviation + Math.sqrt(odometryStandardDeviation * visionStandardDeviation));
     }
@@ -246,7 +255,7 @@ public class PoseEstimator implements AutoCloseable {
         );
     }
 
-    private Twist2d calculateOdometryDifferenceTwist2d(SwerveModulePosition[] swerveModulePositions, Rotation2d gyroHeading) {
+    private Twist2d calculateNewOdometryPoseDifference(SwerveModulePosition[] swerveModulePositions, Rotation2d gyroHeading) {
         final Twist2d odometryDifferenceTwist2d = SwerveConstants.KINEMATICS.toTwist2d(lastSwerveModulePositions, swerveModulePositions);
         odometryDifferenceTwist2d.dtheta = gyroHeading.minus(lastGyroHeading).getRadians();
 
@@ -258,9 +267,9 @@ public class PoseEstimator implements AutoCloseable {
         lastGyroHeading = gyroHeading;
     }
 
-    private void updateRobotPosesFromOdometryDifferenceTwist2d(Twist2d OdometryDifferenceTwist2d, double timestamp) {
-        odometryPose = odometryPose.exp(OdometryDifferenceTwist2d);
-        estimatedPose = estimatedPose.exp(OdometryDifferenceTwist2d);
+    private void updateRobotPosesFromNewOdometryPoseDifference(Twist2d newOdometryPoseDifference, double timestamp) {
+        odometryPose = odometryPose.exp(newOdometryPoseDifference);
+        estimatedPose = estimatedPose.exp(newOdometryPoseDifference);
         previousOdometryPoses.addSample(timestamp, odometryPose);
     }
 }
