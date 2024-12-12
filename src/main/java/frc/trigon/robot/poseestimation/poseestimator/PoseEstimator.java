@@ -257,7 +257,7 @@ public class PoseEstimator implements AutoCloseable {
 
     private Twist2d calculateNewOdometryPoseDifference(SwerveModulePosition[] swerveModulePositions, Rotation2d gyroHeading) {
         final Twist2d odometryDifferenceTwist2d = SwerveConstants.KINEMATICS.toTwist2d(lastSwerveModulePositions, swerveModulePositions);
-        odometryDifferenceTwist2d.dtheta = gyroHeading.minus(lastGyroHeading).getRadians();
+        return new Twist2d(odometryDifferenceTwist2d.dx, odometryDifferenceTwist2d.dy, gyroHeading.minus(lastGyroHeading).getRadians());
 
         return odometryDifferenceTwist2d;
     }
