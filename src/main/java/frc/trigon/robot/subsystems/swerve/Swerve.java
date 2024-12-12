@@ -43,10 +43,7 @@ public class Swerve extends MotorSubsystem {
         setName("Swerve");
         phoenix6SignalThread.setThreadFrequencyHertz(PoseEstimatorConstants.ODOMETRY_FREQUENCY_HERTZ);
         SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER.enableContinuousInput(SwerveConstants.MINIMUM_PID_ANGLE, SwerveConstants.MAXIMUM_PID_ANGLE);
-        setpointGenerator = new SwerveSetpointGenerator(
-                PathPlannerConstants.getRobotConfig(),
-                SwerveConstants.MAXIMUM_ROTATIONAL_SPEED_RADIANS_PER_SECOND
-        );
+        setpointGenerator = new SwerveSetpointGenerator(PathPlannerConstants.getRobotConfig(), SwerveConstants.MAXIMUM_ROTATIONAL_SPEED_RADIANS_PER_SECOND);
         previousSetpoint = new SwerveSetpoint(getSelfRelativeVelocity(), getModuleStates(), DriveFeedforwards.zeros(PathPlannerConstants.getRobotConfig().numModules));
     }
 
@@ -67,7 +64,7 @@ public class Swerve extends MotorSubsystem {
     @Override
     public void updateLog(SysIdRoutineLog log) {
         for (SwerveModule module : swerveModules)
-            module.updateLog(log);
+            module.updateSysIDLog(log);
     }
 
     @Override
@@ -140,6 +137,18 @@ public class Swerve extends MotorSubsystem {
     }
 
     /**
+     * Gets the positions of the drive wheels in radians. We don't use a {@link Rotation2d} because this method returns distance, not rotation.
+     *
+     * @return the positions of the drive wheels in radians
+     */
+    public double[] getDriveWheelPositionsRadians() {
+        final double[] swerveModulesPositions = new double[swerveModules.length];
+        for (int i = 0; i < swerveModules.length; i++)
+            swerveModulesPositions[i] = swerveModules[i].getDriveWheelPositionRadians();
+        return swerveModulesPositions;
+    }
+
+    /**
      * Drives the swerve with the given chassis speeds and feedforwards, relative to the robot's frame of reference.
      * This is used for PathPlanner paths so that each path is as optimized as it can be.
      *
@@ -156,6 +165,15 @@ public class Swerve extends MotorSubsystem {
         final SwerveModuleState[] swerveModuleStates = SwerveConstants.KINEMATICS.toSwerveModuleStates(chassisSpeeds);
         for (int i = 0; i < swerveModules.length; i++)
             swerveModules[i].setTargetState(swerveModuleStates[i], feedforwards.torqueCurrents()[i].in(edu.wpi.first.units.Units.Amps));
+    }
+
+    /**
+     * Drives the swerve to a certain angle relative to the robot. Used for Wheel Radius Characterization.
+     *
+     * @param omegaRadiansPerSecond the target angular velocity in radians per second
+     */
+    public void runWheelRadiusCharacterization(double omegaRadiansPerSecond) {
+        selfRelativeDrive(new ChassisSpeeds(0, 0, omegaRadiansPerSecond));
     }
 
     void initializeDrive(boolean shouldUseClosedLoop) {
@@ -331,7 +349,7 @@ public class Swerve extends MotorSubsystem {
         gyro.update();
 
         for (SwerveModule currentModule : swerveModules)
-            currentModule.update();
+            currentModule.updatePeriodically();
 
         phoenix6SignalThread.updateLatestTimestamps();
     }

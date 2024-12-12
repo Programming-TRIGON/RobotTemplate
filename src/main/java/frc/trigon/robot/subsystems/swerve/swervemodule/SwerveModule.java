@@ -44,10 +44,10 @@ public class SwerveModule {
     }
 
     /**
-     * Sets the target angle and speed of the module from a target module state for the angle, and a target current for the drive speed.
-     * This is used for PathPlanner to follow a path using feedforwards as well as chassisSpeeds.
+     * Sets the target angle and speed of the module from a {@link SwerveModuleState} for the angle, and a target current for the drive speed.
+     * This is used for PathPlanner to follow a path using feedforwards as well as driving from ChassisSpeeds.
      *
-     * @param swerveModuleState the target module state. Only uses the angles
+     * @param swerveModuleState the target state of the module. Only uses the angles
      * @param targetCurrent     the target current of the drive motor
      */
     public void setTargetState(SwerveModuleState swerveModuleState, double targetCurrent) {
@@ -55,10 +55,8 @@ public class SwerveModule {
         swerveModuleState.optimize(getCurrentAngle());
         setTargetAngle(swerveModuleState.angle);
 
-        if (!swerveModuleState.angle.equals(unoptimizedAngle)) {
-            setDriveMotorTargetCurrent(-targetCurrent);
-            return;
-        }
+        if (!swerveModuleState.angle.equals(unoptimizedAngle))
+            targetCurrent *= -1;
         setDriveMotorTargetCurrent(targetCurrent);
     }
 
@@ -74,7 +72,7 @@ public class SwerveModule {
         steerMotor.setBrake(brake);
     }
 
-    public void updateLog(SysIdRoutineLog log) {
+    public void updateSysIDLog(SysIdRoutineLog log) {
         log.motor("Module" + driveMotor.getID() + "Drive")
                 .angularPosition(Units.Rotations.of(driveMotor.getSignal(TalonFXSignal.POSITION)))
                 .angularVelocity(Units.RotationsPerSecond.of(driveMotor.getSignal(TalonFXSignal.VELOCITY)))
@@ -83,13 +81,14 @@ public class SwerveModule {
 
     /**
      * Updates the swerve module. Should be called periodically.
-     * This method updates the hardware, and updates the motor positions variable.
-     * We save the positions to a variable instead of getting them directly because the signals update at a higher frequency than the main code loop.
+     * This method updates the hardware, and their position variables.
+     * We save their positions to a variable instead of getting them directly because their signals update at a higher frequency than the main code loop.
      */
-    public void update() {
+    public void updatePeriodically() {
         driveMotor.update();
         steerMotor.update();
         steerEncoder.update();
+        
         latestOdometryDrivePositions = driveMotor.getThreadedSignal(TalonFXSignal.POSITION);
         latestOdometrySteerPositions = steerMotor.getThreadedSignal(TalonFXSignal.POSITION);
     }
@@ -112,15 +111,20 @@ public class SwerveModule {
     }
 
     public SwerveModuleState getCurrentState() {
-        return new SwerveModuleState(rotationsToMeters(driveMotor.getSignal(TalonFXSignal.VELOCITY)), getCurrentAngle());
+        return new SwerveModuleState(driveWheelRotationsToMeters(driveMotor.getSignal(TalonFXSignal.VELOCITY)), getCurrentAngle());
     }
 
     public SwerveModuleState getTargetState() {
         return targetState;
     }
 
-    public Rotation2d getDriveWheelPosition() {
-        return Rotation2d.fromRotations(driveMotor.getSignal(TalonFXSignal.POSITION));
+    /**
+     * Gets the position of the drive wheel in meters. We don't use a {@link Rotation2d} because this function returns distance, not rotation.
+     *
+     * @return the position of the drive wheel, in meters.
+     */
+    public double getDriveWheelPositionRadians() {
+        return edu.wpi.first.math.util.Units.rotationsToRadians(driveMotor.getSignal(TalonFXSignal.POSITION));
     }
 
     /**
@@ -132,7 +136,7 @@ public class SwerveModule {
      */
     public SwerveModulePosition getOdometryPosition(int odometryUpdateIndex) {
         return new SwerveModulePosition(
-                rotationsToMeters(latestOdometryDrivePositions[odometryUpdateIndex]),
+                driveWheelRotationsToMeters(latestOdometryDrivePositions[odometryUpdateIndex]),
                 Rotation2d.fromRotations(latestOdometrySteerPositions[odometryUpdateIndex])
         );
     }
@@ -184,7 +188,7 @@ public class SwerveModule {
         return Rotation2d.fromRotations(steerMotor.getSignal(TalonFXSignal.POSITION));
     }
 
-    private double rotationsToMeters(double rotations) {
+    private double driveWheelRotationsToMeters(double rotations) {
         return Conversions.rotationsToDistance(rotations, wheelDiameterMeters);
     }
 

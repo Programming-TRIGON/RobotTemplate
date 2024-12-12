@@ -28,7 +28,7 @@ public class SwerveModuleConstants {
             DRIVE_MOTOR_NEUTRAL_MODE_VALUE = NeutralModeValue.Brake,
             STEER_MOTOR_NEUTRAL_MODE_VALUE = NeutralModeValue.Brake;
     private static final double
-            DRIVE_MOTOR_SLIP_CURRENT = RobotHardwareStats.isSimulation() ? 1000 : 80,
+            DRIVE_MOTOR_SLIP_CURRENT = RobotHardwareStats.isSimulation() ? 1000 : 80, // TODO: calibrate before competition
             STEER_MOTOR_CURRENT_LIMIT = RobotHardwareStats.isSimulation() ? 1000 : 30;
     private static final double
             STEER_MOTOR_P = RobotHardwareStats.isSimulation() ? 75 : 75,
@@ -81,6 +81,7 @@ public class SwerveModuleConstants {
         configuration.TorqueCurrent.PeakReverseTorqueCurrent = -DRIVE_MOTOR_SLIP_CURRENT;
         configuration.CurrentLimits.StatorCurrentLimit = DRIVE_MOTOR_SLIP_CURRENT;
         configuration.CurrentLimits.StatorCurrentLimitEnable = true;
+
         configuration.ClosedLoopRamps.TorqueClosedLoopRampPeriod = DRIVE_MOTOR_CLOSED_LOOP_RAMP_RATE;
         configuration.OpenLoopRamps.VoltageOpenLoopRampPeriod = DRIVE_MOTOR_OPEN_LOOP_RAMP_RATE;
 
@@ -102,6 +103,7 @@ public class SwerveModuleConstants {
 
         configuration.MotorOutput.Inverted = STEER_MOTOR_INVERTED_VALUE;
         configuration.MotorOutput.NeutralMode = STEER_MOTOR_NEUTRAL_MODE_VALUE;
+
         configuration.CurrentLimits.StatorCurrentLimit = STEER_MOTOR_CURRENT_LIMIT;
         configuration.CurrentLimits.StatorCurrentLimitEnable = true;
 
