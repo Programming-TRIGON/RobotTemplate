@@ -96,7 +96,9 @@ public class Swerve extends MotorSubsystem {
     }
 
     public ChassisSpeeds getFieldRelativeVelocity() {
-        return ChassisSpeeds.fromRobotRelativeSpeeds(getSelfRelativeVelocity(), RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getRotation());
+        final ChassisSpeeds selfRelativeSpeeds = getSelfRelativeVelocity();
+        selfRelativeSpeeds.toFieldRelativeSpeeds(RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getRotation());
+        return selfRelativeSpeeds;
     }
 
     /**
@@ -152,7 +154,7 @@ public class Swerve extends MotorSubsystem {
      * @param feedforwards  the target feedforwards for each module
      */
     public void selfRelativeFeedForwardDrive(ChassisSpeeds chassisSpeeds, DriveFeedforwards feedforwards) {
-        chassisSpeeds = discretize(chassisSpeeds);
+        discretize(chassisSpeeds);
         if (isStill(chassisSpeeds)) {
             stop();
             return;
@@ -261,7 +263,7 @@ public class Swerve extends MotorSubsystem {
     }
 
     private void selfRelativeDrive(ChassisSpeeds chassisSpeeds) {
-        chassisSpeeds = discretize(chassisSpeeds);
+        discretize(chassisSpeeds);
         if (isStill(chassisSpeeds)) {
             stop();
             return;
@@ -282,13 +284,12 @@ public class Swerve extends MotorSubsystem {
      * This should fix the chassis speeds, so they won't make the robot skew while rotating.
      *
      * @param chassisSpeeds the chassis speeds to fix skewing for
-     * @return the fixed speeds
      */
-    private ChassisSpeeds discretize(ChassisSpeeds chassisSpeeds) {
+    private void discretize(ChassisSpeeds chassisSpeeds) {
         final double currentTimestamp = Timer.getFPGATimestamp();
         final double difference = currentTimestamp - lastTimestamp;
         lastTimestamp = currentTimestamp;
-        return ChassisSpeeds.discretize(chassisSpeeds, difference);
+        chassisSpeeds.discretize(difference);
     }
 
     private void updatePoseEstimatorStates() {
@@ -337,7 +338,8 @@ public class Swerve extends MotorSubsystem {
     }
 
     private ChassisSpeeds fieldRelativeSpeedsToSelfRelativeSpeeds(ChassisSpeeds fieldRelativeSpeeds) {
-        return ChassisSpeeds.fromFieldRelativeSpeeds(fieldRelativeSpeeds, getDriveRelativeAngle());
+        fieldRelativeSpeeds.toRobotRelativeSpeeds(getDriveRelativeAngle());
+        return fieldRelativeSpeeds;
     }
 
     private ChassisSpeeds powersToSpeeds(double xPower, double yPower, double thetaPower) {
