@@ -138,8 +138,9 @@ public class PoseEstimator implements AutoCloseable {
      * @param timestamp             the timestamp of the odometry observation
      */
     private void addOdometryObservation(SwerveModulePosition[] swerveModulePositions, Rotation2d gyroHeading, double timestamp) {
-        final Twist2d newOdometryPoseDifference = calculateNewOdometryPoseDifference(swerveModulePositions, gyroHeading);
         updateOdometryPositions(swerveModulePositions, gyroHeading);
+
+        final Twist2d newOdometryPoseDifference = calculateNewOdometryPoseDifference(swerveModulePositions, gyroHeading);
         updateRobotPosesFromNewOdometryPoseDifference(newOdometryPoseDifference, timestamp);
     }
 
