@@ -58,7 +58,7 @@ public class PathPlannerConstants {
         );
     }
 
-    private static RobotConfig getRobotConfig() {
+    public static RobotConfig getRobotConfig() {
         try {
             return RobotConfig.fromGUISettings();
         } catch (IOException | ParseException e) {

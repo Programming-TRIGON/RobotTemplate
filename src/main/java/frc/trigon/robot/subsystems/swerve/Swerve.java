@@ -1,6 +1,8 @@
 package frc.trigon.robot.subsystems.swerve;
 
 import com.pathplanner.lib.util.DriveFeedforwards;
+import com.pathplanner.lib.util.swerve.SwerveSetpoint;
+import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -14,12 +16,14 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.trigon.robot.RobotContainer;
+import frc.trigon.robot.constants.PathPlannerConstants;
 import frc.trigon.robot.poseestimation.poseestimator.PoseEstimatorConstants;
 import frc.trigon.robot.subsystems.MotorSubsystem;
 import frc.trigon.robot.subsystems.swerve.swervemodule.SwerveModule;
 import frc.trigon.robot.subsystems.swerve.swervemodule.SwerveModuleConstants;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
+import org.trigon.hardware.RobotHardwareStats;
 import org.trigon.hardware.phoenix6.Phoenix6SignalThread;
 import org.trigon.hardware.phoenix6.pigeon2.Pigeon2Gyro;
 import org.trigon.hardware.phoenix6.pigeon2.Pigeon2Signal;
@@ -31,12 +35,23 @@ public class Swerve extends MotorSubsystem {
     private final Pigeon2Gyro gyro = frc.trigon.robot.subsystems.swerve.SwerveConstants.GYRO;
     private final SwerveModule[] swerveModules = SwerveConstants.SWERVE_MODULES;
     private final Phoenix6SignalThread phoenix6SignalThread = Phoenix6SignalThread.getInstance();
+    private final SwerveSetpointGenerator setpointGenerator;
+    private SwerveSetpoint previousSetpoint;
     private double lastTimestamp = Timer.getTimestamp();
 
     public Swerve() {
         setName("Swerve");
         phoenix6SignalThread.setThreadFrequencyHertz(PoseEstimatorConstants.ODOMETRY_FREQUENCY_HERTZ);
         SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER.enableContinuousInput(SwerveConstants.MINIMUM_PID_ANGLE, SwerveConstants.MAXIMUM_PID_ANGLE);
+
+        setpointGenerator = new SwerveSetpointGenerator(
+                PathPlannerConstants.getRobotConfig(),
+                SwerveConstants.MAXIMUM_ROTATIONAL_SPEED_RADIANS_PER_SECOND
+        );
+
+        ChassisSpeeds currentChassisSpeeds = getSelfRelativeVelocity();
+        SwerveModuleState[] currentStates = getModuleStates();
+        previousSetpoint = new SwerveSetpoint(currentChassisSpeeds, currentStates, DriveFeedforwards.zeros(PathPlannerConstants.getRobotConfig().numModules));
     }
 
     @Override
@@ -83,6 +98,10 @@ public class Swerve extends MotorSubsystem {
 
     public void setHeading(Rotation2d heading) {
         gyro.setYaw(heading);
+    }
+
+    public Rotation2d getHeading() {
+        return Rotation2d.fromDegrees(SwerveConstants.GYRO.getSignal(Pigeon2Signal.YAW));
     }
 
     public ChassisSpeeds getSelfRelativeVelocity() {
@@ -153,6 +172,25 @@ public class Swerve extends MotorSubsystem {
     }
 
     /**
+     * Moves the robot to a certain pose using PID.
+     *
+     * @param targetPose the target pose, relative to the blue alliance driver station's right corner
+     */
+    void pidToPose(MirrorablePose2d targetPose) {
+        final Pose2d currentPose = RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose();
+        final Pose2d mirroredTargetPose = targetPose.get();
+        final double xSpeed = SwerveConstants.TRANSLATION_PID_CONTROLLER.calculate(currentPose.getX(), mirroredTargetPose.getX());
+        final double ySpeed = SwerveConstants.TRANSLATION_PID_CONTROLLER.calculate(currentPose.getY(), mirroredTargetPose.getY());
+        final int direction = Mirrorable.isRedAlliance() ? -1 : 1;
+        final ChassisSpeeds targetFieldRelativeSpeeds = new ChassisSpeeds(
+                xSpeed * direction,
+                ySpeed * direction,
+                calculateProfiledAngleSpeedToTargetAngle(targetPose.getRotation())
+        );
+        selfRelativeDrive(fieldRelativeSpeedsToSelfRelativeSpeeds(targetFieldRelativeSpeeds));
+    }
+
+    /**
      * Drives the swerve with the given powers and a target angle, relative to the field's frame of reference.
      *
      * @param xPower      the x power
@@ -202,15 +240,20 @@ public class Swerve extends MotorSubsystem {
         selfRelativeDrive(speeds);
     }
 
-    private void selfRelativeDrive(ChassisSpeeds chassisSpeeds) {
-        discretize(chassisSpeeds);
-        if (isStill(chassisSpeeds)) {
-            stop();
-            return;
-        }
 
-        final SwerveModuleState[] swerveModuleStates = SwerveConstants.KINEMATICS.toSwerveModuleStates(chassisSpeeds);
-        setTargetModuleStates(swerveModuleStates);
+    /**
+     * This method will take in desired robot-relative chassis targetSpeeds,
+     * generate a swerve setpoint, then set the target state for each module
+     *
+     * @param targetSpeeds The desired robot-relative targetSpeeds
+     */
+    private void selfRelativeDrive(ChassisSpeeds targetSpeeds) {
+        previousSetpoint = setpointGenerator.generateSetpoint(
+                previousSetpoint,
+                targetSpeeds,
+                RobotHardwareStats.getPeriodicTimeSeconds()
+        );
+        setTargetModuleStates(previousSetpoint.moduleStates());
     }
 
     private void setTargetModuleStates(SwerveModuleState[] swerveModuleStates) {

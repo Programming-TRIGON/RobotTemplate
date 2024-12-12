@@ -2,6 +2,7 @@ package frc.trigon.robot.subsystems.swerve;
 
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.pathplanner.lib.config.PIDConstants;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -92,6 +93,11 @@ public class SwerveConstants {
             PROFILED_ROTATION_PID_CONSTANTS.kI,
             PROFILED_ROTATION_PID_CONSTANTS.kD,
             ROTATION_CONSTRAINTS
+    );
+    static final PIDController TRANSLATION_PID_CONTROLLER = new PIDController(
+            TRANSLATION_PID_CONSTANTS.kP,
+            TRANSLATION_PID_CONSTANTS.kI,
+            TRANSLATION_PID_CONSTANTS.kD
     );
 
     static {
