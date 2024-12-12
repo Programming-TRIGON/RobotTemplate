@@ -38,9 +38,10 @@ public class VisionObservationSorter {
     /**
      * Partitions the given section of an array by their double value and returns the new pivot.
      *
-     * @param array      the array to partition and sort
-     * @param startIndex the start of the current partition of the array to partition
-     * @param endIndex   the end of the current partition of the array to partition
+     * @param array                  the array to partition and sort
+     * @param objectToDoubleFunction the function needed to convert an object in the array to a double
+     * @param startIndex             the start of the current partition of the array to partition
+     * @param endIndex               the end of the current partition of the array to partition
      * @return the index of the new pivot in the whole array
      */
     private static int partitionArrayAndGetNewPivot(Object[] array, ToDoubleFunction<Object> objectToDoubleFunction, int startIndex, int endIndex) {
