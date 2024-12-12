@@ -43,15 +43,11 @@ public class Swerve extends MotorSubsystem {
         setName("Swerve");
         phoenix6SignalThread.setThreadFrequencyHertz(PoseEstimatorConstants.ODOMETRY_FREQUENCY_HERTZ);
         SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER.enableContinuousInput(SwerveConstants.MINIMUM_PID_ANGLE, SwerveConstants.MAXIMUM_PID_ANGLE);
-
         setpointGenerator = new SwerveSetpointGenerator(
                 PathPlannerConstants.getRobotConfig(),
                 SwerveConstants.MAXIMUM_ROTATIONAL_SPEED_RADIANS_PER_SECOND
         );
-
-        ChassisSpeeds currentChassisSpeeds = getSelfRelativeVelocity();
-        SwerveModuleState[] currentStates = getModuleStates();
-        previousSetpoint = new SwerveSetpoint(currentChassisSpeeds, currentStates, DriveFeedforwards.zeros(PathPlannerConstants.getRobotConfig().numModules));
+        previousSetpoint = new SwerveSetpoint(getSelfRelativeVelocity(), getModuleStates(), DriveFeedforwards.zeros(PathPlannerConstants.getRobotConfig().numModules));
     }
 
     @Override
