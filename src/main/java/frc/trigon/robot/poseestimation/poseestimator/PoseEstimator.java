@@ -10,6 +10,8 @@ import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.constants.FieldConstants;
 import frc.trigon.robot.poseestimation.apriltagcamera.AprilTagCamera;
 import frc.trigon.robot.poseestimation.apriltagcamera.AprilTagCameraConstants;
+import frc.trigon.robot.poseestimation.t265.T265;
+import frc.trigon.robot.poseestimation.t265.T265Constants;
 import frc.trigon.robot.subsystems.swerve.SwerveConstants;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -24,6 +26,7 @@ import java.util.NoSuchElementException;
 public class PoseEstimator implements AutoCloseable {
     private final Field2d field = new Field2d();
     private final AprilTagCamera[] aprilTagCameras;
+    private final T265 t265 = T265.getInstance();
     private final TimeInterpolatableBuffer<Pose2d> previousOdometryPoses = TimeInterpolatableBuffer.createBuffer(PoseEstimatorConstants.POSE_BUFFER_SIZE_SECONDS);
 
     private Pose2d
@@ -35,7 +38,7 @@ public class PoseEstimator implements AutoCloseable {
     /**
      * Constructs a new PoseEstimator.
      *
-     * @param aprilTagCameras the cameras that should be used to update the pose estimator.
+     * @param aprilTagCameras the cameras that should be used to update the pose estimator
      */
     public PoseEstimator(AprilTagCamera... aprilTagCameras) {
         this.aprilTagCameras = aprilTagCameras;
@@ -52,6 +55,7 @@ public class PoseEstimator implements AutoCloseable {
 
     public void periodic() {
         updateFromVision();
+        updateFromT265();
         field.setRobotPose(getCurrentEstimatedPose());
         if (RobotHardwareStats.isSimulation())
             AprilTagCameraConstants.VISION_SIMULATION.update(RobotContainer.POSE_ESTIMATOR.getCurrentOdometryPose());
@@ -108,7 +112,7 @@ public class PoseEstimator implements AutoCloseable {
                 closestCameraToTag = i;
         }
 
-        final Rotation2d bestRobotHeading = aprilTagCameras[closestCameraToTag].getSolvePNPHeading();
+        final Rotation2d bestRobotHeading = aprilTagCameras[closestCameraToTag].getRobotSolvePNPHeading();
         resetPose(new Pose2d(getCurrentEstimatedPose().getTranslation(), bestRobotHeading));
     }
 
@@ -160,19 +164,31 @@ public class PoseEstimator implements AutoCloseable {
         VisionObservationSorter.quickSortByDoubleValue(aprilTagCameras, (aprilTagCamera) -> ((AprilTagCamera) aprilTagCamera).getLatestResultTimestampSeconds());
     }
 
+    private void updateFromT265() {
+        for (AprilTagCamera aprilTagCamera : aprilTagCameras)
+            if (aprilTagCamera.isWithinBestTagRangeForSolvePNP())
+                t265.resetT265Offset(aprilTagCamera.getEstimatedRobotPose());
+
+        t265.updatePeriodically();
+
+        addT265Observation(
+                t265.getEstimatedRobotPose(),
+                T265Constants.STANDARD_DEVIATIONS,
+                t265.getLatestResultTimestampSeconds()
+        );
+    }
+
     /**
      * Sets the estimated vision pose at the timestamps of the results from the cameras.
      */
     private void addVisionObservations() {
         for (AprilTagCamera aprilTagCamera : aprilTagCameras) {
-            if (!aprilTagCamera.hasNewResult())
-                continue;
-
-            addVisionObservation(
-                    getCameraEstimatedPose(aprilTagCamera),
-                    aprilTagCamera.calculateStandardDeviations(),
-                    aprilTagCamera.getLatestResultTimestampSeconds()
-            );
+            if (aprilTagCamera.hasNewResult())
+                addVisionObservation(
+                        getCameraEstimatedPose(aprilTagCamera),
+                        aprilTagCamera.calculateStandardDeviations(),
+                        aprilTagCamera.getLatestResultTimestampSeconds()
+                );
         }
     }
 
@@ -184,7 +200,7 @@ public class PoseEstimator implements AutoCloseable {
     }
 
     private void addVisionObservation(Pose2d estimatedPose, PoseEstimatorConstants.StandardDeviations standardDeviations, double timestamp) {
-        if (isVisionObservationTooOld(timestamp))
+        if (isObservationTooOld(timestamp))
             return;
 
         final Pose2d odometrySample = getPoseSample(timestamp);
@@ -198,7 +214,29 @@ public class PoseEstimator implements AutoCloseable {
         this.estimatedPose = estimatedOdometryPose.plus(calculatePoseStandardDeviations(estimatedPoseAtObservationTime, standardDeviations));
     }
 
-    private boolean isVisionObservationTooOld(double timestamp) {
+    /**
+     * Sets the estimated T265 position at the given timestamp.
+     *
+     * @param estimatedPose      the estimated robot pose
+     * @param standardDeviations the standard deviations of the estimated pose
+     * @param timestamp          the timestamp of the observation
+     */
+    private void addT265Observation(Pose2d estimatedPose, PoseEstimatorConstants.StandardDeviations standardDeviations, double timestamp) {
+        if (isObservationTooOld(timestamp))
+            return;
+
+        final Pose2d odometrySample = getPoseSample(timestamp);
+        if (odometrySample == null)
+            return;
+
+        final Transform2d odometryPoseToSamplePoseTransform = new Transform2d(odometryPose, odometrySample);
+        final Pose2d estimatedPoseAtObservationTime = estimatedPose.plus(odometryPoseToSamplePoseTransform);
+
+        final Pose2d estimatedOdometryPose = estimatedPoseAtObservationTime.plus(odometryPoseToSamplePoseTransform.inverse());
+        this.estimatedPose = estimatedOdometryPose.plus(calculatePoseStandardDeviations(estimatedPoseAtObservationTime, standardDeviations));
+    }
+
+    private boolean isObservationTooOld(double timestamp) {
         try {
             final double oldestEstimatedRobotPoseTimestamp = previousOdometryPoses.getInternalBuffer().lastKey() - PoseEstimatorConstants.POSE_BUFFER_SIZE_SECONDS;
             if (oldestEstimatedRobotPoseTimestamp > timestamp)

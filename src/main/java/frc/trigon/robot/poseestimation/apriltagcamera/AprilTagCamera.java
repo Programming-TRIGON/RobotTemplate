@@ -64,8 +64,12 @@ public class AprilTagCamera {
         return robotPose;
     }
 
-    public Rotation2d getSolvePNPHeading() {
-        return inputs.cameraSolvePNPPose.getRotation().toRotation2d().minus(robotCenterToCamera.getRotation().toRotation2d());
+    public Pose2d getRobotSolvePNPPose() {
+        return getRobotPoseFromCameraPose(inputs.cameraSolvePNPPose.toPose2d());
+    }
+
+    public Rotation2d getRobotSolvePNPHeading() {
+        return getRobotSolvePNPPose().getRotation();
     }
 
     public String getName() {
@@ -93,6 +97,10 @@ public class AprilTagCamera {
         return inputs.distanceFromBestTag;
     }
 
+    public boolean isWithinBestTagRangeForSolvePNP() {
+        return inputs.distanceFromBestTag < AprilTagCameraConstants.MAXIMUM_DISTANCE_FROM_TAG_FOR_SOLVE_PNP_METERS;
+    }
+
     /**
      * If the robot is close enough to the tag, it calculates the pose using the solve PNP heading.
      * If it's too far, it assumes the robot's heading from the gyro and calculates its position from there.
@@ -118,7 +126,7 @@ public class AprilTagCamera {
 
         if (!isWithinBestTagRangeForSolvePNP())
             return new Pose2d(getFieldRelativeRobotTranslation(gyroHeading), gyroHeading);
-        final Rotation2d solvePNPHeading = getSolvePNPHeading();
+        final Rotation2d solvePNPHeading = getRobotSolvePNPHeading();
         return new Pose2d(getFieldRelativeRobotTranslation(solvePNPHeading), solvePNPHeading);
     }
 
@@ -204,10 +212,6 @@ public class AprilTagCamera {
         return exponent * (distance * distance) / numberOfVisibleTags;
     }
 
-    private boolean isWithinBestTagRangeForSolvePNP() {
-        return inputs.distanceFromBestTag < AprilTagCameraConstants.MAXIMUM_DISTANCE_FROM_TAG_FOR_SOLVE_PNP_METERS;
-    }
-
     private void logCameraInfo() {
         Logger.processInputs("Cameras/" + name, inputs);
         if (!FieldConstants.TAG_ID_TO_POSE.isEmpty())
@@ -239,5 +243,14 @@ public class AprilTagCamera {
 
     private void logSolvePNPPose() {
         Logger.recordOutput("Poses/Robot/" + name + "/SolvePNPPose", inputs.cameraSolvePNPPose.plus(robotCenterToCamera.inverse()));
+    }
+
+    private Pose2d getRobotPoseFromCameraPose(Pose2d cameraPose) {
+        final Translation2d cameraTranslation = cameraPose.getTranslation();
+        final Translation2d robotCenterToCameraTranslation = robotCenterToCamera.getTranslation().toTranslation2d();
+        final Rotation2d cameraRotation = cameraPose.getRotation();
+        final Rotation2d robotCenterToCameraRotation = robotCenterToCamera.getRotation().toRotation2d();
+
+        return new Pose2d(cameraTranslation.minus(robotCenterToCameraTranslation), cameraRotation.minus(robotCenterToCameraRotation));
     }
 }
