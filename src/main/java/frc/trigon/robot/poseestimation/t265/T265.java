@@ -27,7 +27,6 @@ public class T265 {
 
     public void updatePeriodically() {
         updateLatestResultTimestampSeconds();
-
         logInputs();
     }
 
