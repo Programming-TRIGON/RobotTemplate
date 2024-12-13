@@ -64,9 +64,9 @@ public class T265 {
     }
 
     private void logInputs() {
-        Logger.recordOutput("FPS", framesPerSecond.get());
-        Logger.recordOutput("Battery", batteryLevel.get());
-        Logger.recordOutput("RobotPose", getEstimatedRobotPose());
-        Logger.recordOutput("T265Pose", getT265Pose());
+        Logger.recordOutput("T265/FPS", framesPerSecond.get());
+        Logger.recordOutput("T265/Battery", batteryLevel.get());
+        Logger.recordOutput("T265/RobotPose", getEstimatedRobotPose());
+        Logger.recordOutput("T265/T265Pose", getT265Pose());
     }
 }
