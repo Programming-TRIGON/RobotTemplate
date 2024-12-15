@@ -39,10 +39,9 @@ public class T265 {
     }
 
     public Pose2d getEstimatedRobotPose() {
-        final Pose2d t265Pose = getT265Pose();
         return new Pose2d(
-                t265Pose.getTranslation().minus(t265ToRobotTransform.getTranslation()),
-                t265Pose.getRotation().minus(t265ToRobotTransform.getRotation())
+                getT265Translation().minus(t265ToRobotTransform.getTranslation()),
+                getT265Heading().minus(t265ToRobotTransform.getRotation())
         );
     }
 
