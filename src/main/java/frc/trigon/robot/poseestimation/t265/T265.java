@@ -2,6 +2,7 @@ package frc.trigon.robot.poseestimation.t265;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.networktables.*;
 import org.littletonrobotics.junction.Logger;
@@ -15,8 +16,7 @@ public class T265 {
     private final FloatArraySubscriber position = t265NetworkTable.getFloatArrayTopic("Position").subscribe(new float[]{0.0f, 0.0f, 0.0f});
     private final FloatArraySubscriber rotation = t265NetworkTable.getFloatArrayTopic("Rotation").subscribe(new float[]{0.0f, 0.0f, 0.0f});
 
-    private Translation2d t265ToRobotTranslationOffset = new Translation2d(0, 0);
-    private Rotation2d t265YawToRobotYawOffset = new Rotation2d(0);
+    private Transform2d t265ToRobotTransform = new Transform2d(0, 0, new Rotation2d(0));
     private double latestResultTimestampSeconds = 0;
 
     public static T265 getInstance() {
@@ -31,8 +31,7 @@ public class T265 {
     }
 
     public void resetT265Offset(Pose2d robotPose) {
-        t265ToRobotTranslationOffset = robotPose.getTranslation().minus(getT265Translation());
-        t265YawToRobotYawOffset = robotPose.getRotation().minus(getT265Heading());
+        t265ToRobotTransform = robotPose.minus(getT265Pose());
     }
 
     public double getLatestResultTimestampSeconds() {
@@ -40,9 +39,11 @@ public class T265 {
     }
 
     public Pose2d getEstimatedRobotPose() {
-        Translation2d robotTranslation = getT265Translation().minus(t265ToRobotTranslationOffset);
-        Rotation2d robotRotation = getT265Heading().minus(t265YawToRobotYawOffset);
-        return new Pose2d(robotTranslation, robotRotation);
+        final Pose2d t265Pose = getT265Pose();
+        return new Pose2d(
+                t265Pose.getTranslation().minus(t265ToRobotTransform.getTranslation()),
+                t265Pose.getRotation().minus(t265ToRobotTransform.getRotation())
+        );
     }
 
     private Pose2d getT265Pose() {
