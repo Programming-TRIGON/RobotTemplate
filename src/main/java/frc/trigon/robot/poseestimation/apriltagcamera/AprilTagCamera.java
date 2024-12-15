@@ -62,12 +62,12 @@ public class AprilTagCamera {
         return robotPose;
     }
 
-    public Pose2d getRobotSolvePNPPose() {
-        return getRobotPoseFromCameraPose(inputs.cameraSolvePNPPose.toPose2d());
-    }
-
     public Rotation2d getRobotSolvePNPHeading() {
         return getRobotSolvePNPPose().getRotation();
+    }
+
+    public Pose2d getRobotSolvePNPPose() {
+        return getRobotPoseFromCameraPose(inputs.cameraSolvePNPPose.toPose2d());
     }
 
     public String getName() {
