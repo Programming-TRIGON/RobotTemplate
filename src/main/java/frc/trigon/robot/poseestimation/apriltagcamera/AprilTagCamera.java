@@ -17,8 +17,8 @@ public class AprilTagCamera {
     private final AprilTagCameraInputsAutoLogged inputs = new AprilTagCameraInputsAutoLogged();
     private final Transform3d robotCenterToCamera;
     private final double
-            thetaStandardDeviationExponent,
-            translationStandardDeviationExponent;
+            translationStandardDeviationExponent,
+            thetaStandardDeviationExponent;
     private final AprilTagCameraIO aprilTagCameraIO;
     private double lastUpdatedTimestamp;
     private Pose2d robotPose = null;
@@ -26,20 +26,18 @@ public class AprilTagCamera {
     /**
      * Constructs a new AprilTagCamera.
      *
-     * @param aprilTagCameraType                   the type of camera
-     * @param name                                 the camera's name
-     * @param robotCenterToCamera                  the transform of the robot's origin point to the camera
-     * @param thetaStandardDeviationExponent       a calibrated gain for the standard theta deviations of the estimated robot pose
-     * @param translationStandardDeviationExponent a calibrated gain for the standard translation deviations of the estimated robot pose
+     * @param aprilTagCameraType  the type of camera
+     * @param name                the camera's name
+     * @param robotCenterToCamera the transform of the robot's origin point to the camera
+     * @param standardDeviations  the standard deviations of the estimated robot pose
      */
     public AprilTagCamera(AprilTagCameraConstants.AprilTagCameraType aprilTagCameraType,
                           String name, Transform3d robotCenterToCamera,
-                          double thetaStandardDeviationExponent,
-                          double translationStandardDeviationExponent) {
+                          PoseEstimatorConstants.StandardDeviations standardDeviations) {
         this.name = name;
         this.robotCenterToCamera = robotCenterToCamera;
-        this.thetaStandardDeviationExponent = thetaStandardDeviationExponent;
-        this.translationStandardDeviationExponent = translationStandardDeviationExponent;
+        this.translationStandardDeviationExponent = standardDeviations.translation();
+        this.thetaStandardDeviationExponent = standardDeviations.theta();
 
         if (RobotHardwareStats.isSimulation()) {
             aprilTagCameraIO = AprilTagCameraConstants.AprilTagCameraType.SIMULATION_CAMERA.createIOFunction.apply(name);
