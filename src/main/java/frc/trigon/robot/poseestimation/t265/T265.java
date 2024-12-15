@@ -11,9 +11,9 @@ public class T265 {
     private final NetworkTable t265NetworkTable = NetworkTableInstance.getDefault().getTable("T265");
 
     private final IntegerSubscriber framesPerSecond = t265NetworkTable.getIntegerTopic("FPS").subscribe(0);
-    private final DoubleSubscriber batteryLevel = t265NetworkTable.getDoubleTopic("BatteryLevel").subscribe(0.0f);
-    private final FloatArraySubscriber position = t265NetworkTable.getFloatArrayTopic("Position").subscribe(new float[]{0.0f, 0.0f, 0.0f});
-    private final FloatArraySubscriber rotation = t265NetworkTable.getFloatArrayTopic("Rotation").subscribe(new float[]{0.0f, 0.0f, 0.0f});
+    private final DoubleSubscriber batteryPercentage = t265NetworkTable.getDoubleTopic("BatteryPercentage").subscribe(0.0f);
+    private final FloatArraySubscriber positionMeters = t265NetworkTable.getFloatArrayTopic("PositionMeters").subscribe(new float[]{0.0f, 0.0f, 0.0f});
+    private final FloatArraySubscriber rotationRadians = t265NetworkTable.getFloatArrayTopic("RotationRadians").subscribe(new float[]{0.0f, 0.0f, 0.0f});
 
     private Pose2d robotToT265Difference = new Pose2d(0, 0, new Rotation2d(0));
     private double latestResultTimestampSeconds = 0;
@@ -36,13 +36,13 @@ public class T265 {
     }
 
     private void updateLatestResultTimestampSeconds() {
-        if (position.getLastChange() > latestResultTimestampSeconds)
-            latestResultTimestampSeconds = position.getLastChange();
+        if (positionMeters.getLastChange() > latestResultTimestampSeconds)
+            latestResultTimestampSeconds = positionMeters.getLastChange();
     }
 
     private void logInputs() {
         Logger.recordOutput("T265/FPS", framesPerSecond.get());
-        Logger.recordOutput("T265/Battery", batteryLevel.get());
+        Logger.recordOutput("T265/Battery", batteryPercentage.get());
         Logger.recordOutput("T265/RobotPose", getEstimatedRobotPose());
         Logger.recordOutput("T265/T265Pose", getT265Pose());
     }
@@ -56,11 +56,11 @@ public class T265 {
     }
 
     private Translation2d getT265Translation() {
-        return new Translation2d(position.get()[2], -position.get()[0]);
+        return new Translation2d(positionMeters.get()[2], -positionMeters.get()[0]);
     }
 
     private Rotation2d getT265Heading() {
-        final double currentYawRadians = rotation.get()[2];
+        final double currentYawRadians = rotationRadians.get()[2];
         return Rotation2d.fromRadians(currentYawRadians);
     }
 }

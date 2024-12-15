@@ -16,9 +16,7 @@ public class AprilTagCamera {
     protected final String name;
     private final AprilTagCameraInputsAutoLogged inputs = new AprilTagCameraInputsAutoLogged();
     private final Transform3d robotCenterToCamera;
-    private final double
-            translationStandardDeviationExponent,
-            thetaStandardDeviationExponent;
+    private final PoseEstimatorConstants.StandardDeviations standardDeviations;
     private final AprilTagCameraIO aprilTagCameraIO;
     private double lastUpdatedTimestamp;
     private Pose2d robotPose = null;
@@ -36,8 +34,7 @@ public class AprilTagCamera {
                           PoseEstimatorConstants.StandardDeviations standardDeviations) {
         this.name = name;
         this.robotCenterToCamera = robotCenterToCamera;
-        this.translationStandardDeviationExponent = standardDeviations.translation();
-        this.thetaStandardDeviationExponent = standardDeviations.theta();
+        this.standardDeviations = standardDeviations;
 
         if (RobotHardwareStats.isSimulation()) {
             aprilTagCameraIO = AprilTagCameraConstants.AprilTagCameraType.SIMULATION_CAMERA.createIOFunction.apply(name);
@@ -85,8 +82,8 @@ public class AprilTagCamera {
      * @return the standard deviations for the pose estimation strategy used
      */
     public PoseEstimatorConstants.StandardDeviations calculateStandardDeviations() {
-        final double translationStandardDeviation = calculateStandardDeviations(translationStandardDeviationExponent, inputs.distanceFromBestTag, inputs.visibleTagIDs.length);
-        final double thetaStandardDeviation = isWithinBestTagRangeForSolvePNP() ? calculateStandardDeviations(thetaStandardDeviationExponent, inputs.distanceFromBestTag, inputs.visibleTagIDs.length) : Double.POSITIVE_INFINITY;
+        final double translationStandardDeviation = calculateStandardDeviations(standardDeviations.translation(), inputs.distanceFromBestTag, inputs.visibleTagIDs.length);
+        final double thetaStandardDeviation = isWithinBestTagRangeForSolvePNP() ? calculateStandardDeviations(standardDeviations.theta(), inputs.distanceFromBestTag, inputs.visibleTagIDs.length) : Double.POSITIVE_INFINITY;
 
         return new PoseEstimatorConstants.StandardDeviations(translationStandardDeviation, thetaStandardDeviation);
     }
