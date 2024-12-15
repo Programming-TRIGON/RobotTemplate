@@ -23,12 +23,12 @@ public class SwerveModuleConstants {
             DRIVE_MOTOR_INVERTED_VALUE = InvertedValue.CounterClockwise_Positive,
             STEER_MOTOR_INVERTED_VALUE = InvertedValue.CounterClockwise_Positive;
     private static final SensorDirectionValue STEER_ENCODER_DIRECTION = SensorDirectionValue.CounterClockwise_Positive;
-    private static final double STEER_ENCODER_RANGE = 0.5;
+    private static final double STEER_ENCODER_DISCONTINUITY_POINT = 0.5;
     private static final NeutralModeValue
             DRIVE_MOTOR_NEUTRAL_MODE_VALUE = NeutralModeValue.Brake,
             STEER_MOTOR_NEUTRAL_MODE_VALUE = NeutralModeValue.Brake;
     private static final double
-            DRIVE_MOTOR_SLIP_CURRENT = RobotHardwareStats.isSimulation() ? 1000 : 80, // TODO: calibrate before competition
+            DRIVE_MOTOR_SLIP_CURRENT = RobotHardwareStats.isSimulation() ? 1000 : 80, // TODO: calibrate right before competition
             STEER_MOTOR_CURRENT_LIMIT = RobotHardwareStats.isSimulation() ? 1000 : 30;
     private static final double
             STEER_MOTOR_P = RobotHardwareStats.isSimulation() ? 75 : 75,
@@ -68,60 +68,60 @@ public class SwerveModuleConstants {
     );
 
     private static TalonFXConfiguration generateDriveMotorConfiguration() {
-        final TalonFXConfiguration configuration = new TalonFXConfiguration();
+        final TalonFXConfiguration config = new TalonFXConfiguration();
 
-        configuration.Audio.BeepOnBoot = false;
-        configuration.Audio.BeepOnConfig = false;
+        config.Audio.BeepOnBoot = false;
+        config.Audio.BeepOnConfig = false;
 
-        configuration.MotorOutput.Inverted = DRIVE_MOTOR_INVERTED_VALUE;
-        configuration.MotorOutput.NeutralMode = DRIVE_MOTOR_NEUTRAL_MODE_VALUE;
-        configuration.Feedback.SensorToMechanismRatio = DRIVE_MOTOR_GEAR_RATIO;
+        config.MotorOutput.Inverted = DRIVE_MOTOR_INVERTED_VALUE;
+        config.MotorOutput.NeutralMode = DRIVE_MOTOR_NEUTRAL_MODE_VALUE;
+        config.Feedback.SensorToMechanismRatio = DRIVE_MOTOR_GEAR_RATIO;
 
-        configuration.TorqueCurrent.PeakForwardTorqueCurrent = DRIVE_MOTOR_SLIP_CURRENT;
-        configuration.TorqueCurrent.PeakReverseTorqueCurrent = -DRIVE_MOTOR_SLIP_CURRENT;
-        configuration.CurrentLimits.StatorCurrentLimit = DRIVE_MOTOR_SLIP_CURRENT;
-        configuration.CurrentLimits.StatorCurrentLimitEnable = true;
+        config.TorqueCurrent.PeakForwardTorqueCurrent = DRIVE_MOTOR_SLIP_CURRENT;
+        config.TorqueCurrent.PeakReverseTorqueCurrent = -DRIVE_MOTOR_SLIP_CURRENT;
+        config.CurrentLimits.StatorCurrentLimit = DRIVE_MOTOR_SLIP_CURRENT;
+        config.CurrentLimits.StatorCurrentLimitEnable = true;
 
-        configuration.ClosedLoopRamps.TorqueClosedLoopRampPeriod = DRIVE_MOTOR_CLOSED_LOOP_RAMP_RATE;
-        configuration.OpenLoopRamps.VoltageOpenLoopRampPeriod = DRIVE_MOTOR_OPEN_LOOP_RAMP_RATE;
+        config.ClosedLoopRamps.TorqueClosedLoopRampPeriod = DRIVE_MOTOR_CLOSED_LOOP_RAMP_RATE;
+        config.OpenLoopRamps.VoltageOpenLoopRampPeriod = DRIVE_MOTOR_OPEN_LOOP_RAMP_RATE;
 
-        configuration.Slot0.kP = DRIVE_MOTOR_P;
-        configuration.Slot0.kI = DRIVE_MOTOR_I;
-        configuration.Slot0.kD = DRIVE_MOTOR_D;
-        configuration.Slot0.kS = DRIVE_MOTOR_KS;
-        configuration.Slot0.kV = DRIVE_MOTOR_KV;
-        configuration.Slot0.kA = DRIVE_MOTOR_KA;
+        config.Slot0.kP = DRIVE_MOTOR_P;
+        config.Slot0.kI = DRIVE_MOTOR_I;
+        config.Slot0.kD = DRIVE_MOTOR_D;
+        config.Slot0.kS = DRIVE_MOTOR_KS;
+        config.Slot0.kV = DRIVE_MOTOR_KV;
+        config.Slot0.kA = DRIVE_MOTOR_KA;
 
-        return configuration;
+        return config;
     }
 
     private static TalonFXConfiguration generateSteerMotorConfiguration() {
-        final TalonFXConfiguration configuration = new TalonFXConfiguration();
+        final TalonFXConfiguration config = new TalonFXConfiguration();
 
-        configuration.Audio.BeepOnBoot = false;
-        configuration.Audio.BeepOnConfig = false;
+        config.Audio.BeepOnBoot = false;
+        config.Audio.BeepOnConfig = false;
 
-        configuration.MotorOutput.Inverted = STEER_MOTOR_INVERTED_VALUE;
-        configuration.MotorOutput.NeutralMode = STEER_MOTOR_NEUTRAL_MODE_VALUE;
+        config.MotorOutput.Inverted = STEER_MOTOR_INVERTED_VALUE;
+        config.MotorOutput.NeutralMode = STEER_MOTOR_NEUTRAL_MODE_VALUE;
 
-        configuration.CurrentLimits.StatorCurrentLimit = STEER_MOTOR_CURRENT_LIMIT;
-        configuration.CurrentLimits.StatorCurrentLimitEnable = true;
+        config.CurrentLimits.StatorCurrentLimit = STEER_MOTOR_CURRENT_LIMIT;
+        config.CurrentLimits.StatorCurrentLimitEnable = true;
 
-        configuration.Feedback.RotorToSensorRatio = STEER_MOTOR_GEAR_RATIO;
-        configuration.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
+        config.Feedback.RotorToSensorRatio = STEER_MOTOR_GEAR_RATIO;
+        config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
 
-        configuration.Slot0.kP = STEER_MOTOR_P;
-        configuration.Slot0.kI = STEER_MOTOR_I;
-        configuration.Slot0.kD = STEER_MOTOR_D;
-        configuration.ClosedLoopGeneral.ContinuousWrap = true;
+        config.Slot0.kP = STEER_MOTOR_P;
+        config.Slot0.kI = STEER_MOTOR_I;
+        config.Slot0.kD = STEER_MOTOR_D;
+        config.ClosedLoopGeneral.ContinuousWrap = true;
 
-        return configuration;
+        return config;
     }
 
     private static CANcoderConfiguration generateSteerEncoderConfiguration() {
         final CANcoderConfiguration configuration = new CANcoderConfiguration();
 
-        configuration.MagnetSensor.AbsoluteSensorDiscontinuityPoint = STEER_ENCODER_RANGE;
+        configuration.MagnetSensor.AbsoluteSensorDiscontinuityPoint = STEER_ENCODER_DISCONTINUITY_POINT;
         configuration.MagnetSensor.SensorDirection = STEER_ENCODER_DIRECTION;
 
         return configuration;

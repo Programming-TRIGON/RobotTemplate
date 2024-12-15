@@ -45,17 +45,17 @@ public class SwerveModule {
 
     /**
      * Sets the target angle and speed of the module from a {@link SwerveModuleState} for the angle, and a target current for the drive speed.
-     * This is used for PathPlanner to follow a path using feedforwards as well as driving from ChassisSpeeds.
+     * This is used for PathPlanner to follow a path using feedforwards as well as for self relative driving.
      *
-     * @param swerveModuleState the target state of the module. Only uses the angles
-     * @param targetCurrent     the target current of the drive motor
+     * @param targetState   the target state of the module. Only uses the angles
+     * @param targetCurrent the target current of the drive motor
      */
-    public void setTargetState(SwerveModuleState swerveModuleState, double targetCurrent) {
-        final Rotation2d unoptimizedAngle = swerveModuleState.angle;
-        swerveModuleState.optimize(getCurrentAngle());
-        setTargetAngle(swerveModuleState.angle);
+    public void setTargetState(SwerveModuleState targetState, double targetCurrent) {
+        final Rotation2d unoptimizedAngle = targetState.angle;
+        targetState.optimize(getCurrentAngle());
+        setTargetAngle(targetState.angle);
 
-        if (!swerveModuleState.angle.equals(unoptimizedAngle))
+        if (!targetState.angle.equals(unoptimizedAngle))
             targetCurrent *= -1;
         setDriveMotorTargetCurrent(targetCurrent);
     }
@@ -88,7 +88,7 @@ public class SwerveModule {
         driveMotor.update();
         steerMotor.update();
         steerEncoder.update();
-        
+
         latestOdometryDrivePositions = driveMotor.getThreadedSignal(TalonFXSignal.POSITION);
         latestOdometrySteerPositions = steerMotor.getThreadedSignal(TalonFXSignal.POSITION);
     }
@@ -119,9 +119,9 @@ public class SwerveModule {
     }
 
     /**
-     * Gets the position of the drive wheel in meters. We don't use a {@link Rotation2d} because this function returns distance, not rotation.
+     * Gets the position of the drive wheel in meters. We don't use a {@link Rotation2d} because this function returns distance, not rotations.
      *
-     * @return the position of the drive wheel, in meters.
+     * @return the position of the drive wheel in meters
      */
     public double getDriveWheelPositionRadians() {
         return edu.wpi.first.math.util.Units.rotationsToRadians(driveMotor.getSignal(TalonFXSignal.POSITION));
@@ -188,6 +188,12 @@ public class SwerveModule {
         return Rotation2d.fromRotations(steerMotor.getSignal(TalonFXSignal.POSITION));
     }
 
+    /**
+     * Converts the drive wheel rotations to meters.
+     *
+     * @param rotations the rotations of the drive wheel
+     * @return the distance the drive wheel has traveled in meters
+     */
     private double driveWheelRotationsToMeters(double rotations) {
         return Conversions.rotationsToDistance(rotations, wheelDiameterMeters);
     }

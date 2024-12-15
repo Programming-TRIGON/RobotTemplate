@@ -137,7 +137,7 @@ public class Swerve extends MotorSubsystem {
     }
 
     /**
-     * Gets the positions of the drive wheels in radians. We don't use a {@link Rotation2d} because this method returns distance, not rotation.
+     * Gets the positions of the drive wheels in radians. We don't use a {@link Rotation2d} because this method returns distance, not rotations.
      *
      * @return the positions of the drive wheels in radians
      */
@@ -168,7 +168,7 @@ public class Swerve extends MotorSubsystem {
     }
 
     /**
-     * Drives the swerve to a certain angle relative to the robot. Used for Wheel Radius Characterization.
+     * Drives the swerve to a certain angular velocity. Used for Wheel Radius Characterization.
      *
      * @param omegaRadiansPerSecond the target angular velocity in radians per second
      */
