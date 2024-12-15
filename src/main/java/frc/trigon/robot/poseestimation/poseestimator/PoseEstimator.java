@@ -7,6 +7,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.trigon.robot.RobotContainer;
+import frc.trigon.robot.constants.CameraConstants;
 import frc.trigon.robot.constants.FieldConstants;
 import frc.trigon.robot.poseestimation.apriltagcamera.AprilTagCamera;
 import frc.trigon.robot.poseestimation.apriltagcamera.AprilTagCameraConstants;
@@ -26,7 +27,7 @@ import java.util.NoSuchElementException;
 public class PoseEstimator implements AutoCloseable {
     private final Field2d field = new Field2d();
     private final AprilTagCamera[] aprilTagCameras;
-    private final T265 t265 = T265.getInstance();
+    private final T265 t265 = CameraConstants.T265;
     private final TimeInterpolatableBuffer<Pose2d> previousOdometryPoses = TimeInterpolatableBuffer.createBuffer(PoseEstimatorConstants.POSE_BUFFER_SIZE_SECONDS);
 
     private Pose2d
@@ -173,7 +174,6 @@ public class PoseEstimator implements AutoCloseable {
 
         addT265Observation(
                 t265.getEstimatedRobotPose(),
-                T265Constants.STANDARD_DEVIATIONS,
                 t265.getLatestResultTimestampSeconds()
         );
     }
@@ -217,11 +217,10 @@ public class PoseEstimator implements AutoCloseable {
     /**
      * Sets the estimated T265 position at the given timestamp.
      *
-     * @param estimatedPose      the estimated robot pose
-     * @param standardDeviations the standard deviations of the estimated pose
-     * @param timestamp          the timestamp of the observation
+     * @param estimatedPose the estimated robot pose
+     * @param timestamp     the timestamp of the observation
      */
-    private void addT265Observation(Pose2d estimatedPose, PoseEstimatorConstants.StandardDeviations standardDeviations, double timestamp) {
+    private void addT265Observation(Pose2d estimatedPose, double timestamp) {
         if (isObservationTooOld(timestamp))
             return;
 
@@ -233,7 +232,7 @@ public class PoseEstimator implements AutoCloseable {
         final Pose2d estimatedPoseAtObservationTime = estimatedPose.plus(odometryPoseToSamplePoseTransform);
 
         final Pose2d estimatedOdometryPose = estimatedPoseAtObservationTime.plus(odometryPoseToSamplePoseTransform.inverse());
-        this.estimatedPose = estimatedOdometryPose.plus(calculatePoseStandardDeviations(estimatedPoseAtObservationTime, standardDeviations));
+        this.estimatedPose = estimatedOdometryPose.plus(calculatePoseStandardDeviations(estimatedPoseAtObservationTime, T265Constants.STANDARD_DEVIATIONS));
     }
 
     private boolean isObservationTooOld(double timestamp) {

@@ -8,7 +8,6 @@ import edu.wpi.first.networktables.*;
 import org.littletonrobotics.junction.Logger;
 
 public class T265 {
-    private static T265 INSTANCE;
     private final NetworkTable t265NetworkTable = NetworkTableInstance.getDefault().getTable("T265");
 
     private final IntegerSubscriber framesPerSecond = t265NetworkTable.getIntegerTopic("FPS").subscribe(0);
@@ -18,12 +17,6 @@ public class T265 {
 
     private Transform2d t265ToRobotTransform = new Transform2d(0, 0, new Rotation2d(0));
     private double latestResultTimestampSeconds = 0;
-
-    public static T265 getInstance() {
-        if (INSTANCE == null)
-            INSTANCE = new T265();
-        return INSTANCE;
-    }
 
     public void updatePeriodically() {
         updateLatestResultTimestampSeconds();
