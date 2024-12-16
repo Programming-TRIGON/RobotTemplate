@@ -28,19 +28,19 @@ public class SwerveModuleConstants {
             DRIVE_MOTOR_NEUTRAL_MODE_VALUE = NeutralModeValue.Brake,
             STEER_MOTOR_NEUTRAL_MODE_VALUE = NeutralModeValue.Brake;
     private static final double
-            DRIVE_MOTOR_SLIP_CURRENT = RobotHardwareStats.isSimulation() ? 1000 : 80, // TODO: calibrate right before competition
-            STEER_MOTOR_CURRENT_LIMIT = RobotHardwareStats.isSimulation() ? 1000 : 30;
+            DRIVE_MOTOR_SLIP_CURRENT = RobotHardwareStats.isSimulation() ? 200 : 80, // TODO: calibrate right before competition
+            STEER_MOTOR_CURRENT_LIMIT = RobotHardwareStats.isSimulation() ? 200 : 30;
     private static final double
-            STEER_MOTOR_P = RobotHardwareStats.isSimulation() ? 75 : 75,
+            STEER_MOTOR_P = RobotHardwareStats.isSimulation() ? 20 : 0,
             STEER_MOTOR_I = 0,
             STEER_MOTOR_D = 0;
     private static final double
             DRIVE_MOTOR_P = RobotHardwareStats.isSimulation() ? 50 : 50,
             DRIVE_MOTOR_I = 0,
             DRIVE_MOTOR_D = 0,
-            DRIVE_MOTOR_KS = RobotHardwareStats.isSimulation() ? 1 : 0,
-            DRIVE_MOTOR_KV = RobotHardwareStats.isSimulation() ? 1 : 0,
-            DRIVE_MOTOR_KA = RobotHardwareStats.isSimulation() ? 1 : 0;
+            DRIVE_MOTOR_KS = RobotHardwareStats.isSimulation() ? 0 : 0,
+            DRIVE_MOTOR_KV = RobotHardwareStats.isSimulation() ? 0 : 0,
+            DRIVE_MOTOR_KA = RobotHardwareStats.isSimulation() ? 0 : 0;
     static final boolean ENABLE_FOC = true;
     static final TalonFXConfiguration
             DRIVE_MOTOR_CONFIGURATION = generateDriveMotorConfiguration(),

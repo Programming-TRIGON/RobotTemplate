@@ -34,6 +34,14 @@ public class SwerveModule {
             latestOdometryDrivePositions,
             latestOdometrySteerPositions;
 
+    /**
+     * Constructs a new SwerveModule with the given module ID, wheel diameter, and offset rotations.
+     * MAKE SURE TO PUT THESE PARAMETERS IN THE RIGHT ORDER!!!
+     *
+     * @param moduleID            the ID of the module
+     * @param wheelDiameterMeters the diameter of the drive wheel in meters
+     * @param offsetRotations     the module's encoder offset in rotations
+     */
     public SwerveModule(int moduleID, double wheelDiameterMeters, double offsetRotations) {
         this.wheelDiameterMeters = wheelDiameterMeters;
         driveMotor = new TalonFXMotor(moduleID, "Module" + moduleID + "Drive", RobotConstants.CANIVORE_NAME);
@@ -160,7 +168,7 @@ public class SwerveModule {
     }
 
     private void setTargetClosedLoopVelocity(double targetVelocityMetersPerSecond) {
-        final double targetVelocityRotationsPerSecond = Conversions.distanceToRotations(targetVelocityMetersPerSecond, wheelDiameterMeters);
+        final double targetVelocityRotationsPerSecond = driveWheelRotationsToMeters(targetVelocityMetersPerSecond);
         driveMotor.setControl(driveVelocityRequest.withVelocity(targetVelocityRotationsPerSecond));
     }
 
