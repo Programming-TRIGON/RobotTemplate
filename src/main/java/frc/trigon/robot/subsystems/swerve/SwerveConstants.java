@@ -47,11 +47,11 @@ public class SwerveConstants {
 
     private static final DoubleSupplier SIMULATION_YAW_VELOCITY_SUPPLIER = () -> RobotContainer.SWERVE.getSelfRelativeVelocity().omegaRadiansPerSecond;
 
-    private static final double
-            FRONT_MODULE_X_DISTANCE_FROM_CENTER = 0,
-            FRONT_MODULE_Y_DISTANCE_FROM_CENTER = 0,
-            REAR_MODULE_X_DISTANCE_FROM_CENTER = 0,
-            REAR_MODULE_Y_DISTANCE_FROM_CENTER = 0;
+    private static final double//TODO: Find these values
+            FRONT_MODULE_X_DISTANCE_FROM_CENTER = 0.25,
+            FRONT_MODULE_Y_DISTANCE_FROM_CENTER = 0.25,
+            REAR_MODULE_X_DISTANCE_FROM_CENTER = 0.25,
+            REAR_MODULE_Y_DISTANCE_FROM_CENTER = 0.25;
     public static final Translation2d[] MODULE_LOCATIONS = {
             new Translation2d(FRONT_MODULE_X_DISTANCE_FROM_CENTER, FRONT_MODULE_Y_DISTANCE_FROM_CENTER),
             new Translation2d(FRONT_MODULE_X_DISTANCE_FROM_CENTER, -FRONT_MODULE_Y_DISTANCE_FROM_CENTER),

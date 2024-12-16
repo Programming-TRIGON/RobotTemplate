@@ -59,7 +59,7 @@ public class PoseEstimator implements AutoCloseable {
     }
 
     public void periodic() {
-        updateFromRelativePoseSource();
+        updateFromRelativeRobotPoseSource();
         field.setRobotPose(getCurrentEstimatedPose());
         if (RobotHardwareStats.isSimulation())
             AprilTagCameraConstants.VISION_SIMULATION.update(RobotContainer.POSE_ESTIMATOR.getCurrentOdometryPose());
@@ -140,24 +140,20 @@ public class PoseEstimator implements AutoCloseable {
         updateOdometryPositions(swerveModulePositions, gyroHeading);
     }
 
-    private void updateFromRelativePoseSource() {
-        updateAllCameras();
-        for (AprilTagCamera aprilTagCamera : aprilTagCameras)
+    private void updateFromRelativeRobotPoseSource() {
+        for (AprilTagCamera aprilTagCamera : aprilTagCameras) {
+            aprilTagCamera.update();
+
             if (aprilTagCamera.isWithinBestTagRangeForSolvePNP())
                 t265.resetOffset(aprilTagCamera.getEstimatedRobotPose());
+        }
 
         t265.updatePeriodically();
 
-        addT265Observation(
+        addRelativeRobotPoseSourceObservation(
                 t265.getEstimatedRobotPose(),
                 t265.getLatestResultTimestampSeconds()
         );
-    }
-
-    private void updateAllCameras() {
-        for (AprilTagCamera aprilTagCamera : aprilTagCameras) {
-            aprilTagCamera.update();
-        }
     }
 
     /**
@@ -166,7 +162,7 @@ public class PoseEstimator implements AutoCloseable {
      * @param estimatedPose the estimated robot pose
      * @param timestamp     the timestamp of the observation
      */
-    private void addT265Observation(Pose2d estimatedPose, double timestamp) {
+    private void addRelativeRobotPoseSourceObservation(Pose2d estimatedPose, double timestamp) {
         if (isObservationTooOld(timestamp))
             return;
 
