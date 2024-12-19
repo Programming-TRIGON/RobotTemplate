@@ -32,7 +32,7 @@ import org.trigon.utilities.mirrorable.MirrorablePose2d;
 import org.trigon.utilities.mirrorable.MirrorableRotation2d;
 
 public class Swerve extends MotorSubsystem {
-    private final Pigeon2Gyro gyro = frc.trigon.robot.subsystems.swerve.SwerveConstants.GYRO;
+    private final Pigeon2Gyro gyro = SwerveConstants.GYRO;
     private final SwerveModule[] swerveModules = SwerveConstants.SWERVE_MODULES;
     private final Phoenix6SignalThread phoenix6SignalThread = Phoenix6SignalThread.getInstance();
     private final SwerveSetpointGenerator setpointGenerator;
@@ -253,8 +253,7 @@ public class Swerve extends MotorSubsystem {
         speeds.omegaRadiansPerSecond = calculateProfiledAngleSpeedToTargetAngle(targetAngle);
         selfRelativeDrive(speeds);
     }
-
-
+    
     /**
      * This method will take in desired robot-relative chassis targetSpeeds,
      * generate a swerve setpoint, then set the target state for each module
@@ -267,6 +266,10 @@ public class Swerve extends MotorSubsystem {
                 targetSpeeds,
                 RobotHardwareStats.getPeriodicTimeSeconds()
         );
+        if (isStill(previousSetpoint.robotRelativeSpeeds())) {
+            stop();
+            return;
+        }
         setTargetModuleStates(previousSetpoint.moduleStates());
     }
 
