@@ -14,7 +14,9 @@ import frc.trigon.robot.subsystems.swerve.SwerveConstants;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.trigon.hardware.RobotHardwareStats;
+import org.trigon.utilities.QuickSort;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
@@ -29,7 +31,12 @@ public class PoseEstimator implements AutoCloseable {
     private Pose2d
             odometryPose = new Pose2d(),
             estimatedPose = new Pose2d();
-    private SwerveModulePosition[] lastSwerveModulePositions = new SwerveModulePosition[4];
+    private SwerveModulePosition[] lastSwerveModulePositions = new SwerveModulePosition[]{
+            new SwerveModulePosition(),
+            new SwerveModulePosition(),
+            new SwerveModulePosition(),
+            new SwerveModulePosition()
+    };
     private Rotation2d lastGyroHeading = new Rotation2d();
 
     /**
@@ -131,7 +138,7 @@ public class PoseEstimator implements AutoCloseable {
     }
 
     /**
-     * Sets the odometry position at a given timestamp.
+     * Sets the estimated pose from the odometry at the given timestamp.
      *
      * @param swerveModulePositions the positions of each swerve module
      * @param gyroHeading           the heading of the gyro
@@ -144,26 +151,28 @@ public class PoseEstimator implements AutoCloseable {
         updateRobotPosesFromNewOdometryPoseDifference(newOdometryPoseDifference, timestamp);
     }
 
+    /**
+     * Updates the estimated pose from the cameras.
+     */
     private void updateFromVision() {
-        updateAllCameras();
-        sortCamerasByLastTargetTimestamp();
-        addVisionObservations();
+        Arrays.stream(aprilTagCameras).forEach(AprilTagCamera::update);
+
+        final AprilTagCamera[] newResultCameras = Arrays.stream(aprilTagCameras)
+                .filter(AprilTagCamera::hasNewResult)
+                .toArray(AprilTagCamera[]::new);
+        sortCamerasByLastTargetTimestamp(newResultCameras);
+
+        updateEstimatedPoseFromVision();
     }
 
-    private void updateAllCameras() {
-        for (AprilTagCamera aprilTagCamera : aprilTagCameras) {
-            aprilTagCamera.update();
-        }
-    }
-
-    private void sortCamerasByLastTargetTimestamp() {
-        VisionObservationSorter.quickSortByDoubleValue(aprilTagCameras, (aprilTagCamera) -> ((AprilTagCamera) aprilTagCamera).getLatestResultTimestampSeconds());
+    private void sortCamerasByLastTargetTimestamp(AprilTagCamera[] aprilTagCameras) {
+        QuickSort.sort(aprilTagCameras, (aprilTagCamera) -> ((AprilTagCamera) aprilTagCamera).getLatestResultTimestampSeconds());
     }
 
     /**
-     * Sets the estimated vision pose at the timestamps of the results from the cameras.
+     * Sets the estimated pose from each camera, each at the timestamp of their latest result.
      */
-    private void addVisionObservations() {
+    private void updateEstimatedPoseFromVision() {
         for (AprilTagCamera aprilTagCamera : aprilTagCameras) {
             if (!aprilTagCamera.hasNewResult())
                 continue;
@@ -187,15 +196,15 @@ public class PoseEstimator implements AutoCloseable {
         if (isVisionObservationTooOld(timestamp))
             return;
 
-        final Pose2d odometrySample = getPoseSample(timestamp);
-        if (odometrySample == null)
+        final Pose2d poseSampleAtObservationTimestamp = getPoseSample(timestamp);
+        if (poseSampleAtObservationTimestamp == null)
             return;
 
-        final Transform2d odometryPoseToSamplePoseTransform = new Transform2d(odometryPose, odometrySample);
+        final Transform2d odometryPoseToSamplePoseTransform = new Transform2d(odometryPose, poseSampleAtObservationTimestamp);
         final Pose2d estimatedPoseAtObservationTime = estimatedPose.plus(odometryPoseToSamplePoseTransform);
 
         final Pose2d estimatedOdometryPose = estimatedPoseAtObservationTime.plus(odometryPoseToSamplePoseTransform.inverse());
-        this.estimatedPose = estimatedOdometryPose.plus(calculatePoseStandardDeviations(estimatedPoseAtObservationTime, standardDeviations));
+        this.estimatedPose = estimatedOdometryPose.plus(calculatePoseAmbiguity(estimatedPoseAtObservationTime, standardDeviations));
     }
 
     private boolean isVisionObservationTooOld(double timestamp) {
@@ -222,31 +231,19 @@ public class PoseEstimator implements AutoCloseable {
         return estimatedPose.plus(odometryPoseToSamplePoseTransform);
     }
 
-    private Transform2d calculatePoseStandardDeviations(Pose2d estimatedPoseAtObservationTime, PoseEstimatorConstants.StandardDeviations cameraStandardDeviations) {
+    /**
+     * Calculates the ambiguity of the estimated pose from the standard deviations of the camera.
+     *
+     * @param estimatedPoseAtObservationTime the pose estimate at the timestamp of the camera's observation
+     * @param cameraStandardDeviations       the standard deviations of the camera
+     * @return the ambiguity of the estimated pose
+     */
+    private Transform2d calculatePoseAmbiguity(Pose2d estimatedPoseAtObservationTime, PoseEstimatorConstants.StandardDeviations cameraStandardDeviations) {
         final Transform2d poseEstimateAtObservationTimeToObservationPose = new Transform2d(estimatedPoseAtObservationTime, estimatedPose);
-        final PoseEstimatorConstants.StandardDeviations estimatedPoseStandardDeviations = combineOdometryAndVisionStandardDeviations(cameraStandardDeviations);
+        final PoseEstimatorConstants.StandardDeviations estimatedPoseStandardDeviations = cameraStandardDeviations.combineOdometryAndVisionStandardDeviations();
         return scaleTransformFromStandardDeviations(poseEstimateAtObservationTimeToObservationPose, estimatedPoseStandardDeviations);
     }
 
-    private PoseEstimatorConstants.StandardDeviations combineOdometryAndVisionStandardDeviations(PoseEstimatorConstants.StandardDeviations observationStandardDeviation) {
-        final PoseEstimatorConstants.StandardDeviations odometryStandardDeviations = PoseEstimatorConstants.ODOMETRY_STANDARD_DEVIATIONS;
-
-        return new PoseEstimatorConstants.StandardDeviations(
-                combineOdometryAndVisionStandardDeviation(odometryStandardDeviations.translation(), observationStandardDeviation.translation()),
-                combineOdometryAndVisionStandardDeviation(odometryStandardDeviations.theta(), observationStandardDeviation.theta())
-        );
-    }
-
-    /**
-     * Combines a standard deviation value of the odometry and of the vision result to get a new standard deviation.
-     *
-     * @param odometryStandardDeviation a standard deviation value of the estimated odometry pose
-     * @param visionStandardDeviation   a standard deviation value of the estimated vision pose
-     * @return the combined standard deviation
-     */
-    private double combineOdometryAndVisionStandardDeviation(double odometryStandardDeviation, double visionStandardDeviation) {
-        return odometryStandardDeviation / (odometryStandardDeviation + Math.sqrt(odometryStandardDeviation * visionStandardDeviation));
-    }
 
     private Transform2d scaleTransformFromStandardDeviations(Transform2d transform, PoseEstimatorConstants.StandardDeviations standardDeviations) {
         return new Transform2d(
@@ -256,6 +253,13 @@ public class PoseEstimator implements AutoCloseable {
         );
     }
 
+    /**
+     * Calculates the difference between the previous and current odometry poses.
+     *
+     * @param swerveModulePositions the current positions of each swerve module
+     * @param gyroHeading           the current heading of the gyro
+     * @return the difference as a {@link edu.wpi.first.math.geometry.Twist2d}
+     */
     private Twist2d calculateNewOdometryPoseDifference(SwerveModulePosition[] swerveModulePositions, Rotation2d gyroHeading) {
         final Twist2d odometryDifferenceTwist2d = SwerveConstants.KINEMATICS.toTwist2d(lastSwerveModulePositions, swerveModulePositions);
         return new Twist2d(odometryDifferenceTwist2d.dx, odometryDifferenceTwist2d.dy, gyroHeading.minus(lastGyroHeading).getRadians());
