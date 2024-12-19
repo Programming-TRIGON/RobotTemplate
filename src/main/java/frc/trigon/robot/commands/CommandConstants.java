@@ -9,6 +9,8 @@ import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.commands.commandfactories.GeneralCommands;
 import frc.trigon.robot.constants.OperatorConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveCommands;
+import frc.trigon.robot.subsystems.swerve.SwerveConstants;
+import org.trigon.commands.WheelRadiusCharacterizationCommand;
 import org.trigon.hardware.misc.XboxController;
 import org.trigon.hardware.misc.leds.LEDCommands;
 import org.trigon.hardware.misc.leds.LEDStrip;
@@ -27,13 +29,13 @@ public class CommandConstants {
 
     public static final Command
             FIELD_RELATIVE_DRIVE_COMMAND = SwerveCommands.getOpenLoopFieldRelativeDriveCommand(
-            () -> calculateDriveStickAxisValue(DRIVER_CONTROLLER.getLeftX()),
             () -> calculateDriveStickAxisValue(DRIVER_CONTROLLER.getLeftY()),
+            () -> calculateDriveStickAxisValue(DRIVER_CONTROLLER.getLeftX()),
             () -> calculateRotationStickAxisValue(DRIVER_CONTROLLER.getRightX())
     ),
             SELF_RELATIVE_DRIVE_COMMAND = SwerveCommands.getOpenLoopSelfRelativeDriveCommand(
-                    () -> calculateDriveStickAxisValue(DRIVER_CONTROLLER.getLeftX()),
                     () -> calculateDriveStickAxisValue(DRIVER_CONTROLLER.getLeftY()),
+                    () -> calculateDriveStickAxisValue(DRIVER_CONTROLLER.getLeftX()),
                     () -> calculateRotationStickAxisValue(DRIVER_CONTROLLER.getRightX())
             ),
             RESET_HEADING_COMMAND = new InstantCommand(() -> RobotContainer.POSE_ESTIMATOR.resetPose(changeRotation(new MirrorablePose2d(RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose(), false), new Rotation2d()).get())),
@@ -43,7 +45,14 @@ public class CommandConstants {
                     () -> getYPowerFromPov(DRIVER_CONTROLLER.getPov()) / OperatorConstants.POV_DIVIDER / calculateShiftModeValue(MINIMUM_TRANSLATION_SHIFT_POWER),
                     () -> 0
             ),
-            STATIC_WHITE_LED_COLOR_COMMAND = LEDCommands.getStaticColorCommand(Color.kWhite, LEDStrip.LED_STRIPS);
+            STATIC_WHITE_LED_COLOR_COMMAND = LEDCommands.getStaticColorCommand(Color.kWhite, LEDStrip.LED_STRIPS),
+            WHEEL_RADIUS_CHARACTERIZATION_COMMAND = new WheelRadiusCharacterizationCommand(
+                    SwerveConstants.MODULE_LOCATIONS,
+                    RobotContainer.SWERVE::getDriveWheelPositionsRadians,
+                    () -> RobotContainer.SWERVE.getHeading().getRadians(),
+                    RobotContainer.SWERVE::runWheelRadiusCharacterization,
+                    RobotContainer.SWERVE
+            );
 
 
     /**
