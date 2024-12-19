@@ -151,7 +151,7 @@ public class SwerveModule {
 
     /**
      * Sets the target velocity for the module.
-     * First, {@link this#reduceSkew} is called to reduce the skew by lowering the target velocity according to the error.
+     * First, {@link this#reduceSkew(double, Rotation2d)} is called to reduce the skew by lowering the target velocity according to the error.
      * Then, the target velocity is set using either closed loop or open loop depending on {@link this#shouldDriveMotorUseClosedLoop}.
      *
      * @param targetVelocityMetersPerSecond the target velocity, in meters per second
