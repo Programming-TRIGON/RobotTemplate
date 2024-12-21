@@ -29,8 +29,7 @@ public class RelativeRobotPoseSource {
 
     @AutoLogOutput
     public Pose2d getEstimatedRobotPose() {
-        final Transform2d robotPose = new Transform2d(transform2dToPose2d(robotToT265), inputs.pose);
-        return transform2dToPose2d(robotPose);
+        return inputs.pose.transformBy(robotToT265.inverse());
     }
 
     public double getLatestResultTimestampSeconds() {

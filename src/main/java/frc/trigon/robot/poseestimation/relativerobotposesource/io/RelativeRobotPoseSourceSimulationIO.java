@@ -9,6 +9,7 @@ public class RelativeRobotPoseSourceSimulationIO extends RelativeRobotPoseSource
     @Override
     protected void updateInputs(RelativeRobotPoseSourceInputsAutoLogged inputs) {
         inputs.pose = RobotContainer.POSE_ESTIMATOR.getCurrentOdometryPose();
+        inputs.hasNewResult = true;
         inputs.latestResultTimestampSeconds = Timer.getFPGATimestamp();
     }
 }
