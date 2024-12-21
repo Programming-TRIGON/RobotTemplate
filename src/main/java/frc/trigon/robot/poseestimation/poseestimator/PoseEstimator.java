@@ -145,7 +145,7 @@ public class PoseEstimator implements AutoCloseable {
             aprilTagCamera.update();
 
             if (aprilTagCamera.isWithinBestTagRangeForSolvePNP())
-                t265.resetOffset(aprilTagCamera.getEstimatedRobotPose());
+                t265.resetOffset(aprilTagCamera.getRobotSolvePNPPose());
         }
 
         t265.updatePeriodically();
