@@ -18,10 +18,6 @@ import org.trigon.hardware.phoenix6.pigeon2.Pigeon2Signal;
 import java.util.function.DoubleSupplier;
 
 public class SwerveConstants {
-    public static final double
-            MAXIMUM_SPEED_METERS_PER_SECOND = RobotHardwareStats.isSimulation() ? 4.9 : 4.04502,
-            MAXIMUM_ROTATIONAL_SPEED_RADIANS_PER_SECOND = RobotHardwareStats.isSimulation() ? 12.03 : 12.03;
-
     private static final int PIGEON_ID = 0;
     static final Pigeon2Gyro GYRO = new Pigeon2Gyro(PIGEON_ID, "SwerveGyro", RobotConstants.CANIVORE_NAME);
     private static final double
@@ -103,6 +99,9 @@ public class SwerveConstants {
             TRANSLATION_PID_CONSTANTS.kI,
             TRANSLATION_PID_CONSTANTS.kD
     );
+    public static final double
+            MAXIMUM_SPEED_METERS_PER_SECOND = RobotHardwareStats.isSimulation() ? 4.9 : 4.04502,
+            MAXIMUM_ROTATIONAL_SPEED_RADIANS_PER_SECOND = RobotHardwareStats.isSimulation() ? 12.03 : 12.03;
 
     static {
         final Pigeon2Configuration config = new Pigeon2Configuration();
