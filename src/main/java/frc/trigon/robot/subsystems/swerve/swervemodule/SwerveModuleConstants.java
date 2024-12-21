@@ -56,9 +56,6 @@ public class SwerveModuleConstants {
     private static final DCMotor
             DRIVE_MOTOR_GEARBOX = DCMotor.getKrakenX60Foc(DRIVE_MOTOR_AMOUNT),
             STEER_MOTOR_GEARBOX = DCMotor.getFalcon500Foc(STEER_MOTOR_AMOUNT);
-    static final SimpleMotorSimulation
-            DRIVE_MOTOR_SIMULATION = createDriveMotorSimulation(),
-            STEER_MOTOR_SIMULATION = createSteerMotorSimulation();
 
     static final double VOLTAGE_COMPENSATION_SATURATION = 12;
     public static final SysIdRoutine.Config DRIVE_MOTOR_SYSID_CONFIG = new SysIdRoutine.Config(
@@ -66,6 +63,26 @@ public class SwerveModuleConstants {
             Units.Volts.of(8),
             Units.Second.of(1000)
     );
+
+    /**
+     * Creates a new SimpleMotorSimulation for the drive motor.
+     * We use a function instead of a constant because we need to create a new instance of the simulation for each module.
+     *
+     * @return the drive motor simulation
+     */
+    static SimpleMotorSimulation createDriveMotorSimulation() {
+        return new SimpleMotorSimulation(DRIVE_MOTOR_GEARBOX, DRIVE_MOTOR_GEAR_RATIO, DRIVE_MOMENT_OF_INERTIA);
+    }
+
+    /**
+     * Creates a new SimpleMotorSimulation for the steer motor.
+     * We use a function instead of a constant because we need to create a new instance of the simulation for each module.
+     *
+     * @return the steer motor simulation
+     */
+    static SimpleMotorSimulation createSteerMotorSimulation() {
+        return new SimpleMotorSimulation(STEER_MOTOR_GEARBOX, STEER_MOTOR_GEAR_RATIO, STEER_MOMENT_OF_INERTIA);
+    }
 
     private static TalonFXConfiguration generateDriveMotorConfiguration() {
         final TalonFXConfiguration config = new TalonFXConfiguration();
@@ -125,13 +142,5 @@ public class SwerveModuleConstants {
         configuration.MagnetSensor.SensorDirection = STEER_ENCODER_DIRECTION;
 
         return configuration;
-    }
-
-    private static SimpleMotorSimulation createDriveMotorSimulation() {
-        return new SimpleMotorSimulation(DRIVE_MOTOR_GEARBOX, DRIVE_MOTOR_GEAR_RATIO, DRIVE_MOMENT_OF_INERTIA);
-    }
-
-    private static SimpleMotorSimulation createSteerMotorSimulation() {
-        return new SimpleMotorSimulation(STEER_MOTOR_GEARBOX, STEER_MOTOR_GEAR_RATIO, STEER_MOMENT_OF_INERTIA);
     }
 }

@@ -214,7 +214,7 @@ public class SwerveModule {
 
     private void configureDriveMotor() {
         driveMotor.applyConfiguration(SwerveModuleConstants.DRIVE_MOTOR_CONFIGURATION);
-        driveMotor.setPhysicsSimulation(SwerveModuleConstants.DRIVE_MOTOR_SIMULATION);
+        driveMotor.setPhysicsSimulation(SwerveModuleConstants.createDriveMotorSimulation());
 
         driveMotor.registerSignal(TalonFXSignal.VELOCITY, 100);
         driveMotor.registerSignal(TalonFXSignal.TORQUE_CURRENT, 100);
@@ -225,7 +225,7 @@ public class SwerveModule {
     private void configureSteerMotor() {
         SwerveModuleConstants.STEER_MOTOR_CONFIGURATION.Feedback.FeedbackRemoteSensorID = steerEncoder.getID();
         steerMotor.applyConfiguration(SwerveModuleConstants.STEER_MOTOR_CONFIGURATION);
-        steerMotor.setPhysicsSimulation(SwerveModuleConstants.STEER_MOTOR_SIMULATION);
+        steerMotor.setPhysicsSimulation(SwerveModuleConstants.createSteerMotorSimulation());
 
         steerMotor.registerSignal(TalonFXSignal.VELOCITY, 100);
         steerMotor.registerSignal(TalonFXSignal.MOTOR_VOLTAGE, 100);
