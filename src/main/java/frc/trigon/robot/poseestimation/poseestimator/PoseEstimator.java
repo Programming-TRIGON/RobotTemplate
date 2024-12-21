@@ -147,7 +147,7 @@ public class PoseEstimator implements AutoCloseable {
     private void addOdometryObservation(SwerveModulePosition[] swerveModulePositions, Rotation2d gyroHeading, double timestamp) {
         final Twist2d newOdometryPoseDifference = calculateNewOdometryPoseDifference(swerveModulePositions, gyroHeading);
         updateRobotPosesFromNewOdometryPoseDifference(newOdometryPoseDifference, timestamp);
-        
+
         updateOdometryPositions(swerveModulePositions, gyroHeading);
     }
 
@@ -178,18 +178,11 @@ public class PoseEstimator implements AutoCloseable {
                 continue;
 
             addVisionObservation(
-                    getCameraEstimatedPose(aprilTagCamera),
+                    aprilTagCamera.getEstimatedRobotPose(),
                     aprilTagCamera.calculateStandardDeviations(),
                     aprilTagCamera.getLatestResultTimestampSeconds()
             );
         }
-    }
-
-    private Pose2d getCameraEstimatedPose(AprilTagCamera aprilTagCamera) {
-        final Pose2d robotPose = aprilTagCamera.getEstimatedRobotPose();
-        if (robotPose == null || robotPose.getTranslation() == null || robotPose.getRotation() == null)
-            return null;
-        return robotPose;
     }
 
     private void addVisionObservation(Pose2d estimatedPose, PoseEstimatorConstants.StandardDeviations standardDeviations, double timestamp) {
