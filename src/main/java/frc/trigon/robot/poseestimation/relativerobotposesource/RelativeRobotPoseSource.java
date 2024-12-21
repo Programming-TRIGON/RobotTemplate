@@ -3,11 +3,11 @@ package frc.trigon.robot.poseestimation.relativerobotposesource;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
+import org.littletonrobotics.junction.AutoLogOutput;
 
 public class RelativeRobotPoseSource {
     private final RelativeRobotPoseSourceInputsAutoLogged inputs = new RelativeRobotPoseSourceInputsAutoLogged();
     private final RelativeRobotPoseSourceIO relativeRobotPoseSourceIO;
-
     private Transform2d robotToT265 = new Transform2d(0, 0, new Rotation2d(0));
 
     public RelativeRobotPoseSource(RelativeRobotPoseSourceIO relativeRobotPoseSourceIO) {
@@ -27,6 +27,7 @@ public class RelativeRobotPoseSource {
         robotToT265 = inputs.pose.minus(robotPose);
     }
 
+    @AutoLogOutput
     public Pose2d getEstimatedRobotPose() {
         final Transform2d robotPose = new Transform2d(transform2dToPose2d(robotToT265), inputs.pose);
         return transform2dToPose2d(robotPose);

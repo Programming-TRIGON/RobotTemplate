@@ -127,7 +127,7 @@ public class PoseEstimator implements AutoCloseable {
     }
 
     /**
-     * Sets the odometry position at a given timestamp.
+     * Sets the estimated robot pose from the odometry at the given timestamp.
      *
      * @param swerveModulePositions the positions of each swerve module
      * @param gyroHeading           the heading of the gyro
@@ -173,8 +173,7 @@ public class PoseEstimator implements AutoCloseable {
         final Transform2d odometryPoseToSamplePoseTransform = new Transform2d(odometryPose, odometrySample);
         final Pose2d estimatedPoseAtObservationTime = estimatedPose.plus(odometryPoseToSamplePoseTransform);
 
-        final Pose2d estimatedOdometryPose = estimatedPoseAtObservationTime.plus(odometryPoseToSamplePoseTransform.inverse());
-        this.estimatedPose = estimatedOdometryPose.plus(calculatePoseStandardDeviations(estimatedPoseAtObservationTime, RelativeRobotPoseSourceConstants.T265_STANDARD_DEVIATIONS));
+        this.estimatedPose = estimatedPose.plus(calculatePoseStandardDeviations(estimatedPoseAtObservationTime, RelativeRobotPoseSourceConstants.T265_STANDARD_DEVIATIONS));
     }
 
     private boolean isObservationTooOld(double timestamp) {

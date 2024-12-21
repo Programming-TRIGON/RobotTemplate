@@ -20,6 +20,7 @@ public class RelativeRobotPoseSourceT265IO extends RelativeRobotPoseSourceIO {
         inputs.framesPerSecond = (int) framesPerSecond.get();
         inputs.batteryPercentage = batteryPercentage.get();
         inputs.pose = getT265Pose();
+        inputs.hasNewResult = positionMeters.getLastChange() > inputs.latestResultTimestampSeconds;
         inputs.latestResultTimestampSeconds = positionMeters.getLastChange();
     }
 
