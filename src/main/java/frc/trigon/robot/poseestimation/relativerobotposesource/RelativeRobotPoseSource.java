@@ -8,7 +8,9 @@ import org.littletonrobotics.junction.AutoLogOutput;
 public class RelativeRobotPoseSource {
     private final RelativeRobotPoseSourceInputsAutoLogged inputs = new RelativeRobotPoseSourceInputsAutoLogged();
     private final RelativeRobotPoseSourceIO relativeRobotPoseSourceIO;
-    private Transform2d robotToT265 = new Transform2d(0, 0, new Rotation2d(0));
+
+    private Pose2d lastResettedRobotPose = new Pose2d(0, 0, new Rotation2d(0));
+    private Pose2d lastResettedRelativePoseSourcePose = new Pose2d(0, 0, new Rotation2d(0));
 
     public RelativeRobotPoseSource(RelativeRobotPoseSourceIO relativeRobotPoseSourceIO) {
         this.relativeRobotPoseSourceIO = relativeRobotPoseSourceIO;
@@ -24,19 +26,17 @@ public class RelativeRobotPoseSource {
      * @param robotPose the current pose of the robot
      */
     public void resetOffset(Pose2d robotPose) {
-        robotToT265 = inputs.pose.minus(robotPose);
+        this.lastResettedRobotPose = robotPose;
+        this.lastResettedRelativePoseSourcePose = inputs.pose;
     }
 
     @AutoLogOutput
     public Pose2d getEstimatedRobotPose() {
-        return inputs.pose.transformBy(robotToT265.inverse());
+        final Transform2d movementFromLastResettedPose = new Transform2d(lastResettedRelativePoseSourcePose, inputs.pose);
+        return lastResettedRobotPose.transformBy(movementFromLastResettedPose);
     }
 
     public double getLatestResultTimestampSeconds() {
         return inputs.latestResultTimestampSeconds;
-    }
-
-    private Pose2d transform2dToPose2d(Transform2d transform) {
-        return new Pose2d(transform.getTranslation(), transform.getRotation());
     }
 }
