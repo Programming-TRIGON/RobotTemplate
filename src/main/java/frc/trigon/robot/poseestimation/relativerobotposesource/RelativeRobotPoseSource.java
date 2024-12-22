@@ -3,6 +3,8 @@ package frc.trigon.robot.poseestimation.relativerobotposesource;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import frc.trigon.robot.RobotContainer;
 import org.littletonrobotics.junction.AutoLogOutput;
 
 public class RelativeRobotPoseSource {
@@ -26,8 +28,10 @@ public class RelativeRobotPoseSource {
      * @param robotPose the current pose of the robot
      */
     public void resetOffset(Pose2d robotPose) {
-        this.lastResettedRobotPose = robotPose;
-        this.lastResettedRelativePoseSourcePose = inputs.pose;
+        if (isUnderMaximumSpeedForOffsetResetting()) {
+            this.lastResettedRobotPose = robotPose;
+            this.lastResettedRelativePoseSourcePose = inputs.pose;
+        }
     }
 
     @AutoLogOutput
@@ -38,5 +42,13 @@ public class RelativeRobotPoseSource {
 
     public double getLatestResultTimestampSeconds() {
         return inputs.latestResultTimestampSeconds;
+    }
+
+    private boolean isUnderMaximumSpeedForOffsetResetting() {
+        final ChassisSpeeds chassisSpeeds = RobotContainer.SWERVE.getSelfRelativeVelocity();
+        final double currentTranslationVelocityMetersPerSecond = Math.hypot(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond);
+        final double currentThetaVelocityRadiansPerSecond = chassisSpeeds.omegaRadiansPerSecond;
+        return currentTranslationVelocityMetersPerSecond <= RelativeRobotPoseSourceConstants.MAXIMUM_TRANSLATION_VELOCITY_FOR_OFFSET_RESETTING_METERS_PER_SECOND &&
+                currentThetaVelocityRadiansPerSecond <= RelativeRobotPoseSourceConstants.MAXIMUM_THETA_VELOCITY_FOR_OFFSET_RESETTING_RADIANS_PER_SECOND;
     }
 }
