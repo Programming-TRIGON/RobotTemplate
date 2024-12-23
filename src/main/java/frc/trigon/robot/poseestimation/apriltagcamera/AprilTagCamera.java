@@ -119,7 +119,7 @@ public class AprilTagCamera {
         if (inputs.visibleTagIDs.length == 0 || !inputs.hasResult || inputs.poseAmbiguity > AprilTagCameraConstants.MAXIMUM_AMBIGUITY)
             return null;
 
-        final Rotation2d fieldRelativeRobotHeading = isWithinBestTagRangeForSolvePNP() ? getSolvePNPHeading() : gyroHeading;
+        final Rotation2d fieldRelativeRobotHeading = isWithinBestTagRangeForSolvePNP() ? getRobotSolvePNPHeading() : gyroHeading;
         final Translation2d fieldRelativeRobotTranslation = getFieldRelativeRobotTranslation(fieldRelativeRobotHeading);
 
         if (fieldRelativeRobotTranslation == null)
