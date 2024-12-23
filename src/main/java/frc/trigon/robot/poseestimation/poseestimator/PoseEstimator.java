@@ -127,7 +127,11 @@ public class PoseEstimator implements AutoCloseable {
     }
 
     /**
+     * <<<<<<< HEAD
      * Sets the estimated robot pose from the odometry at the given timestamp.
+     * =======
+     * Sets the estimated pose from the odometry at the given timestamp.
+     * >>>>>>> redo-poseestimator6328
      *
      * @param swerveModulePositions the positions of each swerve module
      * @param gyroHeading           the heading of the gyro
@@ -166,11 +170,11 @@ public class PoseEstimator implements AutoCloseable {
         if (isObservationTooOld(timestamp))
             return;
 
-        final Pose2d odometrySample = getPoseSample(timestamp);
-        if (odometrySample == null)
+        final Pose2d poseSampleAtObservationTimestamp = getPoseAtTimestamp(timestamp);
+        if (poseSampleAtObservationTimestamp == null)
             return;
 
-        final Transform2d odometryPoseToSamplePoseTransform = new Transform2d(odometryPose, odometrySample);
+        final Transform2d odometryPoseToSamplePoseTransform = new Transform2d(odometryPose, poseSampleAtObservationTimestamp);
         final Pose2d estimatedPoseAtObservationTime = estimatedPose.plus(odometryPoseToSamplePoseTransform);
 
         this.estimatedPose = estimatedPose.plus(calculatePoseStandardDeviations(estimatedPoseAtObservationTime, RelativeRobotPoseSourceConstants.T265_STANDARD_DEVIATIONS));
@@ -193,7 +197,7 @@ public class PoseEstimator implements AutoCloseable {
      * @param timestamp the target timestamp
      * @return the robot's estimated pose at the timestamp
      */
-    public Pose2d getPoseSample(double timestamp) {
+    public Pose2d getPoseAtTimestamp(double timestamp) {
         final Pose2d samplePose = previousOdometryPoses.getSample(timestamp).orElse(new Pose2d());
         final Transform2d odometryPoseToSamplePoseTransform = new Transform2d(odometryPose, samplePose);
 
@@ -226,6 +230,19 @@ public class PoseEstimator implements AutoCloseable {
         return odometryStandardDeviation / (odometryStandardDeviation + Math.sqrt(odometryStandardDeviation * observationStandardDeviation));
     }
 
+    /**
+     * Calculates the ambiguity of the estimated pose from the standard deviations of the camera.
+     *
+     * @param estimatedPoseAtObservationTime the pose estimate at the timestamp of the camera's observation
+     * @param cameraStandardDeviations       the standard deviations of the camera
+     * @return the ambiguity of the estimated pose
+     */
+    private Transform2d calculatePoseAmbiguity(Pose2d estimatedPoseAtObservationTime, PoseEstimatorConstants.StandardDeviations cameraStandardDeviations) {
+        final Transform2d poseEstimateAtObservationTimeToObservationPose = new Transform2d(estimatedPoseAtObservationTime, estimatedPose);
+        final PoseEstimatorConstants.StandardDeviations estimatedPoseStandardDeviations = cameraStandardDeviations.combineOdometryAndVisionStandardDeviations();
+        return scaleTransformFromStandardDeviations(poseEstimateAtObservationTimeToObservationPose, estimatedPoseStandardDeviations);
+    }
+
     private Transform2d scaleTransformFromStandardDeviations(Transform2d transform, PoseEstimatorConstants.StandardDeviations standardDeviations) {
         return new Transform2d(
                 transform.getX() * standardDeviations.translation(),
@@ -234,6 +251,13 @@ public class PoseEstimator implements AutoCloseable {
         );
     }
 
+    /**
+     * Calculates the difference between the previous and current odometry poses.
+     *
+     * @param swerveModulePositions the current positions of each swerve module
+     * @param gyroHeading           the current heading of the gyro
+     * @return the difference as a {@link edu.wpi.first.math.geometry.Twist2d}
+     */
     private Twist2d calculateNewOdometryPoseDifference(SwerveModulePosition[] swerveModulePositions, Rotation2d gyroHeading) {
         final Twist2d odometryDifferenceTwist2d = SwerveConstants.KINEMATICS.toTwist2d(lastSwerveModulePositions, swerveModulePositions);
         return new Twist2d(odometryDifferenceTwist2d.dx, odometryDifferenceTwist2d.dy, gyroHeading.minus(lastGyroHeading).getRadians());

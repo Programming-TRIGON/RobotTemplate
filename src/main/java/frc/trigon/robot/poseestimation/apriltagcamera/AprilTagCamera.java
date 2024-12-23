@@ -105,7 +105,7 @@ public class AprilTagCamera {
      * @return the robot's pose
      */
     private Pose2d calculateBestRobotPose() {
-        final Rotation2d gyroHeadingAtTimestamp = RobotHardwareStats.isSimulation() ? RobotContainer.POSE_ESTIMATOR.getCurrentOdometryPose().getRotation() : RobotContainer.POSE_ESTIMATOR.getPoseSample(inputs.latestResultTimestampSeconds).getRotation();
+        final Rotation2d gyroHeadingAtTimestamp = RobotHardwareStats.isSimulation() ? RobotContainer.POSE_ESTIMATOR.getCurrentOdometryPose().getRotation() : RobotContainer.POSE_ESTIMATOR.getPoseAtTimestamp(inputs.latestResultTimestampSeconds).getRotation();
         return calculateAssumedRobotHeadingPose(gyroHeadingAtTimestamp);
     }
 
@@ -119,10 +119,12 @@ public class AprilTagCamera {
         if (inputs.visibleTagIDs.length == 0 || !inputs.hasResult || inputs.poseAmbiguity > AprilTagCameraConstants.MAXIMUM_AMBIGUITY)
             return null;
 
-        if (!isWithinBestTagRangeForSolvePNP())
-            return new Pose2d(getFieldRelativeRobotTranslation(gyroHeading), gyroHeading);
-        final Rotation2d solvePNPHeading = getRobotSolvePNPHeading();
-        return new Pose2d(getFieldRelativeRobotTranslation(solvePNPHeading), solvePNPHeading);
+        final Rotation2d fieldRelativeRobotHeading = isWithinBestTagRangeForSolvePNP() ? getSolvePNPHeading() : gyroHeading;
+        final Translation2d fieldRelativeRobotTranslation = getFieldRelativeRobotTranslation(fieldRelativeRobotHeading);
+
+        if (fieldRelativeRobotTranslation == null)
+            return null;
+        return new Pose2d(fieldRelativeRobotTranslation, fieldRelativeRobotHeading);
     }
 
     private Translation2d getFieldRelativeRobotTranslation(Rotation2d currentHeading) {
