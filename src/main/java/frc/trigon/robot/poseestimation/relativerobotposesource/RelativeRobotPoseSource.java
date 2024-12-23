@@ -23,7 +23,9 @@ public class RelativeRobotPoseSource {
     }
 
     /**
-     * Resets the offset from the relative robot pose source to the robot pose.
+     * Resets the offset from the relative robot pose source to the robot pose if the robot isn't moving too fast.
+     * The offset is stored as two {@link Pose2d}s, one for the robot's pose and the other for the relative pose source's pose both at the same timestamp.
+     * With these two poses, we can calculate the total distance moved from the relative pose source's perspective and transform the robot's pose by the same amount.
      *
      * @param robotPose the current pose of the robot
      */
