@@ -166,7 +166,7 @@ public class PoseEstimator implements AutoCloseable {
     }
 
     private void sortCamerasByLastTargetTimestamp(AprilTagCamera[] aprilTagCameras) {
-        QuickSort.sort(aprilTagCameras, (aprilTagCamera) -> ((AprilTagCamera) aprilTagCamera).getLatestResultTimestampSeconds());
+        QuickSort.sort(aprilTagCameras, AprilTagCamera::getLatestResultTimestampSeconds);
     }
 
     /**
@@ -236,7 +236,7 @@ public class PoseEstimator implements AutoCloseable {
         final PoseEstimatorConstants.StandardDeviations estimatedPoseStandardDeviations = cameraStandardDeviations.combineOdometryAndVisionStandardDeviations();
         return scaleTransformFromStandardDeviations(poseEstimateAtObservationTimeToObservationPose, estimatedPoseStandardDeviations);
     }
-    
+
     private Transform2d scaleTransformFromStandardDeviations(Transform2d transform, PoseEstimatorConstants.StandardDeviations standardDeviations) {
         return new Transform2d(
                 transform.getX() * standardDeviations.translation(),
