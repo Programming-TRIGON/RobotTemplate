@@ -1,5 +1,7 @@
 package frc.trigon.robot.poseestimation.poseestimator;
 
+import edu.wpi.first.math.geometry.Transform2d;
+
 public class PoseEstimatorConstants {
     public static final double ODOMETRY_FREQUENCY_HERTZ = 250;
 
@@ -22,6 +24,14 @@ public class PoseEstimatorConstants {
             return new PoseEstimatorConstants.StandardDeviations(
                     combineOdometryAndVisionStandardDeviation(odometryStandardDeviations.translation(), this.translation()),
                     combineOdometryAndVisionStandardDeviation(odometryStandardDeviations.theta(), this.theta())
+            );
+        }
+
+        Transform2d scaleTransformFromStandardDeviations(Transform2d transform) {
+            return new Transform2d(
+                    transform.getX() * this.translation(),
+                    transform.getY() * this.translation(),
+                    transform.getRotation().times(this.theta())
             );
         }
 
