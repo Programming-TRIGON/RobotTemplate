@@ -102,7 +102,7 @@ public class AprilTagCamera {
      * @return the robot's pose
      */
     private Pose2d calculateBestRobotPose() {
-        final Rotation2d gyroHeadingAtTimestamp = RobotHardwareStats.isSimulation() ? RobotContainer.POSE_ESTIMATOR.getCurrentOdometryPose().getRotation() : RobotContainer.POSE_ESTIMATOR.getPoseSample(inputs.latestResultTimestampSeconds).getRotation();
+        final Rotation2d gyroHeadingAtTimestamp = RobotHardwareStats.isSimulation() ? RobotContainer.POSE_ESTIMATOR.getCurrentOdometryPose().getRotation() : RobotContainer.POSE_ESTIMATOR.getPoseAtTimestamp(inputs.latestResultTimestampSeconds).getRotation();
         return calculateAssumedRobotHeadingPose(gyroHeadingAtTimestamp);
     }
 

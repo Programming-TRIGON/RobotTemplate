@@ -189,7 +189,7 @@ public class PoseEstimator implements AutoCloseable {
         if (isVisionObservationTooOld(timestamp))
             return;
 
-        final Pose2d poseSampleAtObservationTimestamp = getPoseSample(timestamp);
+        final Pose2d poseSampleAtObservationTimestamp = getPoseAtTimestamp(timestamp);
         if (poseSampleAtObservationTimestamp == null)
             return;
 
@@ -217,7 +217,7 @@ public class PoseEstimator implements AutoCloseable {
      * @param timestamp the target timestamp
      * @return the robot's estimated pose at the timestamp
      */
-    public Pose2d getPoseSample(double timestamp) {
+    public Pose2d getPoseAtTimestamp(double timestamp) {
         final Pose2d samplePose = previousOdometryPoses.getSample(timestamp).orElse(new Pose2d());
         final Transform2d odometryPoseToSamplePoseTransform = new Transform2d(odometryPose, samplePose);
 
@@ -236,8 +236,7 @@ public class PoseEstimator implements AutoCloseable {
         final PoseEstimatorConstants.StandardDeviations estimatedPoseStandardDeviations = cameraStandardDeviations.combineOdometryAndVisionStandardDeviations();
         return scaleTransformFromStandardDeviations(poseEstimateAtObservationTimeToObservationPose, estimatedPoseStandardDeviations);
     }
-
-
+    
     private Transform2d scaleTransformFromStandardDeviations(Transform2d transform, PoseEstimatorConstants.StandardDeviations standardDeviations) {
         return new Transform2d(
                 transform.getX() * standardDeviations.translation(),
