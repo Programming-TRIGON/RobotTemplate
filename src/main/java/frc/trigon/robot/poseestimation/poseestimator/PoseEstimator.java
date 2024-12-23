@@ -206,28 +206,8 @@ public class PoseEstimator implements AutoCloseable {
 
     private Transform2d calculatePoseStandardDeviations(Pose2d estimatedPoseAtObservationTime, PoseEstimatorConstants.StandardDeviations observationStandardDeviations) {
         final Transform2d poseEstimateAtObservationTimeToObservationPose = new Transform2d(estimatedPoseAtObservationTime, estimatedPose);
-        final PoseEstimatorConstants.StandardDeviations estimatedPoseStandardDeviations = combineOdometryAndObservationStandardDeviations(observationStandardDeviations);
+        final PoseEstimatorConstants.StandardDeviations estimatedPoseStandardDeviations = observationStandardDeviations.combineOdometryAndVisionStandardDeviations();
         return scaleTransformFromStandardDeviations(poseEstimateAtObservationTimeToObservationPose, estimatedPoseStandardDeviations);
-    }
-
-    private PoseEstimatorConstants.StandardDeviations combineOdometryAndObservationStandardDeviations(PoseEstimatorConstants.StandardDeviations observationStandardDeviation) {
-        final PoseEstimatorConstants.StandardDeviations odometryStandardDeviations = PoseEstimatorConstants.ODOMETRY_STANDARD_DEVIATIONS;
-
-        return new PoseEstimatorConstants.StandardDeviations(
-                combineOdometryAndObservationStandardDeviation(odometryStandardDeviations.translation(), observationStandardDeviation.translation()),
-                combineOdometryAndObservationStandardDeviation(odometryStandardDeviations.theta(), observationStandardDeviation.theta())
-        );
-    }
-
-    /**
-     * Combines a standard deviation value of the odometry and of the vision result to get a new standard deviation.
-     *
-     * @param odometryStandardDeviation    a standard deviation value of the estimated odometry pose
-     * @param observationStandardDeviation a standard deviation value of the estimated observation pose
-     * @return the combined standard deviation
-     */
-    private double combineOdometryAndObservationStandardDeviation(double odometryStandardDeviation, double observationStandardDeviation) {
-        return odometryStandardDeviation / (odometryStandardDeviation + Math.sqrt(odometryStandardDeviation * observationStandardDeviation));
     }
 
     /**
