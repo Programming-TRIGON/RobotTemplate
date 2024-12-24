@@ -26,25 +26,6 @@ public class PoseEstimatorConstants {
      * @param theta       the ambiguity of the rotation aspect of the pose estimation
      */
     public record StandardDeviations(double translation, double theta) {
-        PoseEstimatorConstants.StandardDeviations combineOdometryAndVisionStandardDeviations() {
-            final PoseEstimatorConstants.StandardDeviations odometryStandardDeviations = PoseEstimatorConstants.ODOMETRY_STANDARD_DEVIATIONS;
-
-            return new PoseEstimatorConstants.StandardDeviations(
-                    combineOdometryAndVisionStandardDeviation(odometryStandardDeviations.translation(), this.translation()),
-                    combineOdometryAndVisionStandardDeviation(odometryStandardDeviations.theta(), this.theta())
-            );
-        }
-
-        /**
-         * Combines a standard deviation value of the odometry and of the vision result to get a new standard deviation.
-         *
-         * @param odometryStandardDeviation a standard deviation value of the estimated odometry pose
-         * @param visionStandardDeviation   a standard deviation value of the estimated vision pose
-         * @return the combined standard deviation
-         */
-        private double combineOdometryAndVisionStandardDeviation(double odometryStandardDeviation, double visionStandardDeviation) {
-            return odometryStandardDeviation / (odometryStandardDeviation + Math.sqrt(odometryStandardDeviation * visionStandardDeviation));
-        }
     }
 }
 

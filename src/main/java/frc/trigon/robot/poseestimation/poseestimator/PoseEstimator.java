@@ -206,21 +206,7 @@ public class PoseEstimator implements AutoCloseable {
 
     private Transform2d calculatePoseStandardDeviations(Pose2d estimatedPoseAtObservationTime, PoseEstimatorConstants.StandardDeviations observationStandardDeviations) {
         final Transform2d poseEstimateAtObservationTimeToObservationPose = new Transform2d(estimatedPoseAtObservationTime, estimatedPose);
-        final PoseEstimatorConstants.StandardDeviations estimatedPoseStandardDeviations = observationStandardDeviations.combineOdometryAndVisionStandardDeviations();
-        return scaleTransformFromStandardDeviations(poseEstimateAtObservationTimeToObservationPose, estimatedPoseStandardDeviations);
-    }
-
-    /**
-     * Calculates the ambiguity of the estimated pose from the standard deviations of the camera.
-     *
-     * @param estimatedPoseAtObservationTime the pose estimate at the timestamp of the camera's observation
-     * @param cameraStandardDeviations       the standard deviations of the camera
-     * @return the ambiguity of the estimated pose
-     */
-    private Transform2d calculatePoseAmbiguity(Pose2d estimatedPoseAtObservationTime, PoseEstimatorConstants.StandardDeviations cameraStandardDeviations) {
-        final Transform2d poseEstimateAtObservationTimeToObservationPose = new Transform2d(estimatedPoseAtObservationTime, estimatedPose);
-        final PoseEstimatorConstants.StandardDeviations estimatedPoseStandardDeviations = cameraStandardDeviations.combineOdometryAndVisionStandardDeviations();
-        return scaleTransformFromStandardDeviations(poseEstimateAtObservationTimeToObservationPose, estimatedPoseStandardDeviations);
+        return scaleTransformFromStandardDeviations(poseEstimateAtObservationTimeToObservationPose, observationStandardDeviations);
     }
 
     private Transform2d scaleTransformFromStandardDeviations(Transform2d transform, PoseEstimatorConstants.StandardDeviations standardDeviations) {
