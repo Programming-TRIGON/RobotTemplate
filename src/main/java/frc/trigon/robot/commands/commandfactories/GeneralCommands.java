@@ -22,12 +22,16 @@ public class GeneralCommands {
     }
 
     /**
-     * @return a command that toggles between the SWERVE's default command, from field relative to self relative
+     * A command that toggles between the SWERVE's default command, from using Joystick oriented rotation to using normal rotation.
+     * Joystick oriented rotation is when the robot rotates directly to the angle of the joystick.
+     * Normal rotation is when the robot rotates at a speed depending on the power given to the joystick.
+     *
+     * @return a command that toggles between the SWERVE's default command, from using Joystick oriented rotation to using normal rotation.
      */
-    public static Command getToggleFieldAndSelfRelativeDriveCommand() {
+    public static Command getToggleRotationModeCommand() {
         return new InstantCommand(() -> {
             if (RobotContainer.SWERVE.getDefaultCommand().equals(CommandConstants.FIELD_RELATIVE_DRIVE_COMMAND))
-                RobotContainer.SWERVE.setDefaultCommand(CommandConstants.SELF_RELATIVE_DRIVE_COMMAND);
+                RobotContainer.SWERVE.setDefaultCommand(CommandConstants.FIELD_RELATIVE_DRIVE_WITH_JOYSTICK_ORIENTED_ROTATION_COMMAND);
             else
                 RobotContainer.SWERVE.setDefaultCommand(CommandConstants.FIELD_RELATIVE_DRIVE_COMMAND);
 

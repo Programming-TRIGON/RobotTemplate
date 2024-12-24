@@ -15,6 +15,7 @@ import org.trigon.hardware.misc.XboxController;
 import org.trigon.hardware.misc.leds.LEDCommands;
 import org.trigon.hardware.misc.leds.LEDStrip;
 import org.trigon.utilities.mirrorable.MirrorablePose2d;
+import org.trigon.utilities.mirrorable.MirrorableRotation2d;
 
 /**
  * A class that contains commands that only use parameters and don't require logic.
@@ -33,6 +34,11 @@ public class CommandConstants {
             () -> calculateDriveStickAxisValue(DRIVER_CONTROLLER.getLeftX()),
             () -> calculateRotationStickAxisValue(DRIVER_CONTROLLER.getRightX())
     ),
+            FIELD_RELATIVE_DRIVE_WITH_JOYSTICK_ORIENTED_ROTATION_COMMAND = SwerveCommands.getOpenLoopFieldRelativeDriveCommand(
+                    () -> calculateDriveStickAxisValue(DRIVER_CONTROLLER.getLeftY()),
+                    () -> calculateDriveStickAxisValue(DRIVER_CONTROLLER.getLeftX()),
+                    CommandConstants::calculateRotationValue
+            ),
             SELF_RELATIVE_DRIVE_COMMAND = SwerveCommands.getOpenLoopSelfRelativeDriveCommand(
                     () -> calculateDriveStickAxisValue(DRIVER_CONTROLLER.getLeftY()),
                     () -> calculateDriveStickAxisValue(DRIVER_CONTROLLER.getLeftX()),
@@ -87,6 +93,11 @@ public class CommandConstants {
         final double minimumShiftValueCoefficient = 1 - (1 / minimumPower);
 
         return 1 - squaredShiftModeValue * minimumShiftValueCoefficient;
+    }
+
+    private static MirrorableRotation2d calculateRotationValue() {
+        final double targetAngleRadians = Math.atan2(DRIVER_CONTROLLER.getRightY(), DRIVER_CONTROLLER.getRightX());
+        return MirrorableRotation2d.fromRadians(targetAngleRadians, false);
     }
 
     private static double getXPowerFromPov(double pov) {
