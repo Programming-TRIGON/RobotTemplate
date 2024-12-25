@@ -189,17 +189,23 @@ public class PoseEstimator implements AutoCloseable {
         if (isVisionObservationTooOld(timestamp))
             return;
 
-        final Pose2d poseSampleAtObservationTimestamp = getPoseAtTimestamp(timestamp);
-        if (poseSampleAtObservationTimestamp == null)
+        final Pose2d poseAtObservationTimestamp = getPoseAtTimestamp(timestamp);
+        if (poseAtObservationTimestamp == null)
             return;
 
-        final Transform2d odometryPoseToSamplePoseTransform = new Transform2d(odometryPose, poseSampleAtObservationTimestamp);
-        final Pose2d estimatedPoseAtObservationTime = estimatedPose.plus(odometryPoseToSamplePoseTransform);
+        final Transform2d odometryPoseToObservationTimestampPoseTransform = new Transform2d(odometryPose, poseAtObservationTimestamp);
+        final Pose2d estimatedPoseAtObservationTime = estimatedPose.plus(odometryPoseToObservationTimestampPoseTransform);
 
-        final Pose2d estimatedOdometryPose = estimatedPoseAtObservationTime.plus(odometryPoseToSamplePoseTransform.inverse());
+        final Pose2d estimatedOdometryPose = estimatedPoseAtObservationTime.plus(odometryPoseToObservationTimestampPoseTransform.inverse());
         this.estimatedPose = estimatedOdometryPose.plus(calculatePoseAmbiguity(estimatedPoseAtObservationTime, standardDeviations));
     }
 
+    /**
+     * Checks if the buffer that stores the previous poses of the robot still has something stored at the target timestamp.
+     *
+     * @param timestamp the target timestamp to check
+     * @return whether the buffer contains a value at that timestamp or not
+     */
     private boolean isVisionObservationTooOld(double timestamp) {
         try {
             final double oldestEstimatedRobotPoseTimestamp = previousOdometryPoses.getInternalBuffer().lastKey() - PoseEstimatorConstants.POSE_BUFFER_SIZE_SECONDS;
@@ -218,10 +224,10 @@ public class PoseEstimator implements AutoCloseable {
      * @return the robot's estimated pose at the timestamp
      */
     public Pose2d getPoseAtTimestamp(double timestamp) {
-        final Pose2d samplePose = previousOdometryPoses.getSample(timestamp).orElse(new Pose2d());
-        final Transform2d odometryPoseToSamplePoseTransform = new Transform2d(odometryPose, samplePose);
+        final Pose2d poseAtTimestamp = previousOdometryPoses.getSample(timestamp).orElse(new Pose2d());
+        final Transform2d odometryPoseToPoseAtTimestampTransform = new Transform2d(odometryPose, poseAtTimestamp);
 
-        return estimatedPose.plus(odometryPoseToSamplePoseTransform);
+        return estimatedPose.plus(odometryPoseToPoseAtTimestampTransform);
     }
 
     /**
