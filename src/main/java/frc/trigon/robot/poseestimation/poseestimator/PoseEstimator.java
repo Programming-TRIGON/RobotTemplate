@@ -160,23 +160,20 @@ public class PoseEstimator implements AutoCloseable {
         final AprilTagCamera[] newResultCameras = Arrays.stream(aprilTagCameras)
                 .filter(AprilTagCamera::hasNewResult)
                 .toArray(AprilTagCamera[]::new);
-        sortCamerasByLastTargetTimestamp(newResultCameras);
+        sortCamerasByLatestResultTimestamp(newResultCameras);
 
-        updateEstimatedPoseFromVision();
+        updateEstimatedPoseFromVision(newResultCameras);
     }
 
-    private void sortCamerasByLastTargetTimestamp(AprilTagCamera[] aprilTagCameras) {
+    private void sortCamerasByLatestResultTimestamp(AprilTagCamera[] aprilTagCameras) {
         QuickSort.sort(aprilTagCameras, AprilTagCamera::getLatestResultTimestampSeconds);
     }
 
     /**
-     * Sets the estimated pose from each camera, each at the timestamp of their latest result.
+     * Updates the estimated pose from each camera, each at the timestamp of their latest result.
      */
-    private void updateEstimatedPoseFromVision() {
+    private void updateEstimatedPoseFromVision(AprilTagCamera[] aprilTagCameras) {
         for (AprilTagCamera aprilTagCamera : aprilTagCameras) {
-            if (!aprilTagCamera.hasNewResult())
-                continue;
-
             addVisionObservation(
                     aprilTagCamera.getEstimatedRobotPose(),
                     aprilTagCamera.calculateStandardDeviations(),
@@ -185,7 +182,7 @@ public class PoseEstimator implements AutoCloseable {
         }
     }
 
-    private void addVisionObservation(Pose2d estimatedPose, PoseEstimatorConstants.StandardDeviations standardDeviations, double timestamp) {
+    private void addVisionObservation(Pose2d estimatedPose, StandardDeviations standardDeviations, double timestamp) {
         if (isVisionObservationTooOld(timestamp))
             return;
 
@@ -197,7 +194,7 @@ public class PoseEstimator implements AutoCloseable {
         final Pose2d estimatedPoseAtObservationTime = estimatedPose.plus(odometryPoseToObservationTimestampPoseTransform);
 
         final Pose2d estimatedOdometryPose = estimatedPoseAtObservationTime.plus(odometryPoseToObservationTimestampPoseTransform.inverse());
-        this.estimatedPose = estimatedOdometryPose.plus(calculatePoseAmbiguity(estimatedPoseAtObservationTime, standardDeviations));
+        this.estimatedPose = estimatedOdometryPose.plus(calculatePoseAmbiguityAsTransform(estimatedPoseAtObservationTime, standardDeviations));
     }
 
     /**
@@ -231,15 +228,15 @@ public class PoseEstimator implements AutoCloseable {
     }
 
     /**
-     * Calculates the ambiguity of the estimated pose from the standard deviations of the camera.
+     * Calculates the ambiguity of the estimated pose from the standard deviations of the camera and stores the values as a {@link Transform2d}.
      *
      * @param estimatedPoseAtObservationTime the pose estimate at the timestamp of the camera's observation
      * @param cameraStandardDeviations       the standard deviations of the camera
-     * @return the ambiguity of the estimated pose
+     * @return the ambiguity of the estimated pose as a {@link Transform2d}
      */
-    private Transform2d calculatePoseAmbiguity(Pose2d estimatedPoseAtObservationTime, PoseEstimatorConstants.StandardDeviations cameraStandardDeviations) {
+    private Transform2d calculatePoseAmbiguityAsTransform(Pose2d estimatedPoseAtObservationTime, StandardDeviations cameraStandardDeviations) {
         final Transform2d poseEstimateAtObservationTimeToObservationPose = new Transform2d(estimatedPoseAtObservationTime, estimatedPose);
-        final PoseEstimatorConstants.StandardDeviations estimatedPoseStandardDeviations = cameraStandardDeviations.combineOdometryAndVisionStandardDeviations();
+        final StandardDeviations estimatedPoseStandardDeviations = cameraStandardDeviations.combineStandardDeviations(PoseEstimatorConstants.ODOMETRY_STANDARD_DEVIATIONS);
         return estimatedPoseStandardDeviations.scaleTransformFromStandardDeviations(poseEstimateAtObservationTimeToObservationPose);
     }
 
