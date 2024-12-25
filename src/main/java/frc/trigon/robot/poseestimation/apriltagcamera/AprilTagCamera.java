@@ -83,17 +83,17 @@ public class AprilTagCamera {
      */
     public PoseEstimatorConstants.StandardDeviations calculateStandardDeviations() {
         final double translationStandardDeviation = calculateStandardDeviations(standardDeviations.translation(), inputs.distanceFromBestTag, inputs.visibleTagIDs.length);
-        final double thetaStandardDeviation = isWithinBestTagRangeForSolvePNP() ? calculateStandardDeviations(standardDeviations.theta(), inputs.distanceFromBestTag, inputs.visibleTagIDs.length) : Double.POSITIVE_INFINITY;
+        final double thetaStandardDeviation = isWithinBestTagRangeForAccurateSolvePNPResult() ? calculateStandardDeviations(standardDeviations.theta(), inputs.distanceFromBestTag, inputs.visibleTagIDs.length) : Double.POSITIVE_INFINITY;
 
         return new PoseEstimatorConstants.StandardDeviations(translationStandardDeviation, thetaStandardDeviation);
     }
 
-    public double getDistanceToBestTagMeters() {
+    public double getDistanceFromBestTagMeters() {
         return inputs.distanceFromBestTag;
     }
 
-    public boolean isWithinBestTagRangeForSolvePNP() {
-        return inputs.distanceFromBestTag < AprilTagCameraConstants.MAXIMUM_DISTANCE_FROM_TAG_FOR_SOLVE_PNP_METERS;
+    public boolean isWithinBestTagRangeForAccurateSolvePNPResult() {
+        return inputs.distanceFromBestTag < AprilTagCameraConstants.MAXIMUM_DISTANCE_FROM_TAG_FOR_ACCURATE_SOLVE_PNP_RESULT_METERS;
     }
 
     /**
@@ -119,7 +119,7 @@ public class AprilTagCamera {
         if (inputs.visibleTagIDs.length == 0 || !inputs.hasResult || inputs.poseAmbiguity > AprilTagCameraConstants.MAXIMUM_AMBIGUITY)
             return null;
 
-        final Rotation2d fieldRelativeRobotHeading = isWithinBestTagRangeForSolvePNP() ? getRobotSolvePNPHeading() : gyroHeading;
+        final Rotation2d fieldRelativeRobotHeading = isWithinBestTagRangeForAccurateSolvePNPResult() ? getRobotSolvePNPHeading() : gyroHeading;
         final Translation2d fieldRelativeRobotTranslation = getFieldRelativeRobotTranslation(fieldRelativeRobotHeading);
 
         if (fieldRelativeRobotTranslation == null)
@@ -228,7 +228,7 @@ public class AprilTagCamera {
             return;
         }
 
-        final Pose3d[] usedTagPoses = isWithinBestTagRangeForSolvePNP() ? new Pose3d[inputs.visibleTagIDs.length] : new Pose3d[1];
+        final Pose3d[] usedTagPoses = isWithinBestTagRangeForAccurateSolvePNPResult() ? new Pose3d[inputs.visibleTagIDs.length] : new Pose3d[1];
         for (int i = 0; i < usedTagPoses.length; i++)
             usedTagPoses[i] = FieldConstants.TAG_ID_TO_POSE.get(inputs.visibleTagIDs[i]);
         Logger.recordOutput("UsedTags/" + this.getName(), usedTagPoses);

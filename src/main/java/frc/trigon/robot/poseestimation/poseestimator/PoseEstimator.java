@@ -7,6 +7,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.trigon.robot.RobotContainer;
+import frc.trigon.robot.constants.CameraConstants;
 import frc.trigon.robot.constants.FieldConstants;
 import frc.trigon.robot.poseestimation.apriltagcamera.AprilTagCamera;
 import frc.trigon.robot.poseestimation.apriltagcamera.AprilTagCameraConstants;
@@ -26,7 +27,7 @@ import java.util.NoSuchElementException;
 public class PoseEstimator implements AutoCloseable {
     private final Field2d field = new Field2d();
     private final AprilTagCamera[] aprilTagCameras;
-    private final RelativeRobotPoseSource t265 = PoseEstimatorConstants.T265;
+    private final RelativeRobotPoseSource t265 = CameraConstants.T265;
     private final TimeInterpolatableBuffer<Pose2d> previousOdometryPoses = TimeInterpolatableBuffer.createBuffer(PoseEstimatorConstants.POSE_BUFFER_SIZE_SECONDS);
 
     private Pose2d
@@ -144,7 +145,7 @@ public class PoseEstimator implements AutoCloseable {
         for (AprilTagCamera aprilTagCamera : aprilTagCameras) {
             aprilTagCamera.update();
 
-            if (aprilTagCamera.isWithinBestTagRangeForSolvePNP())
+            if (aprilTagCamera.isWithinBestTagRangeForAccurateSolvePNPResult())
                 t265.resetOffset(aprilTagCamera.getRobotSolvePNPPose());
         }
 

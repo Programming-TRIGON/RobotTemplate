@@ -8,12 +8,19 @@ import frc.trigon.robot.poseestimation.relativerobotposesource.RelativeRobotPose
 import frc.trigon.robot.poseestimation.relativerobotposesource.RelativeRobotPoseSourceInputsAutoLogged;
 
 public class RelativeRobotPoseSourceT265IO extends RelativeRobotPoseSourceIO {
-    private final NetworkTable t265NetworkTable = NetworkTableInstance.getDefault().getTable("T265");
+    private final IntegerSubscriber framesPerSecond;
+    private final DoubleSubscriber batteryPercentage;
+    private final FloatArraySubscriber positionMeters;
+    private final FloatArraySubscriber rotationRadians;
 
-    private final IntegerSubscriber framesPerSecond = t265NetworkTable.getIntegerTopic("FPS").subscribe(0);
-    private final DoubleSubscriber batteryPercentage = t265NetworkTable.getDoubleTopic("BatteryPercentage").subscribe(0.0f);
-    private final FloatArraySubscriber positionMeters = t265NetworkTable.getFloatArrayTopic("PositionMeters").subscribe(new float[]{0.0f, 0.0f, 0.0f});
-    private final FloatArraySubscriber rotationRadians = t265NetworkTable.getFloatArrayTopic("RotationRadians").subscribe(new float[]{0.0f, 0.0f, 0.0f});
+    public RelativeRobotPoseSourceT265IO(String hostname) {
+        final NetworkTable t265NetworkTable = NetworkTableInstance.getDefault().getTable(hostname);
+
+        framesPerSecond = t265NetworkTable.getIntegerTopic("FPS").subscribe(0);
+        batteryPercentage = t265NetworkTable.getDoubleTopic("BatteryPercentage").subscribe(0.0f);
+        positionMeters = t265NetworkTable.getFloatArrayTopic("PositionMeters").subscribe(new float[]{0.0f, 0.0f, 0.0f});
+        rotationRadians = t265NetworkTable.getFloatArrayTopic("RotationRadians").subscribe(new float[]{0.0f, 0.0f, 0.0f});
+    }
 
     @Override
     protected void updateInputs(RelativeRobotPoseSourceInputsAutoLogged inputs) {
