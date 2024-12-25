@@ -127,11 +127,7 @@ public class PoseEstimator implements AutoCloseable {
     }
 
     /**
-     * <<<<<<< HEAD
      * Sets the estimated robot pose from the odometry at the given timestamp.
-     * =======
-     * Sets the estimated pose from the odometry at the given timestamp.
-     * >>>>>>> redo-poseestimator6328
      *
      * @param swerveModulePositions the positions of each swerve module
      * @param gyroHeading           the heading of the gyro

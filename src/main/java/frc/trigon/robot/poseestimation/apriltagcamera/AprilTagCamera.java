@@ -243,11 +243,9 @@ public class AprilTagCamera {
     }
 
     private Pose2d getRobotPoseFromCameraPose(Pose2d cameraPose) {
-        final Translation2d cameraTranslation = cameraPose.getTranslation();
         final Translation2d robotCenterToCameraTranslation = robotCenterToCamera.getTranslation().toTranslation2d();
-        final Rotation2d cameraRotation = cameraPose.getRotation();
         final Rotation2d robotCenterToCameraRotation = robotCenterToCamera.getRotation().toRotation2d();
 
-        return new Pose2d(cameraTranslation.minus(robotCenterToCameraTranslation), cameraRotation.minus(robotCenterToCameraRotation));
+        return cameraPose.transformBy(new Transform2d(robotCenterToCameraTranslation, robotCenterToCameraRotation).inverse());
     }
 }
