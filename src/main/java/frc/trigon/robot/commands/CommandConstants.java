@@ -37,7 +37,7 @@ public class CommandConstants {
             FIELD_RELATIVE_DRIVE_WITH_JOYSTICK_ORIENTED_ROTATION_COMMAND = SwerveCommands.getOpenLoopFieldRelativeDriveCommand(
                     () -> calculateDriveStickAxisValue(DRIVER_CONTROLLER.getLeftY()),
                     () -> calculateDriveStickAxisValue(DRIVER_CONTROLLER.getLeftX()),
-                    CommandConstants::calculateRotationValue
+                    CommandConstants::calculateJoystickOrientedRotationValue
             ),
             SELF_RELATIVE_DRIVE_COMMAND = SwerveCommands.getOpenLoopSelfRelativeDriveCommand(
                     () -> calculateDriveStickAxisValue(DRIVER_CONTROLLER.getLeftY()),
@@ -95,8 +95,13 @@ public class CommandConstants {
         return 1 - squaredShiftModeValue * minimumShiftValueCoefficient;
     }
 
-    private static MirrorableRotation2d calculateRotationValue() {
-        final double targetAngleRadians = Math.atan2(DRIVER_CONTROLLER.getRightY(), DRIVER_CONTROLLER.getRightX());
+    /**
+     * Calculates the target rotation value from the joystick's angle. Used for joystick oriented rotation.
+     *
+     * @return the rotation value
+     */
+    private static MirrorableRotation2d calculateJoystickOrientedRotationValue() {
+        final double targetAngleRadians = Math.atan2(DRIVER_CONTROLLER.getRightX(), DRIVER_CONTROLLER.getRightY());
         return MirrorableRotation2d.fromRadians(targetAngleRadians, false);
     }
 
