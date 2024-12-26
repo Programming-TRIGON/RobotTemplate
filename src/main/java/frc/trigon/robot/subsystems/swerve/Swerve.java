@@ -37,6 +37,7 @@ public class Swerve extends MotorSubsystem {
     private final Phoenix6SignalThread phoenix6SignalThread = Phoenix6SignalThread.getInstance();
     private final SwerveSetpointGenerator setpointGenerator;
     private SwerveSetpoint previousSetpoint;
+    private MirrorableRotation2d currentFieldRelativeTargetAngle = new MirrorableRotation2d(RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getRotation(), false);
     private double lastTimestamp = Timer.getTimestamp();
 
     public Swerve() {
@@ -212,8 +213,11 @@ public class Swerve extends MotorSubsystem {
      * @param targetAngle the target angle, relative to the blue alliance's forward position
      */
     void fieldRelativeDrive(double xPower, double yPower, MirrorableRotation2d targetAngle) {
+        if (targetAngle != null)
+            currentFieldRelativeTargetAngle = targetAngle;
+
         final ChassisSpeeds speeds = selfRelativeSpeedsFromFieldRelativePowers(xPower, yPower, 0);
-        speeds.omegaRadiansPerSecond = calculateProfiledAngleSpeedToTargetAngle(targetAngle);
+        speeds.omegaRadiansPerSecond = calculateProfiledAngleSpeedToTargetAngle(currentFieldRelativeTargetAngle);
         selfRelativeDrive(speeds);
     }
 
@@ -226,6 +230,7 @@ public class Swerve extends MotorSubsystem {
      */
     void fieldRelativeDrive(double xPower, double yPower, double thetaPower) {
         final ChassisSpeeds speeds = selfRelativeSpeedsFromFieldRelativePowers(xPower, yPower, thetaPower);
+        currentFieldRelativeTargetAngle = new MirrorableRotation2d(RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getRotation(), false);
         selfRelativeDrive(speeds);
     }
 
@@ -253,7 +258,7 @@ public class Swerve extends MotorSubsystem {
         speeds.omegaRadiansPerSecond = calculateProfiledAngleSpeedToTargetAngle(targetAngle);
         selfRelativeDrive(speeds);
     }
-    
+
     /**
      * This method will take in desired robot-relative chassis targetSpeeds,
      * generate a swerve setpoint, then set the target state for each module
