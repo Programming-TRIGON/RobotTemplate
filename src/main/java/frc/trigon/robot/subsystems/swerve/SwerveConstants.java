@@ -50,8 +50,8 @@ public class SwerveConstants {
     private static final double //TODO: set these values
             FRONT_MODULE_X_DISTANCE_FROM_CENTER = 0.25,
             FRONT_MODULE_Y_DISTANCE_FROM_CENTER = 0.25,
-            REAR_MODULE_X_DISTANCE_FROM_CENTER = 0.25,
-            REAR_MODULE_Y_DISTANCE_FROM_CENTER = 0.25;
+            REAR_MODULE_X_DISTANCE_FROM_CENTER = -0.25,
+            REAR_MODULE_Y_DISTANCE_FROM_CENTER = -0.25;
     public static final Translation2d[] MODULE_LOCATIONS = {
             new Translation2d(FRONT_MODULE_X_DISTANCE_FROM_CENTER, FRONT_MODULE_Y_DISTANCE_FROM_CENTER),
             new Translation2d(FRONT_MODULE_X_DISTANCE_FROM_CENTER, -FRONT_MODULE_Y_DISTANCE_FROM_CENTER),
