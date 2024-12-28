@@ -17,7 +17,13 @@ public class StandardDeviations {
         this.theta = theta;
     }
 
-    StandardDeviations combineStandardDeviations(StandardDeviations other) {
+    /**
+     * Combines this with another {@link StandardDeviations}.
+     *
+     * @param other the {@link StandardDeviations} to combine with
+     * @return the combined {@link StandardDeviations}
+     */
+    StandardDeviations combineWith(StandardDeviations other) {
         return new StandardDeviations(
                 combineStandardDeviation(other.translation, translation),
                 combineStandardDeviation(other.theta, theta)
