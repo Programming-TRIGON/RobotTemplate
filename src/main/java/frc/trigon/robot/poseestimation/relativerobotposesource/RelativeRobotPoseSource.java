@@ -22,6 +22,12 @@ public class RelativeRobotPoseSource {
     private Pose2d cameraPoseAtSyncTime = new Pose2d(0, 0, new Rotation2d(0));
     private Pose2d relativePoseSourcePoseAtSyncTime = new Pose2d(0, 0, new Rotation2d(0));
 
+    /**
+     * Constructs a new RelativeRobotPoseSource.
+     *
+     * @param robotCenterToCamera the transform of the robot's origin point to the camera
+     * @param hostname            the name of the camera in the NetworkTables
+     */
     public RelativeRobotPoseSource(Transform2d robotCenterToCamera, String hostname) {
         this.robotCenterToCamera = robotCenterToCamera;
         if (RobotHardwareStats.isReplay()) {
