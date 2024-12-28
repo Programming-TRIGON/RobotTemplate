@@ -54,7 +54,7 @@ public class RelativeRobotPoseSource {
     }
 
     public double getLatestResultTimestampSeconds() {
-        return inputs.latestResultTimestampSeconds;
+        return inputs.lastResultTimestamp;
     }
 
     /**

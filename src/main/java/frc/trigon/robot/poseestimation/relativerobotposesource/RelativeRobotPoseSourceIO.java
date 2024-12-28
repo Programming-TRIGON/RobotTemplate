@@ -13,6 +13,6 @@ public class RelativeRobotPoseSourceIO {
         public double batteryPercentage = 0;
         public Pose2d pose = new Pose2d();
         public boolean hasNewResult = false;
-        public double latestResultTimestampSeconds = 0;
+        public double lastResultTimestamp = 0;
     }
 }
