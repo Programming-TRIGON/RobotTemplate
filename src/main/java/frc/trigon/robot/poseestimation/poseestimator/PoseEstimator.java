@@ -167,20 +167,20 @@ public class PoseEstimator implements AutoCloseable {
 
         relativeRobotPoseSource.updatePeriodically();
 
-        addRelativeRobotPoseSourceObservation(
+        addPoseSourceObservation(
                 relativeRobotPoseSource.getEstimatedRobotPose(),
                 relativeRobotPoseSource.getLatestResultTimestampSeconds(),
-                RelativeRobotPoseSourceConstants.T265_STANDARD_DEVIATIONS
+                RelativeRobotPoseSourceConstants.STANDARD_DEVIATIONS
         );
     }
 
     /**
-     * Sets the estimated relative robot pose source position at the given timestamp.
+     * Sets the estimated pose from a pose source at the given timestamp.
      *
      * @param estimatedPose the estimated robot pose
      * @param timestamp     the timestamp of the observation
      */
-    private void addRelativeRobotPoseSourceObservation(Pose2d estimatedPose, double timestamp, PoseEstimatorConstants.StandardDeviations standardDeviations) {
+    private void addPoseSourceObservation(Pose2d estimatedPose, double timestamp, PoseEstimatorConstants.StandardDeviations standardDeviations) {
         if (isObservationTooOld(timestamp))
             return;
 
