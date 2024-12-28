@@ -223,7 +223,7 @@ public class PoseEstimator implements AutoCloseable {
     }
 
     /**
-     * Checks if the buffer that stores the previous poses of the robot still has something stored at the target timestamp.
+     * Checks if the buffer that stores the previous poses of the robot still has a pose stored at the target timestamp.
      *
      * @param timestamp the target timestamp to check
      * @return whether the buffer contains a value at that timestamp or not
@@ -251,7 +251,7 @@ public class PoseEstimator implements AutoCloseable {
     private Pose2d calculateEstimatedPoseWithAmbiguityCompensation(Pose2d estimatedPoseAtTimestamp, Pose2d observationEstimatedPose, StandardDeviations observationStandardDeviations) {
         final Transform2d estimatedPoseAtTimestampToEstimatedPose = new Transform2d(estimatedPoseAtTimestamp, observationEstimatedPose);
         final Transform2d allowedMovement = calculateAllowedMovementFromAmbiguity(estimatedPoseAtTimestampToEstimatedPose, observationStandardDeviations);
-        return observationEstimatedPose.plus(allowedMovement);
+        return estimatedPoseAtTimestamp.plus(estimatedPoseAtTimestampToEstimatedPose.plus(allowedMovement));
     }
 
     /**
@@ -263,7 +263,7 @@ public class PoseEstimator implements AutoCloseable {
      */
     private Transform2d calculateAllowedMovementFromAmbiguity(Transform2d estimatedPoseAtTimestampToEstimatedPose, StandardDeviations cameraStandardDeviations) {
         final StandardDeviations estimatedPoseStandardDeviations = cameraStandardDeviations.combineWith(PoseEstimatorConstants.ODOMETRY_STANDARD_DEVIATIONS);
-        return estimatedPoseStandardDeviations.scaleTransformFromStandardDeviations(estimatedPoseAtTimestampToEstimatedPose).inverse();
+        return estimatedPoseStandardDeviations.scaleTransformFromStandardDeviations(estimatedPoseAtTimestampToEstimatedPose);
     }
 
     /**
