@@ -214,15 +214,14 @@ public class PoseEstimator implements AutoCloseable {
         if (isVisionObservationTooOld(timestamp))
             return;
 
-        final Pose2d previousEstimatedPoseAtObservationTimestamp = getPoseAtTimestamp(timestamp);
-        if (previousEstimatedPoseAtObservationTimestamp == null)
+        final Pose2d estimatedPoseAtTimestamp = getPoseAtTimestamp(timestamp);
+        if (estimatedPoseAtTimestamp == null)
             return;
 
-        final Transform2d odometryPoseToObservationTimestampPoseTransform = new Transform2d(odometryPose, previousEstimatedPoseAtObservationTimestamp);
-        final Pose2d newEstimatedPoseAtObservationTime = estimatedPose.plus(odometryPoseToObservationTimestampPoseTransform);
+        final Pose2d estimatedPoseWithAmbiguityCompensation = calculateEstimatedPoseWithAmbiguityCompensation(estimatedPoseAtTimestamp, estimatedPose, standardDeviations);
+        final Transform2d estimatedPoseAtTimestampToOdometryPose = new Transform2d(estimatedPoseAtTimestamp, odometryPose);
 
-        final Pose2d estimatedOdometryPose = newEstimatedPoseAtObservationTime.plus(odometryPoseToObservationTimestampPoseTransform.inverse());
-        this.estimatedPose = estimatedOdometryPose.plus(calculateAllowedMovementFromAmbiguity(newEstimatedPoseAtObservationTime, standardDeviations));
+        this.estimatedPose = estimatedPoseWithAmbiguityCompensation.plus(estimatedPoseAtTimestampToOdometryPose);
     }
 
     /**
@@ -243,16 +242,29 @@ public class PoseEstimator implements AutoCloseable {
     }
 
     /**
+     * Calculates the estimated pose of a vision observation with compensation for its ambiguity.
+     *
+     * @param estimatedPoseAtTimestamp      the estimated pose of the robot at the time of the observation
+     * @param observationEstimatedPose      the estimated robot pose from the observation
+     * @param observationStandardDeviations the ambiguity of the observation
+     * @return the estimated pose with compensation for its ambiguity
+     */
+    private Pose2d calculateEstimatedPoseWithAmbiguityCompensation(Pose2d estimatedPoseAtTimestamp, Pose2d observationEstimatedPose, StandardDeviations observationStandardDeviations) {
+        final Transform2d estimatedPoseAtTimestampToEstimatedPose = new Transform2d(estimatedPoseAtTimestamp, observationEstimatedPose);
+        final Transform2d allowedMovement = calculateAllowedMovementFromAmbiguity(estimatedPoseAtTimestampToEstimatedPose, observationStandardDeviations);
+        return observationEstimatedPose.plus(allowedMovement);
+    }
+
+    /**
      * Calculates the allowed movement of the estimated pose and stores the values as a {@link Transform2d}.
      *
-     * @param estimatedPoseAtObservationTime the pose estimate at the timestamp of the camera's observation
-     * @param cameraStandardDeviations       the standard deviations of the camera
+     * @param estimatedPoseAtTimestampToEstimatedPose the difference between the estimated pose of the robot at the time of the observation and the estimated pose from the camera
+     * @param cameraStandardDeviations                the standard deviations of the camera
      * @return the allowed movement of the estimated pose as a {@link Transform2d}
      */
-    private Transform2d calculateAllowedMovementFromAmbiguity(Pose2d estimatedPoseAtObservationTime, StandardDeviations cameraStandardDeviations) {
-        final Transform2d poseEstimateAtObservationTimeToObservationPose = new Transform2d(estimatedPoseAtObservationTime, estimatedPose);
+    private Transform2d calculateAllowedMovementFromAmbiguity(Transform2d estimatedPoseAtTimestampToEstimatedPose, StandardDeviations cameraStandardDeviations) {
         final StandardDeviations estimatedPoseStandardDeviations = cameraStandardDeviations.combineWith(PoseEstimatorConstants.ODOMETRY_STANDARD_DEVIATIONS);
-        return estimatedPoseStandardDeviations.scaleTransformFromStandardDeviations(poseEstimateAtObservationTimeToObservationPose);
+        return estimatedPoseStandardDeviations.scaleTransformFromStandardDeviations(estimatedPoseAtTimestampToEstimatedPose).inverse();
     }
 
     /**
