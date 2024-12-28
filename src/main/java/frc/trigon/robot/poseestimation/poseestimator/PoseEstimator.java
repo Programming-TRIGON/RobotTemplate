@@ -127,8 +127,10 @@ public class PoseEstimator implements AutoCloseable {
      */
     public Pose2d getPoseAtTimestamp(double timestamp) {
         final Pose2d poseAtTimestamp = previousOdometryPoses.getSample(timestamp).orElse(new Pose2d());
-        final Transform2d odometryPoseToPoseAtTimestampTransform = new Transform2d(odometryPose, poseAtTimestamp);
+        if (isTimestampOutOfPreviousHeldPosesRange(timestamp))
+            return null;
 
+        final Transform2d odometryPoseToPoseAtTimestampTransform = new Transform2d(odometryPose, poseAtTimestamp);
         return estimatedPose.plus(odometryPoseToPoseAtTimestampTransform);
     }
 
@@ -207,7 +209,7 @@ public class PoseEstimator implements AutoCloseable {
     }
 
     private void addVisionObservation(Pose2d estimatedPose, StandardDeviations standardDeviations, double timestamp) {
-        if (isVisionObservationTooOld(timestamp))
+        if (isTimestampOutOfPreviousHeldPosesRange(timestamp))
             return;
 
         final Pose2d estimatedPoseAtTimestamp = getPoseAtTimestamp(timestamp);
@@ -226,7 +228,7 @@ public class PoseEstimator implements AutoCloseable {
      * @param timestamp the target timestamp to check
      * @return whether the buffer contains a value at that timestamp or not
      */
-    private boolean isVisionObservationTooOld(double timestamp) {
+    private boolean isTimestampOutOfPreviousHeldPosesRange(double timestamp) {
         try {
             final double oldestEstimatedRobotPoseTimestamp = previousOdometryPoses.getInternalBuffer().lastKey() - PoseEstimatorConstants.POSE_BUFFER_SIZE_SECONDS;
             if (oldestEstimatedRobotPoseTimestamp > timestamp)
@@ -239,6 +241,7 @@ public class PoseEstimator implements AutoCloseable {
 
     /**
      * Calculates the estimated pose of a vision observation with compensation for its ambiguity.
+     * This is done by finding the difference between the estimated pose at the time of the observation and the estimated pose of the observation and scaling that down using the calibrated standard deviations.
      *
      * @param estimatedPoseAtTimestamp      the estimated pose of the robot at the time of the observation
      * @param observationEstimatedPose      the estimated robot pose from the observation
@@ -254,8 +257,8 @@ public class PoseEstimator implements AutoCloseable {
     /**
      * Calculates the allowed movement of the estimated pose and stores the values as a {@link Transform2d}.
      *
-     * @param estimatedPoseAtTimestampToEstimatedPose the difference between the estimated pose of the robot at the time of the observation and the estimated pose from the camera
-     * @param cameraStandardDeviations                the standard deviations of the camera
+     * @param estimatedPoseAtTimestampToEstimatedPose the difference between the estimated pose of the robot at the time of the observation and the estimated pose of the observation
+     * @param cameraStandardDeviations                the standard deviations of the camera's estimated pose
      * @return the allowed movement of the estimated pose as a {@link Transform2d}
      */
     private Transform2d calculateAllowedMovementFromAmbiguity(Transform2d estimatedPoseAtTimestampToEstimatedPose, StandardDeviations cameraStandardDeviations) {
