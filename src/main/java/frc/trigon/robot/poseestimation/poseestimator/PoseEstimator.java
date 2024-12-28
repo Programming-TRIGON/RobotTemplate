@@ -19,6 +19,7 @@ import org.trigon.utilities.QuickSort;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 /**
  * A class that estimates the robot's pose using team 6328's custom pose estimator.
@@ -126,11 +127,11 @@ public class PoseEstimator implements AutoCloseable {
      * @return the robot's estimated pose at the timestamp
      */
     public Pose2d getPoseAtTimestamp(double timestamp) {
-        final Pose2d poseAtTimestamp = previousOdometryPoses.getSample(timestamp).orElse(new Pose2d());
-        if (isTimestampOutOfPreviousHeldPosesRange(timestamp))
+        final Optional<Pose2d> poseAtTimestamp = previousOdometryPoses.getSample(timestamp);
+        if (poseAtTimestamp.isEmpty())
             return null;
 
-        final Transform2d odometryPoseToPoseAtTimestampTransform = new Transform2d(odometryPose, poseAtTimestamp);
+        final Transform2d odometryPoseToPoseAtTimestampTransform = new Transform2d(odometryPose, poseAtTimestamp.get());
         return estimatedPose.plus(odometryPoseToPoseAtTimestampTransform);
     }
 
