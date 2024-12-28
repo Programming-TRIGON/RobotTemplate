@@ -1,14 +1,14 @@
 package frc.trigon.robot.constants;
 
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import frc.trigon.robot.poseestimation.relativerobotposesource.RelativeRobotPoseSource;
 
 public class CameraConstants {
-    private static final Transform3d ROBOT_CENTER_TO_T265 = new Transform3d(
-            new Translation3d(0, 0, 0),
-            new Rotation3d(0, 0, 0)
+    private static final Transform2d ROBOT_CENTER_TO_T265 = new Transform2d(
+            new Translation2d(0, 0),
+            Rotation2d.fromDegrees(0)
     );
 
     public static final RelativeRobotPoseSource T265 = new RelativeRobotPoseSource(ROBOT_CENTER_TO_T265, "T265");

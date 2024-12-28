@@ -64,7 +64,7 @@ public class AprilTagCamera {
     }
 
     public Pose2d getRobotSolvePNPPose() {
-        return getRobotPoseFromCameraPose(inputs.cameraSolvePNPPose.toPose2d());
+        return cameraPoseToRobotPose(inputs.cameraSolvePNPPose.toPose2d());
     }
 
     public String getName() {
@@ -92,6 +92,13 @@ public class AprilTagCamera {
         return inputs.distanceFromBestTag;
     }
 
+    /**
+     * Solve PNP is inaccurate the further the camera is from the tag.
+     * Because of this, there are some things we might want to do only if we are close enough to get an accurate enough result.
+     * This method checks if the current distance from the tag is less than the maximum distance for an accurate result, which is defined as the variable {@link AprilTagCameraConstants#MAXIMUM_DISTANCE_FROM_TAG_FOR_ACCURATE_SOLVE_PNP_RESULT_METERS}
+     *
+     * @return if the camera is close enough to the tag to get an accurate result from solve PNP.
+     */
     public boolean isWithinBestTagRangeForAccurateSolvePNPResult() {
         return inputs.distanceFromBestTag < AprilTagCameraConstants.MAXIMUM_DISTANCE_FROM_TAG_FOR_ACCURATE_SOLVE_PNP_RESULT_METERS;
     }
@@ -242,7 +249,7 @@ public class AprilTagCamera {
         Logger.recordOutput("Poses/Robot/" + name + "/SolvePNPPose", inputs.cameraSolvePNPPose.plus(robotCenterToCamera.inverse()));
     }
 
-    private Pose2d getRobotPoseFromCameraPose(Pose2d cameraPose) {
+    private Pose2d cameraPoseToRobotPose(Pose2d cameraPose) {
         final Translation2d robotCenterToCameraTranslation = robotCenterToCamera.getTranslation().toTranslation2d();
         final Rotation2d robotCenterToCameraRotation = robotCenterToCamera.getRotation().toRotation2d();
 

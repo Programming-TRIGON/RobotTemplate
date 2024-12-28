@@ -7,7 +7,6 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.trigon.robot.RobotContainer;
-import frc.trigon.robot.constants.CameraConstants;
 import frc.trigon.robot.constants.FieldConstants;
 import frc.trigon.robot.poseestimation.apriltagcamera.AprilTagCamera;
 import frc.trigon.robot.poseestimation.apriltagcamera.AprilTagCameraConstants;
@@ -27,9 +26,10 @@ import java.util.NoSuchElementException;
 public class PoseEstimator implements AutoCloseable {
     private final Field2d field = new Field2d();
     private final AprilTagCamera[] aprilTagCameras;
-    private final RelativeRobotPoseSource t265 = CameraConstants.T265;
     private final TimeInterpolatableBuffer<Pose2d> previousOdometryPoses = TimeInterpolatableBuffer.createBuffer(PoseEstimatorConstants.POSE_BUFFER_SIZE_SECONDS);
 
+    private RelativeRobotPoseSource relativeRobotPoseSource;
+    private boolean shouldUseRelativeRobotPoseSource = false;
     private Pose2d
             odometryPose = new Pose2d(),
             estimatedPose = new Pose2d();
@@ -40,6 +40,20 @@ public class PoseEstimator implements AutoCloseable {
             new SwerveModulePosition()
     };
     private Rotation2d lastGyroHeading = new Rotation2d();
+
+    /**
+     * Constructs a new PoseEstimator and sets the relativeRobotPoseSource.
+     *
+     * @param relativeRobotPoseSource the relative robot pose source that should be used to update the pose estimator
+     * @param aprilTagCameras         the apriltag cameras that should be used to update the relative robot pose source
+     */
+    public PoseEstimator(RelativeRobotPoseSource relativeRobotPoseSource, AprilTagCamera... aprilTagCameras) {
+        this(aprilTagCameras);
+
+        this.relativeRobotPoseSource = relativeRobotPoseSource;
+        shouldUseRelativeRobotPoseSource = true;
+
+    }
 
     /**
      * Constructs a new PoseEstimator.
@@ -60,7 +74,8 @@ public class PoseEstimator implements AutoCloseable {
     }
 
     public void periodic() {
-        updateFromRelativeRobotPoseSource();
+        if (shouldUseRelativeRobotPoseSource)
+            updateFromRelativeRobotPoseSource();
         field.setRobotPose(getCurrentEstimatedPose());
         if (RobotHardwareStats.isSimulation())
             AprilTagCameraConstants.VISION_SIMULATION.update(RobotContainer.POSE_ESTIMATOR.getCurrentOdometryPose());
@@ -73,11 +88,12 @@ public class PoseEstimator implements AutoCloseable {
      */
     public void resetPose(Pose2d newPose) {
         RobotContainer.SWERVE.setHeading(newPose.getRotation());
-        t265.resetOffset(newPose);
         odometryPose = newPose;
         estimatedPose = newPose;
         lastGyroHeading = newPose.getRotation();
         previousOdometryPoses.clear();
+        if (shouldUseRelativeRobotPoseSource)
+            relativeRobotPoseSource.resetOffset(newPose);
     }
 
     /**
@@ -146,24 +162,25 @@ public class PoseEstimator implements AutoCloseable {
             aprilTagCamera.update();
 
             if (aprilTagCamera.isWithinBestTagRangeForAccurateSolvePNPResult())
-                t265.resetOffset(aprilTagCamera.getRobotSolvePNPPose());
+                relativeRobotPoseSource.resetOffset(aprilTagCamera.getRobotSolvePNPPose());
         }
 
-        t265.updatePeriodically();
+        relativeRobotPoseSource.updatePeriodically();
 
         addRelativeRobotPoseSourceObservation(
-                t265.getEstimatedRobotPose(),
-                t265.getLatestResultTimestampSeconds()
+                relativeRobotPoseSource.getEstimatedRobotPose(),
+                relativeRobotPoseSource.getLatestResultTimestampSeconds(),
+                RelativeRobotPoseSourceConstants.T265_STANDARD_DEVIATIONS
         );
     }
 
     /**
-     * Sets the estimated T265 position at the given timestamp.
+     * Sets the estimated relative robot pose source position at the given timestamp.
      *
      * @param estimatedPose the estimated robot pose
      * @param timestamp     the timestamp of the observation
      */
-    private void addRelativeRobotPoseSourceObservation(Pose2d estimatedPose, double timestamp) {
+    private void addRelativeRobotPoseSourceObservation(Pose2d estimatedPose, double timestamp, PoseEstimatorConstants.StandardDeviations standardDeviations) {
         if (isObservationTooOld(timestamp))
             return;
 
@@ -174,7 +191,7 @@ public class PoseEstimator implements AutoCloseable {
         final Transform2d odometryPoseToSamplePoseTransform = new Transform2d(odometryPose, poseSampleAtObservationTimestamp);
         final Pose2d estimatedPoseAtObservationTime = estimatedPose.plus(odometryPoseToSamplePoseTransform);
 
-        this.estimatedPose = estimatedPose.plus(calculatePoseStandardDeviations(estimatedPoseAtObservationTime, RelativeRobotPoseSourceConstants.T265_STANDARD_DEVIATIONS));
+        this.estimatedPose = estimatedPose.plus(calculatePoseStandardDeviations(estimatedPoseAtObservationTime, standardDeviations));
     }
 
     private boolean isObservationTooOld(double timestamp) {

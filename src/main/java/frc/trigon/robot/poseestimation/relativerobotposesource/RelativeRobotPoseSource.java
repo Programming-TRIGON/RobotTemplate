@@ -1,6 +1,8 @@
 package frc.trigon.robot.poseestimation.relativerobotposesource;
 
-import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.poseestimation.relativerobotposesource.io.RelativeRobotPoseSourceSimulationIO;
@@ -14,15 +16,18 @@ import org.trigon.hardware.RobotHardwareStats;
  */
 public class RelativeRobotPoseSource {
     private final RelativeRobotPoseSourceInputsAutoLogged inputs = new RelativeRobotPoseSourceInputsAutoLogged();
-    private final Transform3d robotCenterToCamera;
+    private final Transform2d robotCenterToCamera;
     private final RelativeRobotPoseSourceIO relativeRobotPoseSourceIO;
 
     private Pose2d cameraPoseAtSyncTime = new Pose2d(0, 0, new Rotation2d(0));
     private Pose2d relativePoseSourcePoseAtSyncTime = new Pose2d(0, 0, new Rotation2d(0));
 
-    public RelativeRobotPoseSource(Transform3d robotCenterToCamera, String hostname) {
+    public RelativeRobotPoseSource(Transform2d robotCenterToCamera, String hostname) {
         this.robotCenterToCamera = robotCenterToCamera;
-        if (RobotHardwareStats.isSimulation()) {
+        if (RobotHardwareStats.isReplay()) {
+            this.relativeRobotPoseSourceIO = new RelativeRobotPoseSourceSimulationIO();
+            return;
+        } else if (RobotHardwareStats.isSimulation()) {
             this.relativeRobotPoseSourceIO = new RelativeRobotPoseSourceSimulationIO();
             return;
         }
@@ -42,7 +47,7 @@ public class RelativeRobotPoseSource {
      */
     public void resetOffset(Pose2d robotPose) {
         if (isUnderMaximumSpeedForOffsetResetting()) {
-            this.cameraPoseAtSyncTime = robotPose.transformBy(calculateCameraToRobot());
+            this.cameraPoseAtSyncTime = robotPose.transformBy(robotCenterToCamera);
             this.relativePoseSourcePoseAtSyncTime = inputs.pose;
         }
     }
@@ -50,7 +55,8 @@ public class RelativeRobotPoseSource {
     @AutoLogOutput
     public Pose2d getEstimatedRobotPose() {
         final Transform2d movementFromSyncedPose = new Transform2d(relativePoseSourcePoseAtSyncTime, inputs.pose);
-        return cameraPoseAtSyncTime.transformBy(movementFromSyncedPose);
+        final Transform2d cameraToRobot = robotCenterToCamera.inverse();
+        return cameraPoseAtSyncTime.transformBy(cameraToRobot).transformBy(movementFromSyncedPose);
     }
 
     public double getLatestResultTimestampSeconds() {
@@ -68,13 +74,5 @@ public class RelativeRobotPoseSource {
         final double currentThetaVelocityRadiansPerSecond = chassisSpeeds.omegaRadiansPerSecond;
         return currentTranslationVelocityMetersPerSecond <= RelativeRobotPoseSourceConstants.MAXIMUM_TRANSLATION_VELOCITY_FOR_OFFSET_RESETTING_METERS_PER_SECOND &&
                 currentThetaVelocityRadiansPerSecond <= RelativeRobotPoseSourceConstants.MAXIMUM_THETA_VELOCITY_FOR_OFFSET_RESETTING_RADIANS_PER_SECOND;
-    }
-
-    private Transform2d calculateCameraToRobot() {
-        final Transform3d cameraToRobotCenter = robotCenterToCamera.inverse();
-        final Translation2d robotToCameraTranslation = cameraToRobotCenter.getTranslation().toTranslation2d();
-        final Rotation2d robotToCameraRotation = cameraToRobotCenter.getRotation().toRotation2d();
-
-        return new Transform2d(robotToCameraTranslation, robotToCameraRotation);
     }
 }
