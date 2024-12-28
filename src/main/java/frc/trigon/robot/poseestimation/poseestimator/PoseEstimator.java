@@ -168,29 +168,25 @@ public class PoseEstimator implements AutoCloseable {
      * Updates the estimated pose from the cameras.
      */
     private void updateFromVision() {
-        updateCameras();
-        final AprilTagCamera[] newResultCameras = getCamerasWithResults();
+        final AprilTagCamera[] newResultCameras = getCamerasWithNewResult();
         sortCamerasByLatestResultTimestamp(newResultCameras);
 
         updateEstimatedPoseFromVision(newResultCameras);
     }
 
-    private void updateCameras() {
-        for (AprilTagCamera aprilTagCamera : aprilTagCameras)
-            aprilTagCamera.update();
-    }
-
-    private AprilTagCamera[] getCamerasWithResults() {
-        AprilTagCamera[] camerasWithResults = new AprilTagCamera[aprilTagCameras.length];
+    private AprilTagCamera[] getCamerasWithNewResult() {
+        final AprilTagCamera[] camerasWithNewResult = new AprilTagCamera[aprilTagCameras.length];
         int index = 0;
 
-        for (AprilTagCamera aprilTagCamera : aprilTagCameras)
+        for (AprilTagCamera aprilTagCamera : aprilTagCameras) {
+            aprilTagCamera.update();
             if (aprilTagCamera.hasNewResult()) {
-                camerasWithResults[index] = aprilTagCamera;
+                camerasWithNewResult[index] = aprilTagCamera;
                 index++;
             }
+        }
 
-        return Arrays.copyOf(camerasWithResults, index);
+        return Arrays.copyOf(camerasWithNewResult, index);
     }
 
     private void sortCamerasByLatestResultTimestamp(AprilTagCamera[] aprilTagCameras) {
