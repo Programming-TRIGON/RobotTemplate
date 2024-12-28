@@ -2,6 +2,11 @@ package frc.trigon.robot.poseestimation.poseestimator;
 
 import edu.wpi.first.math.geometry.Transform2d;
 
+/**
+ * Standard Deviations represent how ambiguous an estimated pose is using calibrated gains.
+ * The higher the value is, the more ambiguous the pose is and the less trustworthy the result.
+ * Standard Deviations are used to reduce noise in a pose estimate result by accounting for how much each result is wrong by.
+ */
 public class StandardDeviations {
     private final double translation, theta;
 
@@ -19,14 +24,16 @@ public class StandardDeviations {
 
     /**
      * Combines this with another {@link StandardDeviations}.
+     * This might be used when estimating a pose in relation to another estimated pose.
+     * In a case like this, you would want to find the combined standard deviations of both estimated poses to find the final standard deviations.
      *
      * @param other the {@link StandardDeviations} to combine with
      * @return the combined {@link StandardDeviations}
      */
     StandardDeviations combineWith(StandardDeviations other) {
         return new StandardDeviations(
-                combineStandardDeviation(other.translation, translation),
-                combineStandardDeviation(other.theta, theta)
+                combineStandardDeviation(translation, other.translation),
+                combineStandardDeviation(theta, other.theta)
         );
     }
 
@@ -41,8 +48,8 @@ public class StandardDeviations {
     /**
      * Combines two standard deviation values.
      *
-     * @param firstStandardDeviation  the first standard deviation value as a double
-     * @param secondStandardDeviation the second deviation value as a double
+     * @param firstStandardDeviation  the original standard deviation value
+     * @param secondStandardDeviation the standard deviation value to combine with
      * @return the combined standard deviation
      */
     private double combineStandardDeviation(double firstStandardDeviation, double secondStandardDeviation) {

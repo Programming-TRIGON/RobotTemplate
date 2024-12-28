@@ -256,7 +256,7 @@ public class PoseEstimator implements AutoCloseable {
     }
 
     /**
-     * Calculates the allowed movement of the estimated pose and stores the values as a {@link Transform2d}.
+     * Calculates the scaling needed to reduce noise in the estimated pose from the standard deviations of the observation.
      *
      * @param estimatedPoseAtTimestampToEstimatedPose the difference between the estimated pose of the robot at the time of the observation and the estimated pose of the observation
      * @param cameraStandardDeviations                the standard deviations of the camera's estimated pose
