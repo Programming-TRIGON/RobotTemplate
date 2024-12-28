@@ -1,9 +1,7 @@
 package frc.trigon.robot.poseestimation.apriltagcamera.io;
 
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.util.Units;
 import frc.trigon.robot.constants.FieldConstants;
 import frc.trigon.robot.poseestimation.apriltagcamera.AprilTagCameraIO;
 import frc.trigon.robot.poseestimation.apriltagcamera.AprilTagCameraInputsAutoLogged;
@@ -39,15 +37,11 @@ public class AprilTagPhotonCameraIO extends AprilTagCameraIO {
 
     private void updateHasResultInputs(AprilTagCameraInputsAutoLogged inputs, PhotonPipelineResult latestResult) {
         final PhotonTrackedTarget bestTarget = getBestTarget(latestResult);
-        final Rotation3d bestTargetRelativeRotation3d = getBestTargetRelativeRotation(bestTarget);
 
         inputs.cameraSolvePNPPose = getSolvePNPPose(latestResult, bestTarget);
         inputs.latestResultTimestampSeconds = latestResult.getTimestampSeconds();
-        inputs.bestTargetRelativePitchRadians = bestTargetRelativeRotation3d.getY();
-        inputs.bestTargetRelativeYawRadians = bestTargetRelativeRotation3d.getZ();
         inputs.visibleTagIDs = getVisibleTagIDs(latestResult, bestTarget);
         inputs.distanceFromBestTag = getDistanceFromBestTag(bestTarget);
-        inputs.poseAmbiguity = bestTarget.getPoseAmbiguity();
     }
 
     private void updateNoResultInputs(AprilTagCameraInputsAutoLogged inputs) {
@@ -69,17 +63,6 @@ public class AprilTagPhotonCameraIO extends AprilTagCameraIO {
                 bestTarget = target;
         }
         return bestTarget;
-    }
-
-    /**
-     * Estimates the camera's rotation relative to the apriltag.
-     *
-     * @param bestTag the best apriltag visible to the camera
-     * @return the estimated rotation
-     */
-    private Rotation3d getBestTargetRelativeRotation(PhotonTrackedTarget bestTag) {
-        final Rotation3d cameraRotation = bestTag.getBestCameraToTarget().getRotation();
-        return new Rotation3d(0, Units.degreesToRadians(cameraRotation.getY()), Units.degreesToRadians(cameraRotation.getZ()));
     }
 
     /**

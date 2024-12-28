@@ -162,7 +162,7 @@ public class PoseEstimator implements AutoCloseable {
             aprilTagCamera.update();
 
             if (aprilTagCamera.isWithinBestTagRangeForAccurateSolvePNPResult())
-                relativeRobotPoseSource.resetOffset(aprilTagCamera.getRobotSolvePNPPose());
+                relativeRobotPoseSource.resetOffset(aprilTagCamera.getRobotPose());
         }
 
         relativeRobotPoseSource.updatePeriodically();

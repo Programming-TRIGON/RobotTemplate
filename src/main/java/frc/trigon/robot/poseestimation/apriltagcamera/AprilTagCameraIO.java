@@ -22,9 +22,6 @@ public class AprilTagCameraIO {
         public double latestResultTimestampSeconds = 0;
         public Pose3d cameraSolvePNPPose = new Pose3d();
         public int[] visibleTagIDs = new int[0];
-        public double bestTargetRelativeYawRadians = 0;
-        public double bestTargetRelativePitchRadians = 0;
         public double distanceFromBestTag = 0;
-        public double poseAmbiguity = 0;
     }
 }
