@@ -14,7 +14,7 @@ import frc.trigon.robot.subsystems.swerve.SwerveConstants;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.trigon.hardware.RobotHardwareStats;
-import org.trigon.utilities.QuickSortHandler;
+import org.trigon.utilities.QuickSort;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -126,12 +126,12 @@ public class PoseEstimator implements AutoCloseable {
      * @return the robot's estimated pose at the timestamp
      */
     public Pose2d getPoseAtTimestamp(double timestamp) {
-        final Optional<Pose2d> poseAtTimestamp = previousOdometryPoses.getSample(timestamp);
-        if (poseAtTimestamp.isEmpty())
+        final Optional<Pose2d> odometryPoseAtTimestamp = previousOdometryPoses.getSample(timestamp);
+        if (odometryPoseAtTimestamp.isEmpty())
             return null;
 
-        final Transform2d odometryPoseToPoseAtTimestampTransform = new Transform2d(odometryPose, poseAtTimestamp.get());
-        return estimatedPose.plus(odometryPoseToPoseAtTimestampTransform);
+        final Transform2d currentOdometryPoseToOdometryPoseAtTimestampTransform = new Transform2d(odometryPose, odometryPoseAtTimestamp.get());
+        return estimatedPose.plus(currentOdometryPoseToOdometryPoseAtTimestampTransform);
     }
 
     private void putAprilTagsOnFieldWidget() {
@@ -192,7 +192,7 @@ public class PoseEstimator implements AutoCloseable {
     }
 
     private void sortCamerasByLatestResultTimestamp(AprilTagCamera[] aprilTagCameras) {
-        QuickSortHandler.sort(aprilTagCameras, AprilTagCamera::getLatestResultTimestampSeconds);
+        QuickSort.sort(aprilTagCameras, AprilTagCamera::getLatestResultTimestampSeconds);
     }
 
     /**
@@ -224,8 +224,8 @@ public class PoseEstimator implements AutoCloseable {
      * @return the estimated pose with compensation for its ambiguity
      */
     private Pose2d calculateEstimatedPoseWithAmbiguityCompensation(Pose2d estimatedPoseAtObservationTime, Pose2d observationPose, StandardDeviations observationStandardDeviations) {
-        final Transform2d estimatedPoseAtTimestampToEstimatedPose = new Transform2d(estimatedPoseAtObservationTime, observationPose);
-        final Transform2d allowedMovement = calculateAllowedMovementFromAmbiguity(estimatedPoseAtTimestampToEstimatedPose, observationStandardDeviations);
+        final Transform2d estimatedPoseAtObservationTimeToObservationPose = new Transform2d(estimatedPoseAtObservationTime, observationPose);
+        final Transform2d allowedMovement = calculateAllowedMovementFromAmbiguity(estimatedPoseAtObservationTimeToObservationPose, observationStandardDeviations);
         return observationPose.plus(allowedMovement);
     }
 
