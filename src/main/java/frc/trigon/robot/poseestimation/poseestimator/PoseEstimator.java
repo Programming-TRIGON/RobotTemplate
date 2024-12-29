@@ -217,10 +217,7 @@ public class PoseEstimator implements AutoCloseable {
         if (estimatedPoseAtTimestamp == null)
             return;
 
-        final Pose2d estimatedPoseWithAmbiguityCompensation = calculateEstimatedPoseWithAmbiguityCompensation(estimatedPoseAtTimestamp, estimatedPose, standardDeviations);
-        final Transform2d estimatedPoseAtTimestampToOdometryPose = new Transform2d(estimatedPoseAtTimestamp, odometryPose);
-
-        this.estimatedPose = estimatedPoseWithAmbiguityCompensation.plus(estimatedPoseAtTimestampToOdometryPose);
+        this.estimatedPose = calculateEstimatedPoseWithAmbiguityCompensation(estimatedPoseAtTimestamp, estimatedPose, standardDeviations);
     }
 
     /**
