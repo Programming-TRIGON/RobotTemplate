@@ -104,8 +104,7 @@ public class Swerve extends MotorSubsystem {
 
     public ChassisSpeeds getFieldRelativeVelocity() {
         final ChassisSpeeds selfRelativeSpeeds = getSelfRelativeVelocity();
-        selfRelativeSpeeds.toFieldRelativeSpeeds(RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getRotation());
-        return selfRelativeSpeeds;
+        return ChassisSpeeds.fromRobotRelativeSpeeds(selfRelativeSpeeds, RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getRotation());
     }
 
     /**
@@ -290,8 +289,7 @@ public class Swerve extends MotorSubsystem {
     }
 
     private ChassisSpeeds fieldRelativeSpeedsToSelfRelativeSpeeds(ChassisSpeeds fieldRelativeSpeeds) {
-        fieldRelativeSpeeds.toRobotRelativeSpeeds(getDriveRelativeAngle());
-        return fieldRelativeSpeeds;
+        return ChassisSpeeds.fromFieldRelativeSpeeds(fieldRelativeSpeeds, RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getRotation());
     }
 
     private Rotation2d getDriveRelativeAngle() {
@@ -314,7 +312,7 @@ public class Swerve extends MotorSubsystem {
         final double currentTimestamp = Timer.getTimestamp();
         final double difference = currentTimestamp - lastTimestamp;
         lastTimestamp = currentTimestamp;
-        chassisSpeeds.discretize(difference);
+        ChassisSpeeds.discretize(chassisSpeeds, difference);
     }
 
     private double calculateProfiledAngleSpeedToTargetAngle(MirrorableRotation2d targetAngle) {
