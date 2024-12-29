@@ -3,32 +3,37 @@ package frc.trigon.robot.poseestimation.relativerobotposesource.io;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.networktables.*;
+import edu.wpi.first.wpilibj.Timer;
 import frc.trigon.robot.poseestimation.relativerobotposesource.RelativeRobotPoseSourceIO;
 import frc.trigon.robot.poseestimation.relativerobotposesource.RelativeRobotPoseSourceInputsAutoLogged;
+import org.trigon.utilities.JsonHandler;
+
+import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 public class RelativeRobotPoseSourceT265IO extends RelativeRobotPoseSourceIO {
-    private final IntegerSubscriber framesPerSecond;
-    private final DoubleSubscriber batteryPercentage;
-    private final FloatArraySubscriber positionMeters;
-    private final FloatArraySubscriber rotationRadians;
+    private final Supplier<Integer> framesPerSecond;
+    private final DoubleSupplier batteryPercentage;
+    private final DoubleSupplier xPositionMeters, yPositionMeters, rotationRadians;
+
+    private Pose2d lastPose = new Pose2d();
 
     public RelativeRobotPoseSourceT265IO(String hostname) {
-        final NetworkTable t265NetworkTable = NetworkTableInstance.getDefault().getTable(hostname);
-
-        framesPerSecond = t265NetworkTable.getIntegerTopic("FPS").subscribe(0);
-        batteryPercentage = t265NetworkTable.getDoubleTopic("BatteryPercentage").subscribe(0.0f);
-        positionMeters = t265NetworkTable.getFloatArrayTopic("PositionMeters").subscribe(new float[]{0.0f, 0.0f, 0.0f});
-        rotationRadians = t265NetworkTable.getFloatArrayTopic("RotationRadians").subscribe(new float[]{0.0f, 0.0f, 0.0f});
+        framesPerSecond = () -> JsonHandler.parseJsonStringToObject("FPS", Integer.TYPE);
+        batteryPercentage = () -> JsonHandler.parseJsonStringToObject("BatteryPercentage", Double.TYPE);
+        xPositionMeters = () -> JsonHandler.parseJsonStringToObject("XPositionMeters", Double.TYPE);
+        yPositionMeters = () -> JsonHandler.parseJsonStringToObject("YPositionMeters", Double.TYPE);
+        rotationRadians = () -> JsonHandler.parseJsonStringToObject("RotationRadians", Double.TYPE);
     }
 
     @Override
     protected void updateInputs(RelativeRobotPoseSourceInputsAutoLogged inputs) {
-        inputs.framesPerSecond = (int) framesPerSecond.get();
-        inputs.batteryPercentage = batteryPercentage.get();
+        lastPose = inputs.pose;
+
+        inputs.framesPerSecond = framesPerSecond.get();
+        inputs.batteryPercentage = batteryPercentage.getAsDouble();
         inputs.pose = getT265Pose();
-        inputs.hasNewResult = positionMeters.getLastChange() > inputs.lastResultTimestamp;
-        inputs.lastResultTimestamp = positionMeters.getLastChange();
+        inputs.lastResultTimestamp = lastPose == inputs.pose ? inputs.lastResultTimestamp : Timer.getTimestamp();
     }
 
     private Pose2d getT265Pose() {
@@ -36,11 +41,10 @@ public class RelativeRobotPoseSourceT265IO extends RelativeRobotPoseSourceIO {
     }
 
     private Translation2d getT265Translation() {
-        return new Translation2d(positionMeters.get()[2], -positionMeters.get()[0]);
+        return new Translation2d(xPositionMeters.getAsDouble(), yPositionMeters.getAsDouble());
     }
 
     private Rotation2d getT265Heading() {
-        final double currentYawRadians = rotationRadians.get()[2];
-        return Rotation2d.fromRadians(currentYawRadians);
+        return Rotation2d.fromRadians(rotationRadians.getAsDouble());
     }
 }
