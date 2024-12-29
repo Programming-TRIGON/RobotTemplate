@@ -252,7 +252,7 @@ public class PoseEstimator implements AutoCloseable {
     private Pose2d calculateEstimatedPoseWithAmbiguityCompensation(Pose2d estimatedPoseAtTimestamp, Pose2d observationEstimatedPose, StandardDeviations observationStandardDeviations) {
         final Transform2d estimatedPoseAtTimestampToEstimatedPose = new Transform2d(estimatedPoseAtTimestamp, observationEstimatedPose);
         final Transform2d allowedMovement = calculateAllowedMovementFromAmbiguity(estimatedPoseAtTimestampToEstimatedPose, observationStandardDeviations);
-        return estimatedPoseAtTimestamp.plus(allowedMovement);
+        return observationEstimatedPose.plus(allowedMovement);
     }
 
     /**
