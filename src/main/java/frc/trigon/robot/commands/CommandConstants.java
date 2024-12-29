@@ -27,7 +27,7 @@ public class CommandConstants {
     private static final double
             MINIMUM_TRANSLATION_SHIFT_POWER = 0.18,
             MINIMUM_ROTATION_SHIFT_POWER = 0.3;
-    private static final double ROTATION_SHIFT_DEADBAND = 0.4;
+    private static final double ROTATION_JOYSTICK_DEADBAND = 0.4;
 
     public static final Command
             FIELD_RELATIVE_DRIVE_COMMAND = SwerveCommands.getOpenLoopFieldRelativeDriveCommand(
@@ -40,7 +40,7 @@ public class CommandConstants {
                     () -> calculateDriveStickAxisValue(DRIVER_CONTROLLER.getLeftX()),
                     CommandConstants::calculateJoystickOrientedRotationValue
             ),
-            SELF_RELATIVE_DRIVE_COMMAND = SwerveCommands.getOpenLoopSelfRelativeDriveCommand(
+            SELF_RELATIVE_DRIVE_COMMAND = SwerveCommands.getClosedLoopSelfRelativeDriveCommand(
                     () -> calculateDriveStickAxisValue(DRIVER_CONTROLLER.getLeftY()),
                     () -> calculateDriveStickAxisValue(DRIVER_CONTROLLER.getLeftX()),
                     () -> calculateRotationStickAxisValue(DRIVER_CONTROLLER.getRightX())
@@ -102,7 +102,7 @@ public class CommandConstants {
      * @return the rotation value
      */
     private static MirrorableRotation2d calculateJoystickOrientedRotationValue() {
-        if (1 - Math.abs(Math.hypot(DRIVER_CONTROLLER.getRightX(), DRIVER_CONTROLLER.getRightY())) > ROTATION_SHIFT_DEADBAND)
+        if (1 - Math.abs(Math.hypot(DRIVER_CONTROLLER.getRightX(), DRIVER_CONTROLLER.getRightY())) > ROTATION_JOYSTICK_DEADBAND)
             return null;
 
         final double targetAngleRadians = Math.atan2(DRIVER_CONTROLLER.getRightX(), DRIVER_CONTROLLER.getRightY());

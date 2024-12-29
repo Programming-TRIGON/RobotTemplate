@@ -59,8 +59,8 @@ public class SwerveModuleConstants {
 
     static final double VOLTAGE_COMPENSATION_SATURATION = 12;
     public static final SysIdRoutine.Config DRIVE_MOTOR_SYSID_CONFIG = new SysIdRoutine.Config(
-            Units.Volts.of(5).per(Units.Second),
-            Units.Volts.of(8),
+            Units.Volts.of(1).per(Units.Second),
+            Units.Volts.of(3),
             Units.Second.of(1000)
     );
 
@@ -136,11 +136,11 @@ public class SwerveModuleConstants {
     }
 
     private static CANcoderConfiguration generateSteerEncoderConfiguration() {
-        final CANcoderConfiguration configuration = new CANcoderConfiguration();
+        final CANcoderConfiguration config = new CANcoderConfiguration();
 
-        configuration.MagnetSensor.AbsoluteSensorDiscontinuityPoint = STEER_ENCODER_DISCONTINUITY_POINT;
-        configuration.MagnetSensor.SensorDirection = STEER_ENCODER_DIRECTION;
+        config.MagnetSensor.AbsoluteSensorDiscontinuityPoint = STEER_ENCODER_DISCONTINUITY_POINT;
+        config.MagnetSensor.SensorDirection = STEER_ENCODER_DIRECTION;
 
-        return configuration;
+        return config;
     }
 }
