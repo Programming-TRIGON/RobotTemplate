@@ -208,37 +208,37 @@ public class PoseEstimator implements AutoCloseable {
         }
     }
 
-    private void addVisionObservation(Pose2d estimatedPose, StandardDeviations standardDeviations, double timestamp) {
-        final Pose2d estimatedPoseAtTimestamp = getPoseAtTimestamp(timestamp);
-        if (estimatedPoseAtTimestamp != null)
-            this.estimatedPose = calculateEstimatedPoseWithAmbiguityCompensation(estimatedPoseAtTimestamp, estimatedPose, standardDeviations);
+    private void addVisionObservation(Pose2d observationPose, StandardDeviations standardDeviations, double timestamp) {
+        final Pose2d estimatedPoseAtObservationTime = getPoseAtTimestamp(timestamp);
+        if (estimatedPoseAtObservationTime != null)
+            this.estimatedPose = calculateEstimatedPoseWithAmbiguityCompensation(estimatedPoseAtObservationTime, observationPose, standardDeviations);
     }
 
     /**
      * Calculates the estimated pose of a vision observation with compensation for its ambiguity.
      * This is done by finding the difference between the estimated pose at the time of the observation and the estimated pose of the observation and scaling that down using the calibrated standard deviations.
      *
-     * @param estimatedPoseAtTimestamp      the estimated pose of the robot at the time of the observation
-     * @param observationEstimatedPose      the estimated robot pose from the observation
-     * @param observationStandardDeviations the ambiguity of the observation
+     * @param estimatedPoseAtObservationTime the estimated pose of the robot at the time of the observation
+     * @param observationPose                the estimated robot pose from the observation
+     * @param observationStandardDeviations  the ambiguity of the observation
      * @return the estimated pose with compensation for its ambiguity
      */
-    private Pose2d calculateEstimatedPoseWithAmbiguityCompensation(Pose2d estimatedPoseAtTimestamp, Pose2d observationEstimatedPose, StandardDeviations observationStandardDeviations) {
-        final Transform2d estimatedPoseAtTimestampToEstimatedPose = new Transform2d(estimatedPoseAtTimestamp, observationEstimatedPose);
+    private Pose2d calculateEstimatedPoseWithAmbiguityCompensation(Pose2d estimatedPoseAtObservationTime, Pose2d observationPose, StandardDeviations observationStandardDeviations) {
+        final Transform2d estimatedPoseAtTimestampToEstimatedPose = new Transform2d(estimatedPoseAtObservationTime, observationPose);
         final Transform2d allowedMovement = calculateAllowedMovementFromAmbiguity(estimatedPoseAtTimestampToEstimatedPose, observationStandardDeviations);
-        return observationEstimatedPose.plus(allowedMovement);
+        return observationPose.plus(allowedMovement);
     }
 
     /**
      * Calculates the scaling needed to reduce noise in the estimated pose from the standard deviations of the observation.
      *
-     * @param estimatedPoseAtTimestampToEstimatedPose the difference between the estimated pose of the robot at the time of the observation and the estimated pose of the observation
-     * @param cameraStandardDeviations                the standard deviations of the camera's estimated pose
+     * @param estimatedPoseAtObservationTimeToObservationPose the difference between the estimated pose of the robot at the time of the observation and the estimated pose of the observation
+     * @param cameraStandardDeviations                        the standard deviations of the camera's estimated pose
      * @return the allowed movement of the estimated pose as a {@link Transform2d}
      */
-    private Transform2d calculateAllowedMovementFromAmbiguity(Transform2d estimatedPoseAtTimestampToEstimatedPose, StandardDeviations cameraStandardDeviations) {
+    private Transform2d calculateAllowedMovementFromAmbiguity(Transform2d estimatedPoseAtObservationTimeToObservationPose, StandardDeviations cameraStandardDeviations) {
         final StandardDeviations estimatedPoseStandardDeviations = cameraStandardDeviations.combineWith(PoseEstimatorConstants.ODOMETRY_STANDARD_DEVIATIONS);
-        return estimatedPoseStandardDeviations.scaleTransformFromStandardDeviations(estimatedPoseAtTimestampToEstimatedPose);
+        return estimatedPoseStandardDeviations.scaleTransformFromStandardDeviations(estimatedPoseAtObservationTimeToObservationPose);
     }
 
     /**
