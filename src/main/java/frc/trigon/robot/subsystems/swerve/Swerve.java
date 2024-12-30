@@ -174,6 +174,7 @@ public class Swerve extends MotorSubsystem {
     }
 
     void initializeDrive(boolean shouldUseClosedLoop) {
+        previousSetpoint = new SwerveSetpoint(getSelfRelativeVelocity(), getModuleStates(), DriveFeedforwards.zeros(PathPlannerConstants.getRobotConfig().numModules));
         setClosedLoop(shouldUseClosedLoop);
         resetRotationController();
     }
