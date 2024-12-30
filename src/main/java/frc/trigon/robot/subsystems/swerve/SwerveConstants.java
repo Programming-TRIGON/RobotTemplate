@@ -84,8 +84,8 @@ public class SwerveConstants {
             TRANSLATION_PID_CONSTANTS.kD
     );
     public static final double
-            MAXIMUM_SPEED_METERS_PER_SECOND = RobotHardwareStats.isSimulation() ? 4.9 : 4.04502,
-            MAXIMUM_ROTATIONAL_SPEED_RADIANS_PER_SECOND = RobotHardwareStats.isSimulation() ? 12.03 : 12.03;
+            MAXIMUM_SPEED_METERS_PER_SECOND = PathPlannerConstants.getRobotConfig().moduleConfig.maxDriveVelocityMPS,
+            MAXIMUM_ROTATIONAL_SPEED_RADIANS_PER_SECOND = PathPlannerConstants.getRobotConfig().moduleConfig.maxDriveVelocityRadPerSec;
 
     static {
         final Pigeon2Configuration config = new Pigeon2Configuration();
