@@ -4,10 +4,10 @@ import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.pathplanner.lib.config.PIDConstants;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.trigon.robot.RobotContainer;
+import frc.trigon.robot.constants.PathPlannerConstants;
 import frc.trigon.robot.constants.RobotConstants;
 import frc.trigon.robot.poseestimation.poseestimator.PoseEstimatorConstants;
 import frc.trigon.robot.subsystems.swerve.swervemodule.SwerveModule;
@@ -47,20 +47,10 @@ public class SwerveConstants {
     };
 
     private static final DoubleSupplier SIMULATION_YAW_VELOCITY_SUPPLIER = () -> RobotContainer.SWERVE.getSelfRelativeVelocity().omegaRadiansPerSecond;
-    private static final double //TODO: set these values
-            FRONT_MODULE_X_DISTANCE_FROM_CENTER = 0.25,
-            FRONT_MODULE_Y_DISTANCE_FROM_CENTER = 0.25,
-            REAR_MODULE_X_DISTANCE_FROM_CENTER = -0.25,
-            REAR_MODULE_Y_DISTANCE_FROM_CENTER = -0.25;
-    public static final Translation2d[] MODULE_LOCATIONS = {
-            new Translation2d(FRONT_MODULE_X_DISTANCE_FROM_CENTER, FRONT_MODULE_Y_DISTANCE_FROM_CENTER),
-            new Translation2d(FRONT_MODULE_X_DISTANCE_FROM_CENTER, -FRONT_MODULE_Y_DISTANCE_FROM_CENTER),
-            new Translation2d(REAR_MODULE_X_DISTANCE_FROM_CENTER, REAR_MODULE_Y_DISTANCE_FROM_CENTER),
-            new Translation2d(REAR_MODULE_X_DISTANCE_FROM_CENTER, -REAR_MODULE_Y_DISTANCE_FROM_CENTER)
-    };
-    public static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(MODULE_LOCATIONS);
+    public static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(PathPlannerConstants.getRobotConfig().moduleLocations);
     private static final double FURTHEST_MODULE_DISTANCE_FROM_CENTER = Math.hypot(
-            REAR_MODULE_X_DISTANCE_FROM_CENTER, FRONT_MODULE_Y_DISTANCE_FROM_CENTER
+            PathPlannerConstants.getRobotConfig().moduleLocations[0].getX(),
+            PathPlannerConstants.getRobotConfig().moduleLocations[3].getY()
     );
     static final double
             TRANSLATION_TOLERANCE_METERS = 0.05,
@@ -85,9 +75,7 @@ public class SwerveConstants {
             MAXIMUM_ROTATION_VELOCITY,
             MAXIMUM_ROTATION_ACCELERATION
     );
-    static final double
-            MAXIMUM_PID_ANGLE = 180,
-            MINIMUM_PID_ANGLE = -180;
+    static final double MAXIMUM_PID_ANGLE = 180;
     static final ProfiledPIDController PROFILED_ROTATION_PID_CONTROLLER = new ProfiledPIDController(
             PROFILED_ROTATION_PID_CONSTANTS.kP,
             PROFILED_ROTATION_PID_CONSTANTS.kI,
