@@ -1,13 +1,9 @@
 package frc.trigon.robot.poseestimation.apriltagcamera;
 
-import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.*;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.constants.FieldConstants;
-import frc.trigon.robot.poseestimation.poseestimator.PoseEstimator6328;
+import frc.trigon.robot.poseestimation.poseestimator.StandardDeviations;
 import org.littletonrobotics.junction.Logger;
 import org.trigon.hardware.RobotHardwareStats;
 
@@ -86,11 +82,11 @@ public class AprilTagCamera {
      *
      * @return the standard deviations for the pose estimation strategy used
      */
-    public Matrix<N3, N1> calculateStandardDeviations() {
+    public StandardDeviations calculateStandardDeviations() {
         final double translationStandardDeviation = calculateStandardDeviations(translationStandardDeviationExponent, inputs.distanceFromBestTag, inputs.visibleTagIDs.length);
         final double thetaStandardDeviation = isWithinBestTagRangeForSolvePNP() ? calculateStandardDeviations(thetaStandardDeviationExponent, inputs.distanceFromBestTag, inputs.visibleTagIDs.length) : Double.POSITIVE_INFINITY;
 
-        return VecBuilder.fill(translationStandardDeviation, translationStandardDeviation, thetaStandardDeviation);
+        return new StandardDeviations(translationStandardDeviation, thetaStandardDeviation);
     }
 
     public double getDistanceToBestTagMeters() {
@@ -106,7 +102,7 @@ public class AprilTagCamera {
      * @return the robot's pose
      */
     private Pose2d calculateBestRobotPose() {
-        final Rotation2d gyroHeadingAtTimestamp = RobotHardwareStats.isSimulation() ? RobotContainer.POSE_ESTIMATOR.getCurrentOdometryPose().getRotation() : PoseEstimator6328.getInstance().samplePose(inputs.latestResultTimestampSeconds).getRotation();
+        final Rotation2d gyroHeadingAtTimestamp = RobotHardwareStats.isSimulation() ? RobotContainer.POSE_ESTIMATOR.getCurrentOdometryPose().getRotation() : RobotContainer.POSE_ESTIMATOR.getPoseAtTimestamp(inputs.latestResultTimestampSeconds).getRotation();
         return calculateAssumedRobotHeadingPose(gyroHeadingAtTimestamp);
     }
 
@@ -120,10 +116,12 @@ public class AprilTagCamera {
         if (inputs.visibleTagIDs.length == 0 || !inputs.hasResult || inputs.poseAmbiguity > AprilTagCameraConstants.MAXIMUM_AMBIGUITY)
             return null;
 
-        if (!isWithinBestTagRangeForSolvePNP())
-            return new Pose2d(getFieldRelativeRobotTranslation(gyroHeading), gyroHeading);
-        final Rotation2d solvePNPHeading = getSolvePNPHeading();
-        return new Pose2d(getFieldRelativeRobotTranslation(solvePNPHeading), solvePNPHeading);
+        final Rotation2d fieldRelativeRobotHeading = isWithinBestTagRangeForSolvePNP() ? getSolvePNPHeading() : gyroHeading;
+        final Translation2d fieldRelativeRobotTranslation = getFieldRelativeRobotTranslation(fieldRelativeRobotHeading);
+
+        if (fieldRelativeRobotTranslation == null)
+            return null;
+        return new Pose2d(fieldRelativeRobotTranslation, fieldRelativeRobotHeading);
     }
 
     private Translation2d getFieldRelativeRobotTranslation(Rotation2d currentHeading) {
