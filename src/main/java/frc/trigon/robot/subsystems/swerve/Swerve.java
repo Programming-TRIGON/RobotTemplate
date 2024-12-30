@@ -298,6 +298,7 @@ public class Swerve extends MotorSubsystem {
      * This should fix the chassis speeds, so they won't make the robot skew while rotating.
      *
      * @param chassisSpeeds the chassis speeds to fix skewing for
+     * @return the discretized chassis speeds
      */
     private ChassisSpeeds discretize(ChassisSpeeds chassisSpeeds) {
         final double currentTimestamp = Timer.getTimestamp();
