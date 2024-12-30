@@ -41,7 +41,7 @@ public class Swerve extends MotorSubsystem {
     public Swerve() {
         setName("Swerve");
         phoenix6SignalThread.setThreadFrequencyHertz(PoseEstimatorConstants.ODOMETRY_FREQUENCY_HERTZ);
-        SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER.enableContinuousInput(SwerveConstants.MINIMUM_PID_ANGLE, SwerveConstants.MAXIMUM_PID_ANGLE);
+        SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER.enableContinuousInput(-SwerveConstants.MAXIMUM_PID_ANGLE, SwerveConstants.MAXIMUM_PID_ANGLE);
         setpointGenerator = new SwerveSetpointGenerator(PathPlannerConstants.getRobotConfig(), SwerveConstants.MAXIMUM_ROTATIONAL_SPEED_RADIANS_PER_SECOND);
         previousSetpoint = new SwerveSetpoint(getSelfRelativeVelocity(), getModuleStates(), DriveFeedforwards.zeros(PathPlannerConstants.getRobotConfig().numModules));
     }
@@ -259,7 +259,7 @@ public class Swerve extends MotorSubsystem {
      * This method will take in desired robot-relative chassis targetSpeeds,
      * generate a swerve setpoint, then set the target state for each module
      *
-     * @param targetSpeeds The desired robot-relative targetSpeeds
+     * @param targetSpeeds the desired robot-relative targetSpeeds
      */
     private void selfRelativeDrive(ChassisSpeeds targetSpeeds) {
         previousSetpoint = setpointGenerator.generateSetpoint(
