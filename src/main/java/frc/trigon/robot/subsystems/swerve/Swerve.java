@@ -97,8 +97,7 @@ public class Swerve extends MotorSubsystem {
 
     public ChassisSpeeds getFieldRelativeVelocity() {
         final ChassisSpeeds selfRelativeSpeeds = getSelfRelativeVelocity();
-        selfRelativeSpeeds.toFieldRelativeSpeeds(RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getRotation());
-        return selfRelativeSpeeds;
+        return ChassisSpeeds.fromRobotRelativeSpeeds(selfRelativeSpeeds, RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getRotation());
     }
 
     /**
@@ -154,7 +153,7 @@ public class Swerve extends MotorSubsystem {
      * @param feedforwards  the target feedforwards for each module
      */
     public void selfRelativeFeedForwardDrive(ChassisSpeeds chassisSpeeds, DriveFeedforwards feedforwards) {
-        discretize(chassisSpeeds);
+        chassisSpeeds = discretize(chassisSpeeds);
         if (isStill(chassisSpeeds)) {
             stop();
             return;
@@ -263,7 +262,7 @@ public class Swerve extends MotorSubsystem {
     }
 
     private void selfRelativeDrive(ChassisSpeeds chassisSpeeds) {
-        discretize(chassisSpeeds);
+        chassisSpeeds = discretize(chassisSpeeds);
         if (isStill(chassisSpeeds)) {
             stop();
             return;
@@ -285,11 +284,11 @@ public class Swerve extends MotorSubsystem {
      *
      * @param chassisSpeeds the chassis speeds to fix skewing for
      */
-    private void discretize(ChassisSpeeds chassisSpeeds) {
+    private ChassisSpeeds discretize(ChassisSpeeds chassisSpeeds) {
         final double currentTimestamp = Timer.getFPGATimestamp();
         final double difference = currentTimestamp - lastTimestamp;
         lastTimestamp = currentTimestamp;
-        chassisSpeeds.discretize(difference);
+        return ChassisSpeeds.discretize(chassisSpeeds, difference);
     }
 
     private void updatePoseEstimatorStates() {
@@ -338,8 +337,7 @@ public class Swerve extends MotorSubsystem {
     }
 
     private ChassisSpeeds fieldRelativeSpeedsToSelfRelativeSpeeds(ChassisSpeeds fieldRelativeSpeeds) {
-        fieldRelativeSpeeds.toRobotRelativeSpeeds(getDriveRelativeAngle());
-        return fieldRelativeSpeeds;
+        return ChassisSpeeds.fromFieldRelativeSpeeds(fieldRelativeSpeeds, getDriveRelativeAngle());
     }
 
     private ChassisSpeeds powersToSpeeds(double xPower, double yPower, double thetaPower) {
