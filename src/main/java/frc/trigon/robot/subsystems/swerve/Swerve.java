@@ -156,7 +156,7 @@ public class Swerve extends MotorSubsystem {
      * @param feedforwards  the target feedforwards for each module
      */
     public void selfRelativeFeedForwardDrive(ChassisSpeeds chassisSpeeds, DriveFeedforwards feedforwards) {
-        discretize(chassisSpeeds);
+        chassisSpeeds = discretize(chassisSpeeds);
         if (isStill(chassisSpeeds)) {
             stop();
             return;
@@ -283,15 +283,6 @@ public class Swerve extends MotorSubsystem {
             swerveModules[i].setTargetState(swerveModuleStates[i]);
     }
 
-    private ChassisSpeeds selfRelativeSpeedsFromFieldRelativePowers(double xPower, double yPower, double thetaPower) {
-        final ChassisSpeeds fieldRelativeSpeeds = powersToSpeeds(xPower, yPower, thetaPower);
-        return fieldRelativeSpeedsToSelfRelativeSpeeds(fieldRelativeSpeeds);
-    }
-
-    private ChassisSpeeds fieldRelativeSpeedsToSelfRelativeSpeeds(ChassisSpeeds fieldRelativeSpeeds) {
-        return ChassisSpeeds.fromFieldRelativeSpeeds(fieldRelativeSpeeds, RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getRotation());
-    }
-
     private Rotation2d getDriveRelativeAngle() {
         final Rotation2d currentAngle = RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getRotation();
         return Mirrorable.isRedAlliance() ? currentAngle.rotateBy(Rotation2d.fromDegrees(180)) : currentAngle;
@@ -308,21 +299,11 @@ public class Swerve extends MotorSubsystem {
      *
      * @param chassisSpeeds the chassis speeds to fix skewing for
      */
-    private void discretize(ChassisSpeeds chassisSpeeds) {
+    private ChassisSpeeds discretize(ChassisSpeeds chassisSpeeds) {
         final double currentTimestamp = Timer.getTimestamp();
         final double difference = currentTimestamp - lastTimestamp;
         lastTimestamp = currentTimestamp;
-        ChassisSpeeds.discretize(chassisSpeeds, difference);
-    }
-
-    private double calculateProfiledAngleSpeedToTargetAngle(MirrorableRotation2d targetAngle) {
-        final Rotation2d currentAngle = RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getRotation();
-        return Units.degreesToRadians(SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER.calculate(currentAngle.getDegrees(), targetAngle.get().getDegrees()));
-    }
-
-    private boolean atTranslationPosition(double currentTranslationPosition, double targetTranslationPosition, double currentTranslationVelocity) {
-        return Math.abs(currentTranslationPosition - targetTranslationPosition) < SwerveConstants.TRANSLATION_TOLERANCE_METERS &&
-                Math.abs(currentTranslationVelocity) < SwerveConstants.TRANSLATION_VELOCITY_TOLERANCE;
+        return ChassisSpeeds.discretize(chassisSpeeds, difference);
     }
 
     /**
@@ -345,21 +326,6 @@ public class Swerve extends MotorSubsystem {
         );
     }
 
-    private void updateNetworkTables() {
-        Logger.recordOutput("Swerve/Velocity/Rot", getSelfRelativeVelocity().omegaRadiansPerSecond);
-        Logger.recordOutput("Swerve/Velocity/X", getSelfRelativeVelocity().vxMetersPerSecond);
-        Logger.recordOutput("Swerve/Velocity/Y", getSelfRelativeVelocity().vyMetersPerSecond);
-    }
-
-    private void updateHardware() {
-        gyro.update();
-
-        for (SwerveModule currentModule : swerveModules)
-            currentModule.updatePeriodically();
-
-        phoenix6SignalThread.updateLatestTimestamps();
-    }
-
     private void updatePoseEstimatorStates() {
         final double[] odometryUpdatesYawDegrees = gyro.getThreadedSignal(Pigeon2Signal.YAW);
         final int odometryUpdates = odometryUpdatesYawDegrees.length;
@@ -379,6 +345,40 @@ public class Swerve extends MotorSubsystem {
         for (int i = 0; i < swerveModules.length; i++)
             swerveModulePositions[i] = swerveModules[i].getOdometryPosition(odometryUpdateIndex);
         return swerveModulePositions;
+    }
+
+    private boolean atTranslationPosition(double currentTranslationPosition, double targetTranslationPosition, double currentTranslationVelocity) {
+        return Math.abs(currentTranslationPosition - targetTranslationPosition) < SwerveConstants.TRANSLATION_TOLERANCE_METERS &&
+                Math.abs(currentTranslationVelocity) < SwerveConstants.TRANSLATION_VELOCITY_TOLERANCE;
+    }
+
+    private double calculateProfiledAngleSpeedToTargetAngle(MirrorableRotation2d targetAngle) {
+        final Rotation2d currentAngle = RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getRotation();
+        return Units.degreesToRadians(SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER.calculate(currentAngle.getDegrees(), targetAngle.get().getDegrees()));
+    }
+
+    private ChassisSpeeds selfRelativeSpeedsFromFieldRelativePowers(double xPower, double yPower, double thetaPower) {
+        final ChassisSpeeds fieldRelativeSpeeds = powersToSpeeds(xPower, yPower, thetaPower);
+        return fieldRelativeSpeedsToSelfRelativeSpeeds(fieldRelativeSpeeds);
+    }
+
+    private ChassisSpeeds fieldRelativeSpeedsToSelfRelativeSpeeds(ChassisSpeeds fieldRelativeSpeeds) {
+        return ChassisSpeeds.fromFieldRelativeSpeeds(fieldRelativeSpeeds, getDriveRelativeAngle());
+    }
+
+    private void updateHardware() {
+        gyro.update();
+
+        for (SwerveModule currentModule : swerveModules)
+            currentModule.updatePeriodically();
+
+        phoenix6SignalThread.updateLatestTimestamps();
+    }
+
+    private void updateNetworkTables() {
+        Logger.recordOutput("Swerve/Velocity/Rot", getSelfRelativeVelocity().omegaRadiansPerSecond);
+        Logger.recordOutput("Swerve/Velocity/X", getSelfRelativeVelocity().vxMetersPerSecond);
+        Logger.recordOutput("Swerve/Velocity/Y", getSelfRelativeVelocity().vyMetersPerSecond);
     }
 
     @AutoLogOutput(key = "Swerve/CurrentStates")
