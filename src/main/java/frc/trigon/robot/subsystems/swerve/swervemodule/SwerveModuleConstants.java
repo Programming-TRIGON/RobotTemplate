@@ -38,9 +38,9 @@ public class SwerveModuleConstants {
             DRIVE_MOTOR_P = RobotHardwareStats.isSimulation() ? 50 : 50,
             DRIVE_MOTOR_I = 0,
             DRIVE_MOTOR_D = 0,
-            DRIVE_MOTOR_KS = RobotHardwareStats.isSimulation() ? 0 : 0,
+            DRIVE_MOTOR_KS = RobotHardwareStats.isSimulation() ? 0.4708 : 0,
             DRIVE_MOTOR_KV = RobotHardwareStats.isSimulation() ? 0 : 0,
-            DRIVE_MOTOR_KA = RobotHardwareStats.isSimulation() ? 0 : 0;
+            DRIVE_MOTOR_KA = RobotHardwareStats.isSimulation() ? 0.48818 : 0;
     static final boolean ENABLE_FOC = true;
     static final TalonFXConfiguration
             DRIVE_MOTOR_CONFIGURATION = generateDriveMotorConfiguration(),
@@ -59,8 +59,8 @@ public class SwerveModuleConstants {
 
     static final double VOLTAGE_COMPENSATION_SATURATION = 12;
     public static final SysIdRoutine.Config DRIVE_MOTOR_SYSID_CONFIG = new SysIdRoutine.Config(
-            Units.Volts.of(5).per(Units.Second),
-            Units.Volts.of(8),
+            Units.Volts.of(1).per(Units.Second),
+            Units.Volts.of(3),
             Units.Second.of(1000)
     );
 
@@ -136,11 +136,11 @@ public class SwerveModuleConstants {
     }
 
     private static CANcoderConfiguration generateSteerEncoderConfiguration() {
-        final CANcoderConfiguration configuration = new CANcoderConfiguration();
+        final CANcoderConfiguration config = new CANcoderConfiguration();
 
-        configuration.MagnetSensor.AbsoluteSensorDiscontinuityPoint = STEER_ENCODER_DISCONTINUITY_POINT;
-        configuration.MagnetSensor.SensorDirection = STEER_ENCODER_DIRECTION;
+        config.MagnetSensor.AbsoluteSensorDiscontinuityPoint = STEER_ENCODER_DISCONTINUITY_POINT;
+        config.MagnetSensor.SensorDirection = STEER_ENCODER_DIRECTION;
 
-        return configuration;
+        return config;
     }
 }
