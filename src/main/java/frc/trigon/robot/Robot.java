@@ -20,10 +20,9 @@ public class Robot extends LoggedRobot {
     public static final boolean IS_REAL = Robot.isReal();
     private final CommandScheduler commandScheduler = CommandScheduler.getInstance();
     private Command autonomousCommand;
-    private RobotContainer robotContainer;
+    private final RobotContainer robotContainer;
 
-    @Override
-    public void robotInit() {
+    Robot() {
         RobotConstants.init();
         configLogger();
         robotContainer = new RobotContainer();
