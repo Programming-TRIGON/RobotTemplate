@@ -12,7 +12,6 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.VoltageUnit;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.trigon.robot.RobotContainer;
@@ -38,7 +37,6 @@ public class Swerve extends MotorSubsystem {
     private final SwerveSetpointGenerator setpointGenerator;
     private SwerveSetpoint previousSetpoint;
     private MirrorableRotation2d currentFieldRelativeTargetAngle = new MirrorableRotation2d(RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getRotation(), false);
-    private double lastTimestamp = Timer.getTimestamp();
 
     public Swerve() {
         setName("Swerve");
@@ -156,7 +154,6 @@ public class Swerve extends MotorSubsystem {
      * @param feedforwards  the target feedforwards for each module
      */
     public void selfRelativeFeedForwardDrive(ChassisSpeeds chassisSpeeds, DriveFeedforwards feedforwards) {
-        chassisSpeeds = discretize(chassisSpeeds);
         if (isStill(chassisSpeeds)) {
             stop();
             return;
@@ -291,20 +288,6 @@ public class Swerve extends MotorSubsystem {
     private void setClosedLoop(boolean shouldUseClosedLoop) {
         for (SwerveModule currentModule : swerveModules)
             currentModule.shouldDriveMotorUseClosedLoop(shouldUseClosedLoop);
-    }
-
-    /**
-     * When the robot drives while rotating it skews a bit to the side.
-     * This should fix the chassis speeds, so they won't make the robot skew while rotating.
-     *
-     * @param chassisSpeeds the chassis speeds to fix skewing for
-     * @return the discretized chassis speeds
-     */
-    private ChassisSpeeds discretize(ChassisSpeeds chassisSpeeds) {
-        final double currentTimestamp = Timer.getTimestamp();
-        final double difference = currentTimestamp - lastTimestamp;
-        lastTimestamp = currentTimestamp;
-        return ChassisSpeeds.discretize(chassisSpeeds, difference);
     }
 
     /**
