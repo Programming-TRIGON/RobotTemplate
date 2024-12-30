@@ -8,18 +8,18 @@ import edu.wpi.first.math.geometry.Transform2d;
  * Standard Deviations are used to reduce noise in a pose estimate result by accounting for how much each result is wrong by.
  */
 public class StandardDeviations {
-    private final double translation, theta;
+    private final double translationStandardDeviation, thetaStandardDeviation;
 
     /**
      * Constructs an object that stores how ambiguous the estimated pose of the robot is.
      * The greater the number, the less trustworthy the pose is.
      *
-     * @param translation the ambiguity of the translation aspect of the pose estimation
-     * @param theta       the ambiguity of the rotation aspect of the pose estimation
+     * @param translationStandardDeviation the ambiguity of the translation aspect of the pose estimation
+     * @param thetaStandardDeviation       the ambiguity of the rotation aspect of the pose estimation
      */
-    public StandardDeviations(double translation, double theta) {
-        this.translation = translation;
-        this.theta = theta;
+    public StandardDeviations(double translationStandardDeviation, double thetaStandardDeviation) {
+        this.translationStandardDeviation = translationStandardDeviation;
+        this.thetaStandardDeviation = thetaStandardDeviation;
     }
 
     /**
@@ -32,16 +32,16 @@ public class StandardDeviations {
      */
     StandardDeviations combineWith(StandardDeviations other) {
         return new StandardDeviations(
-                combineStandardDeviation(translation, other.translation),
-                combineStandardDeviation(theta, other.theta)
+                combineStandardDeviation(translationStandardDeviation, other.translationStandardDeviation),
+                combineStandardDeviation(thetaStandardDeviation, other.thetaStandardDeviation)
         );
     }
 
     Transform2d scaleTransformFromStandardDeviations(Transform2d transform) {
         return new Transform2d(
-                transform.getX() * translation,
-                transform.getY() * translation,
-                transform.getRotation().times(theta)
+                transform.getX() * translationStandardDeviation,
+                transform.getY() * translationStandardDeviation,
+                transform.getRotation().times(thetaStandardDeviation)
         );
     }
 
