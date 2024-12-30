@@ -14,7 +14,7 @@ import frc.trigon.robot.subsystems.swerve.SwerveConstants;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.trigon.hardware.RobotHardwareStats;
-import org.trigon.utilities.QuickSort;
+import org.trigon.utilities.QuickSortHandler;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -192,7 +192,7 @@ public class PoseEstimator implements AutoCloseable {
     }
 
     private void sortCamerasByLatestResultTimestamp(AprilTagCamera[] aprilTagCameras) {
-        QuickSort.sort(aprilTagCameras, AprilTagCamera::getLatestResultTimestampSeconds);
+        QuickSortHandler.sort(aprilTagCameras, AprilTagCamera::getLatestResultTimestampSeconds);
     }
 
     /**
