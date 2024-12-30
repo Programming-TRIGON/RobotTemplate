@@ -24,7 +24,7 @@ public class GeneralCommands {
     /**
      * Creates a command that toggles between the swerve's default commands: joystick oriented rotation and normal rotation.
      * Joystick oriented rotation is when the robot rotates directly to the angle of the joystick.
-     * Normal rotation is when the robot rotates at a speed depending on the power given to the joystick.
+     * Normal rotation is when the robot rotates at a speed depending on the axis value of the joystick.
      *
      * @return the command
      */
