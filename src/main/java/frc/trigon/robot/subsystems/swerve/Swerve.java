@@ -347,15 +347,6 @@ public class Swerve extends MotorSubsystem {
         return swerveModulePositions;
     }
 
-    private void updateHardware() {
-        gyro.update();
-
-        for (SwerveModule currentModule : swerveModules)
-            currentModule.updatePeriodically();
-
-        phoenix6SignalThread.updateLatestTimestamps();
-    }
-
     private boolean atTranslationPosition(double currentTranslationPosition, double targetTranslationPosition, double currentTranslationVelocity) {
         return Math.abs(currentTranslationPosition - targetTranslationPosition) < SwerveConstants.TRANSLATION_TOLERANCE_METERS &&
                 Math.abs(currentTranslationVelocity) < SwerveConstants.TRANSLATION_VELOCITY_TOLERANCE;
@@ -373,6 +364,15 @@ public class Swerve extends MotorSubsystem {
 
     private ChassisSpeeds fieldRelativeSpeedsToSelfRelativeSpeeds(ChassisSpeeds fieldRelativeSpeeds) {
         return ChassisSpeeds.fromFieldRelativeSpeeds(fieldRelativeSpeeds, getDriveRelativeAngle());
+    }
+    
+    private void updateHardware() {
+        gyro.update();
+
+        for (SwerveModule currentModule : swerveModules)
+            currentModule.updatePeriodically();
+
+        phoenix6SignalThread.updateLatestTimestamps();
     }
 
     private void updateNetworkTables() {
