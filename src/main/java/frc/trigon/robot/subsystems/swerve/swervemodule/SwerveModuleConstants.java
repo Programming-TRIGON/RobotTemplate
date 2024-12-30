@@ -9,6 +9,7 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.trigon.robot.constants.PathPlannerConstants;
 import org.trigon.hardware.RobotHardwareStats;
 import org.trigon.hardware.simulation.SimpleMotorSimulation;
 
@@ -28,7 +29,7 @@ public class SwerveModuleConstants {
             DRIVE_MOTOR_NEUTRAL_MODE_VALUE = NeutralModeValue.Brake,
             STEER_MOTOR_NEUTRAL_MODE_VALUE = NeutralModeValue.Brake;
     private static final double
-            DRIVE_MOTOR_SLIP_CURRENT = RobotHardwareStats.isSimulation() ? 200 : 80, // TODO: calibrate right before competition
+            DRIVE_MOTOR_SLIP_CURRENT = PathPlannerConstants.getRobotConfig().moduleConfig.driveCurrentLimit, // TODO: calibrate right before competition
             STEER_MOTOR_CURRENT_LIMIT = RobotHardwareStats.isSimulation() ? 200 : 30;
     private static final double
             STEER_MOTOR_P = RobotHardwareStats.isSimulation() ? 20 : 0,

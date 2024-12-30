@@ -37,7 +37,7 @@ public class Swerve extends MotorSubsystem {
     private final SwerveSetpointGenerator setpointGenerator;
     private SwerveSetpoint previousSetpoint;
     private MirrorableRotation2d currentFieldRelativeTargetAngle = new MirrorableRotation2d(RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getRotation(), false);
-    private double lastTimestamp;
+    private double lastTimestamp = Timer.getTimestamp();
 
     public Swerve() {
         setName("Swerve");
