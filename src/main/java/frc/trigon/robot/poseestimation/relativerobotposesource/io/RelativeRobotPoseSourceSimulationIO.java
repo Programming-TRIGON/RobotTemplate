@@ -8,6 +8,8 @@ import frc.trigon.robot.poseestimation.relativerobotposesource.RelativeRobotPose
 public class RelativeRobotPoseSourceSimulationIO extends RelativeRobotPoseSourceIO {
     @Override
     protected void updateInputs(RelativeRobotPoseSourceInputsAutoLogged inputs) {
+        inputs.framesPerSecond = 60;
+        inputs.batteryPercentage = 100;
         inputs.pose = RobotContainer.POSE_ESTIMATOR.getCurrentOdometryPose();
         inputs.lastResultTimestamp = Timer.getTimestamp();
     }
