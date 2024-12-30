@@ -34,16 +34,12 @@ public class SwerveConstants {
             FRONT_RIGHT_ID = 2,
             REAR_LEFT_ID = 3,
             REAR_RIGHT_ID = 4;
-    private static final double
-            FRONT_LEFT_WHEEL_DIAMETER_METERS = RobotHardwareStats.isSimulation() ? 0.1016 : 0.049274 * 2,
-            FRONT_RIGHT_WHEEL_DIAMETER_METERS = RobotHardwareStats.isSimulation() ? 0.1016 : 0.049274 * 2,
-            REAR_LEFT_WHEEL_DIAMETER_METERS = RobotHardwareStats.isSimulation() ? 0.1016 : 0.049274 * 2,
-            REAR_RIGHT_WHEEL_DIAMETER_METERS = RobotHardwareStats.isSimulation() ? 0.1016 : 0.049274 * 2;
+    private static final double WHEEL_DIAMETER_METERS = PathPlannerConstants.getRobotConfig().moduleConfig.wheelRadiusMeters;
     static final SwerveModule[] SWERVE_MODULES = {
-            new SwerveModule(FRONT_LEFT_ID, FRONT_LEFT_WHEEL_DIAMETER_METERS, FRONT_LEFT_STEER_ENCODER_OFFSET),
-            new SwerveModule(FRONT_RIGHT_ID, FRONT_RIGHT_WHEEL_DIAMETER_METERS, FRONT_RIGHT_STEER_ENCODER_OFFSET),
-            new SwerveModule(REAR_LEFT_ID, REAR_LEFT_WHEEL_DIAMETER_METERS, REAR_LEFT_STEER_ENCODER_OFFSET),
-            new SwerveModule(REAR_RIGHT_ID, REAR_RIGHT_WHEEL_DIAMETER_METERS, REAR_RIGHT_STEER_ENCODER_OFFSET)
+            new SwerveModule(FRONT_LEFT_ID, WHEEL_DIAMETER_METERS, FRONT_LEFT_STEER_ENCODER_OFFSET),
+            new SwerveModule(FRONT_RIGHT_ID, WHEEL_DIAMETER_METERS, FRONT_RIGHT_STEER_ENCODER_OFFSET),
+            new SwerveModule(REAR_LEFT_ID, WHEEL_DIAMETER_METERS, REAR_LEFT_STEER_ENCODER_OFFSET),
+            new SwerveModule(REAR_RIGHT_ID, WHEEL_DIAMETER_METERS, REAR_RIGHT_STEER_ENCODER_OFFSET)
     };
 
     private static final DoubleSupplier SIMULATION_YAW_VELOCITY_SUPPLIER = () -> RobotContainer.SWERVE.getSelfRelativeVelocity().omegaRadiansPerSecond;

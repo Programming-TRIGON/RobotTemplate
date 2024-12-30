@@ -12,6 +12,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.VoltageUnit;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.trigon.robot.RobotContainer;
@@ -22,7 +23,6 @@ import frc.trigon.robot.subsystems.swerve.swervemodule.SwerveModule;
 import frc.trigon.robot.subsystems.swerve.swervemodule.SwerveModuleConstants;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
-import org.trigon.hardware.RobotHardwareStats;
 import org.trigon.hardware.phoenix6.Phoenix6SignalThread;
 import org.trigon.hardware.phoenix6.pigeon2.Pigeon2Gyro;
 import org.trigon.hardware.phoenix6.pigeon2.Pigeon2Signal;
@@ -37,6 +37,7 @@ public class Swerve extends MotorSubsystem {
     private final SwerveSetpointGenerator setpointGenerator;
     private SwerveSetpoint previousSetpoint;
     private MirrorableRotation2d currentFieldRelativeTargetAngle = new MirrorableRotation2d(RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getRotation(), false);
+    private double lastTimestamp = Timer.getTimestamp();
 
     public Swerve() {
         setName("Swerve");
@@ -263,10 +264,14 @@ public class Swerve extends MotorSubsystem {
      * @param targetSpeeds the desired robot-relative targetSpeeds
      */
     private void selfRelativeDrive(ChassisSpeeds targetSpeeds) {
+        final double currentTime = Timer.getFPGATimestamp();
+        final double difference = currentTime - lastTimestamp;
+        lastTimestamp = currentTime;
+        
         previousSetpoint = setpointGenerator.generateSetpoint(
                 previousSetpoint,
                 targetSpeeds,
-                RobotHardwareStats.getPeriodicTimeSeconds()
+                difference
         );
         if (isStill(previousSetpoint.robotRelativeSpeeds())) {
             stop();
