@@ -5,10 +5,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.trigon.robot.RobotContainer;
-import frc.trigon.robot.poseestimation.relativerobotposesource.io.RelativeRobotPoseSourceSimulationIO;
-import frc.trigon.robot.poseestimation.relativerobotposesource.io.RelativeRobotPoseSourceT265IO;
 import org.littletonrobotics.junction.AutoLogOutput;
-import org.trigon.hardware.RobotHardwareStats;
 
 /**
  * A relative robot pose source is a robot pose source that calculates its position externally.
@@ -30,14 +27,7 @@ public class RelativeRobotPoseSource {
      */
     public RelativeRobotPoseSource(Transform2d robotCenterToCamera, String hostname) {
         this.robotCenterToCamera = robotCenterToCamera;
-        if (RobotHardwareStats.isReplay()) {
-            this.relativeRobotPoseSourceIO = new RelativeRobotPoseSourceSimulationIO();
-            return;
-        } else if (RobotHardwareStats.isSimulation()) {
-            this.relativeRobotPoseSourceIO = new RelativeRobotPoseSourceSimulationIO();
-            return;
-        }
-        this.relativeRobotPoseSourceIO = new RelativeRobotPoseSourceT265IO(hostname);
+        this.relativeRobotPoseSourceIO = RelativeRobotPoseSourceIO.generateIO(hostname);
     }
 
     public void updatePeriodically() {

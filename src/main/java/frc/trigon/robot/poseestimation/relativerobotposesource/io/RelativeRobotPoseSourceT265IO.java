@@ -29,9 +29,8 @@ public class RelativeRobotPoseSourceT265IO extends RelativeRobotPoseSourceIO {
     }
 
     private void updateJsonDump() {
-        final String jsonString = NetworkTableInstance.getDefault().getEntry(hostname).getString(null);
-        if (jsonString != null)
-            jsonDump = JsonHandler.parseJsonStringToObject(jsonString, JsonDump.class);
+        final String jsonString = NetworkTableInstance.getDefault().getEntry(hostname).getString("");
+        jsonDump = JsonHandler.parseJsonStringToObject(jsonString, JsonDump.class);
     }
 
     private Pose2d getT265Pose() {
