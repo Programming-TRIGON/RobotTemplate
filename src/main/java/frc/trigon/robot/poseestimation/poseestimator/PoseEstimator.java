@@ -19,6 +19,7 @@ import org.trigon.hardware.RobotHardwareStats;
 
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 /**
  * A class that estimates the robot's pose using team 6328's custom pose estimator.
@@ -30,6 +31,7 @@ public class PoseEstimator implements AutoCloseable {
 
     private RelativeRobotPoseSource relativeRobotPoseSource;
     private boolean shouldUseRelativeRobotPoseSource = false;
+
     private Pose2d
             odometryPose = new Pose2d(),
             estimatedPose = new Pose2d();
@@ -125,6 +127,21 @@ public class PoseEstimator implements AutoCloseable {
             addOdometryObservation(swerveWheelPositions[i], gyroRotations[i], timestamps[i]);
     }
 
+    /**
+     * Gets the estimated pose of the robot at the target timestamp.
+     *
+     * @param timestamp the target timestamp
+     * @return the robot's estimated pose at the timestamp
+     */
+    public Pose2d getPoseAtTimestamp(double timestamp) {
+        final Optional<Pose2d> odometryPoseAtTimestamp = previousOdometryPoses.getSample(timestamp);
+        if (odometryPoseAtTimestamp.isEmpty())
+            return null;
+
+        final Transform2d currentOdometryPoseToOdometryPoseAtTimestampTransform = new Transform2d(odometryPose, odometryPoseAtTimestamp.get());
+        return estimatedPose.plus(currentOdometryPoseToOdometryPoseAtTimestampTransform);
+    }
+
     private void putAprilTagsOnFieldWidget() {
         for (Map.Entry<Integer, Pose3d> entry : FieldConstants.TAG_ID_TO_POSE.entrySet()) {
             final Pose2d tagPose = entry.getValue().toPose2d();
@@ -180,7 +197,7 @@ public class PoseEstimator implements AutoCloseable {
      * @param estimatedPose the estimated robot pose
      * @param timestamp     the timestamp of the observation
      */
-    private void addPoseSourceObservation(Pose2d estimatedPose, double timestamp, PoseEstimatorConstants.StandardDeviations standardDeviations) {
+    private void addPoseSourceObservation(Pose2d estimatedPose, double timestamp, StandardDeviations standardDeviations) {
         if (isObservationTooOld(timestamp))
             return;
 
@@ -206,29 +223,35 @@ public class PoseEstimator implements AutoCloseable {
     }
 
     /**
-     * Gets the estimated pose of the robot at the target timestamp.
+     * Calculates the estimated pose of a vision observation with compensation for its ambiguity.
+     * This is done by finding the difference between the estimated pose at the time of the observation and the estimated pose of the observation and scaling that down using the calibrated standard deviations.
      *
-     * @param timestamp the target timestamp
-     * @return the robot's estimated pose at the timestamp
+     * @param estimatedPoseAtObservationTime the estimated pose of the robot at the time of the observation
+     * @param observationPose                the estimated robot pose from the observation
+     * @param observationStandardDeviations  the ambiguity of the observation
+     * @return the estimated pose with compensation for its ambiguity
      */
-    public Pose2d getPoseAtTimestamp(double timestamp) {
-        final Pose2d samplePose = previousOdometryPoses.getSample(timestamp).orElse(new Pose2d());
-        final Transform2d odometryPoseToSamplePoseTransform = new Transform2d(odometryPose, samplePose);
-
-        return estimatedPose.plus(odometryPoseToSamplePoseTransform);
+    private Pose2d calculateEstimatedPoseWithAmbiguityCompensation(Pose2d estimatedPoseAtObservationTime, Pose2d observationPose, StandardDeviations observationStandardDeviations) {
+        final Transform2d estimatedPoseAtObservationTimeToObservationPose = new Transform2d(estimatedPoseAtObservationTime, observationPose);
+        final Transform2d allowedMovement = calculateAllowedMovementFromAmbiguity(estimatedPoseAtObservationTimeToObservationPose, observationStandardDeviations);
+        return observationPose.plus(allowedMovement);
     }
 
-    private Transform2d calculatePoseStandardDeviations(Pose2d estimatedPoseAtObservationTime, PoseEstimatorConstants.StandardDeviations observationStandardDeviations) {
+    /**
+     * Calculates the scaling needed to reduce noise in the estimated pose from the standard deviations of the observation.
+     *
+     * @param estimatedPoseAtObservationTimeToObservationPose the difference between the estimated pose of the robot at the time of the observation and the estimated pose of the observation
+     * @param cameraStandardDeviations                        the standard deviations of the camera's estimated pose
+     * @return the allowed movement of the estimated pose as a {@link Transform2d}
+     */
+    private Transform2d calculateAllowedMovementFromAmbiguity(Transform2d estimatedPoseAtObservationTimeToObservationPose, StandardDeviations cameraStandardDeviations) {
+        final StandardDeviations estimatedPoseStandardDeviations = cameraStandardDeviations.combineWith(PoseEstimatorConstants.ODOMETRY_STANDARD_DEVIATIONS);
+        return estimatedPoseStandardDeviations.scaleTransformFromStandardDeviations(estimatedPoseAtObservationTimeToObservationPose);
+    }
+
+    private Transform2d calculatePoseStandardDeviations(Pose2d estimatedPoseAtObservationTime, StandardDeviations observationStandardDeviations) {
         final Transform2d poseEstimateAtObservationTimeToObservationPose = new Transform2d(estimatedPoseAtObservationTime, estimatedPose);
-        return scaleTransformFromStandardDeviations(poseEstimateAtObservationTimeToObservationPose, observationStandardDeviations);
-    }
-
-    private Transform2d scaleTransformFromStandardDeviations(Transform2d transform, PoseEstimatorConstants.StandardDeviations standardDeviations) {
-        return new Transform2d(
-                transform.getX() * standardDeviations.translation(),
-                transform.getY() * standardDeviations.translation(),
-                transform.getRotation().times(standardDeviations.theta())
-        );
+        return observationStandardDeviations.scaleTransformFromStandardDeviations(poseEstimateAtObservationTimeToObservationPose);
     }
 
     /**
