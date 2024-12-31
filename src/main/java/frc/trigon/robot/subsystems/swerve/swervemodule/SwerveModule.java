@@ -23,7 +23,6 @@ public class SwerveModule {
             driveMotor,
             steerMotor;
     private final CANcoderEncoder steerEncoder;
-    private final double wheelDiameterMeters;
     private final PositionVoltage steerPositionRequest = new PositionVoltage(0).withEnableFOC(SwerveModuleConstants.ENABLE_FOC);
     private final VelocityTorqueCurrentFOC driveVelocityRequest = new VelocityTorqueCurrentFOC(0);
     private final VoltageOut driveVoltageRequest = new VoltageOut(0);
@@ -38,12 +37,10 @@ public class SwerveModule {
      * Constructs a new SwerveModule with the given module ID, wheel diameter, and offset rotations.
      * MAKE SURE TO PUT THESE PARAMETERS IN THE RIGHT ORDER!!!
      *
-     * @param moduleID            the ID of the module
-     * @param wheelDiameterMeters the diameter of the drive wheel in meters
-     * @param offsetRotations     the module's encoder offset in rotations
+     * @param moduleID        the ID of the module
+     * @param offsetRotations the module's encoder offset in rotations
      */
-    public SwerveModule(int moduleID, double wheelDiameterMeters, double offsetRotations) {
-        this.wheelDiameterMeters = wheelDiameterMeters;
+    public SwerveModule(int moduleID, double offsetRotations) {
         driveMotor = new TalonFXMotor(moduleID, "Module" + moduleID + "Drive", RobotConstants.CANIVORE_NAME);
         steerMotor = new TalonFXMotor(moduleID + 4, "Module" + moduleID + "Steer", RobotConstants.CANIVORE_NAME);
         steerEncoder = new CANcoderEncoder(moduleID + 4, "Module" + moduleID + "Steer", RobotConstants.CANIVORE_NAME);
@@ -168,7 +165,7 @@ public class SwerveModule {
     }
 
     private void setTargetClosedLoopVelocity(double targetVelocityMetersPerSecond) {
-        final double targetVelocityRotationsPerSecond = driveWheelRotationsToMeters(targetVelocityMetersPerSecond);
+        final double targetVelocityRotationsPerSecond = metersToDriveWheelRotations(targetVelocityMetersPerSecond);
         driveMotor.setControl(driveVelocityRequest.withVelocity(targetVelocityRotationsPerSecond));
     }
 
@@ -203,7 +200,17 @@ public class SwerveModule {
      * @return the distance the drive wheel has traveled in meters
      */
     private double driveWheelRotationsToMeters(double rotations) {
-        return Conversions.rotationsToDistance(rotations, wheelDiameterMeters);
+        return Conversions.rotationsToDistance(rotations, SwerveConstants.WHEEL_DIAMETER_METERS);
+    }
+
+    /**
+     * Converts meters to the rotations of the drive wheel.
+     *
+     * @param meters the meters to be converted
+     * @return the distance the drive wheel has traveled in drive wheel rotations
+     */
+    private double metersToDriveWheelRotations(double meters) {
+        return Conversions.distanceToRotations(meters, SwerveConstants.WHEEL_DIAMETER_METERS);
     }
 
     private void configureHardware(double offsetRotations) {

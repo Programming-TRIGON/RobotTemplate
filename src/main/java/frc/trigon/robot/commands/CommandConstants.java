@@ -102,7 +102,8 @@ public class CommandConstants {
      * @return the rotation value
      */
     private static MirrorableRotation2d calculateJoystickOrientedRotationValue() {
-        if (1 - Math.abs(Math.hypot(DRIVER_CONTROLLER.getRightX(), DRIVER_CONTROLLER.getRightY())) > JOYSTICK_ORIENTED_ROTATION_DEADBAND)
+        final double joystickPower = 1 - Math.hypot(DRIVER_CONTROLLER.getRightX(), DRIVER_CONTROLLER.getRightY());
+        if (joystickPower > JOYSTICK_ORIENTED_ROTATION_DEADBAND)
             return null;
 
         final double targetAngleRadians = Math.atan2(DRIVER_CONTROLLER.getRightX(), DRIVER_CONTROLLER.getRightY());
