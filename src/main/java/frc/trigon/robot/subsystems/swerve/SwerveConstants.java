@@ -37,7 +37,7 @@ public class SwerveConstants {
             FRONT_RIGHT_ID = 2,
             REAR_LEFT_ID = 3,
             REAR_RIGHT_ID = 4;
-    public static final double WHEEL_DIAMETER_METERS = PathPlannerConstants.getRobotConfig().moduleConfig.wheelRadiusMeters;
+    public static final double WHEEL_DIAMETER_METERS = PathPlannerConstants.getRobotConfig().moduleConfig.wheelRadiusMeters * 2;
     static final SwerveModule[] SWERVE_MODULES = {
             new SwerveModule(FRONT_LEFT_ID, FRONT_LEFT_STEER_ENCODER_OFFSET),
             new SwerveModule(FRONT_RIGHT_ID, FRONT_RIGHT_STEER_ENCODER_OFFSET),
