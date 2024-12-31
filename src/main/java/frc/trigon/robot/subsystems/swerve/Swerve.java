@@ -34,15 +34,14 @@ public class Swerve extends MotorSubsystem {
     private final Pigeon2Gyro gyro = SwerveConstants.GYRO;
     private final SwerveModule[] swerveModules = SwerveConstants.SWERVE_MODULES;
     private final Phoenix6SignalThread phoenix6SignalThread = Phoenix6SignalThread.getInstance();
-    private final SwerveSetpointGenerator setpointGenerator;
-    private SwerveSetpoint previousSetpoint;
+    private final SwerveSetpointGenerator setpointGenerator = new SwerveSetpointGenerator(PathPlannerConstants.ROBOT_CONFIG, SwerveConstants.MAXIMUM_ROTATIONAL_SPEED_RADIANS_PER_SECOND);
     private MirrorableRotation2d currentFieldRelativeTargetAngle = new MirrorableRotation2d(RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getRotation(), false);
     private double lastTimestamp = Timer.getTimestamp();
+    private SwerveSetpoint previousSetpoint;
 
     public Swerve() {
         setName("Swerve");
         phoenix6SignalThread.setThreadFrequencyHertz(PoseEstimatorConstants.ODOMETRY_FREQUENCY_HERTZ);
-        setpointGenerator = new SwerveSetpointGenerator(PathPlannerConstants.getRobotConfig(), SwerveConstants.MAXIMUM_ROTATIONAL_SPEED_RADIANS_PER_SECOND);
     }
 
     @Override
@@ -173,7 +172,7 @@ public class Swerve extends MotorSubsystem {
     }
 
     void initializeDrive(boolean shouldUseClosedLoop) {
-        previousSetpoint = new SwerveSetpoint(getSelfRelativeVelocity(), getModuleStates(), DriveFeedforwards.zeros(PathPlannerConstants.getRobotConfig().numModules));
+        previousSetpoint = new SwerveSetpoint(getSelfRelativeVelocity(), getModuleStates(), DriveFeedforwards.zeros(PathPlannerConstants.ROBOT_CONFIG.numModules));
         setClosedLoop(shouldUseClosedLoop);
         resetRotationController();
     }

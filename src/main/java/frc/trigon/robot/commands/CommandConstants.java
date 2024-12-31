@@ -54,7 +54,7 @@ public class CommandConstants {
             ),
             STATIC_WHITE_LED_COLOR_COMMAND = LEDCommands.getStaticColorCommand(Color.kWhite, LEDStrip.LED_STRIPS),
             WHEEL_RADIUS_CHARACTERIZATION_COMMAND = new WheelRadiusCharacterizationCommand(
-                    PathPlannerConstants.getRobotConfig().moduleLocations,
+                    PathPlannerConstants.ROBOT_CONFIG.moduleLocations,
                     RobotContainer.SWERVE::getDriveWheelPositionsRadians,
                     () -> RobotContainer.SWERVE.getHeading().getRadians(),
                     RobotContainer.SWERVE::runWheelRadiusCharacterization,
@@ -108,7 +108,7 @@ public class CommandConstants {
             return null;
 
         final double targetAngleRadians = Math.atan2(DRIVER_CONTROLLER.getRightX(), DRIVER_CONTROLLER.getRightY());
-        return MirrorableRotation2d.fromRadians(targetAngleRadians, false);
+        return MirrorableRotation2d.fromRadians(targetAngleRadians, true);
     }
 
     private static double getXPowerFromPov(double pov) {

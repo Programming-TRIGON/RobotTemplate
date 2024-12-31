@@ -43,7 +43,7 @@ public class SwerveModule {
     public SwerveModule(int moduleID, double offsetRotations) {
         driveMotor = new TalonFXMotor(moduleID, "Module" + moduleID + "Drive", RobotConstants.CANIVORE_NAME);
         steerMotor = new TalonFXMotor(moduleID + 4, "Module" + moduleID + "Steer", RobotConstants.CANIVORE_NAME);
-        steerEncoder = new CANcoderEncoder(moduleID + 4, "Module" + moduleID + "Steer", RobotConstants.CANIVORE_NAME);
+        steerEncoder = new CANcoderEncoder(moduleID + 4, "Module" + moduleID + "Steer encoder", RobotConstants.CANIVORE_NAME);
 
         configureHardware(offsetRotations);
     }
@@ -200,7 +200,7 @@ public class SwerveModule {
      * @return the distance the drive wheel has traveled in meters
      */
     private double driveWheelRotationsToMeters(double rotations) {
-        return Conversions.rotationsToDistance(rotations, SwerveConstants.WHEEL_DIAMETER_METERS);
+        return Conversions.rotationsToDistance(rotations, SwerveModuleConstants.WHEEL_DIAMETER_METERS);
     }
 
     /**
@@ -210,7 +210,7 @@ public class SwerveModule {
      * @return the distance the drive wheel has traveled in drive wheel rotations
      */
     private double metersToDriveWheelRotations(double meters) {
-        return Conversions.distanceToRotations(meters, SwerveConstants.WHEEL_DIAMETER_METERS);
+        return Conversions.distanceToRotations(meters, SwerveModuleConstants.WHEEL_DIAMETER_METERS);
     }
 
     private void configureHardware(double offsetRotations) {
