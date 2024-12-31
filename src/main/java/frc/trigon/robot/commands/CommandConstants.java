@@ -38,7 +38,7 @@ public class CommandConstants {
             FIELD_RELATIVE_DRIVE_WITH_JOYSTICK_ORIENTED_ROTATION_COMMAND = SwerveCommands.getClosedLoopFieldRelativeDriveCommand(
                     () -> calculateDriveStickAxisValue(DRIVER_CONTROLLER.getLeftY()),
                     () -> calculateDriveStickAxisValue(DRIVER_CONTROLLER.getLeftX()),
-                    CommandConstants::calculateJoystickOrientedtargetAngle
+                    CommandConstants::calculateJoystickOrientedTargetAngle
             ),
             SELF_RELATIVE_DRIVE_COMMAND = SwerveCommands.getClosedLoopSelfRelativeDriveCommand(
                     () -> calculateDriveStickAxisValue(DRIVER_CONTROLLER.getLeftY()),
@@ -102,7 +102,7 @@ public class CommandConstants {
      *
      * @return the rotation value
      */
-    private static MirrorableRotation2d calculateJoystickOrientedtargetAngle() {
+    private static MirrorableRotation2d calculateJoystickOrientedTargetAngle() {
         final double joystickPower = 1 - Math.hypot(DRIVER_CONTROLLER.getRightX(), DRIVER_CONTROLLER.getRightY());
         if (joystickPower > JOYSTICK_ORIENTED_ROTATION_DEADBAND)
             return null;
