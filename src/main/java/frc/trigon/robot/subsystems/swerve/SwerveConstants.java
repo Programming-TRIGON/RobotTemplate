@@ -2,6 +2,7 @@ package frc.trigon.robot.subsystems.swerve;
 
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -18,6 +19,8 @@ import org.trigon.hardware.phoenix6.pigeon2.Pigeon2Signal;
 import java.util.function.DoubleSupplier;
 
 public class SwerveConstants {
+    private static final RobotConfig ROBOT_CONFIG = PathPlannerConstants.getRobotConfig();
+
     private static final int PIGEON_ID = 0;
     static final Pigeon2Gyro GYRO = new Pigeon2Gyro(PIGEON_ID, "SwerveGyro", RobotConstants.CANIVORE_NAME);
     private static final double
@@ -36,18 +39,19 @@ public class SwerveConstants {
             REAR_RIGHT_ID = 4;
     private static final double WHEEL_DIAMETER_METERS = PathPlannerConstants.getRobotConfig().moduleConfig.wheelRadiusMeters;
     static final SwerveModule[] SWERVE_MODULES = {
-            new SwerveModule(FRONT_LEFT_ID, WHEEL_DIAMETER_METERS, FRONT_LEFT_STEER_ENCODER_OFFSET),
-            new SwerveModule(FRONT_RIGHT_ID, WHEEL_DIAMETER_METERS, FRONT_RIGHT_STEER_ENCODER_OFFSET),
-            new SwerveModule(REAR_LEFT_ID, WHEEL_DIAMETER_METERS, REAR_LEFT_STEER_ENCODER_OFFSET),
-            new SwerveModule(REAR_RIGHT_ID, WHEEL_DIAMETER_METERS, REAR_RIGHT_STEER_ENCODER_OFFSET)
+            new SwerveModule(FRONT_LEFT_ID, FRONT_LEFT_STEER_ENCODER_OFFSET),
+            new SwerveModule(FRONT_RIGHT_ID, FRONT_RIGHT_STEER_ENCODER_OFFSET),
+            new SwerveModule(REAR_LEFT_ID, REAR_LEFT_STEER_ENCODER_OFFSET),
+            new SwerveModule(REAR_RIGHT_ID, REAR_RIGHT_STEER_ENCODER_OFFSET)
     };
 
     private static final DoubleSupplier SIMULATION_YAW_VELOCITY_SUPPLIER = () -> RobotContainer.SWERVE.getSelfRelativeVelocity().omegaRadiansPerSecond;
     public static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(PathPlannerConstants.getRobotConfig().moduleLocations);
     private static final double FURTHEST_MODULE_DISTANCE_FROM_CENTER = Math.hypot(
-            PathPlannerConstants.getRobotConfig().moduleLocations[0].getX(),
-            PathPlannerConstants.getRobotConfig().moduleLocations[3].getY()
+            Math.max(ROBOT_CONFIG.moduleLocations[0].getX(), ROBOT_CONFIG.moduleLocations[1].getX()),
+            Math.max(ROBOT_CONFIG.moduleLocations[0].getY(), ROBOT_CONFIG.moduleLocations[3].getY())
     );
+
     static final double
             TRANSLATION_TOLERANCE_METERS = 0.05,
             ROTATION_TOLERANCE_DEGREES = 2,
@@ -84,10 +88,15 @@ public class SwerveConstants {
             TRANSLATION_PID_CONSTANTS.kD
     );
     public static final double
-            MAXIMUM_SPEED_METERS_PER_SECOND = PathPlannerConstants.getRobotConfig().moduleConfig.maxDriveVelocityMPS,
-            MAXIMUM_ROTATIONAL_SPEED_RADIANS_PER_SECOND = PathPlannerConstants.getRobotConfig().moduleConfig.maxDriveVelocityRadPerSec;
+            MAXIMUM_SPEED_METERS_PER_SECOND = ROBOT_CONFIG.moduleConfig.maxDriveVelocityMPS,
+            MAXIMUM_ROTATIONAL_SPEED_RADIANS_PER_SECOND = 12.03;
 
     static {
+        configureGyro();
+        SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER.enableContinuousInput(-SwerveConstants.MAXIMUM_PID_ANGLE, SwerveConstants.MAXIMUM_PID_ANGLE);
+    }
+
+    private static void configureGyro() {
         final Pigeon2Configuration config = new Pigeon2Configuration();
         config.MountPose.MountPoseYaw = GYRO_MOUNT_POSITION_YAW;
         config.MountPose.MountPosePitch = GYRO_MOUNT_POSITION_PITCH;
