@@ -1,8 +1,6 @@
 package frc.trigon.robot.poseestimation.apriltagcamera.io;
 
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.util.Units;
 import frc.trigon.robot.constants.FieldConstants;
 import frc.trigon.robot.poseestimation.apriltagcamera.AprilTagCameraIO;
 import frc.trigon.robot.poseestimation.apriltagcamera.AprilTagCameraInputsAutoLogged;
@@ -29,13 +27,9 @@ public class AprilTagLimelightIO extends AprilTagCameraIO {
     }
 
     private void updateHasResultInputs(AprilTagCameraInputsAutoLogged inputs, LimelightHelpers.LimelightResults results) {
-        final Rotation3d bestTagRelativeRotation = getBestTargetRelativeRotation(results);
-
         inputs.cameraSolvePNPPose = results.getBotPose3d_wpiBlue();
         inputs.latestResultTimestampSeconds = results.timestamp_RIOFPGA_capture;
         inputs.visibleTagIDs = getVisibleTagIDs(results);
-        inputs.bestTargetRelativeYawRadians = bestTagRelativeRotation.getZ();
-        inputs.bestTargetRelativePitchRadians = bestTagRelativeRotation.getY();
         inputs.distanceFromBestTag = getDistanceFromBestTag(results);
     }
 
@@ -62,17 +56,6 @@ public class AprilTagLimelightIO extends AprilTagCameraIO {
             visibleTagIDs[i + idAddition] = currentID;
         }
         return visibleTagIDs;
-    }
-
-    /**
-     * Estimates the camera's rotation relative to the apriltag.
-     *
-     * @param results the camera's pipeline result
-     * @return the estimated rotation
-     */
-    private Rotation3d getBestTargetRelativeRotation(LimelightHelpers.LimelightResults results) {
-        final LimelightHelpers.LimelightTarget_Fiducial bestTag = getBestTarget(results);
-        return new Rotation3d(0, -Units.degreesToRadians(bestTag.tx), -Units.degreesToRadians(bestTag.ty));
     }
 
     private double getDistanceFromBestTag(LimelightHelpers.LimelightResults results) {

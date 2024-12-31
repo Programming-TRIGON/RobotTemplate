@@ -1,6 +1,5 @@
 package frc.trigon.robot.poseestimation.poseestimator;
 
-
 public class PoseEstimatorConstants {
     public static final double ODOMETRY_FREQUENCY_HERTZ = 250;
 
