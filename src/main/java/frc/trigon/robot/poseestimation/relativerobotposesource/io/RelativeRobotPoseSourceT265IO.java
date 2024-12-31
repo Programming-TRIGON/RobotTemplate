@@ -9,8 +9,8 @@ import frc.trigon.robot.poseestimation.relativerobotposesource.RelativeRobotPose
 import org.trigon.utilities.JsonHandler;
 
 public class RelativeRobotPoseSourceT265IO extends RelativeRobotPoseSourceIO {
+    private JsonDump jsonDump = new JsonDump();
     private final String fileName;
-    private JsonDump jsonDump;
 
     public RelativeRobotPoseSourceT265IO(String hostname) {
         fileName = hostname + ".json";
@@ -42,12 +42,12 @@ public class RelativeRobotPoseSourceT265IO extends RelativeRobotPoseSourceIO {
     private Rotation2d getT265Heading() {
         return Rotation2d.fromRadians(jsonDump.rotationRadians);
     }
-}
 
-class JsonDump {
-    protected int framesPerSecond = 0;
-    protected double BatteryPercentage = 0;
-    protected double xPositionMeters = 0;
-    protected double yPositionMeters = 0;
-    protected double rotationRadians = 0;
+    class JsonDump {
+        private int framesPerSecond = 0;
+        private double BatteryPercentage = 0;
+        private double xPositionMeters = 0;
+        private double yPositionMeters = 0;
+        private double rotationRadians = 0;
+    }
 }
