@@ -3,6 +3,7 @@ package frc.trigon.robot.poseestimation.relativerobotposesource.io;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Timer;
 import frc.trigon.robot.poseestimation.relativerobotposesource.RelativeRobotPoseSourceIO;
 import frc.trigon.robot.poseestimation.relativerobotposesource.RelativeRobotPoseSourceInputsAutoLogged;
@@ -10,10 +11,10 @@ import org.trigon.utilities.JsonHandler;
 
 public class RelativeRobotPoseSourceT265IO extends RelativeRobotPoseSourceIO {
     private JsonDump jsonDump = new JsonDump();
-    private final String fileName;
+    private final String hostname;
 
     public RelativeRobotPoseSourceT265IO(String hostname) {
-        fileName = hostname + ".json";
+        this.hostname = hostname;
     }
 
     @Override
@@ -28,7 +29,9 @@ public class RelativeRobotPoseSourceT265IO extends RelativeRobotPoseSourceIO {
     }
 
     private void updateJsonDump() {
-        jsonDump = JsonHandler.parseJsonFileToObject(fileName, JsonDump.class);
+        final String jsonString = NetworkTableInstance.getDefault().getEntry(hostname).getString(null);
+        if (jsonString != null)
+            jsonDump = JsonHandler.parseJsonStringToObject(jsonString, JsonDump.class);
     }
 
     private Pose2d getT265Pose() {
@@ -43,7 +46,7 @@ public class RelativeRobotPoseSourceT265IO extends RelativeRobotPoseSourceIO {
         return Rotation2d.fromRadians(jsonDump.rotationRadians);
     }
 
-    class JsonDump {
+    private static class JsonDump {
         private int framesPerSecond = 0;
         private double BatteryPercentage = 0;
         private double xPositionMeters = 0;
