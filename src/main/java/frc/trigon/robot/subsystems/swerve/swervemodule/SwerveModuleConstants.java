@@ -71,7 +71,7 @@ public class SwerveModuleConstants {
      * @return the drive motor simulation
      */
     static SimpleMotorSimulation createDriveMotorSimulation() {
-        return new SimpleMotorSimulation(DRIVE_MOTOR_GEARBOX, DRIVE_MOTOR_GEAR_RATIO, DRIVE_MOMENT_OF_INERTIA);
+        return new SimpleMotorSimulation(DRIVE_MOTOR_GEARBOX, 1, DRIVE_MOMENT_OF_INERTIA);
     }
 
     /**
