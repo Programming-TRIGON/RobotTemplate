@@ -29,7 +29,7 @@ public class SwerveModuleConstants {
             DRIVE_MOTOR_NEUTRAL_MODE_VALUE = NeutralModeValue.Brake,
             STEER_MOTOR_NEUTRAL_MODE_VALUE = NeutralModeValue.Brake;
     private static final double
-            DRIVE_MOTOR_SLIP_CURRENT = PathPlannerConstants.getRobotConfig().moduleConfig.driveCurrentLimit, // TODO: calibrate right before competition
+            DRIVE_MOTOR_SLIP_CURRENT = PathPlannerConstants.ROBOT_CONFIG.moduleConfig.driveCurrentLimit, // TODO: calibrate right before competition
             STEER_MOTOR_CURRENT_LIMIT = RobotHardwareStats.isSimulation() ? 200 : 30;
     private static final double
             STEER_MOTOR_P = RobotHardwareStats.isSimulation() ? 20 : 0,
@@ -43,6 +43,7 @@ public class SwerveModuleConstants {
             DRIVE_MOTOR_KV = RobotHardwareStats.isSimulation() ? 0 : 0,
             DRIVE_MOTOR_KA = RobotHardwareStats.isSimulation() ? 0.48818 : 0;
     static final boolean ENABLE_FOC = true;
+    static final double WHEEL_DIAMETER_METERS = PathPlannerConstants.ROBOT_CONFIG.moduleConfig.wheelRadiusMeters * 2;
     static final TalonFXConfiguration
             DRIVE_MOTOR_CONFIGURATION = generateDriveMotorConfiguration(),
             STEER_MOTOR_CONFIGURATION = generateSteerMotorConfiguration();
@@ -51,11 +52,9 @@ public class SwerveModuleConstants {
     private static final double
             DRIVE_MOMENT_OF_INERTIA = 0.003,
             STEER_MOMENT_OF_INERTIA = 0.003;
-    private static final int
-            DRIVE_MOTOR_AMOUNT = 1,
-            STEER_MOTOR_AMOUNT = 1;
+    private static final int STEER_MOTOR_AMOUNT = 1;
     private static final DCMotor
-            DRIVE_MOTOR_GEARBOX = DCMotor.getKrakenX60Foc(DRIVE_MOTOR_AMOUNT),
+            DRIVE_MOTOR_GEARBOX = PathPlannerConstants.ROBOT_CONFIG.moduleConfig.driveMotor,
             STEER_MOTOR_GEARBOX = DCMotor.getFalcon500Foc(STEER_MOTOR_AMOUNT);
 
     static final double VOLTAGE_COMPENSATION_SATURATION = 12;

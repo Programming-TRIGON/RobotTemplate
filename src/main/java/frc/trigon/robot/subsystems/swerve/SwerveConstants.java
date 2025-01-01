@@ -2,7 +2,6 @@ package frc.trigon.robot.subsystems.swerve;
 
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.pathplanner.lib.config.PIDConstants;
-import com.pathplanner.lib.config.RobotConfig;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -19,8 +18,6 @@ import org.trigon.hardware.phoenix6.pigeon2.Pigeon2Signal;
 import java.util.function.DoubleSupplier;
 
 public class SwerveConstants {
-    private static final RobotConfig ROBOT_CONFIG = PathPlannerConstants.getRobotConfig();
-
     private static final int PIGEON_ID = 0;
     static final Pigeon2Gyro GYRO = new Pigeon2Gyro(PIGEON_ID, "SwerveGyro", RobotConstants.CANIVORE_NAME);
     private static final double
@@ -37,7 +34,6 @@ public class SwerveConstants {
             FRONT_RIGHT_ID = 2,
             REAR_LEFT_ID = 3,
             REAR_RIGHT_ID = 4;
-    public static final double WHEEL_DIAMETER_METERS = PathPlannerConstants.getRobotConfig().moduleConfig.wheelRadiusMeters * 2;
     static final SwerveModule[] SWERVE_MODULES = {
             new SwerveModule(FRONT_LEFT_ID, FRONT_LEFT_STEER_ENCODER_OFFSET),
             new SwerveModule(FRONT_RIGHT_ID, FRONT_RIGHT_STEER_ENCODER_OFFSET),
@@ -46,12 +42,11 @@ public class SwerveConstants {
     };
 
     private static final DoubleSupplier SIMULATION_YAW_VELOCITY_SUPPLIER = () -> RobotContainer.SWERVE.getSelfRelativeVelocity().omegaRadiansPerSecond;
-    public static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(PathPlannerConstants.getRobotConfig().moduleLocations);
-    private static final double FURTHEST_MODULE_DISTANCE_FROM_CENTER = Math.hypot(
-            Math.max(ROBOT_CONFIG.moduleLocations[0].getX(), ROBOT_CONFIG.moduleLocations[1].getX()),
-            Math.max(ROBOT_CONFIG.moduleLocations[0].getY(), ROBOT_CONFIG.moduleLocations[3].getY())
+    public static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(PathPlannerConstants.ROBOT_CONFIG.moduleLocations);
+    private static final double FURTHEST_MODULE_DISTANCE_FROM_CENTER = Math.max(
+            Math.max(PathPlannerConstants.ROBOT_CONFIG.moduleLocations[0].getNorm(), PathPlannerConstants.ROBOT_CONFIG.moduleLocations[1].getNorm()),
+            Math.max(PathPlannerConstants.ROBOT_CONFIG.moduleLocations[2].getNorm(), PathPlannerConstants.ROBOT_CONFIG.moduleLocations[3].getNorm())
     );
-
     static final double
             TRANSLATION_TOLERANCE_METERS = 0.05,
             ROTATION_TOLERANCE_DEGREES = 2,
@@ -88,7 +83,7 @@ public class SwerveConstants {
             TRANSLATION_PID_CONSTANTS.kD
     );
     public static final double
-            MAXIMUM_SPEED_METERS_PER_SECOND = ROBOT_CONFIG.moduleConfig.maxDriveVelocityMPS,
+            MAXIMUM_SPEED_METERS_PER_SECOND = PathPlannerConstants.ROBOT_CONFIG.moduleConfig.maxDriveVelocityMPS,
             MAXIMUM_ROTATIONAL_SPEED_RADIANS_PER_SECOND = 12.03;
 
     static {
