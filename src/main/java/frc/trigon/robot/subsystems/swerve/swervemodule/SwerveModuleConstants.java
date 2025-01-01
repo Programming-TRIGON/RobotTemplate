@@ -52,9 +52,11 @@ public class SwerveModuleConstants {
     private static final double
             DRIVE_MOMENT_OF_INERTIA = 0.003,
             STEER_MOMENT_OF_INERTIA = 0.003;
-    private static final int STEER_MOTOR_AMOUNT = 1;
+    private static final int
+            DRIVE_MOTOR_AMOUNT = 1,
+            STEER_MOTOR_AMOUNT = 1;
     private static final DCMotor
-            DRIVE_MOTOR_GEARBOX = PathPlannerConstants.ROBOT_CONFIG.moduleConfig.driveMotor,
+            DRIVE_MOTOR_GEARBOX = DCMotor.getKrakenX60Foc(DRIVE_MOTOR_AMOUNT),
             STEER_MOTOR_GEARBOX = DCMotor.getFalcon500Foc(STEER_MOTOR_AMOUNT);
 
     static final double VOLTAGE_COMPENSATION_SATURATION = 12;
@@ -71,7 +73,7 @@ public class SwerveModuleConstants {
      * @return the drive motor simulation
      */
     static SimpleMotorSimulation createDriveMotorSimulation() {
-        return new SimpleMotorSimulation(DRIVE_MOTOR_GEARBOX, 1, DRIVE_MOMENT_OF_INERTIA);
+        return new SimpleMotorSimulation(DRIVE_MOTOR_GEARBOX, DRIVE_MOTOR_GEAR_RATIO, DRIVE_MOMENT_OF_INERTIA);
     }
 
     /**
