@@ -43,7 +43,7 @@ public class SwerveModule {
     public SwerveModule(int moduleID, double offsetRotations) {
         driveMotor = new TalonFXMotor(moduleID, "Module" + moduleID + "Drive", RobotConstants.CANIVORE_NAME);
         steerMotor = new TalonFXMotor(moduleID + 4, "Module" + moduleID + "Steer", RobotConstants.CANIVORE_NAME);
-        steerEncoder = new CANcoderEncoder(moduleID + 4, "Module" + moduleID + "Steer encoder", RobotConstants.CANIVORE_NAME);
+        steerEncoder = new CANcoderEncoder(moduleID + 4, "Module" + moduleID + "SteerEncoder", RobotConstants.CANIVORE_NAME);
 
         configureHardware(offsetRotations);
     }

@@ -173,6 +173,7 @@ public class Swerve extends MotorSubsystem {
 
     void initializeDrive(boolean shouldUseClosedLoop) {
         previousSetpoint = new SwerveSetpoint(getSelfRelativeVelocity(), getModuleStates(), DriveFeedforwards.zeros(PathPlannerConstants.ROBOT_CONFIG.numModules));
+        currentFieldRelativeTargetAngle = new MirrorableRotation2d(RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getRotation(), false);
         setClosedLoop(shouldUseClosedLoop);
         resetRotationController();
     }
@@ -225,7 +226,6 @@ public class Swerve extends MotorSubsystem {
      */
     void fieldRelativeDrive(double xPower, double yPower, double thetaPower) {
         final ChassisSpeeds speeds = selfRelativeSpeedsFromFieldRelativePowers(xPower, yPower, thetaPower);
-        currentFieldRelativeTargetAngle = new MirrorableRotation2d(RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getRotation(), false);
         selfRelativeDrive(speeds);
     }
 
@@ -261,14 +261,10 @@ public class Swerve extends MotorSubsystem {
      * @param targetSpeeds the desired robot-relative targetSpeeds
      */
     private void selfRelativeDrive(ChassisSpeeds targetSpeeds) {
-        final double currentTime = Timer.getFPGATimestamp();
-        final double difference = currentTime - lastTimestamp;
-        lastTimestamp = currentTime;
-
         previousSetpoint = setpointGenerator.generateSetpoint(
                 previousSetpoint,
                 targetSpeeds,
-                difference
+                getTimeSinceLastTimestamp()
         );
         if (isStill(previousSetpoint.robotRelativeSpeeds())) {
             stop();
@@ -291,6 +287,13 @@ public class Swerve extends MotorSubsystem {
     private void setClosedLoop(boolean shouldUseClosedLoop) {
         for (SwerveModule currentModule : swerveModules)
             currentModule.shouldDriveMotorUseClosedLoop(shouldUseClosedLoop);
+    }
+
+    private double getTimeSinceLastTimestamp() {
+        final double currentTime = Timer.getFPGATimestamp();
+        final double difference = currentTime - lastTimestamp;
+        lastTimestamp = currentTime;
+        return difference;
     }
 
     /**
