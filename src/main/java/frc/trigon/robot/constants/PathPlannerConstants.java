@@ -1,12 +1,14 @@
 package frc.trigon.robot.constants;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.pathfinding.Pathfinding;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import frc.trigon.robot.RobotContainer;
 import org.json.simple.parser.ParseException;
 import org.trigon.hardware.RobotHardwareStats;
@@ -20,14 +22,15 @@ import java.io.IOException;
  */
 public class PathPlannerConstants {
     public static final PathConstraints REAL_TIME_PATH_CONSTRAINTS = new PathConstraints(2.5, 2.5, 4, 4);
+    public static final RobotConfig ROBOT_CONFIG = getRobotConfig();
 
     private static final PIDConstants
             AUTO_TRANSLATION_PID_CONSTANTS = RobotHardwareStats.isSimulation() ?
-            new PIDConstants(5, 0, 0) :
-            new PIDConstants(2, 0, 0),
+            new PIDConstants(0, 0, 0) :
+            new PIDConstants(0, 0, 0),
             AUTO_ROTATION_PID_CONSTANTS = RobotHardwareStats.isSimulation() ?
-                    new PIDConstants(2.5, 0, 0) :
-                    new PIDConstants(6.5, 0, 0);
+                    new PIDConstants(0, 0, 0) :
+                    new PIDConstants(0, 0, 0);
 
     private static final PPHolonomicDriveController AUTO_PATH_FOLLOWING_CONTROLLER = new PPHolonomicDriveController(
             AUTO_TRANSLATION_PID_CONSTANTS,
@@ -47,12 +50,11 @@ public class PathPlannerConstants {
     private static void configureAutoBuilder() {
         AutoBuilder.configure(
                 RobotContainer.POSE_ESTIMATOR::getCurrentEstimatedPose,
-                (pose) -> {
-                },
+                RobotContainer.POSE_ESTIMATOR::resetPose,
                 RobotContainer.SWERVE::getSelfRelativeVelocity,
                 RobotContainer.SWERVE::selfRelativeFeedForwardDrive,
                 AUTO_PATH_FOLLOWING_CONTROLLER,
-                getRobotConfig(),
+                ROBOT_CONFIG,
                 Mirrorable::isRedAlliance,
                 RobotContainer.SWERVE
         );
@@ -67,6 +69,9 @@ public class PathPlannerConstants {
     }
 
     private static void registerCommands() {
-//        NamedCommands.registerCommand(name, command);//TODO:Implement NamedCommands
+        NamedCommands.registerCommand("PrepareForShooting", new PrintCommand("PrepareForShooting"));
+        NamedCommands.registerCommand("Collect", new PrintCommand("Collecting"));
+        NamedCommands.registerCommand("FeedNote", new PrintCommand("Feeding"));
+        //TODO:Implement NamedCommands
     }
 }
