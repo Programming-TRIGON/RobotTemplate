@@ -1,7 +1,7 @@
 package frc.trigon.robot.subsystems;
 
 import edu.wpi.first.units.Measure;
-import edu.wpi.first.units.VoltageUnit;
+import edu.wpi.first.units.measure.VoltageUnit;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -118,7 +118,7 @@ public abstract class MotorSubsystem extends edu.wpi.first.wpilibj2.command.Subs
      *
      * @param voltageMeasure the target voltage
      */
-    public void drive(Measure<VoltageUnit> voltageMeasure) {
+    public void drive(VoltageUnit voltageMeasure) {
     }
 
     /**

@@ -9,7 +9,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.Measure;
-import edu.wpi.first.units.VoltageUnit;
+import edu.wpi.first.units.measure.VoltageUnit;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -65,7 +65,7 @@ public class Swerve extends MotorSubsystem {
     }
 
     @Override
-    public void drive(Measure<VoltageUnit> voltageMeasure) {
+    public void drive(VoltageUnit voltageMeasure) {
         for (SwerveModule swerveModule : swerveModules) {
             swerveModule.setTargetDriveMotorCurrent(voltageMeasure.in(edu.wpi.first.units.Units.Volts));
             swerveModule.setTargetAngle(new Rotation2d());
