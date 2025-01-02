@@ -7,7 +7,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.units.measure.Units;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.trigon.hardware.RobotHardwareStats;
 import org.trigon.hardware.simulation.SimpleMotorSimulation;
