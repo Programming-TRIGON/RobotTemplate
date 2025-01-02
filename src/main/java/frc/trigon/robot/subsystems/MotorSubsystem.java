@@ -1,7 +1,6 @@
 package frc.trigon.robot.subsystems;
 
-import edu.wpi.first.units.Measure;
-import edu.wpi.first.units.measure.VoltageUnit;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -116,9 +115,9 @@ public abstract class MotorSubsystem extends edu.wpi.first.wpilibj2.command.Subs
     /**
      * Drives the motor with the given voltage for characterizing.
      *
-     * @param voltageMeasure the target voltage
+     * @param targetDrivePower the target drive power, unitless. This can be amps, volts, etc. Depending on the characterization type
      */
-    public void drive(VoltageUnit voltageMeasure) {
+    public void drive(double targetDrivePower) {
     }
 
     /**
@@ -162,7 +161,7 @@ public abstract class MotorSubsystem extends edu.wpi.first.wpilibj2.command.Subs
         return new SysIdRoutine(
                 getSysIdConfig(),
                 new SysIdRoutine.Mechanism(
-                        this::drive,
+                        (voltage) -> drive(voltage.in(Units.Volts)),
                         this::updateLog,
                         this,
                         getName()
