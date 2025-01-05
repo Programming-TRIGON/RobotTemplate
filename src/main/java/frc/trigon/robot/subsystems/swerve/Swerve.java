@@ -1,6 +1,5 @@
 package frc.trigon.robot.subsystems.swerve;
 
-import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -32,8 +31,8 @@ public class Swerve extends MotorSubsystem {
     private final Pigeon2Gyro gyro = SwerveConstants.GYRO;
     private final SwerveModule[] swerveModules = SwerveConstants.SWERVE_MODULES;
     private final Phoenix6SignalThread phoenix6SignalThread = Phoenix6SignalThread.getInstance();
-    private final SwerveSetpointGenerator setpointGenerator = new SwerveSetpointGenerator(PathPlannerConstants.ROBOT_CONFIG, SwerveConstants.MAXIMUM_ROTATIONAL_SPEED_RADIANS_PER_SECOND);
-    private MirrorableRotation2d currentFieldRelativeTargetAngle = new MirrorableRotation2d(RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getRotation(), false);
+    private final SwerveSetpointGenerator setpointGenerator = new SwerveSetpointGenerator(PathPlannerConstants.ROBOT_CONFIG, SwerveModuleConstants.MAXIMUM_MODULE_ROTATIONAL_SPEED_RADIANS_PER_SECOND);
+    private MirrorableRotation2d targetFieldRelativeAngle = new MirrorableRotation2d(RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getRotation(), false);
     private double lastTimestamp = Timer.getTimestamp();
     private SwerveSetpoint previousSetpoint;
 
@@ -143,24 +142,6 @@ public class Swerve extends MotorSubsystem {
     }
 
     /**
-     * Drives the swerve with the given chassis speeds and feedforwards, relative to the robot's frame of reference.
-     * This is used for PathPlanner paths so that each path is as optimized as it can be.
-     *
-     * @param chassisSpeeds the target chassis speeds
-     * @param feedforwards  the target feedforwards for each module
-     */
-    public void selfRelativeFeedForwardDrive(ChassisSpeeds chassisSpeeds, DriveFeedforwards feedforwards) {
-        if (isStill(chassisSpeeds)) {
-            stop();
-            return;
-        }
-
-        final SwerveModuleState[] swerveModuleStates = SwerveConstants.KINEMATICS.toSwerveModuleStates(chassisSpeeds);
-        for (int i = 0; i < swerveModules.length; i++)
-            swerveModules[i].setTargetState(swerveModuleStates[i], feedforwards.torqueCurrents()[i].in(edu.wpi.first.units.Units.Amps));
-    }
-
-    /**
      * Drives the swerve to a certain angular velocity. Used for Wheel Radius Characterization.
      *
      * @param omegaRadiansPerSecond the target angular velocity in radians per second
@@ -169,9 +150,28 @@ public class Swerve extends MotorSubsystem {
         selfRelativeDrive(new ChassisSpeeds(0, 0, omegaRadiansPerSecond));
     }
 
+    /**
+     * This method will take in desired robot-relative chassis targetSpeeds,
+     * generate a swerve setpoint, then set the target state for each module
+     *
+     * @param targetSpeeds the desired robot-relative targetSpeeds
+     */
+    public void selfRelativeDrive(ChassisSpeeds targetSpeeds) {
+        previousSetpoint = setpointGenerator.generateSetpoint(
+                previousSetpoint,
+                targetSpeeds,
+                getTimeSinceLastTimestamp()
+        );
+        if (isStill(previousSetpoint.robotRelativeSpeeds())) {
+            stop();
+            return;
+        }
+        setTargetModuleStates(previousSetpoint.moduleStates());
+    }
+
     void initializeDrive(boolean shouldUseClosedLoop) {
-        previousSetpoint = new SwerveSetpoint(getSelfRelativeVelocity(), getModuleStates(), DriveFeedforwards.zeros(PathPlannerConstants.ROBOT_CONFIG.numModules));
-        currentFieldRelativeTargetAngle = new MirrorableRotation2d(RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getRotation(), false);
+        previousSetpoint = new SwerveSetpoint(getSelfRelativeVelocity(), getModuleStates(), previousSetpoint.feedforwards());
+        targetFieldRelativeAngle = new MirrorableRotation2d(RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getRotation(), false);
         setClosedLoop(shouldUseClosedLoop);
         resetRotationController();
     }
@@ -208,10 +208,10 @@ public class Swerve extends MotorSubsystem {
      */
     void fieldRelativeDrive(double xPower, double yPower, MirrorableRotation2d targetAngle) {
         if (targetAngle != null)
-            currentFieldRelativeTargetAngle = targetAngle;
+            targetFieldRelativeAngle = targetAngle;
 
         final ChassisSpeeds speeds = selfRelativeSpeedsFromFieldRelativePowers(xPower, yPower, 0);
-        speeds.omegaRadiansPerSecond = calculateProfiledAngleSpeedToTargetAngle(currentFieldRelativeTargetAngle);
+        speeds.omegaRadiansPerSecond = calculateProfiledAngleSpeedToTargetAngle(targetFieldRelativeAngle);
         selfRelativeDrive(speeds);
     }
 
@@ -250,25 +250,6 @@ public class Swerve extends MotorSubsystem {
         final ChassisSpeeds speeds = powersToSpeeds(xPower, yPower, 0);
         speeds.omegaRadiansPerSecond = calculateProfiledAngleSpeedToTargetAngle(targetAngle);
         selfRelativeDrive(speeds);
-    }
-
-    /**
-     * This method will take in desired robot-relative chassis targetSpeeds,
-     * generate a swerve setpoint, then set the target state for each module
-     *
-     * @param targetSpeeds the desired robot-relative targetSpeeds
-     */
-    private void selfRelativeDrive(ChassisSpeeds targetSpeeds) {
-        previousSetpoint = setpointGenerator.generateSetpoint(
-                previousSetpoint,
-                targetSpeeds,
-                getTimeSinceLastTimestamp()
-        );
-        if (isStill(previousSetpoint.robotRelativeSpeeds())) {
-            stop();
-            return;
-        }
-        setTargetModuleStates(previousSetpoint.moduleStates());
     }
 
     private void setTargetModuleStates(SwerveModuleState[] swerveModuleStates) {
