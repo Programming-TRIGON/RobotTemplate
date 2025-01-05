@@ -52,7 +52,7 @@ public class PathPlannerConstants {
                 RobotContainer.POSE_ESTIMATOR::getCurrentEstimatedPose,
                 RobotContainer.POSE_ESTIMATOR::resetPose,
                 RobotContainer.SWERVE::getSelfRelativeVelocity,
-                RobotContainer.SWERVE::selfRelativeFeedForwardDrive,
+                RobotContainer.SWERVE::selfRelativeDrive,
                 AUTO_PATH_FOLLOWING_CONTROLLER,
                 ROBOT_CONFIG,
                 Mirrorable::isRedAlliance,
