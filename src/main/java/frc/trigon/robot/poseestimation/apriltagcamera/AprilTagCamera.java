@@ -2,6 +2,7 @@ package frc.trigon.robot.poseestimation.apriltagcamera;
 
 import edu.wpi.first.math.geometry.*;
 import frc.trigon.robot.constants.FieldConstants;
+import frc.trigon.robot.poseestimation.poseestimator.StandardDeviations;
 import org.littletonrobotics.junction.Logger;
 import org.trigon.hardware.RobotHardwareStats;
 
@@ -14,6 +15,7 @@ public class AprilTagCamera {
     protected final String name;
     private final AprilTagCameraInputsAutoLogged inputs = new AprilTagCameraInputsAutoLogged();
     private final Transform3d robotCenterToCamera;
+    private final StandardDeviations standardDeviations;
     private final AprilTagCameraIO aprilTagCameraIO;
     private Pose2d robotPose = null;
 
@@ -23,18 +25,18 @@ public class AprilTagCamera {
      * @param aprilTagCameraType  the type of camera
      * @param name                the camera's name
      * @param robotCenterToCamera the transform of the robot's origin point to the camera
+     * @param standardDeviations  the calibrated standard deviations for the camera's estimated pose
      */
     public AprilTagCamera(AprilTagCameraConstants.AprilTagCameraType aprilTagCameraType,
-                          String name, Transform3d robotCenterToCamera) {
+                          String name, Transform3d robotCenterToCamera,
+                          StandardDeviations standardDeviations) {
         this.name = name;
         this.robotCenterToCamera = robotCenterToCamera;
+        this.standardDeviations = standardDeviations;
 
-        if (RobotHardwareStats.isSimulation()) {
-            aprilTagCameraIO = AprilTagCameraConstants.AprilTagCameraType.SIMULATION_CAMERA.createIOFunction.apply(name);
+        aprilTagCameraIO = AprilTagCameraIO.generateIO(aprilTagCameraType, name);
+        if (RobotHardwareStats.isSimulation())
             aprilTagCameraIO.addSimulatedCameraToVisionSimulation(robotCenterToCamera);
-            return;
-        }
-        aprilTagCameraIO = aprilTagCameraType.createIOFunction.apply(name);
     }
 
     public void update() {
@@ -45,22 +47,57 @@ public class AprilTagCamera {
     }
 
     public Pose2d getRobotPose() {
-        return cameraPoseToRobotPose(inputs.cameraSolvePNPPose.toPose2d());
+        if (inputs.poseAmbiguity < AprilTagCameraConstants.MAXIMUM_AMBIGUITY)
+            return cameraPoseToRobotPose(inputs.cameraSolvePNPPose.toPose2d());
+        return robotPose;
     }
 
     public String getName() {
         return name;
     }
 
+    public double getLatestResultTimestampSeconds() {
+        return inputs.latestResultTimestampSeconds;
+    }
+
+    public boolean hasResult() {
+        return inputs.hasResult;
+    }
+
+    /**
+     * Calculates the range of how inaccurate the estimated pose could be using the distance from the target, the number of targets, and a calibrated gain.
+     *
+     * @return the standard deviations of the current estimated pose
+     */
+    public StandardDeviations calculateStandardDeviations() {
+        final double translationStandardDeviation = calculateStandardDeviation(standardDeviations.translationStandardDeviation, inputs.distanceFromBestTag, inputs.visibleTagIDs.length);
+        final double thetaStandardDeviation = calculateStandardDeviation(standardDeviations.thetaStandardDeviation, inputs.distanceFromBestTag, inputs.visibleTagIDs.length);
+
+        return new StandardDeviations(translationStandardDeviation, thetaStandardDeviation);
+    }
+
     /**
      * Solve PNP is inaccurate the further the camera is from the tag.
      * Because of this, there are some things we might want to do only if we are close enough to get an accurate enough result.
-     * This method checks if the current distance from the tag is less than the maximum distance for an accurate result, which is defined as the variable {@link AprilTagCameraConstants#MAXIMUM_DISTANCE_FROM_TAG_FOR_ACCURATE_SOLVE_PNP_RESULT_METERS}
+     * This method checks if the current distance from the tag is less than the maximum distance for an accurate result, which is defined as the variable {@link AprilTagCameraConstants#MAXIMUM_DISTANCE_FROM_TAG_FOR_ACCURATE_SOLVE_PNP_RESULT_METERS}.
      *
-     * @return if the camera is close enough to the tag to get an accurate result from solve PNP.
+     * @return if the camera is close enough to the tag to get an accurate result from solve PNP
      */
     public boolean isWithinBestTagRangeForAccurateSolvePNPResult() {
         return inputs.distanceFromBestTag < AprilTagCameraConstants.MAXIMUM_DISTANCE_FROM_TAG_FOR_ACCURATE_SOLVE_PNP_RESULT_METERS;
+    }
+
+    /**
+     * Calculates an aspect of the standard deviations of the estimated pose using a formula.
+     * As we get further from the tag(s), this will return a less trusting (higher deviation) result.
+     *
+     * @param exponent            a calibrated gain
+     * @param distance            the distance from the tag(s)
+     * @param numberOfVisibleTags the number of visible tags
+     * @return the standard deviation
+     */
+    private double calculateStandardDeviation(double exponent, double distance, int numberOfVisibleTags) {
+        return exponent * (distance * distance) / numberOfVisibleTags;
     }
 
     private Pose2d cameraPoseToRobotPose(Pose2d cameraPose) {

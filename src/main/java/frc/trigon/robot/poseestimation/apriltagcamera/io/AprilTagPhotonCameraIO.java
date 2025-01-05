@@ -42,6 +42,7 @@ public class AprilTagPhotonCameraIO extends AprilTagCameraIO {
         inputs.latestResultTimestampSeconds = latestResult.getTimestampSeconds();
         inputs.visibleTagIDs = getVisibleTagIDs(latestResult, bestTarget);
         inputs.distanceFromBestTag = getDistanceFromBestTag(bestTarget);
+        inputs.poseAmbiguity = bestTarget.getPoseAmbiguity();
     }
 
     private void updateNoResultInputs(AprilTagCameraInputsAutoLogged inputs) {

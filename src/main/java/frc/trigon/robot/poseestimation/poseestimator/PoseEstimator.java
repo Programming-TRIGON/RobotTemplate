@@ -3,6 +3,7 @@ package frc.trigon.robot.poseestimation.poseestimator;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.interpolation.TimeInterpolatableBuffer;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -16,7 +17,9 @@ import frc.trigon.robot.subsystems.swerve.SwerveConstants;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.trigon.hardware.RobotHardwareStats;
+import org.trigon.utilities.QuickSort;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -54,7 +57,6 @@ public class PoseEstimator implements AutoCloseable {
 
         this.relativeRobotPoseSource = relativeRobotPoseSource;
         shouldUseRelativeRobotPoseSource = true;
-
     }
 
     /**
@@ -78,6 +80,9 @@ public class PoseEstimator implements AutoCloseable {
     public void periodic() {
         if (shouldUseRelativeRobotPoseSource)
             updateFromRelativeRobotPoseSource();
+        else
+            updateFromAprilTagCameras();
+
         field.setRobotPose(getCurrentEstimatedPose());
         if (RobotHardwareStats.isSimulation())
             AprilTagCameraConstants.VISION_SIMULATION.update(RobotContainer.POSE_ESTIMATOR.getCurrentOdometryPose());
@@ -178,7 +183,7 @@ public class PoseEstimator implements AutoCloseable {
         for (AprilTagCamera aprilTagCamera : aprilTagCameras) {
             aprilTagCamera.update();
 
-            if (aprilTagCamera.isWithinBestTagRangeForAccurateSolvePNPResult())
+            if (aprilTagCamera.isWithinBestTagRangeForAccurateSolvePNPResult() && isUnderMaximumSpeedForOffsetResetting())
                 relativeRobotPoseSource.resetOffset(aprilTagCamera.getRobotPose());
         }
 
@@ -189,6 +194,50 @@ public class PoseEstimator implements AutoCloseable {
                 relativeRobotPoseSource.getLatestResultTimestampSeconds(),
                 RelativeRobotPoseSourceConstants.STANDARD_DEVIATIONS
         );
+    }
+
+    private void updateFromAprilTagCameras() {
+        final AprilTagCamera[] newResultCameras = getCamerasWithResults();
+        sortCamerasByLatestResultTimestamp(newResultCameras);
+
+        for (AprilTagCamera aprilTagCamera : newResultCameras)
+            addPoseSourceObservation(
+                    aprilTagCamera.getRobotPose(),
+                    aprilTagCamera.getLatestResultTimestampSeconds(),
+                    aprilTagCamera.calculateStandardDeviations()
+            );
+    }
+
+    /**
+     * Checks if the current velocity of the slow enough to get an accurate enough result to reset the offset of the {@link RelativeRobotPoseSource}.
+     *
+     * @return if the robot is moving slow enough to calculate an accurate offset result.
+     */
+    private boolean isUnderMaximumSpeedForOffsetResetting() {
+        final ChassisSpeeds chassisSpeeds = RobotContainer.SWERVE.getSelfRelativeVelocity();
+        final double currentTranslationVelocityMetersPerSecond = Math.hypot(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond);
+        final double currentThetaVelocityRadiansPerSecond = chassisSpeeds.omegaRadiansPerSecond;
+        return currentTranslationVelocityMetersPerSecond <= RelativeRobotPoseSourceConstants.MAXIMUM_TRANSLATION_VELOCITY_FOR_OFFSET_RESETTING_METERS_PER_SECOND &&
+                currentThetaVelocityRadiansPerSecond <= RelativeRobotPoseSourceConstants.MAXIMUM_THETA_VELOCITY_FOR_OFFSET_RESETTING_RADIANS_PER_SECOND;
+    }
+
+    private AprilTagCamera[] getCamerasWithResults() {
+        final AprilTagCamera[] camerasWithNewResult = new AprilTagCamera[aprilTagCameras.length];
+        int index = 0;
+
+        for (AprilTagCamera aprilTagCamera : aprilTagCameras) {
+            aprilTagCamera.update();
+            if (aprilTagCamera.hasResult()) {
+                camerasWithNewResult[index] = aprilTagCamera;
+                index++;
+            }
+        }
+
+        return Arrays.copyOf(camerasWithNewResult, index);
+    }
+
+    private void sortCamerasByLatestResultTimestamp(AprilTagCamera[] aprilTagCameras) {
+        QuickSort.sort(aprilTagCameras, AprilTagCamera::getLatestResultTimestampSeconds);
     }
 
     /**
@@ -220,33 +269,6 @@ public class PoseEstimator implements AutoCloseable {
             return true;
         }
         return false;
-    }
-
-    /**
-     * Calculates the estimated pose of a vision observation with compensation for its ambiguity.
-     * This is done by finding the difference between the estimated pose at the time of the observation and the estimated pose of the observation and scaling that down using the calibrated standard deviations.
-     *
-     * @param estimatedPoseAtObservationTime the estimated pose of the robot at the time of the observation
-     * @param observationPose                the estimated robot pose from the observation
-     * @param observationStandardDeviations  the ambiguity of the observation
-     * @return the estimated pose with compensation for its ambiguity
-     */
-    private Pose2d calculateEstimatedPoseWithAmbiguityCompensation(Pose2d estimatedPoseAtObservationTime, Pose2d observationPose, StandardDeviations observationStandardDeviations) {
-        final Transform2d estimatedPoseAtObservationTimeToObservationPose = new Transform2d(estimatedPoseAtObservationTime, observationPose);
-        final Transform2d allowedMovement = calculateAllowedMovementFromAmbiguity(estimatedPoseAtObservationTimeToObservationPose, observationStandardDeviations);
-        return observationPose.plus(allowedMovement);
-    }
-
-    /**
-     * Calculates the scaling needed to reduce noise in the estimated pose from the standard deviations of the observation.
-     *
-     * @param estimatedPoseAtObservationTimeToObservationPose the difference between the estimated pose of the robot at the time of the observation and the estimated pose of the observation
-     * @param cameraStandardDeviations                        the standard deviations of the camera's estimated pose
-     * @return the allowed movement of the estimated pose as a {@link Transform2d}
-     */
-    private Transform2d calculateAllowedMovementFromAmbiguity(Transform2d estimatedPoseAtObservationTimeToObservationPose, StandardDeviations cameraStandardDeviations) {
-        final StandardDeviations estimatedPoseStandardDeviations = cameraStandardDeviations.combineWith(PoseEstimatorConstants.ODOMETRY_STANDARD_DEVIATIONS);
-        return estimatedPoseStandardDeviations.scaleTransformFromStandardDeviations(estimatedPoseAtObservationTimeToObservationPose);
     }
 
     private Transform2d calculatePoseStandardDeviations(Pose2d estimatedPoseAtObservationTime, StandardDeviations observationStandardDeviations) {
