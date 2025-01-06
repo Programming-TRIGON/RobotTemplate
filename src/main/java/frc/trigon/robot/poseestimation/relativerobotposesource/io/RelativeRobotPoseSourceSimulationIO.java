@@ -11,6 +11,7 @@ public class RelativeRobotPoseSourceSimulationIO extends RelativeRobotPoseSource
         inputs.framesPerSecond = 60;
         inputs.batteryPercentage = 100;
         inputs.pose = RobotContainer.POSE_ESTIMATOR.getCurrentOdometryPose();
-        inputs.lastResultTimestamp = Timer.getTimestamp();
+        inputs.resultTimestampSeconds = Timer.getTimestamp();
+        inputs.hasResult = true;
     }
 }

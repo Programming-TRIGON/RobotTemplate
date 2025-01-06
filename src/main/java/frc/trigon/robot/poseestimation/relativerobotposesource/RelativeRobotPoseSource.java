@@ -13,6 +13,7 @@ public class RelativeRobotPoseSource {
     private final Transform2d cameraToRobotCenter;
     private final RelativeRobotPoseSourceIO relativeRobotPoseSourceIO;
 
+    private double lastResultTimestampSeconds = 0;
     private Pose2d robotPoseAtSyncTime = new Pose2d();
     private Pose2d relativePoseSourceEstimatedPoseAtSyncTime = new Pose2d();
 
@@ -50,7 +51,19 @@ public class RelativeRobotPoseSource {
     }
 
     public double getLatestResultTimestampSeconds() {
-        return inputs.lastResultTimestamp;
+        return inputs.resultTimestampSeconds;
+    }
+
+    public boolean hasNewResult() {
+        return inputs.hasResult && isNewTimestamp();
+    }
+
+    private boolean isNewTimestamp() {
+        if (lastResultTimestampSeconds == getLatestResultTimestampSeconds())
+            return false;
+
+        lastResultTimestampSeconds = getLatestResultTimestampSeconds();
+        return true;
     }
 
     private Pose2d getRobotPoseFromCameraPose(Pose2d cameraPose) {
