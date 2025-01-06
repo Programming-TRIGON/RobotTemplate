@@ -189,11 +189,12 @@ public class PoseEstimator implements AutoCloseable {
 
         relativeRobotPoseSource.updatePeriodically();
 
-        addPoseSourceObservation(
-                relativeRobotPoseSource.getEstimatedRobotPose(),
-                relativeRobotPoseSource.getLatestResultTimestampSeconds(),
-                RelativeRobotPoseSourceConstants.STANDARD_DEVIATIONS
-        );
+        if (relativeRobotPoseSource.hasNewResult())
+            addPoseSourceObservation(
+                    relativeRobotPoseSource.getEstimatedRobotPose(),
+                    relativeRobotPoseSource.getLatestResultTimestampSeconds(),
+                    RelativeRobotPoseSourceConstants.STANDARD_DEVIATIONS
+            );
     }
 
     private void updateFromAprilTagCameras() {

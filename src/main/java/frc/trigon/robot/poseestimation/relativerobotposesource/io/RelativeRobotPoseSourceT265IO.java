@@ -10,11 +10,9 @@ import frc.trigon.robot.poseestimation.relativerobotposesource.RelativeRobotPose
 import org.trigon.utilities.JsonHandler;
 
 public class RelativeRobotPoseSourceT265IO extends RelativeRobotPoseSourceIO {
-    private final String hostname;
     private final NetworkTableEntry jsonDumpEntry;
 
     public RelativeRobotPoseSourceT265IO(String hostname) {
-        this.hostname = hostname;
         jsonDumpEntry = NetworkTableInstance.getDefault().getTable(hostname).getEntry("JsonDump");
     }
 
@@ -26,11 +24,11 @@ public class RelativeRobotPoseSourceT265IO extends RelativeRobotPoseSourceIO {
             return;
         }
 
-        inputs.resultTimestampSeconds = jsonDumpEntry.getLastChange();
-        inputs.hasResult = true;
         inputs.framesPerSecond = jsonDump.framesPerSecond;
         inputs.batteryPercentage = jsonDump.BatteryPercentage;
         inputs.pose = extractPose(jsonDump);
+        inputs.resultTimestampSeconds = jsonDumpEntry.getLastChange();
+        inputs.hasResult = true;
     }
 
     private T265JsonDump readJsonDump() {
@@ -52,10 +50,10 @@ public class RelativeRobotPoseSourceT265IO extends RelativeRobotPoseSourceIO {
     }
 
     private static class T265JsonDump {
-        private int framesPerSecond = 0;
-        private double BatteryPercentage = 0;
-        private double xPositionMeters = 0;
-        private double yPositionMeters = 0;
-        private double rotationRadians = 0;
+        private final int framesPerSecond = 0;
+        private final double BatteryPercentage = 0;
+        private final double xPositionMeters = 0;
+        private final double yPositionMeters = 0;
+        private final double rotationRadians = 0;
     }
 }
