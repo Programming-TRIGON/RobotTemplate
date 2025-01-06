@@ -290,8 +290,7 @@ public class PoseEstimator implements AutoCloseable {
      * @param gyroHeading           the current heading of the gyro
      * @return the difference as a {@link edu.wpi.first.math.geometry.Twist2d}
      */
-    private Twist2d calculateNewOdometryPoseDifference(SwerveModulePosition[] swerveModulePositions, Rotation2d
-            gyroHeading) {
+    private Twist2d calculateNewOdometryPoseDifference(SwerveModulePosition[] swerveModulePositions, Rotation2d gyroHeading) {
         final Twist2d odometryDifferenceTwist2d = SwerveConstants.KINEMATICS.toTwist2d(lastSwerveModulePositions, swerveModulePositions);
         return new Twist2d(odometryDifferenceTwist2d.dx, odometryDifferenceTwist2d.dy, gyroHeading.minus(lastGyroHeading).getRadians());
     }
