@@ -21,7 +21,6 @@ import org.trigon.utilities.QuickSortHandler;
 
 import java.util.Arrays;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 /**
@@ -246,29 +245,15 @@ public class PoseEstimator implements AutoCloseable {
     /**
      * Sets the estimated pose from a pose source at the given timestamp.
      *
-     * @param estimatedPose the estimated robot pose
-     * @param timestamp     the timestamp of the observation
+     * @param observationPose the estimated robot pose
+     * @param timestamp       the timestamp of the observation
      */
     private void addPoseSourceObservation(Pose2d observationPose, double timestamp, StandardDeviations standardDeviations) {
-        if (isObservationTooOld(timestamp))
-            return;
-
         final Pose2d estimatedPoseAtObservationTime = getPoseAtTimestamp(timestamp);
         if (estimatedPoseAtObservationTime == null)
             return;
 
         this.estimatedPose = calculateEstimatedPoseWithAmbiguityCompensation(estimatedPoseAtObservationTime, observationPose, standardDeviations);
-    }
-
-    private boolean isObservationTooOld(double timestamp) {
-        try {
-            final double oldestEstimatedRobotPoseTimestamp = previousOdometryPoses.getInternalBuffer().lastKey() - PoseEstimatorConstants.POSE_BUFFER_SIZE_SECONDS;
-            if (oldestEstimatedRobotPoseTimestamp > timestamp)
-                return true;
-        } catch (NoSuchElementException e) {
-            return true;
-        }
-        return false;
     }
 
     /**
