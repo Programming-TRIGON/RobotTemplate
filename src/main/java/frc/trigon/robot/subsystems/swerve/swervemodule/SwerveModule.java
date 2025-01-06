@@ -35,7 +35,6 @@ public class SwerveModule {
 
     /**
      * Constructs a new SwerveModule with the given module ID, wheel diameter, and offset rotations.
-     * MAKE SURE TO PUT THESE PARAMETERS IN THE RIGHT ORDER!!!
      *
      * @param moduleID        the ID of the module
      * @param offsetRotations the module's encoder offset in rotations
