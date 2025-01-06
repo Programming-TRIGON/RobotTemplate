@@ -11,7 +11,7 @@ import frc.trigon.robot.RobotContainer;
 import org.json.simple.parser.ParseException;
 import org.trigon.hardware.RobotHardwareStats;
 import org.trigon.utilities.LocalADStarAK;
-import org.trigon.utilities.mirrorable.Mirrorable;
+import org.trigon.utilities.flippable.Flippable;
 
 import java.io.IOException;
 
@@ -53,7 +53,7 @@ public class PathPlannerConstants {
                 RobotContainer.SWERVE::selfRelativeDriveWithoutSetpointGeneration,
                 AUTO_PATH_FOLLOWING_CONTROLLER,
                 ROBOT_CONFIG,
-                Mirrorable::isRedAlliance,
+                Flippable::isRedAlliance,
                 RobotContainer.SWERVE
         );
     }

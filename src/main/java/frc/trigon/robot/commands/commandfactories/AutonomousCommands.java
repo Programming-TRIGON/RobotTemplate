@@ -7,7 +7,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.trigon.robot.RobotContainer;
 import org.json.simple.parser.ParseException;
-import org.trigon.utilities.mirrorable.MirrorablePose2d;
+import org.trigon.utilities.flippable.FlippablePose2d;
 
 import java.io.IOException;
 import java.util.function.Supplier;
@@ -40,9 +40,9 @@ public class AutonomousCommands {
      */
     public static Pose2d getAutoStartPose(String autoName) {
         try {
-            final Pose2d nonMirroredAutoStartPose = PathPlannerAuto.getPathGroupFromAutoFile(autoName).get(0).getStartingHolonomicPose().get();
-            final MirrorablePose2d mirroredAutoStartPose = new MirrorablePose2d(nonMirroredAutoStartPose, true);
-            return mirroredAutoStartPose.get();
+            final Pose2d nonFlippedAutoStartPose = PathPlannerAuto.getPathGroupFromAutoFile(autoName).get(0).getStartingHolonomicPose().get();
+            final FlippablePose2d flippedAutoStartPose = new FlippablePose2d(nonFlippedAutoStartPose, true);
+            return flippedAutoStartPose.get();
         } catch (IOException | ParseException e) {
             throw new RuntimeException(e);
         }

@@ -24,16 +24,16 @@ import org.littletonrobotics.junction.Logger;
 import org.trigon.hardware.phoenix6.Phoenix6SignalThread;
 import org.trigon.hardware.phoenix6.pigeon2.Pigeon2Gyro;
 import org.trigon.hardware.phoenix6.pigeon2.Pigeon2Signal;
-import org.trigon.utilities.mirrorable.Mirrorable;
-import org.trigon.utilities.mirrorable.MirrorablePose2d;
-import org.trigon.utilities.mirrorable.MirrorableRotation2d;
+import org.trigon.utilities.flippable.Flippable;
+import org.trigon.utilities.flippable.FlippablePose2d;
+import org.trigon.utilities.flippable.FlippableRotation2d;
 
 public class Swerve extends MotorSubsystem {
     private final Pigeon2Gyro gyro = SwerveConstants.GYRO;
     private final SwerveModule[] swerveModules = SwerveConstants.SWERVE_MODULES;
     private final Phoenix6SignalThread phoenix6SignalThread = Phoenix6SignalThread.getInstance();
     private final SwerveSetpointGenerator setpointGenerator = new SwerveSetpointGenerator(PathPlannerConstants.ROBOT_CONFIG, SwerveModuleConstants.MAXIMUM_MODULE_ROTATIONAL_SPEED_RADIANS_PER_SECOND);
-    private MirrorableRotation2d targetFieldRelativeAngle = new MirrorableRotation2d(RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getRotation(), false);
+    private FlippableRotation2d targetFieldRelativeAngle = new FlippableRotation2d(RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getRotation(), false);
     private double lastTimestamp = Timer.getTimestamp();
     private SwerveSetpoint previousSetpoint;
 
@@ -107,9 +107,9 @@ public class Swerve extends MotorSubsystem {
      * @param pose2d a pose, relative to the blue alliance driver station's right corner
      * @return whether the robot is at the pose
      */
-    public boolean atPose(MirrorablePose2d pose2d) {
-        final Pose2d mirroredPose = pose2d.get();
-        return atXAxisPosition(mirroredPose.getX()) && atYAxisPosition(mirroredPose.getY()) && atAngle(pose2d.getRotation());
+    public boolean atPose(FlippablePose2d pose2d) {
+        final Pose2d flippedPose = pose2d.get();
+        return atXAxisPosition(flippedPose.getX()) && atYAxisPosition(flippedPose.getY()) && atAngle(pose2d.getRotation());
     }
 
     public boolean atXAxisPosition(double xAxisPosition) {
@@ -122,7 +122,7 @@ public class Swerve extends MotorSubsystem {
         return atTranslationPosition(RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getY(), yAxisPosition, currentYAxisVelocity);
     }
 
-    public boolean atAngle(MirrorableRotation2d angle) {
+    public boolean atAngle(FlippableRotation2d angle) {
         final boolean atTargetAngle = Math.abs(angle.get().minus(RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getRotation()).getDegrees()) < SwerveConstants.ROTATION_TOLERANCE_DEGREES;
         final boolean isAngleStill = Math.abs(getSelfRelativeVelocity().omegaRadiansPerSecond) < SwerveConstants.ROTATION_VELOCITY_TOLERANCE;
         Logger.recordOutput("Swerve/AtTargetAngle/isStill", isAngleStill);
@@ -169,7 +169,7 @@ public class Swerve extends MotorSubsystem {
 
     void initializeDrive(boolean shouldUseClosedLoop) {
         previousSetpoint = new SwerveSetpoint(getSelfRelativeVelocity(), getModuleStates(), DriveFeedforwards.zeros(PathPlannerConstants.ROBOT_CONFIG.numModules));
-        targetFieldRelativeAngle = new MirrorableRotation2d(RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getRotation(), false);
+        targetFieldRelativeAngle = new FlippableRotation2d(RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getRotation(), false);
         setClosedLoop(shouldUseClosedLoop);
         resetRotationController();
     }
@@ -183,12 +183,12 @@ public class Swerve extends MotorSubsystem {
      *
      * @param targetPose the target pose, relative to the blue alliance driver station's right corner
      */
-    void pidToPose(MirrorablePose2d targetPose) {
+    void pidToPose(FlippablePose2d targetPose) {
         final Pose2d currentPose = RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose();
-        final Pose2d mirroredTargetPose = targetPose.get();
-        final double xSpeed = SwerveConstants.TRANSLATION_PID_CONTROLLER.calculate(currentPose.getX(), mirroredTargetPose.getX());
-        final double ySpeed = SwerveConstants.TRANSLATION_PID_CONTROLLER.calculate(currentPose.getY(), mirroredTargetPose.getY());
-        final int direction = Mirrorable.isRedAlliance() ? -1 : 1;
+        final Pose2d flippedTargetPose = targetPose.get();
+        final double xSpeed = SwerveConstants.TRANSLATION_PID_CONTROLLER.calculate(currentPose.getX(), flippedTargetPose.getX());
+        final double ySpeed = SwerveConstants.TRANSLATION_PID_CONTROLLER.calculate(currentPose.getY(), flippedTargetPose.getY());
+        final int direction = Flippable.isRedAlliance() ? -1 : 1;
         final ChassisSpeeds targetFieldRelativeSpeeds = new ChassisSpeeds(
                 xSpeed * direction,
                 ySpeed * direction,
@@ -204,7 +204,7 @@ public class Swerve extends MotorSubsystem {
      * @param yPower      the y power
      * @param targetAngle the target angle, relative to the blue alliance's forward position
      */
-    void fieldRelativeDrive(double xPower, double yPower, MirrorableRotation2d targetAngle) {
+    void fieldRelativeDrive(double xPower, double yPower, FlippableRotation2d targetAngle) {
         if (targetAngle != null)
             targetFieldRelativeAngle = targetAngle;
 
@@ -244,7 +244,7 @@ public class Swerve extends MotorSubsystem {
      * @param yPower      the y power
      * @param targetAngle the target angle
      */
-    void selfRelativeDrive(double xPower, double yPower, MirrorableRotation2d targetAngle) {
+    void selfRelativeDrive(double xPower, double yPower, FlippableRotation2d targetAngle) {
         final ChassisSpeeds speeds = powersToSpeeds(xPower, yPower, 0);
         speeds.omegaRadiansPerSecond = calculateProfiledAngleSpeedToTargetAngle(targetAngle);
         selfRelativeDrive(speeds);
@@ -277,7 +277,7 @@ public class Swerve extends MotorSubsystem {
 
     private Rotation2d getDriveRelativeAngle() {
         final Rotation2d currentAngle = RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getRotation();
-        return Mirrorable.isRedAlliance() ? currentAngle.rotateBy(Rotation2d.fromDegrees(180)) : currentAngle;
+        return Flippable.isRedAlliance() ? currentAngle.rotateBy(Rotation2d.fromDegrees(180)) : currentAngle;
     }
 
     private void setClosedLoop(boolean shouldUseClosedLoop) {
@@ -338,7 +338,7 @@ public class Swerve extends MotorSubsystem {
                 Math.abs(currentTranslationVelocity) < SwerveConstants.TRANSLATION_VELOCITY_TOLERANCE;
     }
 
-    private double calculateProfiledAngleSpeedToTargetAngle(MirrorableRotation2d targetAngle) {
+    private double calculateProfiledAngleSpeedToTargetAngle(FlippableRotation2d targetAngle) {
         final Rotation2d currentAngle = RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getRotation();
         return Units.degreesToRadians(SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER.calculate(currentAngle.getDegrees(), targetAngle.get().getDegrees()));
     }
