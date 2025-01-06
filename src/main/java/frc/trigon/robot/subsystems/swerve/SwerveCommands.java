@@ -6,8 +6,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.trigon.robot.RobotContainer;
 import org.trigon.commands.InitExecuteCommand;
-import org.trigon.utilities.mirrorable.MirrorablePose2d;
-import org.trigon.utilities.mirrorable.MirrorableRotation2d;
+import org.trigon.utilities.flippable.FlippablePose2d;
+import org.trigon.utilities.flippable.FlippableRotation2d;
 
 import java.util.List;
 import java.util.Set;
@@ -40,7 +40,7 @@ public class SwerveCommands {
      * @param angleSupplier the target angle supplier
      * @return the command
      */
-    public static Command getClosedLoopFieldRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, Supplier<MirrorableRotation2d> angleSupplier) {
+    public static Command getClosedLoopFieldRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, Supplier<FlippableRotation2d> angleSupplier) {
         return new InitExecuteCommand(
                 () -> RobotContainer.SWERVE.initializeDrive(true),
                 () -> RobotContainer.SWERVE.fieldRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), angleSupplier.get()),
@@ -73,7 +73,7 @@ public class SwerveCommands {
      * @param angleSupplier the target angle supplier
      * @return the command
      */
-    public static Command getOpenLoopFieldRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, Supplier<MirrorableRotation2d> angleSupplier) {
+    public static Command getOpenLoopFieldRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, Supplier<FlippableRotation2d> angleSupplier) {
         return new InitExecuteCommand(
                 () -> RobotContainer.SWERVE.initializeDrive(false),
                 () -> RobotContainer.SWERVE.fieldRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), angleSupplier.get()),
@@ -106,7 +106,7 @@ public class SwerveCommands {
      * @param angleSupplier the target angle supplier
      * @return the command
      */
-    public static Command getClosedLoopSelfRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, Supplier<MirrorableRotation2d> angleSupplier) {
+    public static Command getClosedLoopSelfRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, Supplier<FlippableRotation2d> angleSupplier) {
         return new InitExecuteCommand(
                 () -> RobotContainer.SWERVE.initializeDrive(true),
                 () -> RobotContainer.SWERVE.selfRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), angleSupplier.get()),
@@ -130,11 +130,11 @@ public class SwerveCommands {
         );
     }
 
-    public static Command getDriveToPoseCommand(Supplier<MirrorablePose2d> targetPose, PathConstraints constraints) {
+    public static Command getDriveToPoseCommand(Supplier<FlippablePose2d> targetPose, PathConstraints constraints) {
         return new DeferredCommand(() -> getCurrentDriveToPoseCommand(targetPose.get(), constraints), Set.of(RobotContainer.SWERVE));
     }
 
-    private static Command getCurrentDriveToPoseCommand(MirrorablePose2d targetPose, PathConstraints constraints) {
+    private static Command getCurrentDriveToPoseCommand(FlippablePose2d targetPose, PathConstraints constraints) {
         return new SequentialCommandGroup(
                 new InstantCommand(() -> RobotContainer.SWERVE.initializeDrive(true)),
                 getPathfindToPoseCommand(targetPose, constraints),
@@ -142,21 +142,21 @@ public class SwerveCommands {
         );
     }
 
-    private static Command getPathfindToPoseCommand(MirrorablePose2d targetPose, PathConstraints pathConstraints) {
-        final Pose2d targetMirroredPose = targetPose.get();
+    private static Command getPathfindToPoseCommand(FlippablePose2d targetPose, PathConstraints pathConstraints) {
+        final Pose2d targetFlippedPose = targetPose.get();
         final Pose2d currentPose = RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose();
-        if (currentPose.getTranslation().getDistance(targetMirroredPose.getTranslation()) < 0.35)
+        if (currentPose.getTranslation().getDistance(targetFlippedPose.getTranslation()) < 0.35)
             return createOnTheFlyPathCommand(targetPose, pathConstraints);
-        return AutoBuilder.pathfindToPose(targetMirroredPose, pathConstraints);
+        return AutoBuilder.pathfindToPose(targetFlippedPose, pathConstraints);
     }
 
-    private static Command getPIDToPoseCommand(MirrorablePose2d targetPose) {
+    private static Command getPIDToPoseCommand(FlippablePose2d targetPose) {
         return new InstantCommand(RobotContainer.SWERVE::resetRotationController)
                 .andThen(new RunCommand(() -> RobotContainer.SWERVE.pidToPose(targetPose))
                         .until(() -> RobotContainer.SWERVE.atPose(targetPose)));
     }
 
-    private static Command createOnTheFlyPathCommand(MirrorablePose2d targetPose, PathConstraints constraints) {
+    private static Command createOnTheFlyPathCommand(FlippablePose2d targetPose, PathConstraints constraints) {
         List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
                 RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose(),
                 targetPose.get()
