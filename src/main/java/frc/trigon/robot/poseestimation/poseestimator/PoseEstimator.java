@@ -62,6 +62,7 @@ public class PoseEstimator implements AutoCloseable {
 
     /**
      * Constructs a new PoseEstimator.
+     * This constructor disables the use of a relative robot pose source and instead uses april tags cameras for pose estimation.
      *
      * @param aprilTagCameras the cameras that should be used to update the pose estimator
      */
