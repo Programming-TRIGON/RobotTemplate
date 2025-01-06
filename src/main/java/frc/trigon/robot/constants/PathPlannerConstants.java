@@ -29,7 +29,7 @@ public class PathPlannerConstants {
             new PIDConstants(4, 0, 0.2) :
             new PIDConstants(0, 0, 0),
             AUTO_ROTATION_PID_CONSTANTS = RobotHardwareStats.isSimulation() ?
-                    new PIDConstants(1, 0, 0.1) :
+                    new PIDConstants(1, 0, 0.05) :
                     new PIDConstants(0, 0, 0);
 
     private static final PPHolonomicDriveController AUTO_PATH_FOLLOWING_CONTROLLER = new PPHolonomicDriveController(
