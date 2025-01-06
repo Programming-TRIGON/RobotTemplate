@@ -21,6 +21,7 @@ import org.trigon.utilities.QuickSortHandler;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 /**
@@ -140,6 +141,9 @@ public class PoseEstimator implements AutoCloseable {
      * @return the robot's estimated pose at the timestamp
      */
     public Pose2d getPoseAtTimestamp(double timestamp) {
+        if (isPoseOutOfHeldPosesRange(timestamp))
+            return null;
+
         final Optional<Pose2d> odometryPoseAtTimestamp = previousOdometryPoses.getSample(timestamp);
         if (odometryPoseAtTimestamp.isEmpty())
             return null;
@@ -254,6 +258,17 @@ public class PoseEstimator implements AutoCloseable {
             return;
 
         this.estimatedPose = calculateEstimatedPoseWithAmbiguityCompensation(estimatedPoseAtObservationTime, observationPose, standardDeviations);
+    }
+
+    private boolean isPoseOutOfHeldPosesRange(double timestamp) {
+        try {
+            final double oldestEstimatedRobotPoseTimestamp = previousOdometryPoses.getInternalBuffer().lastKey() - PoseEstimatorConstants.POSE_BUFFER_SIZE_SECONDS;
+            if (oldestEstimatedRobotPoseTimestamp > timestamp)
+                return true;
+        } catch (NoSuchElementException e) {
+            return true;
+        }
+        return false;
     }
 
     /**
