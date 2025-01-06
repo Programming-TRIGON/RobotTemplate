@@ -31,9 +31,8 @@ public class PoseEstimator implements AutoCloseable {
     private final Field2d field = new Field2d();
     private final AprilTagCamera[] aprilTagCameras;
     private final TimeInterpolatableBuffer<Pose2d> previousOdometryPoses = TimeInterpolatableBuffer.createBuffer(PoseEstimatorConstants.POSE_BUFFER_SIZE_SECONDS);
-
-    private RelativeRobotPoseSource relativeRobotPoseSource;
-    private boolean shouldUseRelativeRobotPoseSource = false;
+    private final RelativeRobotPoseSource relativeRobotPoseSource;
+    private final boolean shouldUseRelativeRobotPoseSource;
 
     private Pose2d
             odometryPose = new Pose2d(),
@@ -54,10 +53,11 @@ public class PoseEstimator implements AutoCloseable {
      * @param aprilTagCameras         the apriltag cameras that should be used to update the relative robot pose source
      */
     public PoseEstimator(RelativeRobotPoseSource relativeRobotPoseSource, AprilTagCamera... aprilTagCameras) {
-        this(aprilTagCameras);
-
+        this.aprilTagCameras = aprilTagCameras;
         this.relativeRobotPoseSource = relativeRobotPoseSource;
-        shouldUseRelativeRobotPoseSource = true;
+        this.shouldUseRelativeRobotPoseSource = true;
+
+        initialize();
     }
 
     /**
@@ -68,10 +68,10 @@ public class PoseEstimator implements AutoCloseable {
      */
     public PoseEstimator(AprilTagCamera... aprilTagCameras) {
         this.aprilTagCameras = aprilTagCameras;
-        putAprilTagsOnFieldWidget();
-        SmartDashboard.putData("Field", field);
+        this.relativeRobotPoseSource = null;
+        this.shouldUseRelativeRobotPoseSource = false;
 
-        logTargetPath();
+        initialize();
     }
 
     @Override
@@ -150,6 +150,12 @@ public class PoseEstimator implements AutoCloseable {
 
         final Transform2d currentOdometryPoseToOdometryPoseAtTimestampTransform = new Transform2d(odometryPose, odometryPoseAtTimestamp.get());
         return estimatedPose.plus(currentOdometryPoseToOdometryPoseAtTimestampTransform);
+    }
+
+    private void initialize() {
+        putAprilTagsOnFieldWidget();
+        SmartDashboard.putData("Field", field);
+        logTargetPath();
     }
 
     private void putAprilTagsOnFieldWidget() {
