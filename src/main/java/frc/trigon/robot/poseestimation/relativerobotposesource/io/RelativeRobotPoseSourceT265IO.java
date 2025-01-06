@@ -20,10 +20,17 @@ public class RelativeRobotPoseSourceT265IO extends RelativeRobotPoseSourceIO {
     protected void updateInputs(RelativeRobotPoseSourceInputsAutoLogged inputs) {
         final T265JsonDump jsonDump = readJsonDump();
         if (jsonDump == null) {
-            inputs.hasResult = false;
+            updateNoResultInputs(inputs);
             return;
         }
+        updateHasResultInputs(inputs, jsonDump);
+    }
 
+    private void updateNoResultInputs(RelativeRobotPoseSourceInputsAutoLogged inputs) {
+        inputs.hasResult = false;
+    }
+
+    private void updateHasResultInputs(RelativeRobotPoseSourceInputsAutoLogged inputs, T265JsonDump jsonDump) {
         inputs.framesPerSecond = jsonDump.framesPerSecond;
         inputs.batteryPercentage = jsonDump.BatteryPercentage;
         inputs.pose = extractPose(jsonDump);

@@ -42,13 +42,11 @@ public class AprilTagCamera {
     public void update() {
         aprilTagCameraIO.updateInputs(inputs);
 
-        robotPose = getRobotPose();
+        robotPose = calculateRobotPose();
         logCameraInfo();
     }
 
     public Pose2d getRobotPose() {
-        if (inputs.poseAmbiguity < AprilTagCameraConstants.MAXIMUM_AMBIGUITY)
-            return cameraPoseToRobotPose(inputs.cameraSolvePNPPose.toPose2d());
         return robotPose;
     }
 
@@ -60,8 +58,8 @@ public class AprilTagCamera {
         return inputs.latestResultTimestampSeconds;
     }
 
-    public boolean hasResult() {
-        return inputs.hasResult;
+    public boolean hasValidResult() {
+        return inputs.hasResult && inputs.poseAmbiguity < AprilTagCameraConstants.MAXIMUM_AMBIGUITY;
     }
 
     /**
@@ -98,6 +96,10 @@ public class AprilTagCamera {
      */
     private double calculateStandardDeviation(double exponent, double distance, int numberOfVisibleTags) {
         return exponent * (distance * distance) / numberOfVisibleTags;
+    }
+
+    private Pose2d calculateRobotPose() {
+        return cameraPoseToRobotPose(inputs.cameraSolvePNPPose.toPose2d());
     }
 
     private Pose2d cameraPoseToRobotPose(Pose2d cameraPose) {

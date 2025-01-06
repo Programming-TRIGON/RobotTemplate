@@ -44,7 +44,7 @@ public class RelativeRobotPoseSource {
         this.relativePoseSourceEstimatedPoseAtSyncTime = getRobotPoseFromCameraPose(inputs.pose);
     }
 
-    @AutoLogOutput
+    @AutoLogOutput(key = "RelativeRobotPoseSource/EstimatedRobotPose")
     public Pose2d getEstimatedRobotPose() {
         final Transform2d movementFromSyncedPose = new Transform2d(relativePoseSourceEstimatedPoseAtSyncTime, getRobotPoseFromCameraPose(inputs.pose));
         return robotPoseAtSyncTime.transformBy(movementFromSyncedPose);

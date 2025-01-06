@@ -48,6 +48,7 @@ public class PoseEstimator implements AutoCloseable {
 
     /**
      * Constructs a new PoseEstimator and sets the relativeRobotPoseSource.
+     * This constructor enables usage of a relative robot pose source and disables the use of april tags for pose estimation, and instead uses them to reset the relative robot pose source's offset.
      *
      * @param relativeRobotPoseSource the relative robot pose source that should be used to update the pose estimator
      * @param aprilTagCameras         the apriltag cameras that should be used to update the relative robot pose source
@@ -218,8 +219,8 @@ public class PoseEstimator implements AutoCloseable {
         final ChassisSpeeds chassisSpeeds = RobotContainer.SWERVE.getSelfRelativeVelocity();
         final double currentTranslationVelocityMetersPerSecond = Math.hypot(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond);
         final double currentThetaVelocityRadiansPerSecond = chassisSpeeds.omegaRadiansPerSecond;
-        return currentTranslationVelocityMetersPerSecond <= RelativeRobotPoseSourceConstants.MAXIMUM_TRANSLATION_VELOCITY_FOR_OFFSET_RESETTING_METERS_PER_SECOND &&
-                currentThetaVelocityRadiansPerSecond <= RelativeRobotPoseSourceConstants.MAXIMUM_THETA_VELOCITY_FOR_OFFSET_RESETTING_RADIANS_PER_SECOND;
+        return currentTranslationVelocityMetersPerSecond <= PoseEstimatorConstants.MAXIMUM_TRANSLATION_VELOCITY_FOR_RELATIVE_ROBOT_POSE_SOURCE_OFFSET_RESETTING_METERS_PER_SECOND &&
+                currentThetaVelocityRadiansPerSecond <= PoseEstimatorConstants.MAXIMUM_THETA_VELOCITY_FOR_RELATIVE_ROBOT_POSE_SOURCE_OFFSET_RESETTING_RADIANS_PER_SECOND;
     }
 
     private AprilTagCamera[] getCamerasWithResults() {
@@ -228,7 +229,7 @@ public class PoseEstimator implements AutoCloseable {
 
         for (AprilTagCamera aprilTagCamera : aprilTagCameras) {
             aprilTagCamera.update();
-            if (aprilTagCamera.hasResult()) {
+            if (aprilTagCamera.hasValidResult()) {
                 camerasWithNewResult[index] = aprilTagCamera;
                 index++;
             }
