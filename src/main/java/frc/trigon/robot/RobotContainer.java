@@ -18,7 +18,7 @@ import frc.trigon.robot.poseestimation.poseestimator.PoseEstimator;
 import frc.trigon.robot.subsystems.MotorSubsystem;
 import frc.trigon.robot.subsystems.swerve.Swerve;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
-import org.trigon.utilities.mirrorable.Mirrorable;
+import org.trigon.utilities.flippable.Flippable;
 
 public class RobotContainer {
     public static final PoseEstimator POSE_ESTIMATOR = new PoseEstimator();
@@ -53,7 +53,7 @@ public class RobotContainer {
      * For example, the LEDConstants need to be initialized so that the other systems can use them.
      */
     private void initializeGeneralSystems() {
-        Mirrorable.init();
+        Flippable.init();
         LEDConstants.init();
         PathPlannerConstants.init();
     }

@@ -14,8 +14,8 @@ import org.trigon.commands.WheelRadiusCharacterizationCommand;
 import org.trigon.hardware.misc.XboxController;
 import org.trigon.hardware.misc.leds.LEDCommands;
 import org.trigon.hardware.misc.leds.LEDStrip;
-import org.trigon.utilities.mirrorable.MirrorablePose2d;
-import org.trigon.utilities.mirrorable.MirrorableRotation2d;
+import org.trigon.utilities.flippable.FlippablePose2d;
+import org.trigon.utilities.flippable.FlippableRotation2d;
 
 /**
  * A class that contains commands that only use parameters and don't require logic.
@@ -45,7 +45,7 @@ public class CommandConstants {
                     () -> calculateDriveStickAxisValue(DRIVER_CONTROLLER.getLeftX()),
                     () -> calculateRotationStickAxisValue(DRIVER_CONTROLLER.getRightX())
             ),
-            RESET_HEADING_COMMAND = new InstantCommand(() -> RobotContainer.POSE_ESTIMATOR.resetPose(changeRotation(new MirrorablePose2d(RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose(), false), new Rotation2d()).get())),
+            RESET_HEADING_COMMAND = new InstantCommand(() -> RobotContainer.POSE_ESTIMATOR.resetPose(changeRotation(new FlippablePose2d(RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose(), false), new Rotation2d()).get())),
             SET_GYRO_HEADING_TO_SOLVE_PNP_HEADING_COMMAND = new InstantCommand(RobotContainer.POSE_ESTIMATOR::setGyroHeadingToBestSolvePNPHeading).ignoringDisable(true),
             SELF_RELATIVE_DRIVE_FROM_DPAD_COMMAND = SwerveCommands.getClosedLoopSelfRelativeDriveCommand(
                     () -> getXPowerFromPov(DRIVER_CONTROLLER.getPov()) / OperatorConstants.POV_DIVIDER / calculateShiftModeValue(MINIMUM_TRANSLATION_SHIFT_POWER),
@@ -102,13 +102,13 @@ public class CommandConstants {
      *
      * @return the rotation value
      */
-    private static MirrorableRotation2d calculateJoystickOrientedTargetAngle() {
+    private static FlippableRotation2d calculateJoystickOrientedTargetAngle() {
         final double joystickPower = Math.hypot(DRIVER_CONTROLLER.getRightX(), DRIVER_CONTROLLER.getRightY());
         if (joystickPower < JOYSTICK_ORIENTED_ROTATION_DEADBAND)
             return null;
 
         final double targetAngleRadians = Math.atan2(DRIVER_CONTROLLER.getRightX(), DRIVER_CONTROLLER.getRightY());
-        return MirrorableRotation2d.fromRadians(targetAngleRadians, true);
+        return FlippableRotation2d.fromRadians(targetAngleRadians, true);
     }
 
     private static double getXPowerFromPov(double pov) {
@@ -121,8 +121,8 @@ public class CommandConstants {
         return Math.sin(-povRadians);
     }
 
-    private static MirrorablePose2d changeRotation(MirrorablePose2d pose2d, Rotation2d newRotation) {
-        return new MirrorablePose2d(
+    private static FlippablePose2d changeRotation(FlippablePose2d pose2d, Rotation2d newRotation) {
+        return new FlippablePose2d(
                 pose2d.get().getTranslation(),
                 newRotation.getRadians(),
                 false
