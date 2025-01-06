@@ -20,6 +20,7 @@ import java.io.IOException;
  */
 public class PathPlannerConstants {
     public static final PathConstraints REAL_TIME_PATH_CONSTRAINTS = new PathConstraints(2.5, 2.5, 4, 4);
+    public static final RobotConfig ROBOT_CONFIG = getRobotConfig();
 
     private static final PIDConstants
             AUTO_TRANSLATION_PID_CONSTANTS = RobotHardwareStats.isSimulation() ?
@@ -47,12 +48,11 @@ public class PathPlannerConstants {
     private static void configureAutoBuilder() {
         AutoBuilder.configure(
                 RobotContainer.POSE_ESTIMATOR::getCurrentEstimatedPose,
-                (pose) -> {
-                },
+                RobotContainer.POSE_ESTIMATOR::resetPose,
                 RobotContainer.SWERVE::getSelfRelativeVelocity,
-                RobotContainer.SWERVE::selfRelativeFeedForwardDrive,
+                RobotContainer.SWERVE::selfRelativeDriveWithoutSetpointGeneration,
                 AUTO_PATH_FOLLOWING_CONTROLLER,
-                getRobotConfig(),
+                ROBOT_CONFIG,
                 Mirrorable::isRedAlliance,
                 RobotContainer.SWERVE
         );
