@@ -1,11 +1,11 @@
 package frc.trigon.robot.poseestimation.apriltagcamera.io;
 
 import edu.wpi.first.math.geometry.Pose3d;
-import frc.trigon.robot.constants.FieldConstants;
 import frc.trigon.robot.poseestimation.apriltagcamera.AprilTagCameraIO;
 import frc.trigon.robot.poseestimation.apriltagcamera.AprilTagCameraInputsAutoLogged;
 import org.trigon.utilities.LimelightHelpers;
 
+// TODO: Fully implement this class, Limelight currently not supported.
 public class AprilTagLimelightIO extends AprilTagCameraIO {
     private final String hostname;
 
@@ -30,13 +30,11 @@ public class AprilTagLimelightIO extends AprilTagCameraIO {
         inputs.cameraSolvePNPPose = results.getBotPose3d_wpiBlue();
         inputs.latestResultTimestampSeconds = results.timestamp_RIOFPGA_capture;
         inputs.visibleTagIDs = getVisibleTagIDs(results);
-        inputs.distanceFromBestTag = getDistanceFromBestTag(results);
     }
 
     private void updateNoResultInputs(AprilTagCameraInputsAutoLogged inputs) {
         inputs.cameraSolvePNPPose = new Pose3d();
         inputs.visibleTagIDs = new int[0];
-        inputs.distanceFromBestTag = Double.POSITIVE_INFINITY;
     }
 
     private int[] getVisibleTagIDs(LimelightHelpers.LimelightResults results) {
@@ -56,14 +54,6 @@ public class AprilTagLimelightIO extends AprilTagCameraIO {
             visibleTagIDs[i + idAddition] = currentID;
         }
         return visibleTagIDs;
-    }
-
-    private double getDistanceFromBestTag(LimelightHelpers.LimelightResults results) {
-        return getDistanceFromTag((int) getBestTarget(results).fiducialID, results.getBotPose3d_wpiBlue());
-    }
-
-    private double getDistanceFromTag(int fiducialID, Pose3d estimatedRobotPose) {
-        return FieldConstants.TAG_ID_TO_POSE.get(fiducialID).getTranslation().getDistance(estimatedRobotPose.getTranslation());
     }
 
     private LimelightHelpers.LimelightTarget_Fiducial getBestTarget(LimelightHelpers.LimelightResults results) {

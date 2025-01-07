@@ -8,7 +8,7 @@ import org.trigon.hardware.RobotHardwareStats;
 
 /**
  * An april tag camera is a class that provides the robot's pose from a camera using one or multiple apriltags.
- * An april tag is like a 2D barcode used to find the robot's position on the field.
+ * An april tag is like a 2d QR-code used to find the robot's position on the field.
  * Since the tag's position on the field is known, we can calculate our position relative to it, therefore estimating our position on the field.
  */
 public class AprilTagCamera {
@@ -28,7 +28,8 @@ public class AprilTagCamera {
      *                            only the x, y and yaw values will be used for transforming the camera pose to the robot's center,
      *                            to avoid more inaccuracies like pitch and roll.
      *                            The reset will be used for creating a camera in simulation
-     * @param standardDeviations  the calibrated standard deviations for the camera's estimated pose
+     * @param standardDeviations  the initial calibrated standard deviations for the camera's estimated pose,
+     *                            will be changed as the distance from the tag(s) changes and the number of tags changes
      */
     public AprilTagCamera(AprilTagCameraConstants.AprilTagCameraType aprilTagCameraType,
                           String name, Transform3d robotCenterToCamera,
@@ -71,8 +72,9 @@ public class AprilTagCamera {
      * @return the standard deviations of the current estimated pose
      */
     public StandardDeviations calculateStandardDeviations() {
-        final double translationStandardDeviation = calculateStandardDeviation(standardDeviations.translationStandardDeviation, inputs.distanceFromBestTag, inputs.visibleTagIDs.length);
-        final double thetaStandardDeviation = calculateStandardDeviation(standardDeviations.thetaStandardDeviation, inputs.distanceFromBestTag, inputs.visibleTagIDs.length);
+        final double averageDistanceFromTags = calculateAverageDistanceFromTags();
+        final double translationStandardDeviation = calculateStandardDeviation(standardDeviations.translationStandardDeviation, averageDistanceFromTags, inputs.visibleTagIDs.length);
+        final double thetaStandardDeviation = calculateStandardDeviation(standardDeviations.thetaStandardDeviation, averageDistanceFromTags, inputs.visibleTagIDs.length);
 
         return new StandardDeviations(translationStandardDeviation, thetaStandardDeviation);
     }
@@ -85,7 +87,7 @@ public class AprilTagCamera {
      * @return if the camera is close enough to the tag to get an accurate result from solve PNP
      */
     public boolean isWithinBestTagRangeForAccurateSolvePNPResult() {
-        return inputs.distanceFromBestTag < AprilTagCameraConstants.MAXIMUM_DISTANCE_FROM_TAG_FOR_ACCURATE_SOLVE_PNP_RESULT_METERS;
+        return inputs.distancesFromTags[0] < AprilTagCameraConstants.MAXIMUM_DISTANCE_FROM_TAG_FOR_ACCURATE_SOLVE_PNP_RESULT_METERS;
     }
 
     /**
@@ -109,12 +111,19 @@ public class AprilTagCamera {
         return cameraPose.transformBy(cameraToRobotCenter);
     }
 
+    private double calculateAverageDistanceFromTags() {
+        double totalDistance = 0;
+        for (int visibleTagID : inputs.visibleTagIDs)
+            totalDistance += FieldConstants.TAG_ID_TO_POSE.get(visibleTagID).getTranslation().getDistance(inputs.cameraSolvePNPPose.getTranslation());
+        return totalDistance / inputs.visibleTagIDs.length;
+    }
+
     private void logCameraInfo() {
         Logger.processInputs("Cameras/" + name, inputs);
         if (!FieldConstants.TAG_ID_TO_POSE.isEmpty())
             logUsedTags();
 
-        if (!inputs.hasResult || inputs.distanceFromBestTag == Double.POSITIVE_INFINITY || robotPose == null) {
+        if (!inputs.hasResult || robotPose == null) {
             Logger.recordOutput("Poses/Robot/" + name + "/Pose", robotPose);
             return;
         }
