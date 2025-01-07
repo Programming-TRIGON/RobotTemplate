@@ -256,10 +256,12 @@ public class Swerve extends MotorSubsystem {
                 targetSpeeds,
                 RobotHardwareStats.getPeriodicTimeSeconds()
         );
+
         if (isStill(previousSetpoint.robotRelativeSpeeds())) {
             stop();
             return;
         }
+
         setTargetModuleStates(previousSetpoint.moduleStates());
     }
 
