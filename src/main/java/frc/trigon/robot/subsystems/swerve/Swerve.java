@@ -286,7 +286,7 @@ public class Swerve extends MotorSubsystem {
     }
 
     private double getTimeSinceLastTimestamp() {
-        final double currentTime = Timer.getFPGATimestamp();
+        final double currentTime = Timer.getTimestamp();
         final double difference = currentTime - lastTimestamp;
         lastTimestamp = currentTime;
         return difference;
