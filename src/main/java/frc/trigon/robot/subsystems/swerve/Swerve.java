@@ -10,7 +10,6 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.trigon.robot.RobotContainer;
@@ -34,7 +33,6 @@ public class Swerve extends MotorSubsystem {
     private final Phoenix6SignalThread phoenix6SignalThread = Phoenix6SignalThread.getInstance();
     private final SwerveSetpointGenerator setpointGenerator = new SwerveSetpointGenerator(PathPlannerConstants.ROBOT_CONFIG, SwerveModuleConstants.MAXIMUM_MODULE_ROTATIONAL_SPEED_RADIANS_PER_SECOND);
     private FlippableRotation2d targetFieldRelativeAngle = new FlippableRotation2d(RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getRotation(), false);
-    private double lastTimestamp = Timer.getTimestamp();
     private SwerveSetpoint previousSetpoint;
 
     public Swerve() {
@@ -260,7 +258,7 @@ public class Swerve extends MotorSubsystem {
         previousSetpoint = setpointGenerator.generateSetpoint(
                 previousSetpoint,
                 targetSpeeds,
-                getTimeSinceLastTimestamp()
+                0.02
         );
         if (isStill(previousSetpoint.robotRelativeSpeeds())) {
             stop();
@@ -283,13 +281,6 @@ public class Swerve extends MotorSubsystem {
     private void setClosedLoop(boolean shouldUseClosedLoop) {
         for (SwerveModule currentModule : swerveModules)
             currentModule.shouldDriveMotorUseClosedLoop(shouldUseClosedLoop);
-    }
-
-    private double getTimeSinceLastTimestamp() {
-        final double currentTime = Timer.getTimestamp();
-        final double difference = currentTime - lastTimestamp;
-        lastTimestamp = currentTime;
-        return difference;
     }
 
     /**
