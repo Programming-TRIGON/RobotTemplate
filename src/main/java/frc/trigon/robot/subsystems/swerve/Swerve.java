@@ -260,7 +260,7 @@ public class Swerve extends MotorSubsystem {
         previousSetpoint = setpointGenerator.generateSetpoint(
                 previousSetpoint,
                 targetSpeeds,
-                getTimeSinceLastTimestamp()
+                getTimeSinceLastTimestamp() * 10
         );
         if (isStill(previousSetpoint.robotRelativeSpeeds())) {
             stop();
