@@ -27,6 +27,7 @@ public class RelativeRobotPoseSourceT265IO extends RelativeRobotPoseSourceIO {
     }
 
     private void updateNoResultInputs(RelativeRobotPoseSourceInputsAutoLogged inputs) {
+        inputs.framesPerSecond = 0;
         inputs.hasResult = false;
     }
 
