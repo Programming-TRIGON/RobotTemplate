@@ -14,7 +14,7 @@ import org.trigon.hardware.RobotHardwareStats;
 public class AprilTagCamera {
     protected final String name;
     private final AprilTagCameraInputsAutoLogged inputs = new AprilTagCameraInputsAutoLogged();
-    private final Transform3d robotCenterToCamera;
+    private final Transform2d cameraToRobotCenter;
     private final StandardDeviations standardDeviations;
     private final AprilTagCameraIO aprilTagCameraIO;
     private Pose2d robotPose = null;
@@ -24,15 +24,18 @@ public class AprilTagCamera {
      *
      * @param aprilTagCameraType  the type of camera
      * @param name                the camera's name
-     * @param robotCenterToCamera the transform of the robot's origin point to the camera
+     * @param robotCenterToCamera the transform of the robot's origin point to the camera.
+     *                            only the x, y and yaw values will be used for transforming the camera pose to the robot's center,
+     *                            to avoid more inaccuracies like pitch and roll.
+     *                            The reset will be used for creating a camera in simulation
      * @param standardDeviations  the calibrated standard deviations for the camera's estimated pose
      */
     public AprilTagCamera(AprilTagCameraConstants.AprilTagCameraType aprilTagCameraType,
                           String name, Transform3d robotCenterToCamera,
                           StandardDeviations standardDeviations) {
         this.name = name;
-        this.robotCenterToCamera = robotCenterToCamera;
         this.standardDeviations = standardDeviations;
+        this.cameraToRobotCenter = toTransform2d(robotCenterToCamera).inverse();
 
         aprilTagCameraIO = AprilTagCameraIO.generateIO(aprilTagCameraType, name);
         if (RobotHardwareStats.isSimulation())
@@ -103,10 +106,7 @@ public class AprilTagCamera {
     }
 
     private Pose2d cameraPoseToRobotPose(Pose2d cameraPose) {
-        final Translation2d robotCenterToCameraTranslation = robotCenterToCamera.getTranslation().toTranslation2d();
-        final Rotation2d robotCenterToCameraRotation = robotCenterToCamera.getRotation().toRotation2d();
-
-        return cameraPose.transformBy(new Transform2d(robotCenterToCameraTranslation, robotCenterToCameraRotation).inverse());
+        return cameraPose.transformBy(cameraToRobotCenter);
     }
 
     private void logCameraInfo() {
@@ -131,5 +131,12 @@ public class AprilTagCamera {
         for (int i = 0; i < usedTagPoses.length; i++)
             usedTagPoses[i] = FieldConstants.TAG_ID_TO_POSE.get(inputs.visibleTagIDs[i]);
         Logger.recordOutput("UsedTags/" + this.getName(), usedTagPoses);
+    }
+
+    private Transform2d toTransform2d(Transform3d transform3d) {
+        final Translation2d robotCenterToCameraTranslation = transform3d.getTranslation().toTranslation2d();
+        final Rotation2d robotCenterToCameraRotation = transform3d.getRotation().toRotation2d();
+
+        return new Transform2d(robotCenterToCameraTranslation, robotCenterToCameraRotation);
     }
 }
