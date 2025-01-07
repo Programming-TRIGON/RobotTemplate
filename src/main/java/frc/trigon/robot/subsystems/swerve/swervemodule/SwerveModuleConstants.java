@@ -128,7 +128,7 @@ public class SwerveModuleConstants {
         config.CurrentLimits.StatorCurrentLimitEnable = true;
 
         config.Feedback.RotorToSensorRatio = STEER_MOTOR_GEAR_RATIO;
-        config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
+        config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
 
         config.Slot0.kP = STEER_MOTOR_P;
         config.Slot0.kI = STEER_MOTOR_I;
