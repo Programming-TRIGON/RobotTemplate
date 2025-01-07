@@ -20,6 +20,7 @@ import frc.trigon.robot.subsystems.swerve.swervemodule.SwerveModule;
 import frc.trigon.robot.subsystems.swerve.swervemodule.SwerveModuleConstants;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
+import org.trigon.hardware.RobotHardwareStats;
 import org.trigon.hardware.phoenix6.Phoenix6SignalThread;
 import org.trigon.hardware.phoenix6.pigeon2.Pigeon2Gyro;
 import org.trigon.hardware.phoenix6.pigeon2.Pigeon2Signal;
@@ -258,7 +259,7 @@ public class Swerve extends MotorSubsystem {
         previousSetpoint = setpointGenerator.generateSetpoint(
                 previousSetpoint,
                 targetSpeeds,
-                0.02
+                RobotHardwareStats.getPeriodicTimeSeconds()
         );
         if (isStill(previousSetpoint.robotRelativeSpeeds())) {
             stop();
