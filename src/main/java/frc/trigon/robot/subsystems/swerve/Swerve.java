@@ -89,13 +89,13 @@ public class Swerve extends MotorSubsystem {
         return Rotation2d.fromDegrees(SwerveConstants.GYRO.getSignal(Pigeon2Signal.YAW));
     }
 
-    public ChassisSpeeds getSelfRelativeVelocity() {
-        return SwerveConstants.KINEMATICS.toChassisSpeeds(getModuleStates());
-    }
-
     public ChassisSpeeds getFieldRelativeVelocity() {
         final ChassisSpeeds selfRelativeSpeeds = getSelfRelativeVelocity();
         return ChassisSpeeds.fromRobotRelativeSpeeds(selfRelativeSpeeds, RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getRotation());
+    }
+
+    public ChassisSpeeds getSelfRelativeVelocity() {
+        return SwerveConstants.KINEMATICS.toChassisSpeeds(getModuleStates());
     }
 
     /**
