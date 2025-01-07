@@ -351,9 +351,10 @@ public class Swerve extends MotorSubsystem {
     }
 
     private void updateNetworkTables() {
-        Logger.recordOutput("Swerve/Velocity/Rot", getSelfRelativeVelocity().omegaRadiansPerSecond);
-        Logger.recordOutput("Swerve/Velocity/X", getSelfRelativeVelocity().vxMetersPerSecond);
-        Logger.recordOutput("Swerve/Velocity/Y", getSelfRelativeVelocity().vyMetersPerSecond);
+        final ChassisSpeeds selfRelativeVelocity = getSelfRelativeVelocity();
+        Logger.recordOutput("Swerve/Velocity/OmegaRadiansPerSecond", selfRelativeVelocity.omegaRadiansPerSecond);
+        Logger.recordOutput("Swerve/Velocity/XMetersPerSecond", selfRelativeVelocity.vxMetersPerSecond);
+        Logger.recordOutput("Swerve/Velocity/YMetersPerSecond", selfRelativeVelocity.vyMetersPerSecond);
     }
 
     @AutoLogOutput(key = "Swerve/CurrentStates")
