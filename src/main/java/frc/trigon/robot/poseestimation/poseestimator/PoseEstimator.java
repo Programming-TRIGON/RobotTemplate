@@ -141,7 +141,7 @@ public class PoseEstimator implements AutoCloseable {
      * @return the robot's estimated pose at the timestamp
      */
     public Pose2d getPoseAtTimestamp(double timestamp) {
-        if (isPoseOutOfHeldPosesRange(timestamp))
+        if (isTimestampOutOfHeldPosesRange(timestamp))
             return null;
 
         final Optional<Pose2d> odometryPoseAtTimestamp = previousOdometryPoses.getSample(timestamp);
@@ -266,7 +266,7 @@ public class PoseEstimator implements AutoCloseable {
         this.estimatedPose = calculateEstimatedPoseWithAmbiguityCompensation(estimatedPoseAtObservationTime, observationPose, standardDeviations);
     }
 
-    private boolean isPoseOutOfHeldPosesRange(double timestamp) {
+    private boolean isTimestampOutOfHeldPosesRange(double timestamp) {
         try {
             final double oldestEstimatedRobotPoseTimestamp = previousOdometryPoses.getInternalBuffer().lastKey() - PoseEstimatorConstants.POSE_BUFFER_SIZE_SECONDS;
             if (oldestEstimatedRobotPoseTimestamp > timestamp)
