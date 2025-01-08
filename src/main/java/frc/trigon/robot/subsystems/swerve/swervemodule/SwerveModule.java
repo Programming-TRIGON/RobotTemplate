@@ -51,7 +51,7 @@ public class SwerveModule {
         targetState.optimize(getCurrentAngle());
         this.targetState = targetState;
         setTargetAngle(targetState.angle);
-        setTargetVelocity(targetState.speedMetersPerSecond, targetState.angle);
+        setTargetVelocity(targetState.speedMetersPerSecond);
     }
 
     public void setBrake(boolean brake) {
@@ -130,19 +130,16 @@ public class SwerveModule {
 
     /**
      * Sets the target velocity for the module.
-     * First, {@link this#reduceSkew(double, Rotation2d)} is called to reduce the skew by lowering the target velocity according to the error.
-     * Then, the target velocity is set using either closed loop or open loop depending on {@link this#shouldDriveMotorUseClosedLoop}.
+     * The target velocity is set using either closed loop or open loop depending on {@link this#shouldDriveMotorUseClosedLoop}.
      *
      * @param targetVelocityMetersPerSecond the target velocity, in meters per second
-     * @param targetSteerAngle              the target steer angle, to calculate for skew reduction
      */
-    private void setTargetVelocity(double targetVelocityMetersPerSecond, Rotation2d targetSteerAngle) {
-        targetVelocityMetersPerSecond = reduceSkew(targetVelocityMetersPerSecond, targetSteerAngle);
-
+    private void setTargetVelocity(double targetVelocityMetersPerSecond) {
         if (shouldDriveMotorUseClosedLoop) {
             setTargetClosedLoopVelocity(targetVelocityMetersPerSecond);
             return;
         }
+
         setTargetOpenLoopVelocity(targetVelocityMetersPerSecond);
     }
 
@@ -155,20 +152,6 @@ public class SwerveModule {
         final double power = targetVelocityMetersPerSecond / SwerveConstants.MAXIMUM_SPEED_METERS_PER_SECOND;
         final double voltage = Conversions.compensatedPowerToVoltage(power, SwerveModuleConstants.VOLTAGE_COMPENSATION_SATURATION);
         driveMotor.setControl(driveVoltageRequest.withOutput(voltage));
-    }
-
-    /**
-     * When changing direction, the module will skew since the angle motor is not at its target angle.
-     * This method will counter that by reducing the target velocity according to the angle motor's error cosine.
-     *
-     * @param targetVelocityMetersPerSecond the target velocity, in meters per second
-     * @param targetSteerAngle              the target steer angle
-     * @return the reduced target velocity in rotations per second
-     */
-    private double reduceSkew(double targetVelocityMetersPerSecond, Rotation2d targetSteerAngle) {
-        final Rotation2d closedLoopError = targetSteerAngle.minus(getCurrentAngle());
-        final double cosineScalar = Math.abs(closedLoopError.getCos());
-        return targetVelocityMetersPerSecond * cosineScalar;
     }
 
     private Rotation2d getCurrentAngle() {
