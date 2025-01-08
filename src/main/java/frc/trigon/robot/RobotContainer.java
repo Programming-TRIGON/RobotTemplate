@@ -11,7 +11,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.trigon.robot.commands.CommandConstants;
 import frc.trigon.robot.commands.commandfactories.GeneralCommands;
-import frc.trigon.robot.constants.CameraConstants;
 import frc.trigon.robot.constants.LEDConstants;
 import frc.trigon.robot.constants.OperatorConstants;
 import frc.trigon.robot.constants.PathPlannerConstants;
@@ -22,7 +21,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.trigon.utilities.flippable.Flippable;
 
 public class RobotContainer {
-    public static final PoseEstimator POSE_ESTIMATOR = new PoseEstimator(CameraConstants.CAMERA);
+    public static final PoseEstimator POSE_ESTIMATOR = new PoseEstimator();
     public static final Swerve SWERVE = new Swerve();
     private LoggedDashboardChooser<Command> autoChooser;
 
