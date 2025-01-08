@@ -1,6 +1,6 @@
 # RobotCodeXXXX
 
-TRIGON 5990's robot code for the XXXX off-season robot, "PLACEHOLDER".
+TRIGON 5990's robot code for the XXXX season robot, "PLACEHOLDER".
 
 # External Programs
 
