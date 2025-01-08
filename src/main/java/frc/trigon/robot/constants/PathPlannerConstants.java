@@ -1,14 +1,12 @@
 package frc.trigon.robot.constants;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.pathfinding.Pathfinding;
-import edu.wpi.first.wpilibj2.command.PrintCommand;
 import frc.trigon.robot.RobotContainer;
 import org.json.simple.parser.ParseException;
 import org.trigon.hardware.RobotHardwareStats;
@@ -69,9 +67,6 @@ public class PathPlannerConstants {
     }
 
     private static void registerCommands() {
-        NamedCommands.registerCommand("PrepareForShooting", new PrintCommand("PrepareForShooting"));
-        NamedCommands.registerCommand("Collect", new PrintCommand("Collecting"));
-        NamedCommands.registerCommand("FeedNote", new PrintCommand("Feeding"));
-        //TODO:Implement NamedCommands
+        // NamedCommands.registerCommand(name, command); //TODO:Implement NamedCommands
     }
 }
