@@ -8,7 +8,7 @@ import edu.wpi.first.math.geometry.Transform2d;
  * Standard Deviations are used to reduce noise in a pose estimate result by accounting for how much each result is wrong by.
  */
 public class StandardDeviations {
-    public final double translationStandardDeviation, thetaStandardDeviation;
+    private final double translationStandardDeviation, thetaStandardDeviation;
 
     /**
      * Constructs an object that stores how ambiguous the estimated pose of the robot is.
@@ -20,6 +20,14 @@ public class StandardDeviations {
     public StandardDeviations(double translationStandardDeviation, double thetaStandardDeviation) {
         this.translationStandardDeviation = translationStandardDeviation;
         this.thetaStandardDeviation = thetaStandardDeviation;
+    }
+
+    public double getTranslationStandardDeviation() {
+        return translationStandardDeviation;
+    }
+
+    public double getThetaStandardDeviation() {
+        return thetaStandardDeviation;
     }
 
     /**
