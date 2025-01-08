@@ -61,6 +61,12 @@ public class StandardDeviations {
      * @return the combined standard deviation
      */
     private double combineStandardDeviation(double firstStandardDeviation, double secondStandardDeviation) {
-        return firstStandardDeviation / (firstStandardDeviation + Math.sqrt(firstStandardDeviation * secondStandardDeviation));
+        if (firstStandardDeviation == 0.0)
+            return 0.0;
+
+        final double squaredSecondStandardDeviation = secondStandardDeviation * secondStandardDeviation;
+        final double combinedSquareRoot = Math.sqrt(firstStandardDeviation * squaredSecondStandardDeviation);
+        final double denominator = firstStandardDeviation + combinedSquareRoot;
+        return firstStandardDeviation / denominator;
     }
 }
