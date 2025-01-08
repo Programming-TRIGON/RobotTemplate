@@ -28,7 +28,7 @@ public class RelativeRobotPoseSource {
         this.relativeRobotPoseSourceIO = RelativeRobotPoseSourceIO.generateIO(hostname);
     }
 
-    public void updatePeriodically() {
+    public void update() {
         relativeRobotPoseSourceIO.updateInputs(inputs);
     }
 

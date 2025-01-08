@@ -78,7 +78,7 @@ public class AprilTagCamera {
 
         Logger.recordOutput("StandardDeviations/" + name + "/translations", translationStandardDeviation);
         Logger.recordOutput("StandardDeviations/" + name + "/theta", thetaStandardDeviation);
-        
+
         return new StandardDeviations(translationStandardDeviation, thetaStandardDeviation);
     }
 
@@ -90,7 +90,7 @@ public class AprilTagCamera {
      * @return if the camera is close enough to the tag to get an accurate result from solve PNP
      */
     public boolean isWithinBestTagRangeForAccurateSolvePNPResult() {
-        return inputs.distancesFromTags[0] < AprilTagCameraConstants.MAXIMUM_DISTANCE_FROM_TAG_FOR_ACCURATE_SOLVE_PNP_RESULT_METERS;
+        return hasValidResult() && inputs.distancesFromTags[0] < AprilTagCameraConstants.MAXIMUM_DISTANCE_FROM_TAG_FOR_ACCURATE_SOLVE_PNP_RESULT_METERS;
     }
 
     /**
