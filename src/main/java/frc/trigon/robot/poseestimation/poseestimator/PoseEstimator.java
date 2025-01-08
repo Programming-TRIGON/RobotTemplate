@@ -195,7 +195,7 @@ public class PoseEstimator implements AutoCloseable {
             aprilTagCamera.update();
 
             if (aprilTagCamera.isWithinBestTagRangeForAccurateSolvePNPResult() && isUnderMaximumSpeedForOffsetResetting())
-                relativeRobotPoseSource.resetOffset(aprilTagCamera.getRobotPose());
+                relativeRobotPoseSource.resetOffset(aprilTagCamera.getEstimatedRobotPose());
         }
 
         relativeRobotPoseSource.updatePeriodically();
@@ -214,7 +214,7 @@ public class PoseEstimator implements AutoCloseable {
 
         for (AprilTagCamera aprilTagCamera : newResultCameras)
             addPoseSourceObservation(
-                    aprilTagCamera.getRobotPose(),
+                    aprilTagCamera.getEstimatedRobotPose(),
                     aprilTagCamera.getLatestResultTimestampSeconds(),
                     aprilTagCamera.calculateStandardDeviations()
             );

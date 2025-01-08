@@ -17,7 +17,7 @@ public class AprilTagCamera {
     private final Transform2d cameraToRobotCenter;
     private final StandardDeviations standardDeviations;
     private final AprilTagCameraIO aprilTagCameraIO;
-    private Pose2d robotPose = null;
+    private Pose2d estimatedRobotPose = null;
 
     /**
      * Constructs a new AprilTagCamera.
@@ -46,12 +46,12 @@ public class AprilTagCamera {
     public void update() {
         aprilTagCameraIO.updateInputs(inputs);
 
-        robotPose = calculateRobotPose();
+        estimatedRobotPose = calculateRobotPose();
         logCameraInfo();
     }
 
-    public Pose2d getRobotPose() {
-        return robotPose;
+    public Pose2d getEstimatedRobotPose() {
+        return estimatedRobotPose;
     }
 
     public String getName() {
@@ -63,7 +63,7 @@ public class AprilTagCamera {
     }
 
     public boolean hasValidResult() {
-        return inputs.hasResult && inputs.poseAmbiguity < AprilTagCameraConstants.MAXIMUM_AMBIGUITY;
+        return inputs.hasResult && inputs.poseAmbiguity < AprilTagCameraConstants.MAXIMUM_AMBIGUITY && estimatedRobotPose != null;
     }
 
     /**
@@ -123,10 +123,11 @@ public class AprilTagCamera {
         if (!FieldConstants.TAG_ID_TO_POSE.isEmpty())
             logUsedTags();
 
-        if (!inputs.hasResult || robotPose == null) {
-            Logger.recordOutput("Poses/Robot/" + name + "/Pose", robotPose);
+        if (hasValidResult()) {
+            Logger.recordOutput("Poses/Robot/" + name + "/Pose", estimatedRobotPose);
             return;
         }
+        
         Logger.recordOutput("Poses/Robot/" + name + "/Pose", AprilTagCameraConstants.EMPTY_POSE_LIST);
     }
 
