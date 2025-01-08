@@ -22,6 +22,14 @@ public class StandardDeviations {
         this.thetaStandardDeviation = thetaStandardDeviation;
     }
 
+    public double getTranslationStandardDeviation() {
+        return translationStandardDeviation;
+    }
+
+    public double getThetaStandardDeviation() {
+        return thetaStandardDeviation;
+    }
+
     /**
      * Combines this with another {@link StandardDeviations}.
      * This might be used when estimating a pose in relation to another estimated pose.
@@ -30,14 +38,14 @@ public class StandardDeviations {
      * @param other the {@link StandardDeviations} to combine with
      * @return the combined {@link StandardDeviations}
      */
-    StandardDeviations combineWith(StandardDeviations other) {
+    public StandardDeviations combineWith(StandardDeviations other) {
         return new StandardDeviations(
                 combineStandardDeviation(translationStandardDeviation, other.translationStandardDeviation),
                 combineStandardDeviation(thetaStandardDeviation, other.thetaStandardDeviation)
         );
     }
 
-    Transform2d scaleTransformFromStandardDeviations(Transform2d transform) {
+    public Transform2d scaleTransformFromStandardDeviations(Transform2d transform) {
         return new Transform2d(
                 transform.getX() * translationStandardDeviation,
                 transform.getY() * translationStandardDeviation,
@@ -53,6 +61,12 @@ public class StandardDeviations {
      * @return the combined standard deviation
      */
     private double combineStandardDeviation(double firstStandardDeviation, double secondStandardDeviation) {
-        return firstStandardDeviation / (firstStandardDeviation + Math.sqrt(firstStandardDeviation * secondStandardDeviation));
+        if (firstStandardDeviation == 0.0)
+            return 0.0;
+
+        final double squaredSecondStandardDeviation = secondStandardDeviation * secondStandardDeviation;
+        final double combinedSquareRoot = Math.sqrt(firstStandardDeviation * squaredSecondStandardDeviation);
+        final double denominator = firstStandardDeviation + combinedSquareRoot;
+        return firstStandardDeviation / denominator;
     }
 }
