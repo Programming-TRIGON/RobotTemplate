@@ -43,10 +43,6 @@ public class SwerveConstants {
 
     private static final DoubleSupplier SIMULATION_YAW_VELOCITY_SUPPLIER = () -> RobotContainer.SWERVE.getSelfRelativeVelocity().omegaRadiansPerSecond;
     public static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(PathPlannerConstants.ROBOT_CONFIG.moduleLocations);
-    private static final double FURTHEST_MODULE_DISTANCE_FROM_CENTER = Math.max(
-            Math.max(PathPlannerConstants.ROBOT_CONFIG.moduleLocations[0].getNorm(), PathPlannerConstants.ROBOT_CONFIG.moduleLocations[1].getNorm()),
-            Math.max(PathPlannerConstants.ROBOT_CONFIG.moduleLocations[2].getNorm(), PathPlannerConstants.ROBOT_CONFIG.moduleLocations[3].getNorm())
-    );
     static final double
             TRANSLATION_TOLERANCE_METERS = 0.05,
             ROTATION_TOLERANCE_DEGREES = 2,
