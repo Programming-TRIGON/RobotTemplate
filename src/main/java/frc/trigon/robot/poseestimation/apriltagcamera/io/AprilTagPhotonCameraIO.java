@@ -1,9 +1,7 @@
 package frc.trigon.robot.poseestimation.apriltagcamera.io;
 
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.util.Units;
 import frc.trigon.robot.constants.FieldConstants;
 import frc.trigon.robot.poseestimation.apriltagcamera.AprilTagCameraIO;
 import frc.trigon.robot.poseestimation.apriltagcamera.AprilTagCameraInputsAutoLogged;
@@ -24,11 +22,12 @@ public class AprilTagPhotonCameraIO extends AprilTagCameraIO {
     protected void updateInputs(AprilTagCameraInputsAutoLogged inputs) {
         final PhotonPipelineResult latestResult = getLatestPipelineResult();
 
-        inputs.hasResult = latestResult != null && latestResult.hasTargets() && !latestResult.getTargets().isEmpty();
+        inputs.hasResult = latestResult != null && latestResult.hasTargets();
         if (inputs.hasResult) {
             updateHasResultInputs(inputs, latestResult);
             return;
         }
+
         updateNoResultInputs(inputs);
     }
 
@@ -38,48 +37,16 @@ public class AprilTagPhotonCameraIO extends AprilTagCameraIO {
     }
 
     private void updateHasResultInputs(AprilTagCameraInputsAutoLogged inputs, PhotonPipelineResult latestResult) {
-        final PhotonTrackedTarget bestTarget = getBestTarget(latestResult);
-        final Rotation3d bestTargetRelativeRotation3d = getBestTargetRelativeRotation(bestTarget);
-
-        inputs.cameraSolvePNPPose = getSolvePNPPose(latestResult, bestTarget);
+        inputs.cameraSolvePNPPose = getSolvePNPPose(latestResult);
         inputs.latestResultTimestampSeconds = latestResult.getTimestampSeconds();
-        inputs.bestTargetRelativePitchRadians = bestTargetRelativeRotation3d.getY();
-        inputs.bestTargetRelativeYawRadians = bestTargetRelativeRotation3d.getZ();
-        inputs.visibleTagIDs = getVisibleTagIDs(latestResult, bestTarget);
-        inputs.distanceFromBestTag = getDistanceFromBestTag(bestTarget);
-        inputs.poseAmbiguity = bestTarget.getPoseAmbiguity();
+        inputs.visibleTagIDs = getVisibleTagIDs(latestResult);
+        inputs.poseAmbiguity = latestResult.getMultiTagResult().isPresent() ? 0 : latestResult.getBestTarget().getPoseAmbiguity();
+        inputs.distancesFromTags = getDistancesFromTags(latestResult);
     }
 
     private void updateNoResultInputs(AprilTagCameraInputsAutoLogged inputs) {
         inputs.cameraSolvePNPPose = new Pose3d();
         inputs.visibleTagIDs = new int[0];
-        inputs.distanceFromBestTag = Double.POSITIVE_INFINITY;
-    }
-
-    /**
-     * Calculates the best tag from the pipeline result based on the area that the tag takes up.
-     *
-     * @param result the camera's pipeline result
-     * @return the best target
-     */
-    private PhotonTrackedTarget getBestTarget(PhotonPipelineResult result) {
-        PhotonTrackedTarget bestTarget = result.getBestTarget();
-        for (PhotonTrackedTarget target : result.getTargets()) {
-            if (target.getArea() > bestTarget.area)
-                bestTarget = target;
-        }
-        return bestTarget;
-    }
-
-    /**
-     * Estimates the camera's rotation relative to the apriltag.
-     *
-     * @param bestTag the best apriltag visible to the camera
-     * @return the estimated rotation
-     */
-    private Rotation3d getBestTargetRelativeRotation(PhotonTrackedTarget bestTag) {
-        final Rotation3d cameraRotation = bestTag.getBestCameraToTarget().getRotation();
-        return new Rotation3d(0, Units.degreesToRadians(cameraRotation.getY()), Units.degreesToRadians(cameraRotation.getZ()));
     }
 
     /**
@@ -88,35 +55,38 @@ public class AprilTagPhotonCameraIO extends AprilTagCameraIO {
      * @param result the camera's pipeline result
      * @return the estimated pose
      */
-    private Pose3d getSolvePNPPose(PhotonPipelineResult result, PhotonTrackedTarget bestTarget) {
+    private Pose3d getSolvePNPPose(PhotonPipelineResult result) {
         if (result.getMultiTagResult().isPresent()) {
             final Transform3d cameraPoseTransform = result.getMultiTagResult().get().estimatedPose.best;
             return new Pose3d().plus(cameraPoseTransform).relativeTo(FieldConstants.APRIL_TAG_FIELD_LAYOUT.getOrigin());
         }
 
-        final Pose3d tagPose = FieldConstants.TAG_ID_TO_POSE.get(bestTarget.getFiducialId());
-        final Transform3d targetToCamera = bestTarget.getBestCameraToTarget().inverse();
+        final Pose3d tagPose = FieldConstants.TAG_ID_TO_POSE.get(result.getBestTarget().getFiducialId());
+        final Transform3d targetToCamera = result.getBestTarget().getBestCameraToTarget().inverse();
         return tagPose.transformBy(targetToCamera);
     }
 
-    private int[] getVisibleTagIDs(PhotonPipelineResult result, PhotonTrackedTarget bestTarget) {
+    private int[] getVisibleTagIDs(PhotonPipelineResult result) {
         final List<PhotonTrackedTarget> targets = result.getTargets();
         final int[] visibleTagIDs = new int[targets.size()];
-        visibleTagIDs[0] = bestTarget.getFiducialId();
 
-        boolean hasSeenBestTarget = false;
-        for (int i = 0; i < visibleTagIDs.length; i++) {
-            final int targetID = targets.get(i).getFiducialId();
-            if (targetID == visibleTagIDs[0]) {
-                hasSeenBestTarget = true;
-                continue;
-            }
-            visibleTagIDs[hasSeenBestTarget ? i : i + 1] = targetID;
-        }
+        for (int i = 0; i < targets.size(); i++)
+            visibleTagIDs[i] = targets.get(i).getFiducialId();
+
         return visibleTagIDs;
     }
 
-    private double getDistanceFromBestTag(PhotonTrackedTarget bestTag) {
-        return bestTag.getBestCameraToTarget().getTranslation().getNorm();
+    private double[] getDistancesFromTags(PhotonPipelineResult result) {
+        final List<PhotonTrackedTarget> targets = result.getTargets();
+        final double[] distances = new double[targets.size()];
+
+        for (int i = 0; i < targets.size(); i++)
+            distances[i] = getDistanceFromTarget(targets.get(i));
+
+        return distances;
+    }
+
+    private double getDistanceFromTarget(PhotonTrackedTarget target) {
+        return target.getBestCameraToTarget().getTranslation().getNorm();
     }
 }
