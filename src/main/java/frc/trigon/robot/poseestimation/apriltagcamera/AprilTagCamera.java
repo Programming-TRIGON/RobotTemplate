@@ -63,7 +63,7 @@ public class AprilTagCamera {
     }
 
     public boolean hasValidResult() {
-        return inputs.hasResult && inputs.poseAmbiguity < AprilTagCameraConstants.MAXIMUM_AMBIGUITY && estimatedRobotPose != null;
+        return inputs.hasResult && inputs.poseAmbiguity < AprilTagCameraConstants.MAXIMUM_AMBIGUITY;
     }
 
     /**
@@ -107,6 +107,9 @@ public class AprilTagCamera {
     }
 
     private Pose2d calculateRobotPose() {
+        if (!hasValidResult())
+            return null;
+
         return cameraPoseToRobotPose(inputs.cameraSolvePNPPose.toPose2d());
     }
 
