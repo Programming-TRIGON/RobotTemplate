@@ -60,7 +60,6 @@ public class CommandConstants {
                     RobotContainer.SWERVE
             );
 
-
     /**
      * Calculates the target drive power from an axis value by dividing it by the shift mode value.
      *
