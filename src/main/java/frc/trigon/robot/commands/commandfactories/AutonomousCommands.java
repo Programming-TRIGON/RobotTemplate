@@ -44,7 +44,8 @@ public class AutonomousCommands {
             final FlippablePose2d flippedAutoStartPose = new FlippablePose2d(nonFlippedAutoStartPose, true);
             return flippedAutoStartPose.get();
         } catch (IOException | ParseException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            return new Pose2d();
         }
     }
 }

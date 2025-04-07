@@ -2,22 +2,25 @@ package frc.trigon.robot.poseestimation.apriltagcamera;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import frc.trigon.robot.constants.FieldConstants;
 import frc.trigon.robot.poseestimation.apriltagcamera.io.AprilTagLimelightIO;
 import frc.trigon.robot.poseestimation.apriltagcamera.io.AprilTagPhotonCameraIO;
 import frc.trigon.robot.poseestimation.apriltagcamera.io.AprilTagSimulationCameraIO;
+import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
 import org.trigon.hardware.RobotHardwareStats;
 
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 public class AprilTagCameraConstants {
     static final double MAXIMUM_DISTANCE_FROM_TAG_FOR_ACCURATE_SOLVE_PNP_RESULT_METERS = 2;
     static final Pose2d[] EMPTY_POSE_LIST = new Pose2d[0];
     static final double MAXIMUM_AMBIGUITY = 0.4;
+    public static final PhotonPoseEstimator.ConstrainedSolvepnpParams CONSTRAINED_SOLVE_PNP_PARAMS = new PhotonPoseEstimator.ConstrainedSolvepnpParams(false, 0.1);
 
-    public static final VisionSystemSim VISION_SIMULATION = new VisionSystemSim("VisionSimulation");
+    public static final VisionSystemSim VISION_SIMULATION = RobotHardwareStats.isSimulation() ? new VisionSystemSim("VisionSimulation") : null;
     private static final int
             SIMULATION_CAMERA_RESOLUTION_WIDTH = 1600,
             SIMULATION_CAMERA_RESOLUTION_HEIGHT = 1200,
@@ -52,9 +55,9 @@ public class AprilTagCameraConstants {
         SIMULATION_CAMERA(AprilTagSimulationCameraIO::new),
         LIMELIGHT(AprilTagLimelightIO::new);
 
-        final Function<String, AprilTagCameraIO> createIOFunction;
+        final BiFunction<String, Transform3d, AprilTagCameraIO> createIOFunction;
 
-        AprilTagCameraType(Function<String, AprilTagCameraIO> createIOFunction) {
+        AprilTagCameraType(BiFunction<String, Transform3d, AprilTagCameraIO> createIOFunction) {
             this.createIOFunction = createIOFunction;
         }
     }

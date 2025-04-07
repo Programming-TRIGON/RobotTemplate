@@ -1,10 +1,11 @@
 package frc.trigon.robot.poseestimation.apriltagcamera;
 
 import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.wpilibj.DriverStation;
+import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.constants.FieldConstants;
 import frc.trigon.robot.poseestimation.poseestimator.StandardDeviations;
 import org.littletonrobotics.junction.Logger;
-import org.trigon.hardware.RobotHardwareStats;
 
 /**
  * An april tag camera is a class that provides the robot's pose from a camera using one or multiple apriltags.
@@ -17,7 +18,7 @@ public class AprilTagCamera {
     private final Transform2d cameraToRobotCenter;
     private final StandardDeviations standardDeviations;
     private final AprilTagCameraIO aprilTagCameraIO;
-    private Pose2d estimatedRobotPose = null;
+    private Pose2d estimatedRobotPose = new Pose2d();
 
     /**
      * Constructs a new AprilTagCamera.
@@ -38,13 +39,12 @@ public class AprilTagCamera {
         this.standardDeviations = standardDeviations;
         this.cameraToRobotCenter = toTransform2d(robotCenterToCamera).inverse();
 
-        aprilTagCameraIO = AprilTagCameraIO.generateIO(aprilTagCameraType, name);
-        if (RobotHardwareStats.isSimulation())
-            aprilTagCameraIO.addSimulatedCameraToVisionSimulation(robotCenterToCamera);
+        aprilTagCameraIO = AprilTagCameraIO.generateIO(aprilTagCameraType, name, robotCenterToCamera);
     }
 
     public void update() {
         aprilTagCameraIO.updateInputs(inputs);
+        Logger.processInputs("Cameras/" + name, inputs);
 
         estimatedRobotPose = calculateRobotPose();
         logCameraInfo();
@@ -63,7 +63,7 @@ public class AprilTagCamera {
     }
 
     public boolean hasValidResult() {
-        return inputs.hasResult && inputs.poseAmbiguity < AprilTagCameraConstants.MAXIMUM_AMBIGUITY;
+        return inputs.hasResult && inputs.poseAmbiguity < AprilTagCameraConstants.MAXIMUM_AMBIGUITY && inputs.distancesFromTags[0] < 5;
     }
 
     /**
@@ -73,8 +73,8 @@ public class AprilTagCamera {
      */
     public StandardDeviations calculateStandardDeviations() {
         final double averageDistanceFromTags = calculateAverageDistanceFromTags();
-        final double translationStandardDeviation = calculateStandardDeviation(standardDeviations.getThetaStandardDeviation(), averageDistanceFromTags, inputs.visibleTagIDs.length);
-        final double thetaStandardDeviation = calculateStandardDeviation(standardDeviations.getThetaStandardDeviation(), averageDistanceFromTags, inputs.visibleTagIDs.length);
+        final double translationStandardDeviation = calculateStandardDeviation(standardDeviations.translationStandardDeviation(), averageDistanceFromTags, inputs.visibleTagIDs.length);
+        final double thetaStandardDeviation = calculateStandardDeviation(standardDeviations.thetaStandardDeviation(), averageDistanceFromTags, inputs.visibleTagIDs.length);
 
         Logger.recordOutput("StandardDeviations/" + name + "/translations", translationStandardDeviation);
         Logger.recordOutput("StandardDeviations/" + name + "/theta", thetaStandardDeviation);
@@ -110,7 +110,31 @@ public class AprilTagCamera {
         if (!hasValidResult())
             return null;
 
-        return cameraPoseToRobotPose(inputs.cameraSolvePNPPose.toPose2d());
+        return chooseBestRobotPose();
+    }
+
+    private Pose2d chooseBestRobotPose() {
+        if (!inputs.hasConstrainedResult || isWithinBestTagRangeForAccurateSolvePNPResult())
+            return chooseBestNormalSolvePNPPose();
+
+        return cameraPoseToRobotPose(inputs.constrainedSolvePNPPose.toPose2d());
+    }
+
+    private Pose2d chooseBestNormalSolvePNPPose() {
+        final Pose2d bestPose = cameraPoseToRobotPose(inputs.bestCameraSolvePNPPose.toPose2d());
+
+        if (inputs.bestCameraSolvePNPPose.equals(inputs.alternateCameraSolvePNPPose))
+            return bestPose;
+        if (inputs.alternateCameraSolvePNPPose.getTranslation().toTranslation2d().getDistance(FieldConstants.TAG_ID_TO_POSE.get(inputs.visibleTagIDs[0]).getTranslation().toTranslation2d()) < 0.1 || DriverStation.isDisabled())
+            return bestPose;
+
+        final Pose2d alternatePose = cameraPoseToRobotPose(inputs.alternateCameraSolvePNPPose.toPose2d());
+        final Rotation2d robotAngleAtResultTime = RobotContainer.POSE_ESTIMATOR.getEstimatedPoseAtTimestamp(inputs.latestResultTimestampSeconds).getRotation();
+
+        final double bestAngleDifference = Math.abs(bestPose.getRotation().minus(robotAngleAtResultTime).getRadians());
+        final double alternateAngleDifference = Math.abs(alternatePose.getRotation().minus(robotAngleAtResultTime).getRadians());
+
+        return bestAngleDifference > alternateAngleDifference ? alternatePose : bestPose;
     }
 
     private Pose2d cameraPoseToRobotPose(Pose2d cameraPose) {
@@ -119,26 +143,26 @@ public class AprilTagCamera {
 
     private double calculateAverageDistanceFromTags() {
         double totalDistance = 0;
-        for (int visibleTagID : inputs.visibleTagIDs)
-            totalDistance += FieldConstants.TAG_ID_TO_POSE.get(visibleTagID).getTranslation().getDistance(inputs.cameraSolvePNPPose.getTranslation());
+        for (int visibleTagID : inputs.visibleTagIDs) {
+            totalDistance += FieldConstants.TAG_ID_TO_POSE.get(visibleTagID).getTranslation().getDistance(inputs.bestCameraSolvePNPPose.getTranslation());
+        }
         return totalDistance / inputs.visibleTagIDs.length;
     }
 
     private void logCameraInfo() {
-        Logger.processInputs("Cameras/" + name, inputs);
         if (!FieldConstants.TAG_ID_TO_POSE.isEmpty())
             logUsedTags();
 
         if (hasValidResult()) {
-            Logger.recordOutput("Poses/Robot/" + name + "/Pose", estimatedRobotPose);
+            Logger.recordOutput("Poses/Robot/Cameras/" + name + "Pose", new Pose2d[]{estimatedRobotPose});
             return;
         }
 
-        Logger.recordOutput("Poses/Robot/" + name + "/Pose", AprilTagCameraConstants.EMPTY_POSE_LIST);
+        Logger.recordOutput("Poses/Robot/Cameras/" + name + "Pose", AprilTagCameraConstants.EMPTY_POSE_LIST);
     }
 
     private void logUsedTags() {
-        if (!inputs.hasResult) {
+        if (!hasValidResult()) {
             Logger.recordOutput("UsedTags/" + this.getName(), new Pose3d[0]);
             return;
         }

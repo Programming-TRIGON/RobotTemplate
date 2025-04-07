@@ -6,10 +6,9 @@ import org.trigon.hardware.misc.KeyboardController;
 import org.trigon.hardware.misc.XboxController;
 
 public class OperatorConstants {
-    private static final int
-            DRIVER_CONTROLLER_PORT = 0;
-    private static final int DRIVER_CONTROLLER_EXPONENT = 1;
-    private static final double DRIVER_CONTROLLER_DEADBAND = 0.1;
+    public static final double DRIVER_CONTROLLER_DEADBAND = 0.07;
+    private static final int DRIVER_CONTROLLER_PORT = 0;
+    private static final int DRIVER_CONTROLLER_EXPONENT = 2;
     public static final XboxController DRIVER_CONTROLLER = new XboxController(
             DRIVER_CONTROLLER_PORT, DRIVER_CONTROLLER_EXPONENT, DRIVER_CONTROLLER_DEADBAND
     );
@@ -17,15 +16,19 @@ public class OperatorConstants {
 
     public static final double
             POV_DIVIDER = 2,
-            STICKS_SPEED_DIVIDER = 1;
+            ROTATION_STICK_SPEED_DIVIDER = 1;
 
     public static final Trigger
-            RESET_HEADING_TRIGGER = DRIVER_CONTROLLER.y(),
-            TOGGLE_BRAKE_TRIGGER = OPERATOR_CONTROLLER.g().or(RobotController::getUserButton),
-            TOGGLE_ROTATION_MODE_TRIGGER = DRIVER_CONTROLLER.b(),
+            LED_AUTO_SETUP_TRIGGER = OPERATOR_CONTROLLER.backtick(),
+            RESET_HEADING_TRIGGER = OPERATOR_CONTROLLER.r(),
             DRIVE_FROM_DPAD_TRIGGER = new Trigger(() -> DRIVER_CONTROLLER.getPov() != -1),
+            TOGGLE_BRAKE_TRIGGER = OPERATOR_CONTROLLER.g().or(RobotController::getUserButton),
+            DEBUGGING_TRIGGER = OPERATOR_CONTROLLER.f2(),
+            LEFT_MULTIFUNCTION_TRIGGER = DRIVER_CONTROLLER.leftStick().or(OPERATOR_CONTROLLER.b()),
+            RIGHT_MULTIFUNCTION_TRIGGER = DRIVER_CONTROLLER.rightStick().or(OPERATOR_CONTROLLER.m()),
             FORWARD_QUASISTATIC_CHARACTERIZATION_TRIGGER = OPERATOR_CONTROLLER.right(),
             BACKWARD_QUASISTATIC_CHARACTERIZATION_TRIGGER = OPERATOR_CONTROLLER.left(),
             FORWARD_DYNAMIC_CHARACTERIZATION_TRIGGER = OPERATOR_CONTROLLER.up(),
-            BACKWARD_DYNAMIC_CHARACTERIZATION_TRIGGER = OPERATOR_CONTROLLER.down();
+            BACKWARD_DYNAMIC_CHARACTERIZATION_TRIGGER = OPERATOR_CONTROLLER.down(),
+            CONTINUE_TRIGGER = OPERATOR_CONTROLLER.k().or(DRIVER_CONTROLLER.leftBumper());
 }

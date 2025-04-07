@@ -1,6 +1,7 @@
 package frc.trigon.robot.poseestimation.apriltagcamera.io;
 
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import frc.trigon.robot.poseestimation.apriltagcamera.AprilTagCameraIO;
 import frc.trigon.robot.poseestimation.apriltagcamera.AprilTagCameraInputsAutoLogged;
 import org.trigon.utilities.LimelightHelpers;
@@ -9,7 +10,7 @@ import org.trigon.utilities.LimelightHelpers;
 public class AprilTagLimelightIO extends AprilTagCameraIO {
     private final String hostname;
 
-    public AprilTagLimelightIO(String hostname) {
+    public AprilTagLimelightIO(String hostname, Transform3d robotToCamera) {
         this.hostname = hostname;
     }
 
@@ -27,13 +28,13 @@ public class AprilTagLimelightIO extends AprilTagCameraIO {
     }
 
     private void updateHasResultInputs(AprilTagCameraInputsAutoLogged inputs, LimelightHelpers.LimelightResults results) {
-        inputs.cameraSolvePNPPose = results.getBotPose3d_wpiBlue();
+        inputs.bestCameraSolvePNPPose = results.getBotPose3d_wpiBlue();
         inputs.latestResultTimestampSeconds = results.timestamp_RIOFPGA_capture;
         inputs.visibleTagIDs = getVisibleTagIDs(results);
     }
 
     private void updateNoResultInputs(AprilTagCameraInputsAutoLogged inputs) {
-        inputs.cameraSolvePNPPose = new Pose3d();
+        inputs.bestCameraSolvePNPPose = new Pose3d();
         inputs.visibleTagIDs = new int[0];
     }
 

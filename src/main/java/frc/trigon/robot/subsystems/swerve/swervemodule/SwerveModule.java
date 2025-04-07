@@ -24,10 +24,11 @@ public class SwerveModule {
             steerMotor;
     private final CANcoderEncoder steerEncoder;
     private final PositionVoltage steerPositionRequest = new PositionVoltage(0).withEnableFOC(SwerveModuleConstants.ENABLE_FOC);
-    private final VelocityTorqueCurrentFOC driveVelocityRequest = new VelocityTorqueCurrentFOC(0);
-    private final VoltageOut driveVoltageRequest = new VoltageOut(0);
+    private final double wheelDiameter;
+    private final VelocityTorqueCurrentFOC driveVelocityRequest = new VelocityTorqueCurrentFOC(0).withUpdateFreqHz(1000);
+    private final VoltageOut driveVoltageRequest = new VoltageOut(0).withEnableFOC(SwerveModuleConstants.ENABLE_FOC);
     private final TorqueCurrentFOC driveTorqueCurrentFOCRequest = new TorqueCurrentFOC(0);
-    private boolean shouldDriveMotorUseClosedLoop = false;
+    private boolean shouldDriveMotorUseClosedLoop = true;
     private SwerveModuleState targetState = new SwerveModuleState();
     private double[]
             latestOdometryDrivePositions,
@@ -38,20 +39,26 @@ public class SwerveModule {
      *
      * @param moduleID        the ID of the module
      * @param offsetRotations the module's encoder offset in rotations
+     * @param wheelDiameter   the diameter of the wheel
      */
-    public SwerveModule(int moduleID, double offsetRotations) {
+    public SwerveModule(int moduleID, double offsetRotations, double wheelDiameter) {
         driveMotor = new TalonFXMotor(moduleID, "Module" + moduleID + "Drive", RobotConstants.CANIVORE_NAME);
         steerMotor = new TalonFXMotor(moduleID + 4, "Module" + moduleID + "Steer", RobotConstants.CANIVORE_NAME);
         steerEncoder = new CANcoderEncoder(moduleID + 4, "Module" + moduleID + "SteerEncoder", RobotConstants.CANIVORE_NAME);
+        this.wheelDiameter = wheelDiameter;
 
         configureHardware(offsetRotations);
     }
 
-    public void setTargetState(SwerveModuleState targetState) {
-        targetState.optimize(getCurrentAngle());
+    public void setTargetState(SwerveModuleState targetState, double targetForceNm) {
+        if (willOptimize(targetState)) {
+            targetState.optimize(getCurrentAngle());
+            targetForceNm *= -1;
+        }
+
         this.targetState = targetState;
         setTargetAngle(targetState.angle);
-        setTargetVelocity(targetState.speedMetersPerSecond);
+        setTargetVelocity(targetState.speedMetersPerSecond, targetForceNm);
     }
 
     public void setBrake(boolean brake) {
@@ -63,7 +70,7 @@ public class SwerveModule {
         log.motor("Module" + driveMotor.getID() + "Drive")
                 .angularPosition(Units.Rotations.of(driveMotor.getSignal(TalonFXSignal.POSITION)))
                 .angularVelocity(Units.RotationsPerSecond.of(driveMotor.getSignal(TalonFXSignal.VELOCITY)))
-                .voltage(Units.Volts.of(driveMotor.getSignal(TalonFXSignal.TORQUE_CURRENT)));
+                .voltage(Units.Volts.of(driveMotor.getSignal(TalonFXSignal.MOTOR_VOLTAGE)));
     }
 
     /**
@@ -128,24 +135,31 @@ public class SwerveModule {
         );
     }
 
+    private boolean willOptimize(SwerveModuleState state) {
+        final Rotation2d delta = state.angle.minus(getCurrentAngle());
+        return Math.abs(delta.getDegrees()) > 90.0;
+    }
+
     /**
      * Sets the target velocity for the module.
      * The target velocity is set using either closed loop or open loop depending on {@link this#shouldDriveMotorUseClosedLoop}.
      *
      * @param targetVelocityMetersPerSecond the target velocity, in meters per second
+     * @param targetForceNm                 the target force of the module in newton meters
      */
-    private void setTargetVelocity(double targetVelocityMetersPerSecond) {
+    private void setTargetVelocity(double targetVelocityMetersPerSecond, double targetForceNm) {
         if (shouldDriveMotorUseClosedLoop) {
-            setTargetClosedLoopVelocity(targetVelocityMetersPerSecond);
+            setTargetClosedLoopVelocity(targetVelocityMetersPerSecond, targetForceNm);
             return;
         }
 
         setTargetOpenLoopVelocity(targetVelocityMetersPerSecond);
     }
 
-    private void setTargetClosedLoopVelocity(double targetVelocityMetersPerSecond) {
+    private void setTargetClosedLoopVelocity(double targetVelocityMetersPerSecond, double targetForceNm) {
         final double targetVelocityRotationsPerSecond = metersToDriveWheelRotations(targetVelocityMetersPerSecond);
-        driveMotor.setControl(driveVelocityRequest.withVelocity(targetVelocityRotationsPerSecond));
+        final double targetAccelerationRotationsPerSecondSquared = metersToDriveWheelRotations(targetForceNm);
+        driveMotor.setControl(driveVelocityRequest.withVelocity(targetVelocityRotationsPerSecond).withAcceleration(targetAccelerationRotationsPerSecondSquared));
     }
 
     private void setTargetOpenLoopVelocity(double targetVelocityMetersPerSecond) {
@@ -165,7 +179,7 @@ public class SwerveModule {
      * @return the distance the drive wheel has traveled in meters
      */
     private double driveWheelRotationsToMeters(double rotations) {
-        return Conversions.rotationsToDistance(rotations, SwerveModuleConstants.WHEEL_DIAMETER_METERS);
+        return Conversions.rotationsToDistance(rotations, wheelDiameter);
     }
 
     /**
@@ -175,7 +189,7 @@ public class SwerveModule {
      * @return the distance the drive wheel has traveled in drive wheel rotations
      */
     private double metersToDriveWheelRotations(double meters) {
-        return Conversions.distanceToRotations(meters, SwerveModuleConstants.WHEEL_DIAMETER_METERS);
+        return Conversions.distanceToRotations(meters, wheelDiameter);
     }
 
     private void configureHardware(double offsetRotations) {
@@ -185,7 +199,7 @@ public class SwerveModule {
     }
 
     private void configureDriveMotor() {
-        driveMotor.applyConfiguration(SwerveModuleConstants.DRIVE_MOTOR_CONFIGURATION);
+        driveMotor.applyConfiguration(SwerveModuleConstants.generateDriveMotorConfiguration());
         driveMotor.setPhysicsSimulation(SwerveModuleConstants.createDriveMotorSimulation());
 
         driveMotor.registerSignal(TalonFXSignal.VELOCITY, 100);
@@ -195,8 +209,7 @@ public class SwerveModule {
     }
 
     private void configureSteerMotor() {
-        SwerveModuleConstants.STEER_MOTOR_CONFIGURATION.Feedback.FeedbackRemoteSensorID = steerEncoder.getID();
-        steerMotor.applyConfiguration(SwerveModuleConstants.STEER_MOTOR_CONFIGURATION);
+        steerMotor.applyConfiguration(SwerveModuleConstants.generateSteerMotorConfiguration(steerMotor.getID()));
         steerMotor.setPhysicsSimulation(SwerveModuleConstants.createSteerMotorSimulation());
 
         steerMotor.registerSignal(TalonFXSignal.VELOCITY, 100);
@@ -205,8 +218,7 @@ public class SwerveModule {
     }
 
     private void configureSteerEncoder(double offsetRotations) {
-        SwerveModuleConstants.STEER_ENCODER_CONFIGURATION.MagnetSensor.MagnetOffset = offsetRotations;
-        steerEncoder.applyConfiguration(SwerveModuleConstants.STEER_ENCODER_CONFIGURATION);
+        steerEncoder.applyConfiguration(SwerveModuleConstants.generateSteerEncoderConfiguration(offsetRotations));
         steerEncoder.setSimulationInputsFromTalonFX(steerMotor);
 
         steerEncoder.registerSignal(CANcoderSignal.POSITION, 100);
