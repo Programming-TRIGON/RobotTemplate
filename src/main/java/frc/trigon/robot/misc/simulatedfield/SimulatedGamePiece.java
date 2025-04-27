@@ -27,6 +27,11 @@ public class SimulatedGamePiece {
             applyGravity();
     }
 
+    /**
+     * Releases the game piece from the robot.
+     *
+     * @param fieldRelativeReleaseVelocity the velocity that the object is released at, relative to the field
+     */
     public void release(Translation3d fieldRelativeReleaseVelocity) {
         velocityAtRelease = fieldRelativeReleaseVelocity;
         poseAtRelease = fieldRelativePose;

@@ -20,7 +20,7 @@ import org.trigon.utilities.flippable.FlippableRotation2d;
 import java.util.function.Supplier;
 
 public class GamePieceAutoDriveCommand extends ParallelCommandGroup {
-    private static final double AUTO_COLLECTION_OPENING_CHECK_DISTANCE_METERS = 2.2;
+    private static final double AUTO_COLLECTION_OPENING_CHECK_DISTANCE_METERS = 2;
     private static final PIDController Y_PID_CONTROLLER = RobotHardwareStats.isSimulation() ?
             new PIDController(0.5, 0, 0) :
             new PIDController(0.3, 0, 0.03);
@@ -28,23 +28,25 @@ public class GamePieceAutoDriveCommand extends ParallelCommandGroup {
             new ProfiledPIDController(0.5, 0, 0, new TrapezoidProfile.Constraints(2.8, 5)) :
             new ProfiledPIDController(2.4, 0, 0, new TrapezoidProfile.Constraints(2.65, 5.5));
     private static final ObjectDetectionCamera CAMERA = CameraConstants.OBJECT_DETECTION_CAMERA;
+    private final SimulatedGamePieceConstants.GamePieceType targetGamePieceType;
     private Translation2d distanceFromTrackedGamePiece;
 
-    public GamePieceAutoDriveCommand() {
+    public GamePieceAutoDriveCommand(SimulatedGamePieceConstants.GamePieceType targetGamePieceType) {
+        this.targetGamePieceType = targetGamePieceType;
         addCommands(
                 new InstantCommand(CAMERA::initializeTracking),
                 getTrackGamePieceCommand(),
                 GeneralCommands.getContinuousConditionalCommand(
                         getDriveToGamePieceCommand(() -> distanceFromTrackedGamePiece),
                         GeneralCommands.getFieldRelativeDriveCommand(),
-                        () -> CAMERA.getTrackedObjectFieldRelativePosition() != null
+                        () -> CAMERA.getTrackedObjectFieldRelativePosition() != null && shouldMoveTowardsGamePiece(distanceFromTrackedGamePiece)
                 )
         );
     }
 
     private Command getTrackGamePieceCommand() {
         return new RunCommand(() -> {
-            CAMERA.trackObject(SimulatedGamePieceConstants.GamePieceType.GAME_PIECE_TYPE);
+            CAMERA.trackObject(targetGamePieceType);
             distanceFromTrackedGamePiece = calculateDistanceFromTrackedGamePiece();
         });
     }
@@ -57,8 +59,8 @@ public class GamePieceAutoDriveCommand extends ParallelCommandGroup {
 
         final Translation2d robotToGamePiece = robotPose.getTranslation().minus(trackedObjectPositionOnField);
         var distanceFromTrackedGamePiece = robotToGamePiece.rotateBy(robotPose.getRotation().unaryMinus());
-        Logger.recordOutput("Distance", distanceFromTrackedGamePiece);
-        Logger.recordOutput("TargetXDistance", X_PID_CONTROLLER.getSetpoint().position);
+        Logger.recordOutput("GamePieceAutoDrive/DistanceFromTrackedGamePiece", distanceFromTrackedGamePiece);
+        Logger.recordOutput("GamePieceAutoDrive/XDistanceFromTrackedGamePiece", X_PID_CONTROLLER.getSetpoint().position);
         return distanceFromTrackedGamePiece;
     }
 
@@ -66,7 +68,7 @@ public class GamePieceAutoDriveCommand extends ParallelCommandGroup {
         return new SequentialCommandGroup(
                 new InstantCommand(() -> X_PID_CONTROLLER.reset(distanceFromTrackedGamePiece.get().getX(), RobotContainer.SWERVE.getSelfRelativeVelocity().vxMetersPerSecond)),
                 SwerveCommands.getClosedLoopSelfRelativeDriveCommand(
-                        () -> X_PID_CONTROLLER.calculate(distanceFromTrackedGamePiece.get().getX(), -0),//TODO: Calibrate. Should be placed in the intake's constants
+                        () -> X_PID_CONTROLLER.calculate(distanceFromTrackedGamePiece.get().getX()),
                         () -> Y_PID_CONTROLLER.calculate(distanceFromTrackedGamePiece.get().getY()),
                         GamePieceAutoDriveCommand::calculateTargetAngle
                 )
@@ -84,8 +86,8 @@ public class GamePieceAutoDriveCommand extends ParallelCommandGroup {
         if (trackedObjectFieldRelativePosition == null)
             return null;
 
-        final Translation2d objectDistanceToRobot = trackedObjectFieldRelativePosition.minus(robotPose.getTranslation());
-        final Rotation2d angularDistanceToObject = new Rotation2d(Math.atan2(objectDistanceToRobot.getY(), objectDistanceToRobot.getX()));
+        final Translation2d objectDistanceFromRobot = trackedObjectFieldRelativePosition.minus(robotPose.getTranslation());
+        final Rotation2d angularDistanceToObject = new Rotation2d(Math.atan2(objectDistanceFromRobot.getY(), objectDistanceFromRobot.getX()));
         return new FlippableRotation2d(angularDistanceToObject, false);
     }
 }

@@ -1,19 +1,13 @@
 package frc.trigon.robot.misc.objectdetectioncamera.io;
 
-import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import frc.trigon.robot.misc.objectdetectioncamera.ObjectDetectionCameraConstants;
 import frc.trigon.robot.misc.objectdetectioncamera.ObjectDetectionCameraIO;
 import frc.trigon.robot.misc.objectdetectioncamera.ObjectDetectionCameraInputsAutoLogged;
-import org.littletonrobotics.junction.Logger;
-import org.opencv.core.Point;
 import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
-import org.photonvision.targeting.TargetCorner;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -82,71 +76,10 @@ public class PhotonObjectDetectionCameraIO extends ObjectDetectionCameraIO {
     }
 
     private Rotation3d extractRotation3d(PhotonTrackedTarget target) {
-//        final List<TargetCorner> detectedCorners = target.getMinAreaRectCorners();
-//
-//        if (detectedCorners.size() != 4)
-        return calculateMiddleRotation(target);
-
-//        final Point objectPointOnCamera = findAverageOfLowestTwo(detectedCorners);
-//        final Rotation3d objectRotationOnCamera = getCorrectedPixelRot(objectPointOnCamera);
-//
-//        if (objectRotationOnCamera == null)
-//            calculateMiddleRotation(target);
-//
-//        return objectRotationOnCamera;
-    }
-
-    private Rotation3d calculateMiddleRotation(PhotonTrackedTarget target) {
         return new Rotation3d(
                 0,
                 Units.degreesToRadians(target.getPitch()),
                 Units.degreesToRadians(-target.getYaw())
         );
-    }
-
-    private Point findAverageOfLowestTwo(List<TargetCorner> corners) {
-        TargetCorner lowest = corners.get(0);
-        TargetCorner secondLowest = corners.get(1);
-
-        if (secondLowest.y > lowest.y) {
-            TargetCorner temp = lowest;
-            lowest = secondLowest;
-            secondLowest = temp;
-        }
-
-        for (int i = 2; i < 4; i++) {
-            final TargetCorner current = corners.get(i);
-
-            if (current.y > lowest.y) {
-                secondLowest = lowest;
-                lowest = current;
-            } else if (current.y > secondLowest.y) {
-                secondLowest = current;
-            }
-        }
-
-        final double averageX = (lowest.x + secondLowest.x) / 2.0;
-        final double averageY = (lowest.y + secondLowest.y) / 2.0;
-
-        return new Point(averageX, averageY);
-    }
-
-    private Rotation3d getCorrectedPixelRot(Point point) {
-        final Matrix<N3, N3> cameraIntrinsics = photonCamera.getCameraMatrix().orElse(null);
-        if (cameraIntrinsics == null)
-            return null;
-
-        final double fx = cameraIntrinsics.get(0, 0);
-        final double cx = cameraIntrinsics.get(0, 2);
-        final double xOffset = cx - point.x;
-        final double fy = cameraIntrinsics.get(1, 1);
-        final double cy = cameraIntrinsics.get(1, 2);
-        final double yOffset = cy - point.y;
-
-        final Rotation2d yaw = new Rotation2d(fx, xOffset);
-        final Rotation2d pitch = new Rotation2d(fy / Math.cos(Math.atan(xOffset / fx)), -yOffset);
-        Logger.recordOutput("Yaw", yaw.getDegrees());
-        Logger.recordOutput("Pitch", -pitch.getDegrees());
-        return new Rotation3d(0.0, -pitch.getRadians(), yaw.getRadians());
     }
 }

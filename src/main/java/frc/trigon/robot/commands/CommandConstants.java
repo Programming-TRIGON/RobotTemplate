@@ -65,7 +65,7 @@ public class CommandConstants {
      * @return the drive power
      */
     public static double calculateDriveStickAxisValue(double axisValue) {
-        return axisValue / calculateShiftModeValue(MINIMUM_TRANSLATION_SHIFT_POWER);
+        return axisValue / OperatorConstants.TRANSLATION_STICK_SPEED_DIVIDER / calculateShiftModeValue(MINIMUM_TRANSLATION_SHIFT_POWER);
     }
 
     /**
