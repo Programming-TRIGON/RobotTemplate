@@ -63,7 +63,20 @@ public class AprilTagCamera {
     }
 
     public boolean hasValidResult() {
-        return inputs.hasResult && inputs.poseAmbiguity < AprilTagCameraConstants.MAXIMUM_AMBIGUITY && inputs.distancesFromTags[0] < 5;
+        return inputs.hasTarget &&
+                inputs.poseAmbiguity < AprilTagCameraConstants.MAXIMUM_AMBIGUITY &&
+                inputs.distancesFromTags[0] < AprilTagCameraConstants.MAXIMUM_DISTANCE_FROM_TAG_FOR_ACCURATE_RESULT_METERS;
+    }
+
+    /**
+     * Solve PNP is inaccurate the further the camera is from the tag.
+     * Because of this, there are some things we might want to do only if we are close enough to get an accurate enough result.
+     * This method checks if the current distance from the tag is less than the maximum distance for an accurate result, which is defined as the variable {@link AprilTagCameraConstants#MAXIMUM_DISTANCE_FROM_TAG_FOR_ACCURATE_SOLVE_PNP_RESULT_METERS}.
+     *
+     * @return if the camera is close enough to the tag to get an accurate result from solve PNP
+     */
+    public boolean isWithinBestTagRangeForAccurateSolvePNPResult() {
+        return hasValidResult() && inputs.distancesFromTags[0] < AprilTagCameraConstants.MAXIMUM_DISTANCE_FROM_TAG_FOR_ACCURATE_SOLVE_PNP_RESULT_METERS;
     }
 
     /**
@@ -80,30 +93,6 @@ public class AprilTagCamera {
         Logger.recordOutput("StandardDeviations/" + name + "/theta", thetaStandardDeviation);
 
         return new StandardDeviations(translationStandardDeviation, thetaStandardDeviation);
-    }
-
-    /**
-     * Solve PNP is inaccurate the further the camera is from the tag.
-     * Because of this, there are some things we might want to do only if we are close enough to get an accurate enough result.
-     * This method checks if the current distance from the tag is less than the maximum distance for an accurate result, which is defined as the variable {@link AprilTagCameraConstants#MAXIMUM_DISTANCE_FROM_TAG_FOR_ACCURATE_SOLVE_PNP_RESULT_METERS}.
-     *
-     * @return if the camera is close enough to the tag to get an accurate result from solve PNP
-     */
-    public boolean isWithinBestTagRangeForAccurateSolvePNPResult() {
-        return hasValidResult() && inputs.distancesFromTags[0] < AprilTagCameraConstants.MAXIMUM_DISTANCE_FROM_TAG_FOR_ACCURATE_SOLVE_PNP_RESULT_METERS;
-    }
-
-    /**
-     * Calculates an aspect of the standard deviations of the estimated pose using a formula.
-     * As we get further from the tag(s), this will return a less trusting (higher deviation) result.
-     *
-     * @param exponent            a calibrated gain
-     * @param distance            the distance from the tag(s)
-     * @param numberOfVisibleTags the number of visible tags
-     * @return the standard deviation
-     */
-    private double calculateStandardDeviation(double exponent, double distance, int numberOfVisibleTags) {
-        return exponent * (distance * distance) / numberOfVisibleTags;
     }
 
     private Pose2d calculateRobotPose() {
@@ -141,12 +130,17 @@ public class AprilTagCamera {
         return cameraPose.transformBy(cameraToRobotCenter);
     }
 
-    private double calculateAverageDistanceFromTags() {
-        double totalDistance = 0;
-        for (int visibleTagID : inputs.visibleTagIDs) {
-            totalDistance += FieldConstants.TAG_ID_TO_POSE.get(visibleTagID).getTranslation().getDistance(inputs.bestCameraSolvePNPPose.getTranslation());
-        }
-        return totalDistance / inputs.visibleTagIDs.length;
+    /**
+     * Calculates an aspect of the standard deviations of the estimated pose using a formula.
+     * As we get further from the tag(s), this will return a less trusting (higher deviation) result.
+     *
+     * @param exponent            a calibrated gain
+     * @param distance            the distance from the tag(s)
+     * @param numberOfVisibleTags the number of visible tags
+     * @return the standard deviation
+     */
+    private double calculateStandardDeviation(double exponent, double distance, int numberOfVisibleTags) {
+        return exponent * (distance * distance) / numberOfVisibleTags;
     }
 
     private void logCameraInfo() {
@@ -178,5 +172,13 @@ public class AprilTagCamera {
         final Rotation2d robotCenterToCameraRotation = transform3d.getRotation().toRotation2d();
 
         return new Transform2d(robotCenterToCameraTranslation, robotCenterToCameraRotation);
+    }
+
+    private double calculateAverageDistanceFromTags() {
+        double totalDistance = 0;
+        for (int visibleTagID : inputs.visibleTagIDs) {
+            totalDistance += FieldConstants.TAG_ID_TO_POSE.get(visibleTagID).getTranslation().getDistance(inputs.bestCameraSolvePNPPose.getTranslation());
+        }
+        return totalDistance / inputs.visibleTagIDs.length;
     }
 }

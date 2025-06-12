@@ -1,16 +1,13 @@
 package frc.trigon.robot.subsystems.swerve;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.path.*;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.trigon.robot.RobotContainer;
 import org.trigon.commands.InitExecuteCommand;
 import org.trigon.utilities.flippable.FlippablePose2d;
 import org.trigon.utilities.flippable.FlippableRotation2d;
 
-import java.util.List;
 import java.util.Set;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -162,30 +159,5 @@ public class SwerveCommands {
                 },
                 () -> RobotContainer.SWERVE.atPose(targetPose)
         );
-    }
-
-    private static Command createOnTheFlyPathCommand(FlippablePose2d targetPose, PathConstraints constraints) {
-        final Pose2d currentPose = RobotContainer.POSE_ESTIMATOR.getEstimatedRobotPose();
-        final List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
-                currentPose,
-                targetPose.get()
-        );
-
-        final ChassisSpeeds selfRelativeVelocity = RobotContainer.SWERVE.getSelfRelativeVelocity();
-        final double startingVelocity = Math.hypot(selfRelativeVelocity.vxMetersPerSecond, selfRelativeVelocity.vyMetersPerSecond);
-
-        final PathPlannerPath path = new PathPlannerPath(
-                waypoints,
-                constraints,
-                new IdealStartingState(startingVelocity, currentPose.getRotation()),
-                new GoalEndState(0, targetPose.get().getRotation())
-        );
-
-        path.preventFlipping = true;
-        try {
-            return AutoBuilder.followPath(path);
-        } catch (IndexOutOfBoundsException e) {
-            return new InstantCommand();
-        }
     }
 }

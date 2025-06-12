@@ -15,7 +15,9 @@ import org.trigon.hardware.RobotHardwareStats;
 import java.util.function.BiFunction;
 
 public class AprilTagCameraConstants {
-    static final double MAXIMUM_DISTANCE_FROM_TAG_FOR_ACCURATE_SOLVE_PNP_RESULT_METERS = 2;
+    static final double
+            MAXIMUM_DISTANCE_FROM_TAG_FOR_ACCURATE_RESULT_METERS = 5,
+            MAXIMUM_DISTANCE_FROM_TAG_FOR_ACCURATE_SOLVE_PNP_RESULT_METERS = 2;
     static final Pose2d[] EMPTY_POSE_LIST = new Pose2d[0];
     static final double MAXIMUM_AMBIGUITY = 0.4;
     public static final PhotonPoseEstimator.ConstrainedSolvepnpParams CONSTRAINED_SOLVE_PNP_PARAMS = new PhotonPoseEstimator.ConstrainedSolvepnpParams(false, 0.1);

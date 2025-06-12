@@ -37,13 +37,13 @@ public class AprilTagPhotonCameraIO extends AprilTagCameraIO {
     protected void updateInputs(AprilTagCameraInputsAutoLogged inputs) {
         final PhotonPipelineResult latestResult = getLatestPipelineResult();
 
-        inputs.hasResult = latestResult != null && latestResult.hasTargets();
-        if (inputs.hasResult) {
-            updateHasResultInputs(inputs, latestResult);
+        inputs.hasTarget = latestResult != null && latestResult.hasTargets();
+        if (inputs.hasTarget) {
+            updateHasTargetInputs(inputs, latestResult);
             return;
         }
 
-        updateNoResultInputs(inputs);
+        updateNoTargetInputs(inputs);
     }
 
     private PhotonPipelineResult getLatestPipelineResult() {
@@ -51,27 +51,19 @@ public class AprilTagPhotonCameraIO extends AprilTagCameraIO {
         return unreadResults.isEmpty() ? null : unreadResults.get(unreadResults.size() - 1);
     }
 
-    private void updateNoResultInputs(AprilTagCameraInputsAutoLogged inputs) {
-        inputs.bestCameraSolvePNPPose = new Pose3d();
-        inputs.alternateCameraSolvePNPPose = inputs.bestCameraSolvePNPPose;
-        inputs.constrainedSolvePNPPose = inputs.alternateCameraSolvePNPPose;
-        inputs.visibleTagIDs = new int[0];
-        inputs.hasConstrainedResult = false;
-    }
-
-    private void updateHasResultInputs(AprilTagCameraInputsAutoLogged inputs, PhotonPipelineResult latestResult) {
+    private void updateHasTargetInputs(AprilTagCameraInputsAutoLogged inputs, PhotonPipelineResult latestResult) {
         final PhotonTrackedTarget[] visibleNotHatefulTags = getVisibleNotHatefulTags(latestResult);
         final PhotonTrackedTarget bestTag = visibleNotHatefulTags.length == 0 ? null : visibleNotHatefulTags[0];
-
         if (bestTag == null) {
-            updateNoResultInputs(inputs);
-            inputs.hasResult = false;
+            updateNoTargetInputs(inputs);
+            inputs.hasTarget = false;
             return;
         }
+
         updateSolvePNPPoses(inputs, latestResult, bestTag);
         if (inputs.bestCameraSolvePNPPose == null) {
-            updateNoResultInputs(inputs);
-            inputs.hasResult = false;
+            updateNoTargetInputs(inputs);
+            inputs.hasTarget = false;
             return;
         }
 
@@ -82,18 +74,33 @@ public class AprilTagPhotonCameraIO extends AprilTagCameraIO {
         inputs.hasConstrainedResult = false;
     }
 
-    private PhotonTrackedTarget getBestTag(PhotonPipelineResult result) {
-        for (PhotonTrackedTarget tag : result.getTargets()) {
-            if (FieldConstants.TAG_ID_TO_POSE.containsKey(tag.getFiducialId()))
-                return tag;
+    private void updateNoTargetInputs(AprilTagCameraInputsAutoLogged inputs) {
+        inputs.bestCameraSolvePNPPose = new Pose3d();
+        inputs.alternateCameraSolvePNPPose = inputs.bestCameraSolvePNPPose;
+        inputs.constrainedSolvePNPPose = inputs.alternateCameraSolvePNPPose;
+        inputs.visibleTagIDs = new int[0];
+        inputs.hasConstrainedResult = false;
+    }
+
+    private PhotonTrackedTarget[] getVisibleNotHatefulTags(PhotonPipelineResult result) {
+        final List<PhotonTrackedTarget> targets = result.getTargets();
+        final PhotonTrackedTarget[] visibleTagIDs = new PhotonTrackedTarget[targets.size()];
+        int index = 0;
+
+        for (PhotonTrackedTarget target : targets) {
+            if (FieldConstants.TAG_ID_TO_POSE.containsKey(target.getFiducialId())) {
+                visibleTagIDs[index] = target;
+                index++;
+            }
         }
-        return null;
+
+        return Arrays.copyOf(visibleTagIDs, index);
     }
 
     private void updateSolvePNPPoses(AprilTagCameraInputsAutoLogged inputs, PhotonPipelineResult latestResult, PhotonTrackedTarget bestTag) {
         if (latestResult.getMultiTagResult().isPresent()) {
-            final Transform3d cameraPoseTransform = latestResult.getMultiTagResult().get().estimatedPose.best;
-            inputs.bestCameraSolvePNPPose = new Pose3d().plus(cameraPoseTransform).relativeTo(FieldConstants.APRIL_TAG_FIELD_LAYOUT.getOrigin());
+            final Transform3d tagToCamera = latestResult.getMultiTagResult().get().estimatedPose.best;
+            inputs.bestCameraSolvePNPPose = FieldConstants.APRIL_TAG_FIELD_LAYOUT.getOrigin().transformBy(tagToCamera);
             inputs.alternateCameraSolvePNPPose = inputs.bestCameraSolvePNPPose;
             return;
         }
@@ -104,11 +111,11 @@ public class AprilTagPhotonCameraIO extends AprilTagCameraIO {
             return;
         }
 
-        final Transform3d bestTargetToCamera = bestTag.getBestCameraToTarget().inverse();
-        final Transform3d alternateTargetToCamera = bestTag.getAlternateCameraToTarget().inverse();
+        final Transform3d bestTagToCamera = bestTag.getBestCameraToTarget().inverse();
+        final Transform3d alternateTagToCamera = bestTag.getAlternateCameraToTarget().inverse();
 
-        inputs.bestCameraSolvePNPPose = tagPose.transformBy(bestTargetToCamera);
-        inputs.alternateCameraSolvePNPPose = tagPose.transformBy(alternateTargetToCamera);
+        inputs.bestCameraSolvePNPPose = tagPose.transformBy(bestTagToCamera);
+        inputs.alternateCameraSolvePNPPose = tagPose.transformBy(alternateTagToCamera);
 
 //        updateConstrainedSolvePNPPose(inputs, latestResult);
     }
@@ -155,21 +162,6 @@ public class AprilTagPhotonCameraIO extends AprilTagCameraIO {
         );
 
         return pnpResult.map(value -> Pose3d.kZero.plus(value.best).transformBy(robotToCamera)).orElse(null);
-    }
-
-    private PhotonTrackedTarget[] getVisibleNotHatefulTags(PhotonPipelineResult result) {
-        final List<PhotonTrackedTarget> targets = result.getTargets();
-        final PhotonTrackedTarget[] visibleTagIDs = new PhotonTrackedTarget[targets.size()];
-        int index = 0;
-
-        for (PhotonTrackedTarget target : targets) {
-            if (FieldConstants.TAG_ID_TO_POSE.containsKey(target.getFiducialId())) {
-                visibleTagIDs[index] = target;
-                index++;
-            }
-        }
-
-        return Arrays.copyOf(visibleTagIDs, index);
     }
 
     private int[] getVisibleTagIDs(PhotonTrackedTarget[] targets) {

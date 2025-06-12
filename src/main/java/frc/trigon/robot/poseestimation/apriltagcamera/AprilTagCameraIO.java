@@ -20,7 +20,7 @@ public class AprilTagCameraIO {
 
     @AutoLog
     public static class AprilTagCameraInputs {
-        public boolean hasResult = false;
+        public boolean hasTarget = false;
         public boolean hasConstrainedResult = false;
         public double latestResultTimestampSeconds = 0;
         public Pose3d bestCameraSolvePNPPose = new Pose3d();

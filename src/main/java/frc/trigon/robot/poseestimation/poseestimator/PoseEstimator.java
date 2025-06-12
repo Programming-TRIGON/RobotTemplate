@@ -26,7 +26,7 @@ import java.util.Arrays;
 import java.util.Map;
 
 /**
- * A class that estimates the robot's pose using team 6328's custom pose estimator.
+ * A class that estimates the robot's pose using WPILib's {@link SwerveDrivePoseEstimator} and {@link SwerveDriveOdometry}.
  */
 public class PoseEstimator implements AutoCloseable {
     private final SwerveDrivePoseEstimator swerveDrivePoseEstimator = createSwerveDrivePoseEstimator();
@@ -93,7 +93,7 @@ public class PoseEstimator implements AutoCloseable {
     public void resetPose(Pose2d newPose) {
         RobotContainer.SWERVE.setHeading(newPose.getRotation());
 
-        swerveDrivePoseEstimator.resetPose(newPose); // TODO: Might not work as intended
+        swerveDrivePoseEstimator.resetPose(newPose);
         swerveDriveOdometry.resetPose(newPose);
         if (shouldUseRelativeRobotPoseSource)
             relativeRobotPoseSource.resetOffset(newPose);
@@ -120,14 +120,14 @@ public class PoseEstimator implements AutoCloseable {
     }
 
     /**
-     * Updates the pose estimator with the given SWERVE wheel positions and gyro rotations.
-     * This function accepts an array of SWERVE wheel positions and an array of gyro rotations because the odometry can be updated at a faster rate than the main loop (which is 50 hertz).
+     * Updates the pose estimator with the given swerve wheel positions and gyro rotations.
+     * This function accepts an array of swerve wheel positions and an array of gyro rotations because the odometry can be updated at a faster rate than the main loop (which is 50 hertz).
      * This means you could have a couple of odometry updates per main loop, and you would want to update the pose estimator with all of them.
      *
-     * @param swerveWheelPositions the SWERVE wheel positions accumulated since the last update
+     * @param swerveWheelPositions the swerve wheel positions accumulated since the last update
      * @param gyroRotations        the gyro rotations accumulated since the last update
      */
-    public void updatePoseEstimatorStates(SwerveModulePosition[][] swerveWheelPositions, Rotation2d[] gyroRotations, double[] timestamps) {
+    public void updatePoseEstimatorOdometry(SwerveModulePosition[][] swerveWheelPositions, Rotation2d[] gyroRotations, double[] timestamps) {
         for (int i = 0; i < swerveWheelPositions.length; i++) {
             swerveDrivePoseEstimator.updateWithTime(timestamps[i], gyroRotations[i], swerveWheelPositions[i]);
             swerveDriveOdometry.update(gyroRotations[i], swerveWheelPositions[i]);

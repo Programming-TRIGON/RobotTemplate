@@ -28,21 +28,21 @@ public class CommandConstants {
     private static final double JOYSTICK_ORIENTED_ROTATION_DEADBAND = 0.07;
 
     public static final Command
-            FIELD_RELATIVE_DRIVE_WITH_JOYSTICK_ORIENTED_ROTATION_COMMAND = SwerveCommands.getClosedLoopFieldRelativeDriveCommand(
-            () -> calculateDriveStickAxisValue(DRIVER_CONTROLLER.getLeftY()),
-            () -> calculateDriveStickAxisValue(DRIVER_CONTROLLER.getLeftX()),
-            CommandConstants::calculateTargetHeadingFromJoystickAngle
-    ),
-            SELF_RELATIVE_DRIVE_COMMAND = SwerveCommands.getClosedLoopSelfRelativeDriveCommand(
-                    () -> calculateDriveStickAxisValue(DRIVER_CONTROLLER.getLeftY()),
-                    () -> calculateDriveStickAxisValue(DRIVER_CONTROLLER.getLeftX()),
-                    () -> calculateRotationStickAxisValue(DRIVER_CONTROLLER.getRightX())
-            ),
             RESET_HEADING_COMMAND = new InstantCommand(RobotContainer.POSE_ESTIMATOR::resetHeading),
             SELF_RELATIVE_DRIVE_FROM_DPAD_COMMAND = SwerveCommands.getClosedLoopSelfRelativeDriveCommand(
                     () -> getXPowerFromPov(DRIVER_CONTROLLER.getPov()) / OperatorConstants.POV_DIVIDER / calculateShiftModeValue(MINIMUM_TRANSLATION_SHIFT_POWER),
                     () -> getYPowerFromPov(DRIVER_CONTROLLER.getPov()) / OperatorConstants.POV_DIVIDER / calculateShiftModeValue(MINIMUM_TRANSLATION_SHIFT_POWER),
                     () -> 0
+            ),
+            FIELD_RELATIVE_DRIVE_WITH_JOYSTICK_ORIENTED_ROTATION_COMMAND = SwerveCommands.getClosedLoopFieldRelativeDriveCommand(
+                    () -> calculateDriveStickAxisValue(DRIVER_CONTROLLER.getLeftY()),
+                    () -> calculateDriveStickAxisValue(DRIVER_CONTROLLER.getLeftX()),
+                    CommandConstants::calculateTargetHeadingFromJoystickAngle
+            ),
+            SELF_RELATIVE_DRIVE_COMMAND = SwerveCommands.getClosedLoopSelfRelativeDriveCommand(
+                    () -> calculateDriveStickAxisValue(DRIVER_CONTROLLER.getLeftY()),
+                    () -> calculateDriveStickAxisValue(DRIVER_CONTROLLER.getLeftX()),
+                    () -> calculateRotationStickAxisValue(DRIVER_CONTROLLER.getRightX())
             ),
             WHEEL_RADIUS_CHARACTERIZATION_COMMAND = new WheelRadiusCharacterizationCommand(
                     PathPlannerConstants.ROBOT_CONFIG.moduleLocations,
