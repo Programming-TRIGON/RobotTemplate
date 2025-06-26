@@ -296,7 +296,7 @@ public class Swerve extends MotorSubsystem {
         return new ChassisSpeeds(
                 xPower * SwerveConstants.MAXIMUM_SPEED_METERS_PER_SECOND,
                 yPower * SwerveConstants.MAXIMUM_SPEED_METERS_PER_SECOND,
-                Math.pow(thetaPower, 2) * Math.signum(thetaPower) * SwerveConstants.MAXIMUM_ROTATIONAL_SPEED_RADIANS_PER_SECOND
+                thetaPower * SwerveConstants.MAXIMUM_ROTATIONAL_SPEED_RADIANS_PER_SECOND
         );
     }
 
