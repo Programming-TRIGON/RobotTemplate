@@ -27,8 +27,7 @@ public abstract class MotorSubsystem extends edu.wpi.first.wpilibj2.command.Subs
     private static final List<MotorSubsystem> REGISTERED_SUBSYSTEMS = new ArrayList<>();
     private static final Trigger DISABLED_TRIGGER = new Trigger(DriverStation::isDisabled);
     private static final Executor BRAKE_MODE_EXECUTOR = Executors.newFixedThreadPool(8);
-    //    private static final LoggedNetworkBoolean ENABLE_EXTENSIVE_LOGGING = new LoggedNetworkBoolean("/SmartDashboard/EnableExtensiveLogging", !DriverStation.isFMSAttached());
-    private static final LoggedNetworkBoolean ENABLE_EXTENSIVE_LOGGING = new LoggedNetworkBoolean("/SmartDashboard/EnableExtensiveLogging", false);
+    private static final LoggedNetworkBoolean ENABLE_EXTENSIVE_LOGGING = new LoggedNetworkBoolean("/SmartDashboard/EnableExtensiveLogging", RobotHardwareStats.isSimulation());
 
     static {
         DISABLED_TRIGGER.onTrue(new InstantCommand(() -> forEach(MotorSubsystem::stop)).ignoringDisable(true));
@@ -39,7 +38,7 @@ public abstract class MotorSubsystem extends edu.wpi.first.wpilibj2.command.Subs
         }).ignoringDisable(true));
     }
 
-    private final SysIdRoutine sysIdRoutine = createSysIdRoutine();
+    private final SysIdRoutine sysIDRoutine = createSysIDRoutine();
 
     public MotorSubsystem() {
         REGISTERED_SUBSYSTEMS.add(this);
@@ -61,7 +60,6 @@ public abstract class MotorSubsystem extends edu.wpi.first.wpilibj2.command.Subs
      * @param brake whether the motors should brake or coast
      */
     public static void setAllSubsystemsBrakeAsync(boolean brake) {
-//        CompletableFuture.runAsync(() -> forEach((subsystem) -> subsystem.setBrake(brake)));
         BRAKE_MODE_EXECUTOR.execute(() -> forEach((subsystem) -> subsystem.setBrake(brake)));
     }
 
@@ -86,12 +84,12 @@ public abstract class MotorSubsystem extends edu.wpi.first.wpilibj2.command.Subs
      *
      * @param direction the direction in which to run the test
      * @return the command
-     * @throws IllegalStateException if the {@link MotorSubsystem#getSysIdConfig()} function wasn't overridden or returns null
+     * @throws IllegalStateException if the {@link MotorSubsystem#getSysIDConfig()} function wasn't overridden or returns null
      */
     public final Command getQuasistaticCharacterizationCommand(SysIdRoutine.Direction direction) throws IllegalStateException {
-        if (sysIdRoutine == null)
-            throw new IllegalStateException("Subsystem " + getName() + " doesn't have a SysId routine!");
-        return sysIdRoutine.quasistatic(direction);
+        if (sysIDRoutine == null)
+            throw new IllegalStateException("Subsystem " + getName() + " doesn't have a SysID routine!");
+        return sysIDRoutine.quasistatic(direction);
     }
 
     /**
@@ -99,12 +97,12 @@ public abstract class MotorSubsystem extends edu.wpi.first.wpilibj2.command.Subs
      *
      * @param direction the direction in which to run the test
      * @return the command
-     * @throws IllegalStateException if the {@link MotorSubsystem#getSysIdConfig()} function wasn't overridden or returns null
+     * @throws IllegalStateException if the {@link MotorSubsystem#getSysIDConfig()} function wasn't overridden or returns null
      */
     public final Command getDynamicCharacterizationCommand(SysIdRoutine.Direction direction) throws IllegalStateException {
-        if (sysIdRoutine == null)
-            throw new IllegalStateException("Subsystem " + getName() + " doesn't have a SysId routine!");
-        return sysIdRoutine.dynamic(direction);
+        if (sysIDRoutine == null)
+            throw new IllegalStateException("Subsystem " + getName() + " doesn't have a SysID routine!");
+        return sysIDRoutine.dynamic(direction);
     }
 
     /**
@@ -112,7 +110,7 @@ public abstract class MotorSubsystem extends edu.wpi.first.wpilibj2.command.Subs
      *
      * @param targetDrivePower the target drive power, unitless. This can be amps, volts, etc. Depending on the characterization type
      */
-    public void sysIdDrive(double targetDrivePower) {
+    public void sysIDDrive(double targetDrivePower) {
     }
 
     /**
@@ -123,7 +121,7 @@ public abstract class MotorSubsystem extends edu.wpi.first.wpilibj2.command.Subs
     public void updateLog(SysIdRoutineLog log) {
     }
 
-    public SysIdRoutine.Config getSysIdConfig() {
+    public SysIdRoutine.Config getSysIDConfig() {
         return null;
     }
 
@@ -158,14 +156,14 @@ public abstract class MotorSubsystem extends edu.wpi.first.wpilibj2.command.Subs
 
     public abstract void stop();
 
-    private SysIdRoutine createSysIdRoutine() {
-        if (getSysIdConfig() == null)
+    private SysIdRoutine createSysIDRoutine() {
+        if (getSysIDConfig() == null)
             return null;
 
         return new SysIdRoutine(
-                getSysIdConfig(),
+                getSysIDConfig(),
                 new SysIdRoutine.Mechanism(
-                        (voltage) -> sysIdDrive(voltage.in(Units.Volts)),
+                        (voltage) -> sysIDDrive(voltage.in(Units.Volts)),
                         this::updateLog,
                         this,
                         getName()

@@ -49,7 +49,7 @@ public class Swerve extends MotorSubsystem {
     }
 
     @Override
-    public void sysIdDrive(double targetCurrent) {
+    public void sysIDDrive(double targetCurrent) {
         SwerveModuleState[] a = SwerveConstants.KINEMATICS.toSwerveModuleStates(new ChassisSpeeds(0, 0, 2));
         for (int i = 0; i < 4; i++) {
             swerveModules[i].setDriveMotorTargetCurrent(targetCurrent);
@@ -75,7 +75,7 @@ public class Swerve extends MotorSubsystem {
     }
 
     @Override
-    public SysIdRoutine.Config getSysIdConfig() {
+    public SysIdRoutine.Config getSysIDConfig() {
         return SwerveModuleConstants.DRIVE_MOTOR_SYSID_CONFIG;
     }
 

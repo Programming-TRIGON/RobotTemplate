@@ -67,7 +67,7 @@ public class GamePieceAutoDriveCommand extends ParallelCommandGroup {
 
     public static boolean shouldMoveTowardsGamePiece(Translation2d distanceFromTrackedGamePiece) {
         return distanceFromTrackedGamePiece != null &&
-                (distanceFromTrackedGamePiece.getNorm() > PathPlannerConstants.AUTO_COLLECTION_OPENING_CHECK_DISTANCE_METERS);//TODO: If intake is open
+                (distanceFromTrackedGamePiece.getNorm() > PathPlannerConstants.AUTO_COLLECTION_INTAKE_OPEN_CHECK_DISTANCE_METERS);//TODO: If intake is open
     }
 
     public static FlippableRotation2d calculateTargetAngle() {

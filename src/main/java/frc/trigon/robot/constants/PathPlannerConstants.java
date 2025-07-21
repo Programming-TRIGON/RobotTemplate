@@ -18,7 +18,7 @@ import org.trigon.utilities.flippable.Flippable;
 import java.io.IOException;
 
 /**
- * A class that contains the constants and configurations for everything related to PathPlanner.
+ * A class that contains the constants and configurations for everything related to the 15-second autonomous period at the start of the match.
  */
 public class PathPlannerConstants {
     public static final String DEFAULT_AUTO_NAME = "DefaultAutoName";
@@ -40,7 +40,7 @@ public class PathPlannerConstants {
     public static final ProfiledPIDController GAME_PIECE_AUTO_DRIVE_X_PID_CONTROLLER = RobotHardwareStats.isSimulation() ?
             new ProfiledPIDController(0.5, 0, 0, new TrapezoidProfile.Constraints(2.8, 5)) :
             new ProfiledPIDController(2.4, 0, 0, new TrapezoidProfile.Constraints(2.65, 5.5));
-    public static final double AUTO_COLLECTION_OPENING_CHECK_DISTANCE_METERS = 2;
+    public static final double AUTO_COLLECTION_INTAKE_OPEN_CHECK_DISTANCE_METERS = 2;
 
     private static final PPHolonomicDriveController AUTO_PATH_FOLLOWING_CONTROLLER = new PPHolonomicDriveController(
             AUTO_TRANSLATION_PID_CONSTANTS,
