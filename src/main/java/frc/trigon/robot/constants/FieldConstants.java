@@ -11,11 +11,15 @@ import org.trigon.utilities.FilesHandler;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 
 public class FieldConstants {
     public static final double
             FIELD_WIDTH_METERS = FlippingUtil.fieldSizeY,
             FIELD_LENGTH_METERS = FlippingUtil.fieldSizeX;
+    private static final List<Integer> I_HATE_YOU = List.of(
+            //Tags to ignore
+    );
 
     private static final boolean SHOULD_USE_HOME_TAG_LAYOUT = false;
     public static final AprilTagFieldLayout APRIL_TAG_FIELD_LAYOUT = createAprilTagFieldLayout();
@@ -35,7 +39,8 @@ public class FieldConstants {
     private static HashMap<Integer, Pose3d> fieldLayoutToTagIDToPoseMap() {
         final HashMap<Integer, Pose3d> tagIDToPose = new HashMap<>();
         for (AprilTag aprilTag : APRIL_TAG_FIELD_LAYOUT.getTags())
-            tagIDToPose.put(aprilTag.ID, aprilTag.pose.transformBy(TAG_OFFSET));
+            if (!I_HATE_YOU.contains(aprilTag.ID))
+                tagIDToPose.put(aprilTag.ID, aprilTag.pose.transformBy(TAG_OFFSET));
 
         return tagIDToPose;
     }
