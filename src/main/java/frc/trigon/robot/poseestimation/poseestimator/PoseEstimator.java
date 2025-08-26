@@ -19,8 +19,8 @@ import frc.trigon.robot.poseestimation.relativerobotposesource.RelativeRobotPose
 import frc.trigon.robot.subsystems.swerve.SwerveConstants;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
-import org.trigon.utilities.QuickSortHandler;
-import org.trigon.utilities.flippable.Flippable;
+import trigon.utilities.QuickSortHandler;
+import trigon.utilities.flippable.Flippable;
 
 import java.util.Arrays;
 import java.util.Map;

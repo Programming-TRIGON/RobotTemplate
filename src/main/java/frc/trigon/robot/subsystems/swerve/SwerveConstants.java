@@ -12,9 +12,9 @@ import frc.trigon.robot.constants.PathPlannerConstants;
 import frc.trigon.robot.constants.RobotConstants;
 import frc.trigon.robot.poseestimation.poseestimator.PoseEstimatorConstants;
 import frc.trigon.robot.subsystems.swerve.swervemodule.SwerveModule;
-import org.trigon.hardware.RobotHardwareStats;
-import org.trigon.hardware.phoenix6.pigeon2.Pigeon2Gyro;
-import org.trigon.hardware.phoenix6.pigeon2.Pigeon2Signal;
+import trigon.hardware.RobotHardwareStats;
+import trigon.hardware.phoenix6.pigeon2.Pigeon2Gyro;
+import trigon.hardware.phoenix6.pigeon2.Pigeon2Signal;
 
 public class SwerveConstants {
     private static final int GYRO_ID = 0;

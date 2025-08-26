@@ -3,7 +3,7 @@ package frc.trigon.robot.poseestimation.apriltagcamera;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import org.littletonrobotics.junction.AutoLog;
-import org.trigon.hardware.RobotHardwareStats;
+import trigon.hardware.RobotHardwareStats;
 
 public class AprilTagCameraIO {
     static AprilTagCameraIO generateIO(AprilTagCameraConstants.AprilTagCameraType aprilTagCameraType, String name, Transform3d robotToCamera) {
@@ -20,7 +20,7 @@ public class AprilTagCameraIO {
 
     @AutoLog
     public static class AprilTagCameraInputs {
-        public boolean hasTarget = false;
+        public boolean hasResult = false;
         public boolean hasConstrainedResult = false;
         public double latestResultTimestampSeconds = 0;
         public Pose3d bestCameraSolvePNPPose = new Pose3d();

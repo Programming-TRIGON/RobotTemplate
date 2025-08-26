@@ -10,10 +10,10 @@ import frc.trigon.robot.commands.commandfactories.GeneralCommands;
 import frc.trigon.robot.constants.OperatorConstants;
 import frc.trigon.robot.constants.PathPlannerConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveCommands;
-import org.trigon.commands.CameraPositionCalculationCommand;
-import org.trigon.commands.WheelRadiusCharacterizationCommand;
-import org.trigon.hardware.misc.XboxController;
-import org.trigon.utilities.flippable.FlippableRotation2d;
+import trigon.commands.CameraPositionCalculationCommand;
+import trigon.commands.WheelRadiusCharacterizationCommand;
+import trigon.hardware.misc.XboxController;
+import trigon.utilities.flippable.FlippableRotation2d;
 
 /**
  * A class that contains commands that only use parameters and don't require logic.
