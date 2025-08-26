@@ -9,7 +9,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.trigon.robot.RobotContainer;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
-import org.trigon.hardware.RobotHardwareStats;
+import trigon.hardware.RobotHardwareStats;
 
 import java.util.ArrayList;
 import java.util.List;

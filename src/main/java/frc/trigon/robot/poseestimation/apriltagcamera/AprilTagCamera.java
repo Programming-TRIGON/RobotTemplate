@@ -63,7 +63,7 @@ public class AprilTagCamera {
     }
 
     public boolean hasValidResult() {
-        return inputs.hasTarget &&
+        return inputs.hasResult &&
                 inputs.poseAmbiguity < AprilTagCameraConstants.MAXIMUM_AMBIGUITY &&
                 inputs.distancesFromTags[0] < AprilTagCameraConstants.MAXIMUM_DISTANCE_FROM_TAG_FOR_ACCURATE_RESULT_METERS;
     }

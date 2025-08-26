@@ -4,7 +4,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import frc.trigon.robot.poseestimation.apriltagcamera.AprilTagCameraIO;
 import frc.trigon.robot.poseestimation.apriltagcamera.AprilTagCameraInputsAutoLogged;
-import org.trigon.utilities.LimelightHelpers;
+import trigon.utilities.LimelightHelpers;
 
 // TODO: Fully implement this class, Limelight currently not supported.
 public class AprilTagLimelightIO extends AprilTagCameraIO {
@@ -18,9 +18,9 @@ public class AprilTagLimelightIO extends AprilTagCameraIO {
     protected void updateInputs(AprilTagCameraInputsAutoLogged inputs) {
         final LimelightHelpers.LimelightResults results = LimelightHelpers.getLatestResults(hostname);
 
-        inputs.hasTarget = results.targets_Fiducials.length > 0;
+        inputs.hasResult = results.targets_Fiducials.length > 0;
 
-        if (inputs.hasTarget) {
+        if (inputs.hasResult) {
             updateHasTargetInputs(inputs, results);
             return;
         }

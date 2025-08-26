@@ -37,8 +37,8 @@ public class AprilTagPhotonCameraIO extends AprilTagCameraIO {
     protected void updateInputs(AprilTagCameraInputsAutoLogged inputs) {
         final PhotonPipelineResult latestResult = getLatestPipelineResult();
 
-        inputs.hasTarget = latestResult != null && latestResult.hasTargets();
-        if (inputs.hasTarget) {
+        inputs.hasResult = latestResult != null && latestResult.hasTargets();
+        if (inputs.hasResult) {
             updateHasTargetInputs(inputs, latestResult);
             return;
         }
@@ -56,14 +56,14 @@ public class AprilTagPhotonCameraIO extends AprilTagCameraIO {
         final PhotonTrackedTarget bestTag = visibleNotHatefulTags.length == 0 ? null : visibleNotHatefulTags[0];
         if (bestTag == null) {
             updateNoTargetInputs(inputs);
-            inputs.hasTarget = false;
+            inputs.hasResult = false;
             return;
         }
 
         updateSolvePNPPoses(inputs, latestResult, bestTag);
         if (inputs.bestCameraSolvePNPPose == null) {
             updateNoTargetInputs(inputs);
-            inputs.hasTarget = false;
+            inputs.hasResult = false;
             return;
         }
 
