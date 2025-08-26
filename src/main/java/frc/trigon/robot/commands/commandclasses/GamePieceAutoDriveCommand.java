@@ -11,7 +11,7 @@ import frc.trigon.robot.misc.objectdetectioncamera.ObjectPoseEstimator;
 import frc.trigon.robot.misc.simulatedfield.SimulatedGamePieceConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveCommands;
 import org.littletonrobotics.junction.Logger;
-import trigon.utilities.flippable.FlippableRotation2d;
+import lib.utilities.flippable.FlippableRotation2d;
 
 import java.util.function.Supplier;
 

@@ -4,7 +4,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import frc.trigon.robot.poseestimation.apriltagcamera.AprilTagCameraIO;
 import frc.trigon.robot.poseestimation.apriltagcamera.AprilTagCameraInputsAutoLogged;
-import trigon.utilities.LimelightHelpers;
+import lib.utilities.LimelightHelpers;
 
 // TODO: Fully implement this class, Limelight currently not supported.
 public class AprilTagLimelightIO extends AprilTagCameraIO {

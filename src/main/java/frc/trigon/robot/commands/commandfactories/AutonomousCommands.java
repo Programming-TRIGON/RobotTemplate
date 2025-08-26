@@ -7,7 +7,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.trigon.robot.RobotContainer;
 import org.json.simple.parser.ParseException;
-import trigon.utilities.flippable.FlippablePose2d;
+import lib.utilities.flippable.FlippablePose2d;
 
 import java.io.IOException;
 import java.util.function.Supplier;

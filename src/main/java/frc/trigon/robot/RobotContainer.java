@@ -21,7 +21,7 @@ import frc.trigon.robot.poseestimation.poseestimator.PoseEstimator;
 import frc.trigon.robot.subsystems.MotorSubsystem;
 import frc.trigon.robot.subsystems.swerve.Swerve;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
-import trigon.utilities.flippable.Flippable;
+import lib.utilities.flippable.Flippable;
 
 public class RobotContainer {
     public static final PoseEstimator ROBOT_POSE_ESTIMATOR = new PoseEstimator();

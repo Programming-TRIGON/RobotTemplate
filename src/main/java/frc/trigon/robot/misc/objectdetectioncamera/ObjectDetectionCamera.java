@@ -7,7 +7,7 @@ import frc.trigon.robot.misc.objectdetectioncamera.io.PhotonObjectDetectionCamer
 import frc.trigon.robot.misc.objectdetectioncamera.io.SimulationObjectDetectionCameraIO;
 import frc.trigon.robot.misc.simulatedfield.SimulatedGamePieceConstants;
 import org.littletonrobotics.junction.Logger;
-import trigon.hardware.RobotHardwareStats;
+import lib.hardware.RobotHardwareStats;
 
 /**
  * An object detection camera is a class that represents a camera that detects objects other than apriltags, most likely game pieces.

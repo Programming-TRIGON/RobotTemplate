@@ -12,11 +12,11 @@ import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import frc.trigon.robot.constants.RobotConstants;
 import frc.trigon.robot.poseestimation.poseestimator.PoseEstimatorConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveConstants;
-import trigon.hardware.phoenix6.cancoder.CANcoderEncoder;
-import trigon.hardware.phoenix6.cancoder.CANcoderSignal;
-import trigon.hardware.phoenix6.talonfx.TalonFXMotor;
-import trigon.hardware.phoenix6.talonfx.TalonFXSignal;
-import trigon.utilities.Conversions;
+import lib.hardware.phoenix6.cancoder.CANcoderEncoder;
+import lib.hardware.phoenix6.cancoder.CANcoderSignal;
+import lib.hardware.phoenix6.talonfx.TalonFXMotor;
+import lib.hardware.phoenix6.talonfx.TalonFXSignal;
+import lib.utilities.Conversions;
 
 public class SwerveModule {
     private final TalonFXMotor
