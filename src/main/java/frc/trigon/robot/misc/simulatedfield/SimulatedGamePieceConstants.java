@@ -1,8 +1,8 @@
 package frc.trigon.robot.misc.simulatedfield;
 
 import edu.wpi.first.math.geometry.Rotation3d;
-import trigon.utilities.flippable.FlippablePose3d;
-import trigon.utilities.flippable.FlippableTranslation2d;
+import lib.utilities.flippable.FlippablePose3d;
+import lib.utilities.flippable.FlippableTranslation2d;
 
 import java.util.ArrayList;
 import java.util.List;

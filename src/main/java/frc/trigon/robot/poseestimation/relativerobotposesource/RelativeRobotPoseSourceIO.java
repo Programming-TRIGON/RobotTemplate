@@ -4,7 +4,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import frc.trigon.robot.poseestimation.relativerobotposesource.io.RelativeRobotPoseSourceSimulationIO;
 import frc.trigon.robot.poseestimation.relativerobotposesource.io.RelativeRobotPoseSourceT265IO;
 import org.littletonrobotics.junction.AutoLog;
-import trigon.hardware.RobotHardwareStats;
+import lib.hardware.RobotHardwareStats;
 
 public class RelativeRobotPoseSourceIO {
     static RelativeRobotPoseSourceIO generateIO(String hostname) {
