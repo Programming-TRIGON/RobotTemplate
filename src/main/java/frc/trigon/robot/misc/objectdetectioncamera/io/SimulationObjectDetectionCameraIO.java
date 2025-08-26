@@ -29,7 +29,7 @@ public class SimulationObjectDetectionCameraIO extends ObjectDetectionCameraIO {
 
     @Override
     protected void updateInputs(ObjectDetectionCameraInputsAutoLogged inputs) {
-        final Pose2d robotPose = RobotContainer.POSE_ESTIMATOR.getEstimatedRobotPose();
+        final Pose2d robotPose = RobotContainer.ROBOT_POSE_ESTIMATOR.getEstimatedRobotPose();
         final Pose3d cameraPose = new Pose3d(robotPose).plus(robotCenterToCamera);
         final ArrayList<Pair<SimulatedGamePiece, Rotation3d>>[] visibleGamePieces = calculateAllVisibleGamePieces(cameraPose);
 
@@ -103,15 +103,8 @@ public class SimulationObjectDetectionCameraIO extends ObjectDetectionCameraIO {
         final Translation3d difference = cameraPosition.minus(objectPosition);
         final Rotation3d differenceAsAngle = getAngle(difference);
 
-        return minus(differenceAsAngle, cameraPose.getRotation());
-    }
 
-    private Rotation3d minus(Rotation3d rotation, Rotation3d other) {
-        return new Rotation3d(
-                0,
-                rotation.getY() + other.getY(),
-                rotation.getZ() - other.getZ()
-        );
+        return differenceAsAngle.minus(cameraPose.getRotation());
     }
 
     private Rotation3d getAngle(Translation3d translation) {
@@ -135,7 +128,7 @@ public class SimulationObjectDetectionCameraIO extends ObjectDetectionCameraIO {
      * @return the pitch of the vector
      */
     private Rotation2d getPitch(Translation3d vector) {
-        return new Rotation2d(-Math.atan2(vector.getZ(), Math.hypot(vector.getX(), vector.getY())));
+        return new Rotation2d(Math.atan2(vector.getZ(), Math.hypot(vector.getX(), vector.getY())));
     }
 
     /**
@@ -152,7 +145,7 @@ public class SimulationObjectDetectionCameraIO extends ObjectDetectionCameraIO {
     private void logVisibleGamePieces(ArrayList<Pair<SimulatedGamePiece, Rotation3d>>[] visibleGamePieces) {
         for (int i = 0; i < visibleGamePieces.length; i++) {
             final String gamePieceTypeName = SimulatedGamePieceConstants.GamePieceType.getNameFromID(i);
-            Logger.recordOutput(hostname + "/Visible" + gamePieceTypeName, mapSimulatedGamePieceListToPoseArray(visibleGamePieces[i]));
+            Logger.recordOutput(hostname + "/Visible" + gamePieceTypeName + "poses", mapSimulatedGamePieceListToPoseArray(visibleGamePieces[i]));
         }
     }
 

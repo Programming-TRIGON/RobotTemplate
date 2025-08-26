@@ -53,7 +53,7 @@ public class SimulationFieldHandler {
     }
 
     private static void updateCollection() {
-        final Pose3d robotPose = new Pose3d(RobotContainer.POSE_ESTIMATOR.getEstimatedRobotPose());
+        final Pose3d robotPose = new Pose3d(RobotContainer.ROBOT_POSE_ESTIMATOR.getEstimatedRobotPose());
         final Pose3d robotRelativeCollectionPose = new Pose3d();
         final Pose3d collectionPose = robotPose.plus(toTransform(robotRelativeCollectionPose));
 
@@ -138,7 +138,7 @@ public class SimulationFieldHandler {
      * @return the position of the held game piece relative to the field
      */
     private static Pose3d calculateHeldGamePieceFieldRelativePose(Pose3d robotRelativeHeldGamePiecePosition) {
-        final Pose3d robotPose3d = new Pose3d(RobotContainer.POSE_ESTIMATOR.getEstimatedRobotPose());
+        final Pose3d robotPose3d = new Pose3d(RobotContainer.ROBOT_POSE_ESTIMATOR.getEstimatedRobotPose());
         return robotPose3d.plus(toTransform(robotRelativeHeldGamePiecePosition));
     }
 

@@ -78,7 +78,7 @@ public class PhotonObjectDetectionCameraIO extends ObjectDetectionCameraIO {
     private Rotation3d extractRotation3d(PhotonTrackedTarget target) {
         return new Rotation3d(
                 0,
-                Units.degreesToRadians(target.getPitch()),
+                Units.degreesToRadians(-target.getPitch()),
                 Units.degreesToRadians(-target.getYaw())
         );
     }

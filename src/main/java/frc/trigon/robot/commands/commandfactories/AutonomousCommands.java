@@ -27,7 +27,7 @@ public class AutonomousCommands {
                 () -> {
                     if (DriverStation.isEnabled())
                         return;
-                    RobotContainer.POSE_ESTIMATOR.resetPose(getAutoStartPose(autoName.get()));
+                    RobotContainer.ROBOT_POSE_ESTIMATOR.resetPose(getAutoStartPose(autoName.get()));
                 }
         ).ignoringDisable(true);
     }

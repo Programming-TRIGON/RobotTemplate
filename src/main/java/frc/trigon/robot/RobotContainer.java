@@ -11,9 +11,12 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.trigon.robot.commands.CommandConstants;
 import frc.trigon.robot.commands.commandfactories.GeneralCommands;
+import frc.trigon.robot.constants.CameraConstants;
 import frc.trigon.robot.constants.LEDConstants;
 import frc.trigon.robot.constants.OperatorConstants;
 import frc.trigon.robot.constants.PathPlannerConstants;
+import frc.trigon.robot.misc.objectdetectioncamera.ObjectPoseEstimator;
+import frc.trigon.robot.misc.simulatedfield.SimulatedGamePieceConstants;
 import frc.trigon.robot.poseestimation.poseestimator.PoseEstimator;
 import frc.trigon.robot.subsystems.MotorSubsystem;
 import frc.trigon.robot.subsystems.swerve.Swerve;
@@ -21,7 +24,13 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.trigon.utilities.flippable.Flippable;
 
 public class RobotContainer {
-    public static final PoseEstimator POSE_ESTIMATOR = new PoseEstimator();
+    public static final PoseEstimator ROBOT_POSE_ESTIMATOR = new PoseEstimator();
+    public static final ObjectPoseEstimator OBJECT_POSE_ESTIMATOR = new ObjectPoseEstimator(
+            CameraConstants.CORAL_POSE_ESTIMATOR_DELETION_THRESHOLD_SECONDS,
+            ObjectPoseEstimator.DistanceCalculationMethod.ROTATION_AND_TRANSLATION,
+            SimulatedGamePieceConstants.GamePieceType.GAME_PIECE_TYPE,
+            CameraConstants.OBJECT_DETECTION_CAMERA
+    );
     public static final Swerve SWERVE = new Swerve();
     private LoggedDashboardChooser<Command> autoChooser;
 

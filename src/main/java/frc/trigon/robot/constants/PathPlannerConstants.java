@@ -59,8 +59,8 @@ public class PathPlannerConstants {
 
     private static void configureAutoBuilder() {
         AutoBuilder.configure(
-                RobotContainer.POSE_ESTIMATOR::getEstimatedRobotPose,
-                RobotContainer.POSE_ESTIMATOR::resetPose,
+                RobotContainer.ROBOT_POSE_ESTIMATOR::getEstimatedRobotPose,
+                RobotContainer.ROBOT_POSE_ESTIMATOR::resetPose,
                 RobotContainer.SWERVE::getSelfRelativeVelocity,
                 (chassisSpeeds -> RobotContainer.SWERVE.drivePathPlanner(chassisSpeeds, true)),
                 AUTO_PATH_FOLLOWING_CONTROLLER,

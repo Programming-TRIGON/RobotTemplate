@@ -50,7 +50,7 @@ public class LEDAutoSetupCommand extends SequentialCommandGroup {
     }
 
     private Translation2d calculateRobotRelativeDifference() {
-        final Pose2d robotPose = RobotContainer.POSE_ESTIMATOR.getEstimatedRobotPose();
+        final Pose2d robotPose = RobotContainer.ROBOT_POSE_ESTIMATOR.getEstimatedRobotPose();
         final Translation2d robotRelativeRobotTranslation = robotPose.getTranslation().minus(this.autoStartPose.getTranslation());
         return robotRelativeRobotTranslation.rotateBy(robotPose.getRotation());
     }

@@ -70,7 +70,7 @@ public class Swerve extends MotorSubsystem {
         Phoenix6SignalThread.SIGNALS_LOCK.unlock();
 
         updatePoseEstimatorStates();
-        RobotContainer.POSE_ESTIMATOR.periodic();
+        RobotContainer.ROBOT_POSE_ESTIMATOR.periodic();
 //        updateNetworkTables();
     }
 
@@ -95,7 +95,7 @@ public class Swerve extends MotorSubsystem {
 
     public ChassisSpeeds getFieldRelativeVelocity() {
         final ChassisSpeeds selfRelativeSpeeds = getSelfRelativeVelocity();
-        return ChassisSpeeds.fromRobotRelativeSpeeds(selfRelativeSpeeds, RobotContainer.POSE_ESTIMATOR.getEstimatedRobotPose().getRotation());
+        return ChassisSpeeds.fromRobotRelativeSpeeds(selfRelativeSpeeds, RobotContainer.ROBOT_POSE_ESTIMATOR.getEstimatedRobotPose().getRotation());
     }
 
     public ChassisSpeeds getSelfRelativeVelocity() {
@@ -115,16 +115,16 @@ public class Swerve extends MotorSubsystem {
 
     public boolean atXAxisPosition(double xAxisPosition) {
         final double currentXAxisVelocity = getFieldRelativeVelocity().vxMetersPerSecond;
-        return atTranslationPosition(RobotContainer.POSE_ESTIMATOR.getEstimatedRobotPose().getX(), xAxisPosition, currentXAxisVelocity);
+        return atTranslationPosition(RobotContainer.ROBOT_POSE_ESTIMATOR.getEstimatedRobotPose().getX(), xAxisPosition, currentXAxisVelocity);
     }
 
     public boolean atYAxisPosition(double yAxisPosition) {
         final double currentYAxisVelocity = getFieldRelativeVelocity().vyMetersPerSecond;
-        return atTranslationPosition(RobotContainer.POSE_ESTIMATOR.getEstimatedRobotPose().getY(), yAxisPosition, currentYAxisVelocity);
+        return atTranslationPosition(RobotContainer.ROBOT_POSE_ESTIMATOR.getEstimatedRobotPose().getY(), yAxisPosition, currentYAxisVelocity);
     }
 
     public boolean atAngle(FlippableRotation2d angle) {
-        final boolean atTargetAngle = Math.abs(angle.get().minus(RobotContainer.POSE_ESTIMATOR.getEstimatedRobotPose().getRotation()).getDegrees()) < SwerveConstants.ROTATION_TOLERANCE_DEGREES;
+        final boolean atTargetAngle = Math.abs(angle.get().minus(RobotContainer.ROBOT_POSE_ESTIMATOR.getEstimatedRobotPose().getRotation()).getDegrees()) < SwerveConstants.ROTATION_TOLERANCE_DEGREES;
         final boolean isAngleStill = Math.abs(getSelfRelativeVelocity().omegaRadiansPerSecond) < SwerveConstants.ROTATION_VELOCITY_TOLERANCE;
         Logger.recordOutput("Swerve/AtTargetAngle/isStill", isAngleStill);
         Logger.recordOutput("Swerve/AtTargetAngle/atTargetAngle", atTargetAngle);
@@ -186,7 +186,7 @@ public class Swerve extends MotorSubsystem {
     }
 
     public Rotation2d getDriveRelativeAngle() {
-        final Rotation2d currentAngle = RobotContainer.POSE_ESTIMATOR.getEstimatedRobotPose().getRotation();
+        final Rotation2d currentAngle = RobotContainer.ROBOT_POSE_ESTIMATOR.getEstimatedRobotPose().getRotation();
         return Flippable.isRedAlliance() ? currentAngle.rotateBy(Rotation2d.fromDegrees(180)) : currentAngle;
     }
 
@@ -200,7 +200,7 @@ public class Swerve extends MotorSubsystem {
     }
 
     void resetRotationController() {
-        SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER.reset(RobotContainer.POSE_ESTIMATOR.getEstimatedRobotPose().getRotation().getDegrees());
+        SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER.reset(RobotContainer.ROBOT_POSE_ESTIMATOR.getEstimatedRobotPose().getRotation().getDegrees());
     }
 
     /**
@@ -315,7 +315,7 @@ public class Swerve extends MotorSubsystem {
     }
 
     private ChassisSpeeds calculateSelfRelativePIDToPoseSpeeds(FlippablePose2d targetPose) {
-        final Pose2d currentPose = RobotContainer.POSE_ESTIMATOR.getEstimatedRobotPose();
+        final Pose2d currentPose = RobotContainer.ROBOT_POSE_ESTIMATOR.getEstimatedRobotPose();
         final Pose2d flippedTargetPose = targetPose.get();
         final double xSpeed = SwerveConstants.X_TRANSLATION_PID_CONTROLLER.calculate(currentPose.getX(), flippedTargetPose.getX());
         final double ySpeed = SwerveConstants.Y_TRANSLATION_PID_CONTROLLER.calculate(currentPose.getY(), flippedTargetPose.getY());
@@ -340,7 +340,7 @@ public class Swerve extends MotorSubsystem {
             gyroRotations[i] = Rotation2d.fromDegrees(odometryUpdatesYawDegrees[i]);
         }
 
-        RobotContainer.POSE_ESTIMATOR.updatePoseEstimatorOdometry(swerveWheelPositions, gyroRotations, phoenix6SignalThread.getLatestTimestamps());
+        RobotContainer.ROBOT_POSE_ESTIMATOR.updatePoseEstimatorOdometry(swerveWheelPositions, gyroRotations, phoenix6SignalThread.getLatestTimestamps());
     }
 
     private SwerveModulePosition[] getSwerveWheelPositions(int odometryUpdateIndex) {
@@ -360,7 +360,7 @@ public class Swerve extends MotorSubsystem {
             return 0;
         SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER.setGoal(targetAngle.get().getDegrees());
 
-        final Rotation2d currentAngle = RobotContainer.POSE_ESTIMATOR.getEstimatedRobotPose().getRotation();
+        final Rotation2d currentAngle = RobotContainer.ROBOT_POSE_ESTIMATOR.getEstimatedRobotPose().getRotation();
         final double output = Units.degreesToRadians(SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER.calculate(currentAngle.getDegrees()));
         final boolean atGoal = SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER.atGoal();
         Logger.recordOutput("Swerve/ProfiledRotationPIDController/Setpoint", SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER.getSetpoint().position);
