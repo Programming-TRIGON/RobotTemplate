@@ -7,7 +7,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.trigon.robot.RobotContainer;
 import org.json.simple.parser.ParseException;
-import org.trigon.utilities.flippable.FlippablePose2d;
+import trigon.utilities.flippable.FlippablePose2d;
 
 import java.io.IOException;
 import java.util.function.Supplier;
@@ -27,7 +27,7 @@ public class AutonomousCommands {
                 () -> {
                     if (DriverStation.isEnabled())
                         return;
-                    RobotContainer.POSE_ESTIMATOR.resetPose(getAutoStartPose(autoName.get()));
+                    RobotContainer.ROBOT_POSE_ESTIMATOR.resetPose(getAutoStartPose(autoName.get()));
                 }
         ).ignoringDisable(true);
     }
@@ -44,7 +44,8 @@ public class AutonomousCommands {
             final FlippablePose2d flippedAutoStartPose = new FlippablePose2d(nonFlippedAutoStartPose, true);
             return flippedAutoStartPose.get();
         } catch (IOException | ParseException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            return new Pose2d();
         }
     }
 }

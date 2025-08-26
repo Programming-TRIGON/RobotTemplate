@@ -1,8 +1,8 @@
 package frc.trigon.robot.commands;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.trigon.robot.RobotContainer;
@@ -10,12 +10,10 @@ import frc.trigon.robot.commands.commandfactories.GeneralCommands;
 import frc.trigon.robot.constants.OperatorConstants;
 import frc.trigon.robot.constants.PathPlannerConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveCommands;
-import org.trigon.commands.WheelRadiusCharacterizationCommand;
-import org.trigon.hardware.misc.XboxController;
-import org.trigon.hardware.misc.leds.LEDCommands;
-import org.trigon.hardware.misc.leds.LEDStrip;
-import org.trigon.utilities.flippable.FlippablePose2d;
-import org.trigon.utilities.flippable.FlippableRotation2d;
+import trigon.commands.CameraPositionCalculationCommand;
+import trigon.commands.WheelRadiusCharacterizationCommand;
+import trigon.hardware.misc.XboxController;
+import trigon.utilities.flippable.FlippableRotation2d;
 
 /**
  * A class that contains commands that only use parameters and don't require logic.
@@ -25,38 +23,38 @@ import org.trigon.utilities.flippable.FlippableRotation2d;
 public class CommandConstants {
     private static final XboxController DRIVER_CONTROLLER = OperatorConstants.DRIVER_CONTROLLER;
     private static final double
-            MINIMUM_TRANSLATION_SHIFT_POWER = 0.18,
-            MINIMUM_ROTATION_SHIFT_POWER = 0.3;
-    private static final double JOYSTICK_ORIENTED_ROTATION_DEADBAND = 0.4;
+            MINIMUM_TRANSLATION_SHIFT_POWER = 0.30,
+            MINIMUM_ROTATION_SHIFT_POWER = 0.4;
+    private static final double JOYSTICK_ORIENTED_ROTATION_DEADBAND = 0.07;
 
     public static final Command
-            FIELD_RELATIVE_DRIVE_COMMAND = SwerveCommands.getClosedLoopFieldRelativeDriveCommand(
-            () -> calculateDriveStickAxisValue(DRIVER_CONTROLLER.getLeftY()),
-            () -> calculateDriveStickAxisValue(DRIVER_CONTROLLER.getLeftX()),
-            () -> calculateRotationStickAxisValue(DRIVER_CONTROLLER.getRightX())
-    ),
+            RESET_HEADING_COMMAND = new InstantCommand(RobotContainer.ROBOT_POSE_ESTIMATOR::resetHeading),
+            SELF_RELATIVE_DRIVE_FROM_DPAD_COMMAND = SwerveCommands.getClosedLoopSelfRelativeDriveCommand(
+                    () -> getXPowerFromPov(DRIVER_CONTROLLER.getPov()) / OperatorConstants.POV_DIVIDER / calculateShiftModeValue(MINIMUM_TRANSLATION_SHIFT_POWER),
+                    () -> getYPowerFromPov(DRIVER_CONTROLLER.getPov()) / OperatorConstants.POV_DIVIDER / calculateShiftModeValue(MINIMUM_TRANSLATION_SHIFT_POWER),
+                    () -> 0
+            ),
             FIELD_RELATIVE_DRIVE_WITH_JOYSTICK_ORIENTED_ROTATION_COMMAND = SwerveCommands.getClosedLoopFieldRelativeDriveCommand(
                     () -> calculateDriveStickAxisValue(DRIVER_CONTROLLER.getLeftY()),
                     () -> calculateDriveStickAxisValue(DRIVER_CONTROLLER.getLeftX()),
-                    CommandConstants::calculateJoystickOrientedTargetAngle
+                    CommandConstants::calculateTargetHeadingFromJoystickAngle
             ),
             SELF_RELATIVE_DRIVE_COMMAND = SwerveCommands.getClosedLoopSelfRelativeDriveCommand(
                     () -> calculateDriveStickAxisValue(DRIVER_CONTROLLER.getLeftY()),
                     () -> calculateDriveStickAxisValue(DRIVER_CONTROLLER.getLeftX()),
                     () -> calculateRotationStickAxisValue(DRIVER_CONTROLLER.getRightX())
             ),
-            RESET_HEADING_COMMAND = new InstantCommand(() -> RobotContainer.POSE_ESTIMATOR.resetPose(changeRotation(new FlippablePose2d(RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose(), false), new Rotation2d()).get())),
-            SELF_RELATIVE_DRIVE_FROM_DPAD_COMMAND = SwerveCommands.getClosedLoopSelfRelativeDriveCommand(
-                    () -> getXPowerFromPov(DRIVER_CONTROLLER.getPov()) / OperatorConstants.POV_DIVIDER / calculateShiftModeValue(MINIMUM_TRANSLATION_SHIFT_POWER),
-                    () -> getYPowerFromPov(DRIVER_CONTROLLER.getPov()) / OperatorConstants.POV_DIVIDER / calculateShiftModeValue(MINIMUM_TRANSLATION_SHIFT_POWER),
-                    () -> 0
-            ),
-            STATIC_WHITE_LED_COLOR_COMMAND = LEDCommands.getStaticColorCommand(Color.kWhite, LEDStrip.LED_STRIPS),
             WHEEL_RADIUS_CHARACTERIZATION_COMMAND = new WheelRadiusCharacterizationCommand(
                     PathPlannerConstants.ROBOT_CONFIG.moduleLocations,
                     RobotContainer.SWERVE::getDriveWheelPositionsRadians,
                     () -> RobotContainer.SWERVE.getHeading().getRadians(),
-                    RobotContainer.SWERVE::runWheelRadiusCharacterization,
+                    (omegaRadiansPerSecond) -> RobotContainer.SWERVE.selfRelativeDriveWithoutSetpointGeneration(new ChassisSpeeds(0, 0, omegaRadiansPerSecond), null),
+                    RobotContainer.SWERVE
+            ),
+            CALCULATE_CAMERA_POSITION_COMMAND = new CameraPositionCalculationCommand(
+                    RobotContainer.ROBOT_POSE_ESTIMATOR::getEstimatedRobotPose,
+                    Rotation2d.fromDegrees(0),
+                    (omegaRadiansPerSecond) -> RobotContainer.SWERVE.selfRelativeDriveWithoutSetpointGeneration(new ChassisSpeeds(0, 0, omegaRadiansPerSecond), null),
                     RobotContainer.SWERVE
             );
 
@@ -67,7 +65,7 @@ public class CommandConstants {
      * @return the drive power
      */
     public static double calculateDriveStickAxisValue(double axisValue) {
-        return axisValue / OperatorConstants.STICKS_SPEED_DIVIDER / calculateShiftModeValue(MINIMUM_TRANSLATION_SHIFT_POWER);
+        return axisValue / OperatorConstants.TRANSLATION_STICK_SPEED_DIVIDER / calculateShiftModeValue(MINIMUM_TRANSLATION_SHIFT_POWER);
     }
 
     /**
@@ -77,7 +75,7 @@ public class CommandConstants {
      * @return the rotation power
      */
     public static double calculateRotationStickAxisValue(double axisValue) {
-        return axisValue / OperatorConstants.STICKS_SPEED_DIVIDER / calculateShiftModeValue(MINIMUM_ROTATION_SHIFT_POWER);
+        return axisValue / OperatorConstants.ROTATION_STICK_SPEED_DIVIDER / calculateShiftModeValue(MINIMUM_ROTATION_SHIFT_POWER);
     }
 
     /**
@@ -88,7 +86,7 @@ public class CommandConstants {
      * @return the power to apply to the robot
      */
     public static double calculateShiftModeValue(double minimumPower) {
-        final double squaredShiftModeValue = Math.pow(DRIVER_CONTROLLER.getRightTriggerAxis(), 2);
+        final double squaredShiftModeValue = Math.sqrt(DRIVER_CONTROLLER.getRightTriggerAxis());
         final double minimumShiftValueCoefficient = 1 - (1 / minimumPower);
 
         return 1 - squaredShiftModeValue * minimumShiftValueCoefficient;
@@ -98,15 +96,18 @@ public class CommandConstants {
      * Calculates the target rotation value from the joystick's angle. Used for joystick oriented rotation.
      * Joystick oriented rotation is when the robot rotates directly to the joystick's angle.
      *
-     * @return the rotation value
+     * @return the target heading
      */
-    private static FlippableRotation2d calculateJoystickOrientedTargetAngle() {
-        final double joystickPower = Math.hypot(DRIVER_CONTROLLER.getRightX(), DRIVER_CONTROLLER.getRightY());
+    private static FlippableRotation2d calculateTargetHeadingFromJoystickAngle() {
+        final double
+                xPower = DRIVER_CONTROLLER.getRightX(),
+                yPower = DRIVER_CONTROLLER.getRightY();
+
+        final double joystickPower = Math.hypot(xPower, yPower);
         if (joystickPower < JOYSTICK_ORIENTED_ROTATION_DEADBAND)
             return null;
 
-        final double targetAngleRadians = Math.atan2(DRIVER_CONTROLLER.getRightX(), DRIVER_CONTROLLER.getRightY());
-        return FlippableRotation2d.fromRadians(targetAngleRadians, true);
+        return new FlippableRotation2d(Math.atan2(xPower, yPower), true);
     }
 
     private static double getXPowerFromPov(double pov) {
@@ -117,13 +118,5 @@ public class CommandConstants {
     private static double getYPowerFromPov(double pov) {
         final double povRadians = Units.degreesToRadians(pov);
         return Math.sin(-povRadians);
-    }
-
-    private static FlippablePose2d changeRotation(FlippablePose2d pose2d, Rotation2d newRotation) {
-        return new FlippablePose2d(
-                pose2d.get().getTranslation(),
-                newRotation.getRadians(),
-                false
-        );
     }
 }

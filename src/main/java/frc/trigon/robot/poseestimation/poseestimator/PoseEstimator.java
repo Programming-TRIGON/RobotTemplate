@@ -1,49 +1,40 @@
 package frc.trigon.robot.poseestimation.poseestimator;
 
 import com.pathplanner.lib.util.PathPlannerLogging;
-import edu.wpi.first.math.geometry.*;
-import edu.wpi.first.math.interpolation.TimeInterpolatableBuffer;
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.constants.FieldConstants;
 import frc.trigon.robot.poseestimation.apriltagcamera.AprilTagCamera;
-import frc.trigon.robot.poseestimation.apriltagcamera.AprilTagCameraConstants;
 import frc.trigon.robot.poseestimation.relativerobotposesource.RelativeRobotPoseSource;
 import frc.trigon.robot.poseestimation.relativerobotposesource.RelativeRobotPoseSourceConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveConstants;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
-import org.trigon.hardware.RobotHardwareStats;
-import org.trigon.utilities.QuickSortHandler;
+import trigon.utilities.QuickSortHandler;
+import trigon.utilities.flippable.Flippable;
 
 import java.util.Arrays;
 import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Optional;
 
 /**
- * A class that estimates the robot's pose using team 6328's custom pose estimator.
+ * A class that estimates the robot's pose using WPILib's {@link SwerveDrivePoseEstimator} and {@link SwerveDriveOdometry}.
  */
 public class PoseEstimator implements AutoCloseable {
+    private final SwerveDrivePoseEstimator swerveDrivePoseEstimator = createSwerveDrivePoseEstimator();
+    private final SwerveDriveOdometry swerveDriveOdometry = createSwerveDriveOdometry();
     private final Field2d field = new Field2d();
     private final AprilTagCamera[] aprilTagCameras;
-    private final TimeInterpolatableBuffer<Pose2d> previousOdometryPoses = TimeInterpolatableBuffer.createBuffer(PoseEstimatorConstants.POSE_BUFFER_SIZE_SECONDS);
     private final RelativeRobotPoseSource relativeRobotPoseSource;
     private final boolean shouldUseRelativeRobotPoseSource;
-
-    private Pose2d
-            odometryPose = new Pose2d(),
-            estimatedPose = new Pose2d();
-    private SwerveModulePosition[] lastSwerveModulePositions = new SwerveModulePosition[]{
-            new SwerveModulePosition(),
-            new SwerveModulePosition(),
-            new SwerveModulePosition(),
-            new SwerveModulePosition()
-    };
-    private Rotation2d lastGyroHeading = new Rotation2d();
 
     /**
      * Constructs a new PoseEstimator and sets the relativeRobotPoseSource.
@@ -85,9 +76,13 @@ public class PoseEstimator implements AutoCloseable {
         else
             updateFromAprilTagCameras();
 
-        field.setRobotPose(getCurrentEstimatedPose());
-        if (RobotHardwareStats.isSimulation())
-            AprilTagCameraConstants.VISION_SIMULATION.update(RobotContainer.POSE_ESTIMATOR.getCurrentOdometryPose());
+        field.setRobotPose(getEstimatedRobotPose());
+    }
+
+    public void resetHeading() {
+        final Rotation2d resetRotation = Flippable.isRedAlliance() ? Rotation2d.k180deg : Rotation2d.kZero;
+        swerveDrivePoseEstimator.resetRotation(resetRotation);
+        swerveDriveOdometry.resetRotation(resetRotation);
     }
 
     /**
@@ -97,41 +92,46 @@ public class PoseEstimator implements AutoCloseable {
      */
     public void resetPose(Pose2d newPose) {
         RobotContainer.SWERVE.setHeading(newPose.getRotation());
-        odometryPose = newPose;
-        estimatedPose = newPose;
-        lastGyroHeading = newPose.getRotation();
-        previousOdometryPoses.clear();
+
+        swerveDrivePoseEstimator.resetPose(newPose);
+        swerveDriveOdometry.resetPose(newPose);
         if (shouldUseRelativeRobotPoseSource)
             relativeRobotPoseSource.resetOffset(newPose);
+    }
+
+    public void resetOdometry() {
+        swerveDriveOdometry.resetPose(getEstimatedRobotPose());
     }
 
     /**
      * @return the estimated pose of the robot, relative to the blue alliance's driver station right corner
      */
-    @AutoLogOutput
-    public Pose2d getCurrentEstimatedPose() {
-        return estimatedPose;
+    @AutoLogOutput(key = "Poses/Robot/PoseEstimator/EstimatedRobotPose")
+    public Pose2d getEstimatedRobotPose() {
+        return swerveDrivePoseEstimator.getEstimatedPosition();
     }
 
     /**
      * @return the odometry's estimated pose of the robot, relative to the blue alliance's driver station right corner
      */
-    @AutoLogOutput
-    public Pose2d getCurrentOdometryPose() {
-        return odometryPose;
+    @AutoLogOutput(key = "Poses/Robot/PoseEstimator/EstimatedOdometryPose")
+    public Pose2d getEstimatedOdometryPose() {
+        return swerveDriveOdometry.getPoseMeters();
     }
 
     /**
-     * Updates the pose estimator with the given SWERVE wheel positions and gyro rotations.
-     * This function accepts an array of SWERVE wheel positions and an array of gyro rotations because the odometry can be updated at a faster rate than the main loop (which is 50 hertz).
+     * Updates the pose estimator with the given swerve wheel positions and gyro rotations.
+     * This function accepts an array of swerve wheel positions and an array of gyro rotations because the odometry can be updated at a faster rate than the main loop (which is 50 hertz).
      * This means you could have a couple of odometry updates per main loop, and you would want to update the pose estimator with all of them.
      *
-     * @param swerveWheelPositions the SWERVE wheel positions accumulated since the last update
+     * @param swerveWheelPositions the swerve wheel positions accumulated since the last update
      * @param gyroRotations        the gyro rotations accumulated since the last update
      */
-    public void updatePoseEstimatorStates(SwerveModulePosition[][] swerveWheelPositions, Rotation2d[] gyroRotations, double[] timestamps) {
-        for (int i = 0; i < swerveWheelPositions.length; i++)
-            addOdometryObservation(swerveWheelPositions[i], gyroRotations[i], timestamps[i]);
+    public void updatePoseEstimatorOdometry(SwerveModulePosition[][] swerveWheelPositions, Rotation2d[] gyroRotations, double[] timestamps) {
+        for (int i = 0; i < swerveWheelPositions.length; i++) {
+            swerveDrivePoseEstimator.updateWithTime(timestamps[i], gyroRotations[i], swerveWheelPositions[i]);
+            swerveDriveOdometry.update(gyroRotations[i], swerveWheelPositions[i]);
+        }
     }
 
     /**
@@ -141,8 +141,7 @@ public class PoseEstimator implements AutoCloseable {
      * @return the robot's estimated pose at the timestamp
      */
     public Pose2d getEstimatedPoseAtTimestamp(double timestamp) {
-        final Pose2d odometryPoseAtTimestamp = getOdometryPoseAtTimestamp(timestamp);
-        return calculateEstimatedPoseAtTimestamp(odometryPoseAtTimestamp);
+        return swerveDrivePoseEstimator.sampleAt(timestamp).orElse(null);
     }
 
     private void initialize() {
@@ -166,21 +165,10 @@ public class PoseEstimator implements AutoCloseable {
             field.getObject("path").setPoses(pathPoses);
             Logger.recordOutput("PathPlanner/Path", pathPoses.toArray(new Pose2d[0]));
         });
-        PathPlannerLogging.setLogTargetPoseCallback((pose) -> Logger.recordOutput("PathPlanner/TargetPose", pose));
-    }
-
-    /**
-     * Sets the estimated robot pose from the odometry at the given timestamp.
-     *
-     * @param swerveModulePositions the positions of each swerve module
-     * @param gyroHeading           the heading of the gyro
-     * @param timestamp             the timestamp of the odometry observation
-     */
-    private void addOdometryObservation(SwerveModulePosition[] swerveModulePositions, Rotation2d gyroHeading, double timestamp) {
-        final Twist2d newOdometryPoseDifference = calculateNewOdometryPoseDifference(swerveModulePositions, gyroHeading);
-        updateRobotPosesFromNewOdometryPoseDifference(newOdometryPoseDifference, timestamp);
-
-        updateOdometryPositions(swerveModulePositions, gyroHeading);
+        PathPlannerLogging.setLogTargetPoseCallback((pose) -> {
+            RobotContainer.SWERVE.setTargetPathPlannerPose(pose);
+            Logger.recordOutput("PathPlanner/TargetPose", pose);
+        });
     }
 
     private void updateFromRelativeRobotPoseSource() {
@@ -193,24 +181,26 @@ public class PoseEstimator implements AutoCloseable {
 
         relativeRobotPoseSource.update();
 
-        if (relativeRobotPoseSource.hasNewResult())
-            addPoseSourceObservation(
+        if (relativeRobotPoseSource.hasNewResult()) {
+            swerveDrivePoseEstimator.addVisionMeasurement(
                     relativeRobotPoseSource.getEstimatedRobotPose(),
                     relativeRobotPoseSource.getLatestResultTimestampSeconds(),
-                    RelativeRobotPoseSourceConstants.STANDARD_DEVIATIONS
+                    RelativeRobotPoseSourceConstants.STANDARD_DEVIATIONS.toMatrix()
             );
+        }
     }
 
     private void updateFromAprilTagCameras() {
         final AprilTagCamera[] newResultCameras = getCamerasWithResults();
-        sortCamerasByLatestResultTimestamp(newResultCameras);
+//        sortCamerasByLatestResultTimestamp(newResultCameras);
 
-        for (AprilTagCamera aprilTagCamera : newResultCameras)
-            addPoseSourceObservation(
+        for (AprilTagCamera aprilTagCamera : newResultCameras) {
+            swerveDrivePoseEstimator.addVisionMeasurement(
                     aprilTagCamera.getEstimatedRobotPose(),
                     aprilTagCamera.getLatestResultTimestampSeconds(),
-                    aprilTagCamera.calculateStandardDeviations()
+                    aprilTagCamera.calculateStandardDeviations().toMatrix()
             );
+        }
     }
 
     /**
@@ -232,7 +222,7 @@ public class PoseEstimator implements AutoCloseable {
 
         for (AprilTagCamera aprilTagCamera : aprilTagCameras) {
             aprilTagCamera.update();
-            if (aprilTagCamera.hasValidResult()) {
+            if (aprilTagCamera.hasValidResult() && aprilTagCamera.getEstimatedRobotPose() != null) {
                 camerasWithNewResult[index] = aprilTagCamera;
                 index++;
             }
@@ -245,98 +235,36 @@ public class PoseEstimator implements AutoCloseable {
         QuickSortHandler.sort(aprilTagCameras, AprilTagCamera::getLatestResultTimestampSeconds);
     }
 
-    /**
-     * Sets the estimated pose from a pose source at the given timestamp.
-     *
-     * @param observationPose the estimated robot pose
-     * @param timestamp       the timestamp of the observation
-     */
-    private void addPoseSourceObservation(Pose2d observationPose, double timestamp, StandardDeviations standardDeviations) {
-        final Pose2d odometryPoseAtTimestamp = getOdometryPoseAtTimestamp(timestamp);
-        final Pose2d estimatedPoseAtObservationTime = calculateEstimatedPoseAtTimestamp(odometryPoseAtTimestamp);
-        if (estimatedPoseAtObservationTime == null)
-            return;
+    private SwerveDriveOdometry createSwerveDriveOdometry() {
+        final SwerveModulePosition[] swerveModulePositions = {
+                new SwerveModulePosition(),
+                new SwerveModulePosition(),
+                new SwerveModulePosition(),
+                new SwerveModulePosition()
+        };
 
-        final Pose2d estimatedPoseAtTimestampWithAmbiguityCompensation = calculateEstimatedPoseAtTimestampWithAmbiguityCompensation(estimatedPoseAtObservationTime, observationPose, standardDeviations);
-        final Transform2d odometryPoseAtTimestampToCurrentOdometryPose = new Transform2d(odometryPoseAtTimestamp, odometryPose);
-        this.estimatedPose = estimatedPoseAtTimestampWithAmbiguityCompensation.plus(odometryPoseAtTimestampToCurrentOdometryPose);
+        return new SwerveDriveOdometry(
+                SwerveConstants.KINEMATICS,
+                new Rotation2d(),
+                swerveModulePositions
+        );
     }
 
-    private Pose2d getOdometryPoseAtTimestamp(double timestamp) {
-        if (isTimestampOutOfHeldPosesRange(timestamp))
-            return null;
+    private SwerveDrivePoseEstimator createSwerveDrivePoseEstimator() {
+        final SwerveModulePosition[] swerveModulePositions = {
+                new SwerveModulePosition(),
+                new SwerveModulePosition(),
+                new SwerveModulePosition(),
+                new SwerveModulePosition()
+        };
 
-        final Optional<Pose2d> odometryPoseAtTimestamp = previousOdometryPoses.getSample(timestamp);
-        return odometryPoseAtTimestamp.orElse(null);
-    }
-
-    private Pose2d calculateEstimatedPoseAtTimestamp(Pose2d odometryPoseAtTimestamp) {
-        if (odometryPoseAtTimestamp == null)
-            return null;
-
-        final Transform2d currentPoseToSamplePose = new Transform2d(odometryPose, odometryPoseAtTimestamp);
-        return estimatedPose.plus(currentPoseToSamplePose);
-    }
-
-    private boolean isTimestampOutOfHeldPosesRange(double timestamp) {
-        try {
-            final double oldestEstimatedRobotPoseTimestamp = previousOdometryPoses.getInternalBuffer().lastKey() - PoseEstimatorConstants.POSE_BUFFER_SIZE_SECONDS;
-            if (oldestEstimatedRobotPoseTimestamp > timestamp)
-                return true;
-        } catch (NoSuchElementException e) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Calculates the estimated pose of a vision observation with compensation for its ambiguity.
-     * This is done by finding the difference between the estimated pose at the time of the observation and the estimated pose of the observation and scaling that down using the calibrated standard deviations.
-     * This will calculate for the pose at timestamp of `estimatedPoseAtObservationTime`.
-     *
-     * @param estimatedPoseAtObservationTime the estimated pose of the robot at the time of the observation
-     * @param observationPose                the estimated robot pose from the observation
-     * @param observationStandardDeviations  the ambiguity of the observation
-     * @return the estimated pose with compensation for its ambiguity
-     */
-    private Pose2d calculateEstimatedPoseAtTimestampWithAmbiguityCompensation(Pose2d estimatedPoseAtObservationTime, Pose2d observationPose, StandardDeviations observationStandardDeviations) {
-        final Transform2d observationDifference = new Transform2d(estimatedPoseAtObservationTime, observationPose);
-        final Transform2d allowedMovement = calculateAllowedMovementFromAmbiguity(observationDifference, observationStandardDeviations);
-        return estimatedPoseAtObservationTime.plus(allowedMovement);
-    }
-
-    /**
-     * Calculates the scaling needed to reduce noise in the estimated pose from the standard deviations of the observation.
-     *
-     * @param observationDifference    the difference between the estimated pose of the robot at the time of the observation and the estimated pose of the observation
-     * @param cameraStandardDeviations the standard deviations of the camera's estimated pose
-     * @return the allowed movement of the estimated pose as a {@link Transform2d}
-     */
-    private Transform2d calculateAllowedMovementFromAmbiguity(Transform2d observationDifference, StandardDeviations cameraStandardDeviations) {
-        final StandardDeviations combinedStandardDeviations = PoseEstimatorConstants.ODOMETRY_STANDARD_DEVIATIONS.combineWith(cameraStandardDeviations);
-        return combinedStandardDeviations.scaleTransformFromStandardDeviations(observationDifference);
-    }
-
-    /**
-     * Calculates the difference between the previous and current odometry poses.
-     *
-     * @param swerveModulePositions the current positions of each swerve module
-     * @param gyroHeading           the current heading of the gyro
-     * @return the difference as a {@link edu.wpi.first.math.geometry.Twist2d}
-     */
-    private Twist2d calculateNewOdometryPoseDifference(SwerveModulePosition[] swerveModulePositions, Rotation2d gyroHeading) {
-        final Twist2d odometryDifferenceTwist2d = SwerveConstants.KINEMATICS.toTwist2d(lastSwerveModulePositions, swerveModulePositions);
-        return new Twist2d(odometryDifferenceTwist2d.dx, odometryDifferenceTwist2d.dy, gyroHeading.minus(lastGyroHeading).getRadians());
-    }
-
-    private void updateOdometryPositions(SwerveModulePosition[] swerveModulePositions, Rotation2d gyroHeading) {
-        lastSwerveModulePositions = swerveModulePositions;
-        lastGyroHeading = gyroHeading;
-    }
-
-    private void updateRobotPosesFromNewOdometryPoseDifference(Twist2d newOdometryPoseDifference, double timestamp) {
-        odometryPose = odometryPose.exp(newOdometryPoseDifference);
-        estimatedPose = estimatedPose.exp(newOdometryPoseDifference);
-        previousOdometryPoses.addSample(timestamp, odometryPose);
+        return new SwerveDrivePoseEstimator(
+                SwerveConstants.KINEMATICS,
+                new Rotation2d(),
+                swerveModulePositions,
+                new Pose2d(),
+                PoseEstimatorConstants.ODOMETRY_STANDARD_DEVIATIONS.toMatrix(),
+                VecBuilder.fill(0, 0, 0)
+        );
     }
 }

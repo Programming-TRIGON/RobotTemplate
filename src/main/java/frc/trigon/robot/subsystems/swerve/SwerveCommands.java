@@ -1,15 +1,13 @@
 package frc.trigon.robot.subsystems.swerve;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.path.*;
-import edu.wpi.first.math.geometry.Pose2d;
+import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.trigon.robot.RobotContainer;
-import org.trigon.commands.InitExecuteCommand;
-import org.trigon.utilities.flippable.FlippablePose2d;
-import org.trigon.utilities.flippable.FlippableRotation2d;
+import trigon.commands.InitExecuteCommand;
+import trigon.utilities.flippable.FlippablePose2d;
+import trigon.utilities.flippable.FlippableRotation2d;
 
-import java.util.List;
 import java.util.Set;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -134,43 +132,32 @@ public class SwerveCommands {
         return new DeferredCommand(() -> getCurrentDriveToPoseCommand(targetPose.get(), constraints), Set.of(RobotContainer.SWERVE));
     }
 
+    public static Command getDriveToPoseCommand(Supplier<FlippablePose2d> targetPose, PathConstraints constraints, double endVelocity) {
+        return new DeferredCommand(() -> getCurrentDriveToPoseCommand(targetPose.get(), constraints, endVelocity), Set.of(RobotContainer.SWERVE));
+    }
+
     private static Command getCurrentDriveToPoseCommand(FlippablePose2d targetPose, PathConstraints constraints) {
         return new SequentialCommandGroup(
                 new InstantCommand(() -> RobotContainer.SWERVE.initializeDrive(true)),
-                getPathfindToPoseCommand(targetPose, constraints),
+                AutoBuilder.pathfindToPose(targetPose.get(), constraints),
                 getPIDToPoseCommand(targetPose)
         );
     }
 
-    private static Command getPathfindToPoseCommand(FlippablePose2d targetPose, PathConstraints pathConstraints) {
-        final Pose2d targetFlippedPose = targetPose.get();
-        final Pose2d currentPose = RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose();
-        if (currentPose.getTranslation().getDistance(targetFlippedPose.getTranslation()) < 0.35)
-            return createOnTheFlyPathCommand(targetPose, pathConstraints);
-        return AutoBuilder.pathfindToPose(targetFlippedPose, pathConstraints);
+    private static Command getCurrentDriveToPoseCommand(FlippablePose2d targetPose, PathConstraints constraints, double endVelocity) {
+        return new SequentialCommandGroup(
+                new InstantCommand(() -> RobotContainer.SWERVE.initializeDrive(true)),
+                AutoBuilder.pathfindToPose(targetPose.get(), constraints, endVelocity)
+        );
     }
 
     private static Command getPIDToPoseCommand(FlippablePose2d targetPose) {
-        return new InstantCommand(RobotContainer.SWERVE::resetRotationController)
-                .andThen(new RunCommand(() -> RobotContainer.SWERVE.pidToPose(targetPose))
-                        .until(() -> RobotContainer.SWERVE.atPose(targetPose)));
-    }
-
-    private static Command createOnTheFlyPathCommand(FlippablePose2d targetPose, PathConstraints constraints) {
-        List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
-                RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose(),
-                targetPose.get()
+        return new FunctionalCommand(
+                RobotContainer.SWERVE::resetRotationController,
+                () -> RobotContainer.SWERVE.pidToPose(targetPose),
+                (interrupted) -> {
+                },
+                () -> RobotContainer.SWERVE.atPose(targetPose)
         );
-
-        PathPlannerPath path = new PathPlannerPath(
-                waypoints,
-                constraints,
-                new IdealStartingState(0, RobotContainer.SWERVE.getHeading()),
-                new GoalEndState(0, targetPose.get().getRotation())
-        );
-
-        path.preventFlipping = true;
-
-        return AutoBuilder.followPath(path);
     }
 }

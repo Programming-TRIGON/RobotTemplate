@@ -1,9 +1,10 @@
 package frc.trigon.robot.commands.commandfactories;
 
 import edu.wpi.first.wpilibj2.command.*;
-import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.commands.CommandConstants;
+import frc.trigon.robot.constants.OperatorConstants;
 import frc.trigon.robot.subsystems.MotorSubsystem;
+import frc.trigon.robot.subsystems.swerve.SwerveCommands;
 
 import java.util.function.BooleanSupplier;
 
@@ -12,42 +13,18 @@ import java.util.function.BooleanSupplier;
  * These are different from {@link CommandConstants} because they create new commands that use some form of logic instead of only constructing an existing command with parameters.
  */
 public class GeneralCommands {
-    public static Command withoutRequirements(Command command) {
-        return new FunctionalCommand(
-                command::initialize,
-                command::execute,
-                command::end,
-                command::isFinished
+    public static Command getFieldRelativeDriveCommand() {
+        return SwerveCommands.getClosedLoopFieldRelativeDriveCommand(
+                () -> CommandConstants.calculateDriveStickAxisValue(OperatorConstants.DRIVER_CONTROLLER.getLeftY()),
+                () -> CommandConstants.calculateDriveStickAxisValue(OperatorConstants.DRIVER_CONTROLLER.getLeftX()),
+                () -> CommandConstants.calculateDriveStickAxisValue(OperatorConstants.DRIVER_CONTROLLER.getRightX())
         );
-    }
-
-    /**
-     * Creates a command that toggles between the swerve's default commands: joystick oriented rotation and normal rotation.
-     * Joystick oriented rotation is when the robot rotates directly to the angle of the joystick.
-     * Normal rotation is when the robot rotates at a speed depending on the axis value of the joystick.
-     *
-     * @return the command
-     */
-    public static Command getToggleRotationModeCommand() {
-        return new InstantCommand(() -> {
-            if (RobotContainer.SWERVE.getDefaultCommand().equals(CommandConstants.FIELD_RELATIVE_DRIVE_COMMAND))
-                RobotContainer.SWERVE.setDefaultCommand(CommandConstants.FIELD_RELATIVE_DRIVE_WITH_JOYSTICK_ORIENTED_ROTATION_COMMAND);
-            else
-                RobotContainer.SWERVE.setDefaultCommand(CommandConstants.FIELD_RELATIVE_DRIVE_COMMAND);
-
-            RobotContainer.SWERVE.getDefaultCommand().schedule();
-        });
     }
 
     public static Command getToggleBrakeCommand() {
         return new InstantCommand(() -> {
             MotorSubsystem.IS_BRAKING = !MotorSubsystem.IS_BRAKING;
             MotorSubsystem.setAllSubsystemsBrakeAsync(MotorSubsystem.IS_BRAKING);
-
-            if (MotorSubsystem.IS_BRAKING)
-                CommandConstants.STATIC_WHITE_LED_COLOR_COMMAND.cancel();
-            else
-                CommandConstants.STATIC_WHITE_LED_COLOR_COMMAND.schedule();
         }).ignoringDisable(true);
     }
 
@@ -58,7 +35,7 @@ public class GeneralCommands {
     public static Command getContinuousConditionalCommand(Command onTrue, Command onFalse, BooleanSupplier condition) {
         return new ConditionalCommand(
                 onTrue.onlyWhile(condition),
-                onFalse.onlyWhile(() -> !condition.getAsBoolean()),
+                onFalse.until(condition),
                 condition
         ).repeatedly();
     }
@@ -84,15 +61,5 @@ public class GeneralCommands {
      */
     public static Command runWhen(Command command, BooleanSupplier condition, double debounceTimeSeconds) {
         return runWhen(new WaitCommand(debounceTimeSeconds).andThen(command.onlyIf(condition)), condition);
-    }
-
-    public static Command duplicate(Command command) {
-        return new FunctionalCommand(
-                command::initialize,
-                command::execute,
-                command::end,
-                command::isFinished,
-                command.getRequirements().toArray(Subsystem[]::new)
-        );
     }
 }

@@ -7,7 +7,7 @@ import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import frc.trigon.robot.poseestimation.relativerobotposesource.RelativeRobotPoseSourceIO;
 import frc.trigon.robot.poseestimation.relativerobotposesource.RelativeRobotPoseSourceInputsAutoLogged;
-import org.trigon.utilities.JsonHandler;
+import trigon.utilities.JsonHandler;
 
 public class RelativeRobotPoseSourceT265IO extends RelativeRobotPoseSourceIO {
     private final NetworkTableEntry jsonDumpEntry;

@@ -1,14 +1,14 @@
 package frc.trigon.robot.commands.commandclasses;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.commands.commandfactories.AutonomousCommands;
-import org.trigon.hardware.misc.leds.LEDCommands;
-import org.trigon.hardware.misc.leds.LEDStrip;
+import org.littletonrobotics.junction.Logger;
 
 import java.util.function.Supplier;
 
@@ -20,7 +20,7 @@ import java.util.function.Supplier;
 public class LEDAutoSetupCommand extends SequentialCommandGroup {
     private static final double
             TOLERANCE_METERS = 0.1,
-            TOLERANCE_DEGREES = 2;
+            TOLERANCE_DEGREES = 4;
     private final Supplier<String> autoName;
     private Pose2d autoStartPose;
 
@@ -32,14 +32,8 @@ public class LEDAutoSetupCommand extends SequentialCommandGroup {
     public LEDAutoSetupCommand(Supplier<String> autoName) {
         this.autoName = autoName;
 
-        final Supplier<Color>[] ledColors = new Supplier[]{
-                () -> getDesiredLEDColorFromRobotPose(this.autoStartPose.getRotation().getDegrees() - RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getRotation().getDegrees(), TOLERANCE_DEGREES),
-                () -> getDesiredLEDColorFromRobotPose(this.autoStartPose.getX() - RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getX(), TOLERANCE_METERS),
-                () -> getDesiredLEDColorFromRobotPose(this.autoStartPose.getY() - RobotContainer.POSE_ESTIMATOR.getCurrentEstimatedPose().getY(), TOLERANCE_METERS)
-        };
         addCommands(
-                getUpdateAutoStartPoseCommand(),
-                LEDCommands.getSectionColorCommand(ledColors, LEDStrip.LED_STRIPS)
+                getUpdateAutoStartPoseCommand()
         );
     }
 
@@ -51,7 +45,14 @@ public class LEDAutoSetupCommand extends SequentialCommandGroup {
     private Command getUpdateAutoStartPoseCommand() {
         return new InstantCommand(() -> {
             this.autoStartPose = AutonomousCommands.getAutoStartPose(autoName.get());
+            Logger.recordOutput("PathPlanner/AutoStartPose", autoStartPose);
         });
+    }
+
+    private Translation2d calculateRobotRelativeDifference() {
+        final Pose2d robotPose = RobotContainer.ROBOT_POSE_ESTIMATOR.getEstimatedRobotPose();
+        final Translation2d robotRelativeRobotTranslation = robotPose.getTranslation().minus(this.autoStartPose.getTranslation());
+        return robotRelativeRobotTranslation.rotateBy(robotPose.getRotation());
     }
 
     /**

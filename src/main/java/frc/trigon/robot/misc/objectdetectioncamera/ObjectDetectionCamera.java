@@ -1,9 +1,13 @@
 package frc.trigon.robot.misc.objectdetectioncamera;
 
-import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.trigon.robot.RobotContainer;
+import frc.trigon.robot.misc.objectdetectioncamera.io.PhotonObjectDetectionCameraIO;
+import frc.trigon.robot.misc.objectdetectioncamera.io.SimulationObjectDetectionCameraIO;
+import frc.trigon.robot.misc.simulatedfield.SimulatedGamePieceConstants;
 import org.littletonrobotics.junction.Logger;
-import org.trigon.hardware.RobotHardwareStats;
+import trigon.hardware.RobotHardwareStats;
 
 /**
  * An object detection camera is a class that represents a camera that detects objects other than apriltags, most likely game pieces.
@@ -12,12 +16,12 @@ public class ObjectDetectionCamera extends SubsystemBase {
     private final ObjectDetectionCameraInputsAutoLogged objectDetectionCameraInputs = new ObjectDetectionCameraInputsAutoLogged();
     private final ObjectDetectionCameraIO objectDetectionCameraIO;
     private final String hostname;
-    private Rotation2d trackedObjectYaw = new Rotation2d();
-    private boolean trackedTargetWasVisible = false;
+    private final Transform3d robotCenterToCamera;
 
-    public ObjectDetectionCamera(String hostname) {
+    public ObjectDetectionCamera(String hostname, Transform3d robotCenterToCamera) {
         this.hostname = hostname;
-        objectDetectionCameraIO = generateIO(hostname);
+        this.robotCenterToCamera = robotCenterToCamera;
+        this.objectDetectionCameraIO = generateIO(hostname, robotCenterToCamera);
     }
 
     @Override
@@ -27,70 +31,78 @@ public class ObjectDetectionCamera extends SubsystemBase {
     }
 
     /**
-     * Starts tracking the best visible target and remains tracking that target until it is no longer visible.
-     * Tracking an object is locking on to one target and allows for you to remain locked on to one target even when there are more objects visible.
-     * This should be called periodically.
-     * This is used when there is more than one visible object and the best target might change as the robot moves.
-     * When no objects are visible, the tracking resets to the best target the next time an object is visible.
-     */
-    public void trackObject() {
-        if (hasTargets() && !trackedTargetWasVisible) {
-            trackedTargetWasVisible = true;
-            trackedObjectYaw = getBestObjectYaw();
-            return;
-        }
-
-        if (!hasTargets()) {
-            trackedTargetWasVisible = false;
-            return;
-        }
-
-        trackedObjectYaw = calculateTrackedObjectYaw();
-    }
-
-    public boolean hasTargets() {
-        return objectDetectionCameraInputs.hasTargets;
-    }
-
-    /**
-     * @return the yaw (x-axis position) of the target object
-     */
-    public Rotation2d getBestObjectYaw() {
-        return objectDetectionCameraInputs.visibleObjectsYaw[0];
-    }
-
-    /**
-     * @return the yaw (x-axis position) of the current tracked object
-     */
-    public Rotation2d getTrackedObjectYaw() {
-        return trackedObjectYaw;
-    }
-
-    /**
-     * Calculates the yaw (x-axis position) of the object that the camera is currently tracking by finding the target with the least yaw deviation and assuming that it is the same target.
+     * Calculates the position of the best object on the field from the 3D rotation of the object relative to the camera.
+     * This assumes the object is on the ground.
+     * Once it is known that the object is on the ground,
+     * one can simply find the transform from the camera to the ground and apply it to the object's rotation.
      *
-     * @return the yaw of the tracked object
+     * @return the best object's 2D position on the field (z is assumed to be 0)
      */
-    private Rotation2d calculateTrackedObjectYaw() {
-        double closestTargetToTrackedTargetYawDifference = Double.POSITIVE_INFINITY;
-        Rotation2d closestToTrackedTargetYaw = new Rotation2d();
+    public Translation2d calculateBestObjectPositionOnField(SimulatedGamePieceConstants.GamePieceType targetGamePiece) {
+        final Translation2d[] targetObjectsTranslation = getObjectPositionsOnField(targetGamePiece);
+        final Translation2d currentRobotTranslation = RobotContainer.ROBOT_POSE_ESTIMATOR.getEstimatedRobotPose().getTranslation();
+        if (targetObjectsTranslation.length == 0)
+            return null;
+        Translation2d bestObjectTranslation = targetObjectsTranslation[0];
 
-        for (Rotation2d currentObjectYaw : objectDetectionCameraInputs.visibleObjectsYaw) {
-            final double currentObjectToTrackedTargetYawDifference = Math.abs(currentObjectYaw.getRadians() - trackedObjectYaw.getRadians());
-            if (currentObjectToTrackedTargetYawDifference < closestTargetToTrackedTargetYawDifference) {
-                closestTargetToTrackedTargetYawDifference = currentObjectToTrackedTargetYawDifference;
-                closestToTrackedTargetYaw = currentObjectYaw;
-            }
+        for (int i = 1; i < targetObjectsTranslation.length; i++) {
+            final Translation2d currentObjectTranslation = targetObjectsTranslation[i];
+            final double bestObjectDifference = currentRobotTranslation.getDistance(bestObjectTranslation);
+            final double currentObjectDifference = currentRobotTranslation.getDistance(currentObjectTranslation);
+            if (currentObjectDifference < bestObjectDifference)
+                bestObjectTranslation = currentObjectTranslation;
         }
-
-        return closestToTrackedTargetYaw;
+        return bestObjectTranslation;
     }
 
-    private ObjectDetectionCameraIO generateIO(String hostname) {
+    public boolean hasTargets(SimulatedGamePieceConstants.GamePieceType targetGamePiece) {
+        return objectDetectionCameraInputs.hasTarget[targetGamePiece.id];
+    }
+
+    public Translation2d[] getObjectPositionsOnField(SimulatedGamePieceConstants.GamePieceType targetGamePiece) {
+        final Rotation3d[] visibleObjectsRotations = getTargetObjectsRotations(targetGamePiece);
+        final Translation2d[] objectsPositionsOnField = new Translation2d[visibleObjectsRotations.length];
+
+        for (int i = 0; i < visibleObjectsRotations.length; i++)
+            objectsPositionsOnField[i] = calculateObjectPositionFromRotation(visibleObjectsRotations[i]);
+
+        Logger.recordOutput("ObjectDetectionCamera/Visible" + targetGamePiece.name(), objectsPositionsOnField);
+        return objectsPositionsOnField;
+    }
+
+    public Rotation3d[] getTargetObjectsRotations(SimulatedGamePieceConstants.GamePieceType targetGamePiece) {
+        return objectDetectionCameraInputs.visibleObjectRotations[targetGamePiece.id];
+    }
+
+    /**
+     * Calculates the position of the object on the field from the 3D rotation of the object relative to the camera.
+     * This assumes the object is on the ground.
+     * Once it is known that the object is on the ground,
+     * one can simply find the transform from the camera to the ground and apply it to the object's rotation.
+     *
+     * @param objectRotation the object's 3D rotation relative to the camera
+     * @return the object's 2D position on the field (z is assumed to be 0)
+     */
+    private Translation2d calculateObjectPositionFromRotation(Rotation3d objectRotation) {
+        final Pose2d robotPoseAtResultTimestamp = RobotContainer.ROBOT_POSE_ESTIMATOR.getEstimatedPoseAtTimestamp(objectDetectionCameraInputs.latestResultTimestamp);
+        if (robotPoseAtResultTimestamp == null)
+            return new Translation2d();
+        final Pose3d cameraPose = new Pose3d(robotPoseAtResultTimestamp).plus(robotCenterToCamera);
+        final Pose3d objectRotationStart = cameraPose.plus(new Transform3d(0, 0, 0, objectRotation));
+
+        final double cameraZ = cameraPose.getTranslation().getZ();
+        final double objectPitchSin = Math.sin(objectRotationStart.getRotation().getY());
+        final double xTransform = cameraZ / objectPitchSin;
+        final Transform3d objectRotationStartToGround = new Transform3d(xTransform, 0, 0, new Rotation3d());
+
+        return objectRotationStart.transformBy(objectRotationStartToGround).getTranslation().toTranslation2d();
+    }
+
+    private ObjectDetectionCameraIO generateIO(String hostname, Transform3d robotCenterToCamera) {
         if (RobotHardwareStats.isReplay())
             return new ObjectDetectionCameraIO();
         if (RobotHardwareStats.isSimulation())
-            return new SimulationObjectDetectionCameraIO(hostname);
+            return new SimulationObjectDetectionCameraIO(hostname, robotCenterToCamera);
         return new PhotonObjectDetectionCameraIO(hostname);
     }
 }
