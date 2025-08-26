@@ -26,7 +26,7 @@ import org.trigon.utilities.flippable.Flippable;
 public class RobotContainer {
     public static final PoseEstimator ROBOT_POSE_ESTIMATOR = new PoseEstimator();
     public static final ObjectPoseEstimator OBJECT_POSE_ESTIMATOR = new ObjectPoseEstimator(
-            CameraConstants.CORAL_POSE_ESTIMATOR_DELETION_THRESHOLD_SECONDS,
+            CameraConstants.OBJECT_POSE_ESTIMATOR_DELETION_THRESHOLD_SECONDS,
             ObjectPoseEstimator.DistanceCalculationMethod.ROTATION_AND_TRANSLATION,
             SimulatedGamePieceConstants.GamePieceType.GAME_PIECE_TYPE,
             CameraConstants.OBJECT_DETECTION_CAMERA
