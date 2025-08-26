@@ -2,6 +2,7 @@ package frc.trigon.robot.constants;
 
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.trigon.robot.commands.commandclasses.IntakeAssistCommand;
 import org.trigon.hardware.misc.KeyboardController;
 import org.trigon.hardware.misc.XboxController;
 
@@ -20,6 +21,9 @@ public class OperatorConstants {
             POV_DIVIDER = 2,
             TRANSLATION_STICK_SPEED_DIVIDER = 1,
             ROTATION_STICK_SPEED_DIVIDER = 1;
+
+    public static final double INTAKE_ASSIST_SCALAR = 0.0;
+    public static final IntakeAssistCommand.AssistMode DEFAULT_INTAKE_ASSIST_MODE = IntakeAssistCommand.AssistMode.ALTERNATE_ASSIST;
 
     public static final Trigger
             RESET_HEADING_TRIGGER = DRIVER_CONTROLLER.y(),
