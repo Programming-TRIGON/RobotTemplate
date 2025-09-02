@@ -1,7 +1,7 @@
 package lib.hardware.misc.simplesensor.io;
 
 import lib.hardware.misc.simplesensor.SimpleSensorIO;
-import trigon.hardware.misc.simplesensor.SimpleSensorInputsAutoLogged;
+import lib.hardware.misc.simplesensor.SimpleSensorInputsAutoLogged;
 
 import java.util.function.DoubleSupplier;
 

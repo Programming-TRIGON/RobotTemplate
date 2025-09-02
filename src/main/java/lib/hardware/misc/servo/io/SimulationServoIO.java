@@ -3,7 +3,7 @@ package lib.hardware.misc.servo.io;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import lib.hardware.misc.servo.ServoIO;
-import trigon.hardware.misc.servo.ServoInputsAutoLogged;
+import lib.hardware.misc.servo.ServoInputsAutoLogged;
 
 public class SimulationServoIO extends ServoIO {
     private Rotation2d maximumServoAngle = Rotation2d.fromDegrees(180);

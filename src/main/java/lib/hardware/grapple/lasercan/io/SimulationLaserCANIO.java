@@ -1,7 +1,7 @@
 package lib.hardware.grapple.lasercan.io;
 
 import lib.hardware.grapple.lasercan.LaserCANIO;
-import trigon.hardware.grapple.lasercan.LaserCANInputsAutoLogged;
+import lib.hardware.grapple.lasercan.LaserCANInputsAutoLogged;
 
 import java.util.function.DoubleSupplier;
 

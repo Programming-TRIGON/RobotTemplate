@@ -2,11 +2,10 @@ package lib.hardware.grapple.lasercan;
 
 import au.grapplerobotics.ConfigurationFailedException;
 import au.grapplerobotics.LaserCan;
-import org.littletonrobotics.junction.AutoLog;
 import lib.hardware.RobotHardwareStats;
-import trigon.hardware.grapple.lasercan.LaserCANInputsAutoLogged;
 import lib.hardware.grapple.lasercan.io.RealLaserCANIO;
 import lib.hardware.grapple.lasercan.io.SimulationLaserCANIO;
+import org.littletonrobotics.junction.AutoLog;
 
 import java.util.function.DoubleSupplier;
 

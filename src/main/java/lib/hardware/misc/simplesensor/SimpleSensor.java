@@ -1,12 +1,11 @@
 package lib.hardware.misc.simplesensor;
 
-import org.littletonrobotics.junction.Logger;
 import lib.hardware.RobotHardwareStats;
-import trigon.hardware.misc.simplesensor.SimpleSensorInputsAutoLogged;
 import lib.hardware.misc.simplesensor.io.AnalogSensorIO;
 import lib.hardware.misc.simplesensor.io.DigitalSensorIO;
 import lib.hardware.misc.simplesensor.io.DutyCycleSensorIO;
 import lib.hardware.misc.simplesensor.io.SimpleSensorSimulationIO;
+import org.littletonrobotics.junction.Logger;
 
 import java.util.function.DoubleSupplier;
 

@@ -2,7 +2,6 @@ package lib.hardware;
 
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
-import trigon.hardware.ThreadInputsAutoLogged;
 
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;

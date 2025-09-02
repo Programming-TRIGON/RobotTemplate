@@ -1,7 +1,6 @@
 package lib.hardware.misc.simplesensor;
 
 import org.littletonrobotics.junction.AutoLog;
-import trigon.hardware.misc.simplesensor.SimpleSensorInputsAutoLogged;
 
 import java.util.function.DoubleSupplier;
 

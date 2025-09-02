@@ -3,7 +3,7 @@ package lib.hardware.misc.simplesensor.io;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DutyCycle;
 import lib.hardware.misc.simplesensor.SimpleSensorIO;
-import trigon.hardware.misc.simplesensor.SimpleSensorInputsAutoLogged;
+import lib.hardware.misc.simplesensor.SimpleSensorInputsAutoLogged;
 
 public class DutyCycleSensorIO extends SimpleSensorIO {
     private final DutyCycle dutyCycle;

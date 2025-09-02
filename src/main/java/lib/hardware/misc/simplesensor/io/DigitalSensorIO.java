@@ -2,7 +2,7 @@ package lib.hardware.misc.simplesensor.io;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import lib.hardware.misc.simplesensor.SimpleSensorIO;
-import trigon.hardware.misc.simplesensor.SimpleSensorInputsAutoLogged;
+import lib.hardware.misc.simplesensor.SimpleSensorInputsAutoLogged;
 
 public class DigitalSensorIO extends SimpleSensorIO {
     private final DigitalInput digitalInput;

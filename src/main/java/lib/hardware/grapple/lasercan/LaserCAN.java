@@ -3,7 +3,6 @@ package lib.hardware.grapple.lasercan;
 import au.grapplerobotics.ConfigurationFailedException;
 import au.grapplerobotics.LaserCan;
 import org.littletonrobotics.junction.Logger;
-import trigon.hardware.grapple.lasercan.LaserCANInputsAutoLogged;
 
 import java.util.function.DoubleSupplier;
 
