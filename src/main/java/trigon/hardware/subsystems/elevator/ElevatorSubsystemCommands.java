@@ -7,7 +7,7 @@ import trigon.commands.NetworkTablesCommand;
 import java.util.Set;
 
 public class ElevatorSubsystemCommands {
-    public Command getDebuggingCommand(ElevatorSubsystem subsystem) {
+    public static Command getDebuggingCommand(ElevatorSubsystem subsystem) {
         return new NetworkTablesCommand(
                 subsystem::setTargetState,
                 false,
@@ -17,7 +17,7 @@ public class ElevatorSubsystemCommands {
         );
     }
 
-    public Command getSetTargetStateCommand(ElevatorSubsystem.ElevatorState targetState, ElevatorSubsystem subsystem) {
+    public static Command getSetTargetStateCommand(ElevatorSubsystem.ElevatorState targetState, ElevatorSubsystem subsystem) {
         return new ExecuteEndCommand(
                 () -> subsystem.setTargetState(targetState),
                 subsystem::stop,
@@ -25,7 +25,7 @@ public class ElevatorSubsystemCommands {
         );
     }
 
-    public Command getSetTargetStateCommand(double targetPositionMeters, double speedScalar, ElevatorSubsystem subsystem) {
+    public static Command getSetTargetStateCommand(double targetPositionMeters, double speedScalar, ElevatorSubsystem subsystem) {
         return new ExecuteEndCommand(
                 () -> subsystem.setTargetState(targetPositionMeters, speedScalar),
                 subsystem::stop,
@@ -33,7 +33,7 @@ public class ElevatorSubsystemCommands {
         );
     }
 
-    public Command getPrepareTargetStateCommand(ElevatorSubsystem.ElevatorState targetState, ElevatorSubsystem subsystem) {
+    public static Command getPrepareTargetStateCommand(ElevatorSubsystem.ElevatorState targetState, ElevatorSubsystem subsystem) {
         return new ExecuteEndCommand(
                 () -> subsystem.setTargetState(targetState.getPrepareState()),
                 subsystem::stop,

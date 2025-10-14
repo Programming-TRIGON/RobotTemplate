@@ -7,7 +7,7 @@ import trigon.commands.NetworkTablesCommand;
 import java.util.Set;
 
 public class SimpleMotorSubsystemCommands {
-    public Command getDebuggingCommand(SimpleMotorSubsystem subsystem) {
+    public static Command getDebuggingCommand(SimpleMotorSubsystem subsystem) {
         return new NetworkTablesCommand(
                 subsystem::setTargetVelocity,
                 false,
@@ -16,7 +16,7 @@ public class SimpleMotorSubsystemCommands {
         );
     }
 
-    public Command getSetTargetStateCommand(SimpleMotorSubsystem.SimpleMotorState targetState, SimpleMotorSubsystem subsystem) {
+    public static Command getSetTargetStateCommand(SimpleMotorSubsystem.SimpleMotorState targetState, SimpleMotorSubsystem subsystem) {
         return new ExecuteEndCommand(
                 () -> subsystem.setTargetState(targetState),
                 subsystem::stop,
@@ -24,7 +24,7 @@ public class SimpleMotorSubsystemCommands {
         );
     }
 
-    public Command getSetTargetStateCommand(double targetVelocityRotationsPerSecond, SimpleMotorSubsystem subsystem) {
+    public static Command getSetTargetStateCommand(double targetVelocityRotationsPerSecond, SimpleMotorSubsystem subsystem) {
         return new ExecuteEndCommand(
                 () -> subsystem.setTargetVelocity(targetVelocityRotationsPerSecond),
                 subsystem::stop,
@@ -32,7 +32,7 @@ public class SimpleMotorSubsystemCommands {
         );
     }
 
-    public Command getPrepareTargetStateCommand(SimpleMotorSubsystem.SimpleMotorState targetState, SimpleMotorSubsystem subsystem) {
+    public static Command getPrepareTargetStateCommand(SimpleMotorSubsystem.SimpleMotorState targetState, SimpleMotorSubsystem subsystem) {
         return new ExecuteEndCommand(
                 () -> subsystem.setTargetState(targetState.getPrepareState()),
                 subsystem::stop,
