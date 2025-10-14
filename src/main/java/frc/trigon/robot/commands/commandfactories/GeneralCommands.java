@@ -3,8 +3,8 @@ package frc.trigon.robot.commands.commandfactories;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.trigon.robot.commands.CommandConstants;
 import frc.trigon.robot.constants.OperatorConstants;
-import frc.trigon.robot.subsystems.MotorSubsystem;
 import frc.trigon.robot.subsystems.swerve.SwerveCommands;
+import trigon.hardware.subsystems.MotorSubsystem;
 
 import java.util.function.BooleanSupplier;
 
