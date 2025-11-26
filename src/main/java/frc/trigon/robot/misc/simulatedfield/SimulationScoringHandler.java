@@ -1,7 +1,7 @@
 package frc.trigon.robot.misc.simulatedfield;
 
 import edu.wpi.first.math.geometry.Pose3d;
-import trigon.utilities.flippable.FlippablePose3d;
+import lib.utilities.flippable.FlippablePose3d;
 
 import java.util.ArrayList;
 import java.util.List;

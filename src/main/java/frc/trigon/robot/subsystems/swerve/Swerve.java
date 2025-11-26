@@ -20,13 +20,13 @@ import frc.trigon.robot.subsystems.swerve.swervemodule.SwerveModule;
 import frc.trigon.robot.subsystems.swerve.swervemodule.SwerveModuleConstants;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
-import trigon.hardware.RobotHardwareStats;
-import trigon.hardware.phoenix6.Phoenix6SignalThread;
-import trigon.hardware.phoenix6.pigeon2.Pigeon2Gyro;
-import trigon.hardware.phoenix6.pigeon2.Pigeon2Signal;
-import trigon.utilities.flippable.Flippable;
-import trigon.utilities.flippable.FlippablePose2d;
-import trigon.utilities.flippable.FlippableRotation2d;
+import lib.hardware.RobotHardwareStats;
+import lib.hardware.phoenix6.Phoenix6SignalThread;
+import lib.hardware.phoenix6.pigeon2.Pigeon2Gyro;
+import lib.hardware.phoenix6.pigeon2.Pigeon2Signal;
+import lib.utilities.flippable.Flippable;
+import lib.utilities.flippable.FlippablePose2d;
+import lib.utilities.flippable.FlippableRotation2d;
 
 public class Swerve extends MotorSubsystem {
     private final Pigeon2Gyro gyro = SwerveConstants.GYRO;
