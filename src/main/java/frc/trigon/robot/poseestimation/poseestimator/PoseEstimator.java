@@ -6,6 +6,7 @@ import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -17,10 +18,10 @@ import frc.trigon.robot.poseestimation.apriltagcamera.AprilTagCamera;
 import frc.trigon.robot.poseestimation.relativerobotposesource.RelativeRobotPoseSource;
 import frc.trigon.robot.poseestimation.relativerobotposesource.RelativeRobotPoseSourceConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveConstants;
-import org.littletonrobotics.junction.AutoLogOutput;
-import org.littletonrobotics.junction.Logger;
 import lib.utilities.QuickSortHandler;
 import lib.utilities.flippable.Flippable;
+import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -135,13 +136,29 @@ public class PoseEstimator implements AutoCloseable {
     }
 
     /**
-     * Gets the estimated pose of the robot at the target timestamp.
+     * Samples the estimated pose of the robot at a specific timestamp.
+     * Unlike {@link #getPredictedRobotFuturePose} which predicts a pose in the future, this samples a past pose from the estimator's buffer.
      *
-     * @param timestamp the target timestamp
+     * @param timestamp the rio FPGA timestamp
      * @return the robot's estimated pose at the timestamp
      */
-    public Pose2d getEstimatedPoseAtTimestamp(double timestamp) {
+    public Pose2d samplePoseAtTimestamp(double timestamp) {
         return swerveDrivePoseEstimator.sampleAt(timestamp).orElse(null);
+    }
+
+    /**
+     * Predicts the robots pose in a specific amount of time.
+     * Unlike {@link #samplePoseAtTimestamp(double)} which samples a past pose, this predicts the future pose of the robot.
+     *
+     * @param seconds the number of seconds into the future for which the robots pose should be predicted
+     * @return the predicted pose
+     */
+    public Pose2d getPredictedRobotFuturePose(double seconds) {
+        final ChassisSpeeds robotVelocity = RobotContainer.SWERVE.getSelfRelativeVelocity();
+        final double predictedX = robotVelocity.vxMetersPerSecond * seconds;
+        final double predictedY = robotVelocity.vyMetersPerSecond * seconds;
+        final Rotation2d predictedRotation = Rotation2d.fromRadians(robotVelocity.omegaRadiansPerSecond * seconds);
+        return getEstimatedRobotPose().transformBy(new Transform2d(predictedX, predictedY, predictedRotation));
     }
 
     private void initialize() {
