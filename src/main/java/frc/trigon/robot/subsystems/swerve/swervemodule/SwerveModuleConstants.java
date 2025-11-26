@@ -9,7 +9,7 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.trigon.robot.constants.PathPlannerConstants;
+import frc.trigon.robot.constants.AutonomousConstants;
 import lib.hardware.RobotHardwareStats;
 import lib.hardware.simulation.SimpleMotorSimulation;
 
@@ -31,7 +31,7 @@ public class SwerveModuleConstants {
 
     public static final SysIdRoutine.Config DRIVE_MOTOR_SYSID_CONFIG = new SysIdRoutine.Config(
             Units.Volts.of(1).per(Units.Second),
-            Units.Volts.of(8),
+            Units.Volts.of(2),
             Units.Second.of(1000)
     );
 
@@ -58,7 +58,7 @@ public class SwerveModuleConstants {
         return new SimpleMotorSimulation(STEER_MOTOR_GEARBOX, REAR_STEER_MOTOR_GEAR_RATIO, STEER_MOMENT_OF_INERTIA);
     }
 
-    static TalonFXConfiguration generateDriveMotorConfiguration() {
+    public static TalonFXConfiguration generateDriveMotorConfiguration() {
         final TalonFXConfiguration config = new TalonFXConfiguration();
 
         config.Audio.BeepOnBoot = false;
@@ -68,7 +68,7 @@ public class SwerveModuleConstants {
         config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         config.Feedback.SensorToMechanismRatio = DRIVE_MOTOR_GEAR_RATIO;
 
-        final double driveMotorSlipCurrent = PathPlannerConstants.ROBOT_CONFIG.moduleConfig.driveCurrentLimit;
+        final double driveMotorSlipCurrent = AutonomousConstants.ROBOT_CONFIG.moduleConfig.driveCurrentLimit;
         config.TorqueCurrent.PeakForwardTorqueCurrent = driveMotorSlipCurrent;
         config.TorqueCurrent.PeakReverseTorqueCurrent = -driveMotorSlipCurrent;
         config.CurrentLimits.StatorCurrentLimit = driveMotorSlipCurrent;
@@ -77,12 +77,12 @@ public class SwerveModuleConstants {
         config.ClosedLoopRamps.TorqueClosedLoopRampPeriod = 0.1;
         config.OpenLoopRamps.VoltageOpenLoopRampPeriod = 0.1;
 
-        config.Slot0.kP = RobotHardwareStats.isSimulation() ? 50 : 50;
+        config.Slot0.kP = RobotHardwareStats.isSimulation() ? 0 : 0;
         config.Slot0.kI = RobotHardwareStats.isSimulation() ? 0 : 0;
         config.Slot0.kD = RobotHardwareStats.isSimulation() ? 0 : 0;
-        config.Slot0.kS = RobotHardwareStats.isSimulation() ? 0.4708 : 5.25;
-        config.Slot0.kV = RobotHardwareStats.isSimulation() ? 0 : 0;
-        config.Slot0.kA = RobotHardwareStats.isSimulation() ? 0 : DRIVE_MOTOR_GEAR_RATIO / (1 / DCMotor.getKrakenX60Foc(1).KtNMPerAmp);
+        config.Slot0.kS = RobotHardwareStats.isSimulation() ? 0.016046 : 0.2;
+        config.Slot0.kV = RobotHardwareStats.isSimulation() ? 0.8774 : 0.91963;
+        config.Slot0.kA = RobotHardwareStats.isSimulation() ? 0.020691 : 0.069151;
 
         config.Feedback.VelocityFilterTimeConstant = 0;
 
@@ -98,14 +98,14 @@ public class SwerveModuleConstants {
         config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
-        config.CurrentLimits.StatorCurrentLimit = RobotHardwareStats.isSimulation() ? 200 : 30;
+        config.CurrentLimits.StatorCurrentLimit = RobotHardwareStats.isSimulation() ? 200 : 50;
         config.CurrentLimits.StatorCurrentLimitEnable = true;
 
         config.Feedback.RotorToSensorRatio = REAR_STEER_MOTOR_GEAR_RATIO;
         config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
         config.Feedback.FeedbackRemoteSensorID = feedbackRemoteSensorID;
 
-        config.Slot0.kP = RobotHardwareStats.isSimulation() ? 120 : 65;
+        config.Slot0.kP = RobotHardwareStats.isSimulation() ? 120 : 40;
         config.Slot0.kI = RobotHardwareStats.isSimulation() ? 0 : 0;
         config.Slot0.kD = RobotHardwareStats.isSimulation() ? 0 : 0;
         config.ClosedLoopGeneral.ContinuousWrap = true;
