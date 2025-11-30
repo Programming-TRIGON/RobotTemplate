@@ -147,7 +147,7 @@ public class PoseEstimator implements AutoCloseable {
     }
 
     /**
-     * Predicts the robots pose in a specific amount of time.
+     * Predicts the robot's pose after the specified time.
      * Unlike {@link #samplePoseAtTimestamp(double)} which samples a past pose, this predicts the future pose of the robot.
      *
      * @param seconds the number of seconds into the future for which the robots pose should be predicted
