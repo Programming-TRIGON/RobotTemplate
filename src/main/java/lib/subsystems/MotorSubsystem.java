@@ -1,4 +1,4 @@
-package frc.trigon.robot.subsystems;
+package lib.subsystems;
 
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DriverStation;

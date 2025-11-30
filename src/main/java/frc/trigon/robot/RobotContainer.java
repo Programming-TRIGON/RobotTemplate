@@ -18,10 +18,10 @@ import frc.trigon.robot.constants.PathPlannerConstants;
 import frc.trigon.robot.misc.objectdetectioncamera.ObjectPoseEstimator;
 import frc.trigon.robot.misc.simulatedfield.SimulatedGamePieceConstants;
 import frc.trigon.robot.poseestimation.poseestimator.PoseEstimator;
-import frc.trigon.robot.subsystems.MotorSubsystem;
 import frc.trigon.robot.subsystems.swerve.Swerve;
-import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+import lib.subsystems.MotorSubsystem;
 import lib.utilities.flippable.Flippable;
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class RobotContainer {
     public static final PoseEstimator ROBOT_POSE_ESTIMATOR = new PoseEstimator();
