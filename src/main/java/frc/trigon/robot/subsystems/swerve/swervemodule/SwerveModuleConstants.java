@@ -58,7 +58,7 @@ public class SwerveModuleConstants {
         return new SimpleMotorSimulation(STEER_MOTOR_GEARBOX, REAR_STEER_MOTOR_GEAR_RATIO, STEER_MOMENT_OF_INERTIA);
     }
 
-    public static TalonFXConfiguration generateDriveMotorConfiguration() {
+    static TalonFXConfiguration generateDriveMotorConfiguration() {
         final TalonFXConfiguration config = new TalonFXConfiguration();
 
         config.Audio.BeepOnBoot = false;
