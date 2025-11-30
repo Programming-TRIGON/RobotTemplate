@@ -1,4 +1,4 @@
-package trigon.hardware.subsystems.elevator;
+package lib.subsystems.elevator;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.util.Color;

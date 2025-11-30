@@ -1,4 +1,4 @@
-package trigon.hardware.subsystems.arm;
+package lib.subsystems.arm;
 
 import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.DynamicMotionMagicVoltage;
@@ -12,7 +12,7 @@ import lib.hardware.RobotHardwareStats;
 import lib.hardware.phoenix6.talonfx.TalonFXMotor;
 import lib.hardware.phoenix6.talonfx.TalonFXSignal;
 import lib.hardware.simulation.SingleJointedArmSimulation;
-import trigon.hardware.subsystems.MotorSubsystem;
+import lib.subsystems.MotorSubsystem;
 import lib.utilities.mechanisms.SingleJointedArmMechanism2d;
 
 public class ArmSubsystem extends MotorSubsystem {

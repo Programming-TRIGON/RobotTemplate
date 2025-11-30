@@ -1,4 +1,4 @@
-package trigon.hardware.subsystems.elevator;
+package lib.subsystems.elevator;
 
 import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.DynamicMotionMagicVoltage;
@@ -14,7 +14,7 @@ import org.littletonrobotics.junction.Logger;
 import lib.hardware.phoenix6.talonfx.TalonFXMotor;
 import lib.hardware.phoenix6.talonfx.TalonFXSignal;
 import lib.hardware.simulation.ElevatorSimulation;
-import trigon.hardware.subsystems.MotorSubsystem;
+import lib.subsystems.MotorSubsystem;
 import lib.utilities.Conversions;
 import lib.utilities.mechanisms.ElevatorMechanism2d;
 

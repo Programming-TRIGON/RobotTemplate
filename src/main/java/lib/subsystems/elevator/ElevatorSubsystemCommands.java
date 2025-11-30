@@ -1,4 +1,4 @@
-package trigon.hardware.subsystems.elevator;
+package lib.subsystems.elevator;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import lib.commands.ExecuteEndCommand;

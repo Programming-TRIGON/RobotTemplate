@@ -1,4 +1,4 @@
-package trigon.hardware.subsystems.flywheel;
+package lib.subsystems.flywheel;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import lib.commands.ExecuteEndCommand;

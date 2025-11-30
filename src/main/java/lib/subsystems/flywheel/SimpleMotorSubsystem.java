@@ -1,4 +1,4 @@
-package trigon.hardware.subsystems.flywheel;
+package lib.subsystems.flywheel;
 
 import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.VelocityVoltage;
@@ -10,7 +10,7 @@ import org.littletonrobotics.junction.Logger;
 import lib.hardware.phoenix6.talonfx.TalonFXMotor;
 import lib.hardware.phoenix6.talonfx.TalonFXSignal;
 import lib.hardware.simulation.SimpleMotorSimulation;
-import trigon.hardware.subsystems.MotorSubsystem;
+import lib.subsystems.MotorSubsystem;
 import lib.utilities.mechanisms.SpeedMechanism2d;
 
 public class SimpleMotorSubsystem extends MotorSubsystem {
