@@ -30,8 +30,8 @@ public class SwerveConstants {
     private static final double
             FRONT_LEFT_STEER_ENCODER_OFFSET = 0,
             FRONT_RIGHT_STEER_ENCODER_OFFSET = 0,
-            REAR_LEFT_STEER_ENCODER_OFFSET = Math.abs(-0),
-            REAR_RIGHT_STEER_ENCODER_OFFSET = Math.abs(-0);
+            REAR_LEFT_STEER_ENCODER_OFFSET = 0,
+            REAR_RIGHT_STEER_ENCODER_OFFSET = 0;
     private static final double
             FRONT_LEFT_WHEEL_DIAMETER = 0.05 * 2,
             FRONT_RIGHT_WHEEL_DIAMETER = 0.05 * 2,
