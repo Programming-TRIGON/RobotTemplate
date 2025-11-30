@@ -28,15 +28,15 @@ public class SwerveConstants {
             REAR_LEFT_ID = 3,
             REAR_RIGHT_ID = 4;
     private static final double
-            FRONT_LEFT_STEER_ENCODER_OFFSET = -0.044677734375,
-            FRONT_RIGHT_STEER_ENCODER_OFFSET = 0.3525390625,
-            REAR_LEFT_STEER_ENCODER_OFFSET = -0.30517578125,
-            REAR_RIGHT_STEER_ENCODER_OFFSET = -0.121826171875;
+            FRONT_LEFT_STEER_ENCODER_OFFSET = 0,
+            FRONT_RIGHT_STEER_ENCODER_OFFSET = 0,
+            REAR_LEFT_STEER_ENCODER_OFFSET = 0,
+            REAR_RIGHT_STEER_ENCODER_OFFSET = 0;
     private static final double
-            FRONT_LEFT_WHEEL_DIAMETER = 0.1016,
-            FRONT_RIGHT_WHEEL_DIAMETER = 0.1016,
-            REAR_LEFT_WHEEL_DIAMETER = 0.1016,
-            REAR_RIGHT_WHEEL_DIAMETER = 0.1016;
+            FRONT_LEFT_WHEEL_DIAMETER = 0.05 * 2,
+            FRONT_RIGHT_WHEEL_DIAMETER = 0.05 * 2,
+            REAR_LEFT_WHEEL_DIAMETER = 0.05 * 2,
+            REAR_RIGHT_WHEEL_DIAMETER = 0.05 * 2;
     static final SwerveModule[] SWERVE_MODULES = new SwerveModule[]{
             new SwerveModule(FRONT_LEFT_ID, FRONT_LEFT_STEER_ENCODER_OFFSET, FRONT_LEFT_WHEEL_DIAMETER),
             new SwerveModule(FRONT_RIGHT_ID, FRONT_RIGHT_STEER_ENCODER_OFFSET, FRONT_RIGHT_WHEEL_DIAMETER),
@@ -99,9 +99,9 @@ public class SwerveConstants {
 
     private static void configureGyro() {
         final Pigeon2Configuration config = new Pigeon2Configuration();
-        config.MountPose.MountPoseYaw = Units.degreesToRotations(-52.198792);
-        config.MountPose.MountPosePitch = Units.degreesToRadians(-0.087891);
-        config.MountPose.MountPoseRoll = Units.degreesToRadians(-0.659180);
+        config.MountPose.MountPoseYaw = 0;
+        config.MountPose.MountPosePitch = 0;
+        config.MountPose.MountPoseRoll = 0;
         GYRO.applyConfiguration(config);
         GYRO.setSimulationYawVelocitySupplier(() -> RobotContainer.SWERVE.getSelfRelativeVelocity().omegaRadiansPerSecond);
 
