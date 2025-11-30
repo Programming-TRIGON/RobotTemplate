@@ -80,9 +80,9 @@ public class SwerveModuleConstants {
         config.Slot0.kP = RobotHardwareStats.isSimulation() ? 0 : 0;
         config.Slot0.kI = RobotHardwareStats.isSimulation() ? 0 : 0;
         config.Slot0.kD = RobotHardwareStats.isSimulation() ? 0 : 0;
-        config.Slot0.kS = RobotHardwareStats.isSimulation() ? 0 : 0;
-        config.Slot0.kV = RobotHardwareStats.isSimulation() ? 0 : 0;
-        config.Slot0.kA = RobotHardwareStats.isSimulation() ? 0 : 0;
+        config.Slot0.kS = RobotHardwareStats.isSimulation() ? 0.016046 : 0;
+        config.Slot0.kV = RobotHardwareStats.isSimulation() ? 0.8774 : 0;
+        config.Slot0.kA = RobotHardwareStats.isSimulation() ? 00.020691 : 0;
 
         config.Feedback.VelocityFilterTimeConstant = 0;
 
