@@ -34,7 +34,6 @@ public abstract class MotorSubsystem extends edu.wpi.first.wpilibj2.command.Subs
         DISABLED_TRIGGER.onFalse(new InstantCommand(() -> {
             setAllSubsystemsBrakeAsync(true);
             IS_BRAKING = true;
-            RobotContainer.SWERVE.resetSetpoint();
         }).ignoringDisable(true));
     }
 

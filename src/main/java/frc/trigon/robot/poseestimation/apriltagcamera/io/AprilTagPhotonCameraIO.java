@@ -139,7 +139,7 @@ public class AprilTagPhotonCameraIO extends AprilTagCameraIO {
             return null;
 
         Pose3d fieldToRobotSeed = bestCameraSolvePNPPose.transformBy(this.robotToCamera.inverse());
-        final Rotation2d robotYawAtTimestamp = RobotContainer.ROBOT_POSE_ESTIMATOR.getEstimatedPoseAtTimestamp(result.getTimestampSeconds()).getRotation();
+        final Rotation2d robotYawAtTimestamp = RobotContainer.ROBOT_POSE_ESTIMATOR.samplePoseAtTimestamp(result.getTimestampSeconds()).getRotation();
 
         if (!AprilTagCameraConstants.CONSTRAINED_SOLVE_PNP_PARAMS.headingFree()) {
             fieldToRobotSeed = new Pose3d(

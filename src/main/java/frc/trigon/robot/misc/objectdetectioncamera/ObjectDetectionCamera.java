@@ -84,7 +84,7 @@ public class ObjectDetectionCamera extends SubsystemBase {
      * @return the object's 2D position on the field (z is assumed to be 0)
      */
     private Translation2d calculateObjectPositionFromRotation(Rotation3d objectRotation) {
-        final Pose2d robotPoseAtResultTimestamp = RobotContainer.ROBOT_POSE_ESTIMATOR.getEstimatedPoseAtTimestamp(objectDetectionCameraInputs.latestResultTimestamp);
+        final Pose2d robotPoseAtResultTimestamp = RobotContainer.ROBOT_POSE_ESTIMATOR.samplePoseAtTimestamp(objectDetectionCameraInputs.latestResultTimestamp);
         if (robotPoseAtResultTimestamp == null)
             return new Translation2d();
         final Pose3d cameraPose = new Pose3d(robotPoseAtResultTimestamp).plus(robotCenterToCamera);
