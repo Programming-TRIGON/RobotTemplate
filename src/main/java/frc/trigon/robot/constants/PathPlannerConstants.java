@@ -11,9 +11,9 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.trigon.robot.RobotContainer;
 import org.json.simple.parser.ParseException;
-import trigon.hardware.RobotHardwareStats;
-import trigon.utilities.LocalADStarAK;
-import trigon.utilities.flippable.Flippable;
+import lib.hardware.RobotHardwareStats;
+import lib.utilities.LocalADStarAK;
+import lib.utilities.flippable.Flippable;
 
 import java.io.IOException;
 

@@ -11,6 +11,6 @@ We use these a lot and highly recommend them!
 
 # TRIGONLib [![](https://jitpack.io/v/Programming-TRIGON/TRIGONLib.svg)](https://jitpack.io/#Programming-TRIGON/TRIGONLib)
 
-[TRIGON 5990's library](https://github.com/Programming-TRIGON/TRIGONLib) for automatic Advantage Kit and Simulation
-hardware wrappers, utilities, commands, and more.    
-This library is used from the `org.trigon` import.
+[TRIGON 5990's library](https://github.com/Programming-TRIGON/RobotCodeOffSeason2025/tree/main/src/main/java/lib) for
+automatic Advantage Kit and Simulation
+hardware wrappers, utilities, commands, and more.

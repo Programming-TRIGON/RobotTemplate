@@ -10,7 +10,7 @@ import frc.trigon.robot.poseestimation.apriltagcamera.io.AprilTagSimulationCamer
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
-import trigon.hardware.RobotHardwareStats;
+import lib.hardware.RobotHardwareStats;
 
 import java.util.function.BiFunction;
 
