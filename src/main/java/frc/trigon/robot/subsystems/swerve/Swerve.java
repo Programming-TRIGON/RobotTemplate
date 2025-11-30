@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.constants.PathPlannerConstants;
 import frc.trigon.robot.poseestimation.poseestimator.PoseEstimatorConstants;
-import frc.trigon.robot.subsystems.MotorSubsystem;
+import lib.subsystems.MotorSubsystem;
 import frc.trigon.robot.subsystems.swerve.swervemodule.SwerveModule;
 import frc.trigon.robot.subsystems.swerve.swervemodule.SwerveModuleConstants;
 import lib.hardware.phoenix6.Phoenix6SignalThread;
