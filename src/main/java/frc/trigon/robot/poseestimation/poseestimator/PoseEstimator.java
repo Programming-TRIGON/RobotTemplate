@@ -137,7 +137,7 @@ public class PoseEstimator implements AutoCloseable {
 
     /**
      * Samples the estimated pose of the robot at a specific timestamp.
-     * Unlike {@link #getPredictedRobotFuturePose} which predicts a pose in the future, this samples a past pose from the estimator's buffer.
+     * Unlike {@link #getPredictedRobotFuturePose} which predicts a future pose, this gets a stored pose from the estimator's buffer.
      *
      * @param timestamp the rio FPGA timestamp
      * @return the robot's estimated pose at the timestamp
