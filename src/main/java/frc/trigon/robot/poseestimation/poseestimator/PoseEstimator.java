@@ -135,7 +135,7 @@ public class PoseEstimator implements AutoCloseable {
     }
 
     /**
-     * Gets the estimated pose of the robot at the target timestamp.
+     * Samples the estimated pose of the robot at a specific timestamp.
      *
      * @param timestamp the target timestamp
      * @return the robot's estimated pose at the timestamp
