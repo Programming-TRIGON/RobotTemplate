@@ -11,9 +11,10 @@ import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.commands.commandfactories.GeneralCommands;
 import frc.trigon.robot.constants.OperatorConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveCommands;
-import org.littletonrobotics.junction.Logger;
 import lib.hardware.RobotHardwareStats;
+import org.littletonrobotics.junction.Logger;
 
+import java.util.ArrayList;
 import java.util.function.Supplier;
 
 /**
@@ -41,9 +42,9 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
         addCommands(
                 getTrackGamePieceCommand(),
                 GeneralCommands.getContinuousConditionalCommand(
-                        GeneralCommands.getFieldRelativeDriveCommand(),
                         getAssistIntakeCommand(assistMode, () -> distanceFromTrackedGamePiece),
-                        () -> RobotContainer.OBJECT_POSE_ESTIMATOR.getClosestObjectToRobot() == null || distanceFromTrackedGamePiece == null
+                        GeneralCommands.getFieldRelativeDriveCommand(),
+                        () -> RobotContainer.OBJECT_POSE_ESTIMATOR.hasObject() && distanceFromTrackedGamePiece != null
                 )
         );
     }
@@ -53,7 +54,7 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
      * This command is for intaking a game piece with a specific robot-relative position.
      * To create an intake assist command that selects the closest game piece automatically, use {@link IntakeAssistCommand#IntakeAssistCommand(AssistMode)} instead.
      *
-     * @param assistMode               the type of assistance
+     * @param assistMode                   the type of assistance
      * @param distanceFromTrackedGamePiece the position of the game piece relative to the robot
      * @return the command
      */
@@ -69,38 +70,27 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
     }
 
     private Command getTrackGamePieceCommand() {
-        return new RunCommand(() -> {
-            if (RobotContainer.OBJECT_POSE_ESTIMATOR.getClosestObjectToRobot() != null)
-                distanceFromTrackedGamePiece = calculateDistanceFromTrackedCGamePiece();
-        });
+        return new RunCommand(() ->
+                distanceFromTrackedGamePiece = RobotContainer.OBJECT_POSE_ESTIMATOR.hasObject() ?
+                        calculateDistanceFromBestGamePiece() :
+                        null
+        );
     }
 
-    private static Translation2d calculateDistanceFromTrackedCGamePiece() {
-        final Pose2d robotPose = RobotContainer.ROBOT_POSE_ESTIMATOR.getEstimatedRobotPose();
-        final Translation2d trackedObjectPositionOnField = RobotContainer.OBJECT_POSE_ESTIMATOR.getClosestObjectToRobot();
-        if (trackedObjectPositionOnField == null)
-            return null;
+    private static Translation2d calculateTranslationPower(AssistMode assistMode, Translation2d distanceFromTrackedGamePiece) {
+        final Translation2d selfRelativeJoystickPower = getJoystickPosition().rotateBy(RobotContainer.SWERVE.getDriveRelativeAngle().unaryMinus());
 
-        final Translation2d difference = robotPose.getTranslation().minus(trackedObjectPositionOnField);
-        final Translation2d robotToTrackedGamepieceDistance = difference.rotateBy(robotPose.getRotation().unaryMinus());
-        Logger.recordOutput("IntakeAssist/TrackedGamePieceDistance", robotToTrackedGamepieceDistance);
-        return robotToTrackedGamepieceDistance;
-    }
-
-    private static Translation2d calculateTranslationPower(AssistMode assistMode, Translation2d distanceFromTrackedGamepiece) {
-        final Translation2d joystickPower = new Translation2d(OperatorConstants.DRIVER_CONTROLLER.getLeftY(), OperatorConstants.DRIVER_CONTROLLER.getLeftX());
-        final Translation2d selfRelativeJoystickPower = joystickPower.rotateBy(RobotContainer.SWERVE.getDriveRelativeAngle().unaryMinus());
-
-        final double xPIDOutput = clampToOutputRange(X_PID_CONTROLLER.calculate(distanceFromTrackedGamepiece.getX()));
-        final double yPIDOutput = clampToOutputRange(Y_PID_CONTROLLER.calculate(distanceFromTrackedGamepiece.getY()));
+        final double
+                xPIDOutput = clampToOutputRange(X_PID_CONTROLLER.calculate(distanceFromTrackedGamePiece.getX())),
+                yPIDOutput = clampToOutputRange(Y_PID_CONTROLLER.calculate(distanceFromTrackedGamePiece.getY()));
 
         if (assistMode.equals(AssistMode.ALTERNATE_ASSIST))
             return calculateAlternateAssistTranslationPower(selfRelativeJoystickPower, xPIDOutput, yPIDOutput);
         return calculateNormalAssistTranslationPower(assistMode, selfRelativeJoystickPower, xPIDOutput, yPIDOutput);
     }
 
-    private static double calculateThetaPower(AssistMode assistMode, Translation2d distanceFromTrackedGamepiece) {
-        return calculateThetaAssistPower(assistMode, distanceFromTrackedGamepiece.getAngle().plus(Rotation2d.k180deg).unaryMinus());
+    private static double calculateThetaPower(AssistMode assistMode, Translation2d distanceFromTrackedGamePiece) {
+        return calculateThetaAssistPower(assistMode, distanceFromTrackedGamePiece.getAngle().plus(Rotation2d.k180deg).unaryMinus());
     }
 
     private static Translation2d calculateAlternateAssistTranslationPower(Translation2d joystickValue, double xPIDOutput, double yPIDOutput) {
@@ -136,10 +126,6 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
         return calculateNormalAssistPower(pidOutput, joystickValue);
     }
 
-    private static double clampToOutputRange(double value) {
-        return MathUtil.clamp(value, -1, 1);
-    }
-
     private static double calculateAlternateAssistPower(double pidOutput, double pidScalar, double joystickPower) {
         return pidOutput * (1 - Math.abs(pidScalar)) + joystickPower;
     }
@@ -149,10 +135,52 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
         return (pidOutput * intakeAssistScalar) + (joystickPower * (1 - intakeAssistScalar));
     }
 
+    private static double clampToOutputRange(double value) {
+        return MathUtil.clamp(value, -1, 1);
+    }
+
     private static void resetPIDControllers(Translation2d distanceFromTrackedGamePiece) {
         X_PID_CONTROLLER.reset(distanceFromTrackedGamePiece.getX(), RobotContainer.SWERVE.getSelfRelativeVelocity().vxMetersPerSecond);
         Y_PID_CONTROLLER.reset(distanceFromTrackedGamePiece.getY(), RobotContainer.SWERVE.getSelfRelativeVelocity().vyMetersPerSecond);
         THETA_PID_CONTROLLER.reset(distanceFromTrackedGamePiece.getAngle().getRadians(), RobotContainer.SWERVE.getSelfRelativeVelocity().omegaRadiansPerSecond);
+    }
+
+    private static Translation2d calculateDistanceFromBestGamePiece() {
+        final Pose2d robotPose = RobotContainer.ROBOT_POSE_ESTIMATOR.getEstimatedRobotPose();
+        final ArrayList<Translation2d> objectPositionsOnField = RobotContainer.OBJECT_POSE_ESTIMATOR.getObjectsOnField();
+
+        Translation2d bestObjectPosition = null;
+        for (Translation2d currentObjectPosition : objectPositionsOnField) {
+            if (!isGamePieceAssistable(robotPose, currentObjectPosition))
+                continue;
+            final double currentObjectDistanceFromRobotMeters = currentObjectPosition.getDistance(robotPose.getTranslation());
+            if (bestObjectPosition == null || currentObjectDistanceFromRobotMeters < bestObjectPosition.getDistance(robotPose.getTranslation()))
+                bestObjectPosition = currentObjectPosition;
+        }
+
+        if (bestObjectPosition == null)
+            return null;
+
+        final Translation2d robotToBestGamePiece = robotPose.getTranslation().minus(bestObjectPosition);
+        final Translation2d robotToBestGamePieceDistance = robotToBestGamePiece.rotateBy(robotPose.getRotation().unaryMinus());
+        Logger.recordOutput("IntakeAssist/TargetGamePieceDistance", robotToBestGamePieceDistance);
+        return robotToBestGamePieceDistance;
+    }
+
+    private static boolean isGamePieceAssistable(Pose2d robotPose, Translation2d gamePiecePosition) {
+        final Rotation2d joystickAngle = getJoystickPosition().getAngle().rotateBy(RobotContainer.SWERVE.getDriveRelativeAngle());//Probably bad unit addition
+        final double gamePieceDistance = robotPose.getTranslation().getDistance(gamePiecePosition);
+        final Rotation2d scaledMaximumAssistAngle = OperatorConstants.INTAKE_ASSIST_MAXIMUM_ASSIST_ANGLE.times(1 / gamePieceDistance);
+
+        return Math.abs(joystickAngle.getRadians()) < Math.abs(scaledMaximumAssistAngle.getRadians());
+    }
+
+    private static Translation2d getJoystickPosition() {
+        final double
+                joystickX = OperatorConstants.DRIVER_CONTROLLER.getLeftX(),
+                joystickY = OperatorConstants.DRIVER_CONTROLLER.getLeftY();
+
+        return new Translation2d(joystickX, joystickY);
     }
 
     /**

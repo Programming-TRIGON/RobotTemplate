@@ -1,5 +1,6 @@
 package frc.trigon.robot.constants;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.trigon.robot.commands.commandclasses.IntakeAssistCommand;
@@ -23,6 +24,7 @@ public class OperatorConstants {
             ROTATION_STICK_SPEED_DIVIDER = 1;
 
     public static final double INTAKE_ASSIST_SCALAR = 0.0;
+    public static final Rotation2d INTAKE_ASSIST_MAXIMUM_ASSIST_ANGLE = Rotation2d.fromDegrees(30);
     public static final IntakeAssistCommand.AssistMode DEFAULT_INTAKE_ASSIST_MODE = IntakeAssistCommand.AssistMode.ALTERNATE_ASSIST;
 
     public static final Trigger
