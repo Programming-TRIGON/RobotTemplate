@@ -61,10 +61,10 @@ public class SwerveConstants {
     private static final PIDConstants
             TRANSLATION_PID_CONSTANTS = RobotHardwareStats.isSimulation() ?
             new PIDConstants(5, 0, 0) :
-            new PIDConstants(4.2, 0, 0),
+            new PIDConstants(6.3, 0, 0),
             PROFILED_ROTATION_PID_CONSTANTS = RobotHardwareStats.isSimulation() ?
                     new PIDConstants(4, 0, 0) :
-                    new PIDConstants(13, 0, 0.25);
+                    new PIDConstants(10, 0, 0.1);
     private static final double
             MAXIMUM_ROTATION_VELOCITY = RobotHardwareStats.isSimulation() ? 720 : Units.radiansToDegrees(MAXIMUM_ROTATIONAL_SPEED_RADIANS_PER_SECOND),
             MAXIMUM_ROTATION_ACCELERATION = RobotHardwareStats.isSimulation() ? 720 : 900;
@@ -95,6 +95,8 @@ public class SwerveConstants {
         configureGyro();
         SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER.enableContinuousInput(-SwerveConstants.MAXIMUM_PID_ANGLE, SwerveConstants.MAXIMUM_PID_ANGLE);
         SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER.setTolerance(1);
+        SwerveConstants.X_TRANSLATION_PID_CONTROLLER.setTolerance(0.02);
+        SwerveConstants.Y_TRANSLATION_PID_CONTROLLER.setTolerance(0.02);
     }
 
     private static void configureGyro() {

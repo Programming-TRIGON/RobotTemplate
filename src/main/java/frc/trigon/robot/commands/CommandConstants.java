@@ -48,13 +48,13 @@ public class CommandConstants {
                     AutonomousConstants.ROBOT_CONFIG.moduleLocations,
                     RobotContainer.SWERVE::getDriveWheelPositionsRadians,
                     () -> RobotContainer.SWERVE.getHeading().getRadians(),
-                    (omegaRadiansPerSecond) -> RobotContainer.SWERVE.selfRelativeDriveWithoutSetpointGeneration(new ChassisSpeeds(0, 0, omegaRadiansPerSecond), null),
+                    (omegaRadiansPerSecond) -> RobotContainer.SWERVE.selfRelativeDriveWithoutSetpointGeneration(new ChassisSpeeds(0, 0, omegaRadiansPerSecond)),
                     RobotContainer.SWERVE
             ),
             CALCULATE_CAMERA_POSITION_COMMAND = new CameraPositionCalculationCommand(
                     RobotContainer.ROBOT_POSE_ESTIMATOR::getEstimatedRobotPose,
                     Rotation2d.fromDegrees(0),
-                    (omegaRadiansPerSecond) -> RobotContainer.SWERVE.selfRelativeDriveWithoutSetpointGeneration(new ChassisSpeeds(0, 0, omegaRadiansPerSecond), null),
+                    (omegaRadiansPerSecond) -> RobotContainer.SWERVE.selfRelativeDriveWithoutSetpointGeneration(new ChassisSpeeds(0, 0, omegaRadiansPerSecond)),
                     RobotContainer.SWERVE
             );
 
