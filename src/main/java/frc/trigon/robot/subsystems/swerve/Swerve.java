@@ -13,13 +13,11 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.trigon.robot.RobotContainer;
-import frc.trigon.robot.constants.PathPlannerConstants;
+import frc.trigon.robot.constants.AutonomousConstants;
 import frc.trigon.robot.poseestimation.poseestimator.PoseEstimatorConstants;
 import frc.trigon.robot.subsystems.MotorSubsystem;
 import frc.trigon.robot.subsystems.swerve.swervemodule.SwerveModule;
 import frc.trigon.robot.subsystems.swerve.swervemodule.SwerveModuleConstants;
-import org.littletonrobotics.junction.AutoLogOutput;
-import org.littletonrobotics.junction.Logger;
 import lib.hardware.RobotHardwareStats;
 import lib.hardware.phoenix6.Phoenix6SignalThread;
 import lib.hardware.phoenix6.pigeon2.Pigeon2Gyro;
@@ -27,15 +25,17 @@ import lib.hardware.phoenix6.pigeon2.Pigeon2Signal;
 import lib.utilities.flippable.Flippable;
 import lib.utilities.flippable.FlippablePose2d;
 import lib.utilities.flippable.FlippableRotation2d;
+import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
 
 public class Swerve extends MotorSubsystem {
     private final Pigeon2Gyro gyro = SwerveConstants.GYRO;
     private final SwerveModule[] swerveModules = SwerveConstants.SWERVE_MODULES;
     private final Phoenix6SignalThread phoenix6SignalThread = Phoenix6SignalThread.getInstance();
-    private final SwerveSetpointGenerator setpointGenerator = new SwerveSetpointGenerator(PathPlannerConstants.ROBOT_CONFIG, SwerveModuleConstants.MAXIMUM_MODULE_ROTATIONAL_SPEED_RADIANS_PER_SECOND);
+    private final SwerveSetpointGenerator setpointGenerator = new SwerveSetpointGenerator(AutonomousConstants.ROBOT_CONFIG, SwerveModuleConstants.MAXIMUM_MODULE_ROTATIONAL_SPEED_RADIANS_PER_SECOND);
     public Pose2d targetPathPlannerPose = new Pose2d();
     public boolean isPathPlannerDriving = false;
-    private SwerveSetpoint previousSetpoint = new SwerveSetpoint(getSelfRelativeVelocity(), getModuleStates(), DriveFeedforwards.zeros(PathPlannerConstants.ROBOT_CONFIG.numModules));
+    private SwerveSetpoint previousSetpoint = new SwerveSetpoint(getSelfRelativeVelocity(), getModuleStates(), DriveFeedforwards.zeros(AutonomousConstants.ROBOT_CONFIG.numModules));
 
     public Swerve() {
         setName("Swerve");
@@ -157,7 +157,7 @@ public class Swerve extends MotorSubsystem {
         if (isFromPathPlanner && DriverStation.isAutonomous() && !isPathPlannerDriving)
             return;
         final ChassisSpeeds pidSpeeds = calculateSelfRelativePIDToPoseSpeeds(new FlippablePose2d(targetPathPlannerPose, false));
-        final ChassisSpeeds scaledSpeeds = targetPathPlannerFeedforwardSpeeds.times(PathPlannerConstants.FEEDFORWARD_SCALAR);
+        final ChassisSpeeds scaledSpeeds = targetPathPlannerFeedforwardSpeeds.times(AutonomousConstants.FEEDFORWARD_SCALAR);
         final ChassisSpeeds combinedSpeeds = pidSpeeds.plus(scaledSpeeds);
         selfRelativeDrive(combinedSpeeds);
     }
@@ -191,7 +191,7 @@ public class Swerve extends MotorSubsystem {
     }
 
     public void resetSetpoint() {
-        previousSetpoint = new SwerveSetpoint(getSelfRelativeVelocity(), getModuleStates(), DriveFeedforwards.zeros(PathPlannerConstants.ROBOT_CONFIG.numModules));
+        previousSetpoint = new SwerveSetpoint(getSelfRelativeVelocity(), getModuleStates(), DriveFeedforwards.zeros(AutonomousConstants.ROBOT_CONFIG.numModules));
     }
 
     public void initializeDrive(boolean shouldUseClosedLoop) {

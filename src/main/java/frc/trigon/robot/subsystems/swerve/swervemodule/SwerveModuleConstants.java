@@ -9,7 +9,7 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.trigon.robot.constants.PathPlannerConstants;
+import frc.trigon.robot.constants.AutonomousConstants;
 import lib.hardware.RobotHardwareStats;
 import lib.hardware.simulation.SimpleMotorSimulation;
 
@@ -68,7 +68,7 @@ public class SwerveModuleConstants {
         config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         config.Feedback.SensorToMechanismRatio = DRIVE_MOTOR_GEAR_RATIO;
 
-        final double driveMotorSlipCurrent = PathPlannerConstants.ROBOT_CONFIG.moduleConfig.driveCurrentLimit;
+        final double driveMotorSlipCurrent = AutonomousConstants.ROBOT_CONFIG.moduleConfig.driveCurrentLimit;
         config.TorqueCurrent.PeakForwardTorqueCurrent = driveMotorSlipCurrent;
         config.TorqueCurrent.PeakReverseTorqueCurrent = -driveMotorSlipCurrent;
         config.CurrentLimits.StatorCurrentLimit = driveMotorSlipCurrent;

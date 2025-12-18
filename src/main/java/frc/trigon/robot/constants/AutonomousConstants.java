@@ -5,25 +5,28 @@ import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.util.Units;
 import frc.trigon.robot.RobotContainer;
-import org.json.simple.parser.ParseException;
 import lib.hardware.RobotHardwareStats;
 import lib.utilities.LocalADStarAK;
 import lib.utilities.flippable.Flippable;
+import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
 
 /**
  * A class that contains the constants and configurations for everything related to the 15-second autonomous period at the start of the match.
  */
-public class PathPlannerConstants {
+public class AutonomousConstants {
     public static final String DEFAULT_AUTO_NAME = "DefaultAutoName";
     public static final RobotConfig ROBOT_CONFIG = getRobotConfig();
     public static final double FEEDFORWARD_SCALAR = 0.5;//TODO: Calibrate
+    public static final PathConstraints DRIVE_TO_SCORING_LOCATION_CONSTRAINTS = new PathConstraints(2.5, 4.5, Units.degreesToRadians(450), Units.degreesToRadians(900));
 
     private static final PIDConstants
             AUTO_TRANSLATION_PID_CONSTANTS = RobotHardwareStats.isSimulation() ?

@@ -7,8 +7,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.commands.commandfactories.GeneralCommands;
+import frc.trigon.robot.constants.AutonomousConstants;
 import frc.trigon.robot.constants.OperatorConstants;
-import frc.trigon.robot.constants.PathPlannerConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveCommands;
 import lib.commands.CameraPositionCalculationCommand;
 import lib.commands.WheelRadiusCharacterizationCommand;
@@ -45,7 +45,7 @@ public class CommandConstants {
                     () -> calculateRotationStickAxisValue(DRIVER_CONTROLLER.getRightX())
             ),
             WHEEL_RADIUS_CHARACTERIZATION_COMMAND = new WheelRadiusCharacterizationCommand(
-                    PathPlannerConstants.ROBOT_CONFIG.moduleLocations,
+                    AutonomousConstants.ROBOT_CONFIG.moduleLocations,
                     RobotContainer.SWERVE::getDriveWheelPositionsRadians,
                     () -> RobotContainer.SWERVE.getHeading().getRadians(),
                     (omegaRadiansPerSecond) -> RobotContainer.SWERVE.selfRelativeDriveWithoutSetpointGeneration(new ChassisSpeeds(0, 0, omegaRadiansPerSecond), null),
