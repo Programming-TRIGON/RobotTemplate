@@ -120,9 +120,21 @@ public class ObjectPoseEstimator extends SubsystemBase {
      * @return the closest object's position on the field, or null if no objects are known
      */
     public Translation2d getClosestObjectToPosition(Translation2d position) {
-        return knownObjectPositions.keySet().stream()
-                .min(Comparator.comparingDouble(position::getDistance))
-                .orElse(null);
+        final Translation2d[] objectsTranslations = knownObjectPositions.keySet().toArray(Translation2d[]::new);
+        if (knownObjectPositions.isEmpty())
+            return null;
+        Translation2d closestObjectTranslation = objectsTranslations[0];
+        double closestObjectDistance = position.getDistance(closestObjectTranslation);
+
+        for (int i = 1; i < objectsTranslations.length; i++) {
+            final Translation2d currentObjectTranslation = objectsTranslations[i];
+            final double currentObjectDistance = position.getDistance(currentObjectTranslation);
+            if (currentObjectDistance < closestObjectDistance) {
+                closestObjectDistance = currentObjectDistance;
+                closestObjectTranslation = currentObjectTranslation;
+            }
+        }
+        return closestObjectTranslation;
     }
 
     /**
