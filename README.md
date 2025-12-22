@@ -25,7 +25,7 @@ Have questions? Want to learn more? Reach out to us!
 
 | Platform | Link |
 |----------|------|
-| 🌐 **Website** | [trigon5990.com](https://trigon5990.com) |
+| 🌐 **Website** | [trigon5990.org](https://trigon5990.com) |
 | 💻 **GitHub** | [@Programming-TRIGON](https://github.com/Programming-TRIGON) |
 | 📸 **Instagram** | [@trigon5990](https://www.instagram.com/trigon5990/) |
 | 🎥 **YouTube** | [Trigon 5990](https://www.youtube.com/@Trigon5990) |
