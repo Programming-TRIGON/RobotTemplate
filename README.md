@@ -19,14 +19,16 @@ We use these a lot and highly recommend them!
 automatic Advantage Kit and Simulation
 hardware wrappers, utilities, commands, and more.
 
-## Contact Us
+## 📞 Contact Us
 
-For any questions or inquiries, and some more info, please feel free to contact us through the following channels:
+Have questions? Want to learn more? Reach out to us!
 
-* **🌐 Website:** [trigon5990.com](https://trigon5990.com)
-* **💻 GitHub:** [Programming-TRIGON](https://github.com/Programming-TRIGON)
-* **📸 Instagram:** [@trigon5990](https://www.instagram.com/trigon5990/)
-* **🎥 YouTube:** [Trigon 5990](https://www.youtube.com/@Trigon5990)
-* **💙 LinkedIn:** [Trigon 5990](https://www.linkedin.com/company/trigon5990/)
-* **📘 Facebook:** [Trigon 5990](https://www.facebook.com/trigon5990/)
-* **📧 Email:** [trigon5990@gmail.com](mailto:trigon5990@gmail.com)
+| Platform | Link |
+|----------|------|
+| 🌐 **Website** | [trigon5990.com](https://trigon5990.com) |
+| 💻 **GitHub** | [@Programming-TRIGON](https://github.com/Programming-TRIGON) |
+| 📸 **Instagram** | [@trigon5990](https://www.instagram.com/trigon5990/) |
+| 🎥 **YouTube** | [Trigon 5990](https://www.youtube.com/@Trigon5990) |
+| 💼 **LinkedIn** | [Trigon 5990](https://www.linkedin.com/company/trigon5990/) |
+| 📘 **Facebook** | [Trigon 5990](https://www.facebook.com/trigon5990/) |
+| 📧 **Email** | [trigon5990@gmail.com](mailto:trigon5990@gmail.com) |
