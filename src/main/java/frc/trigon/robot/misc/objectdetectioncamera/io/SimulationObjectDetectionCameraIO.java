@@ -35,8 +35,8 @@ public class SimulationObjectDetectionCameraIO extends ObjectDetectionCameraIO {
 
         boolean hasAnyTarget = false;
         for (int i = 0; i < ObjectDetectionCameraConstants.NUMBER_OF_GAME_PIECE_TYPES; i++) {
-            inputs.hasTarget[i] = !visibleGamePieces[i].isEmpty();
-            if (inputs.hasTarget[i])
+            inputs.seesObject[i] = !visibleGamePieces[i].isEmpty();
+            if (inputs.seesObject[i])
                 hasAnyTarget = true;
         }
 
@@ -56,7 +56,7 @@ public class SimulationObjectDetectionCameraIO extends ObjectDetectionCameraIO {
     }
 
     private void updateNoNewResultInputs(ObjectDetectionCameraInputsAutoLogged inputs) {
-        inputs.hasTarget = new boolean[ObjectDetectionCameraConstants.NUMBER_OF_GAME_PIECE_TYPES];
+        inputs.seesObject = new boolean[ObjectDetectionCameraConstants.NUMBER_OF_GAME_PIECE_TYPES];
         inputs.visibleObjectRotations = new Rotation3d[ObjectDetectionCameraConstants.NUMBER_OF_GAME_PIECE_TYPES][0];
     }
 

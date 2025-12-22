@@ -13,9 +13,9 @@ public class ObjectDetectionCameraIO {
     @AutoLog
     public static class ObjectDetectionCameraInputs {
         /**
-         * Whether there is at least one target or not for each game piece, by game piece index (type).
+         * Whether there is at least one object or not for each game piece, by game piece index (type).
          */
-        public boolean[] hasTarget = new boolean[ObjectDetectionCameraConstants.NUMBER_OF_GAME_PIECE_TYPES];
+        public boolean[] seesObject = new boolean[ObjectDetectionCameraConstants.NUMBER_OF_GAME_PIECE_TYPES];
         /**
          * Stores the Rotation3d of all visible objects.
          * The first index is the game piece ID (type).
