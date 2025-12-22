@@ -175,7 +175,7 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
     private static boolean isGamePieceAssistable(Pose2d robotPose, Translation2d gamePiecePosition) {
         final Rotation2d joystickAngle = getJoystickPosition().getAngle().rotateBy(RobotContainer.SWERVE.getDriveRelativeAngle());//Probably bad unit addition
         final double gamePieceDistance = robotPose.getTranslation().getDistance(gamePiecePosition);
-        final Rotation2d scaledMaximumAssistAngle = OperatorConstants.INTAKE_ASSIST_MAXIMUM_ASSIST_ANGLE.times(1 / gamePieceDistance);
+        final Rotation2d scaledMaximumAssistAngle = OperatorConstants.INTAKE_ASSIST_MAXIMUM_ANGLE_FROM_GAME_PIECE.times(1 / gamePieceDistance);
 
         return Math.abs(joystickAngle.getRadians()) < Math.abs(scaledMaximumAssistAngle.getRadians());
     }
