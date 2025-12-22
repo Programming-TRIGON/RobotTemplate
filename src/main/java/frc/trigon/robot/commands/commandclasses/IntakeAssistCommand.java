@@ -11,8 +11,8 @@ import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.commands.commandfactories.GeneralCommands;
 import frc.trigon.robot.constants.OperatorConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveCommands;
-import org.littletonrobotics.junction.Logger;
 import lib.hardware.RobotHardwareStats;
+import org.littletonrobotics.junction.Logger;
 
 import java.util.function.Supplier;
 
@@ -53,7 +53,7 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
      * This command is for intaking a game piece with a specific robot-relative position.
      * To create an intake assist command that selects the closest game piece automatically, use {@link IntakeAssistCommand#IntakeAssistCommand(AssistMode)} instead.
      *
-     * @param assistMode               the type of assistance
+     * @param assistMode                   the type of assistance
      * @param distanceFromTrackedGamePiece the position of the game piece relative to the robot
      * @return the command
      */
@@ -150,9 +150,9 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
     }
 
     private static void resetPIDControllers(Translation2d distanceFromTrackedGamePiece) {
-        X_PID_CONTROLLER.reset(distanceFromTrackedGamePiece.getX(), RobotContainer.SWERVE.getSelfRelativeVelocity().vxMetersPerSecond);
-        Y_PID_CONTROLLER.reset(distanceFromTrackedGamePiece.getY(), RobotContainer.SWERVE.getSelfRelativeVelocity().vyMetersPerSecond);
-        THETA_PID_CONTROLLER.reset(distanceFromTrackedGamePiece.getAngle().getRadians(), RobotContainer.SWERVE.getSelfRelativeVelocity().omegaRadiansPerSecond);
+        X_PID_CONTROLLER.reset(distanceFromTrackedGamePiece.getX(), RobotContainer.SWERVE.getSelfRelativeChassisSpeeds().vxMetersPerSecond);
+        Y_PID_CONTROLLER.reset(distanceFromTrackedGamePiece.getY(), RobotContainer.SWERVE.getSelfRelativeChassisSpeeds().vyMetersPerSecond);
+        THETA_PID_CONTROLLER.reset(distanceFromTrackedGamePiece.getAngle().getRadians(), RobotContainer.SWERVE.getSelfRelativeChassisSpeeds().omegaRadiansPerSecond);
     }
 
     /**

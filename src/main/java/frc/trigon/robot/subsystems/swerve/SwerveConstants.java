@@ -23,25 +23,24 @@ public class SwerveConstants {
 
     public static final int
             FRONT_LEFT_ID = 1,
-            FRONT_RIGHT_ID = 2;
-    private static final int
+            FRONT_RIGHT_ID = 2,
             REAR_LEFT_ID = 3,
             REAR_RIGHT_ID = 4;
     private static final double
-            FRONT_LEFT_STEER_ENCODER_OFFSET = 0,
-            FRONT_RIGHT_STEER_ENCODER_OFFSET = 0,
-            REAR_LEFT_STEER_ENCODER_OFFSET = 0,
-            REAR_RIGHT_STEER_ENCODER_OFFSET = 0;
-    private static final double
+            FRONT_LEFT_STEER_ENCODER_OFFSET_ROTATIONS = 0,
+            FRONT_RIGHT_STEER_ENCODER_OFFSET_ROTATIONS = 0,
+            REAR_LEFT_STEER_ENCODER_OFFSET_ROTATIONS = 0,
+            REAR_RIGHT_STEER_ENCODER_OFFSET_ROTATIONS = 0;
+    private static final double//TODO:Calibrate
             FRONT_LEFT_WHEEL_DIAMETER = 0.05 * 2,
             FRONT_RIGHT_WHEEL_DIAMETER = 0.05 * 2,
             REAR_LEFT_WHEEL_DIAMETER = 0.05 * 2,
             REAR_RIGHT_WHEEL_DIAMETER = 0.05 * 2;
     static final SwerveModule[] SWERVE_MODULES = new SwerveModule[]{
-            new SwerveModule(FRONT_LEFT_ID, FRONT_LEFT_STEER_ENCODER_OFFSET, FRONT_LEFT_WHEEL_DIAMETER),
-            new SwerveModule(FRONT_RIGHT_ID, FRONT_RIGHT_STEER_ENCODER_OFFSET, FRONT_RIGHT_WHEEL_DIAMETER),
-            new SwerveModule(REAR_LEFT_ID, REAR_LEFT_STEER_ENCODER_OFFSET, REAR_LEFT_WHEEL_DIAMETER),
-            new SwerveModule(REAR_RIGHT_ID, REAR_RIGHT_STEER_ENCODER_OFFSET, REAR_RIGHT_WHEEL_DIAMETER)
+            new SwerveModule(FRONT_LEFT_ID, FRONT_LEFT_STEER_ENCODER_OFFSET_ROTATIONS, FRONT_LEFT_WHEEL_DIAMETER),
+            new SwerveModule(FRONT_RIGHT_ID, FRONT_RIGHT_STEER_ENCODER_OFFSET_ROTATIONS, FRONT_RIGHT_WHEEL_DIAMETER),
+            new SwerveModule(REAR_LEFT_ID, REAR_LEFT_STEER_ENCODER_OFFSET_ROTATIONS, REAR_LEFT_WHEEL_DIAMETER),
+            new SwerveModule(REAR_RIGHT_ID, REAR_RIGHT_STEER_ENCODER_OFFSET_ROTATIONS, REAR_RIGHT_WHEEL_DIAMETER)
     };
 
     public static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(PathPlannerConstants.ROBOT_CONFIG.moduleLocations);
@@ -90,22 +89,29 @@ public class SwerveConstants {
                     TRANSLATION_PID_CONSTANTS.kI,
                     TRANSLATION_PID_CONSTANTS.kD
             );
+    private static final double
+            ROTATION_PID_TOLERANCE = 1,
+            TRANSLATION_PID_TOLERANCE = 0.02;
 
     static {
         configureGyro();
+
         SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER.enableContinuousInput(-SwerveConstants.MAXIMUM_PID_ANGLE, SwerveConstants.MAXIMUM_PID_ANGLE);
-        SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER.setTolerance(1);
-        SwerveConstants.X_TRANSLATION_PID_CONTROLLER.setTolerance(0.02);
-        SwerveConstants.Y_TRANSLATION_PID_CONTROLLER.setTolerance(0.02);
+        SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER.setTolerance(ROTATION_PID_TOLERANCE);
+
+        SwerveConstants.X_TRANSLATION_PID_CONTROLLER.setTolerance(TRANSLATION_PID_TOLERANCE);
+        SwerveConstants.Y_TRANSLATION_PID_CONTROLLER.setTolerance(TRANSLATION_PID_TOLERANCE);
     }
 
     private static void configureGyro() {
         final Pigeon2Configuration config = new Pigeon2Configuration();
+        //TODO:Calibrate
         config.MountPose.MountPoseYaw = 0;
         config.MountPose.MountPosePitch = 0;
         config.MountPose.MountPoseRoll = 0;
+
         GYRO.applyConfiguration(config);
-        GYRO.setSimulationYawVelocitySupplier(() -> RobotContainer.SWERVE.getSelfRelativeVelocity().omegaRadiansPerSecond);
+        GYRO.setSimulationYawVelocitySupplier(() -> RobotContainer.SWERVE.getSelfRelativeChassisSpeeds().omegaRadiansPerSecond);
 
         GYRO.registerThreadedSignal(Pigeon2Signal.YAW, PoseEstimatorConstants.ODOMETRY_FREQUENCY_HERTZ);
     }

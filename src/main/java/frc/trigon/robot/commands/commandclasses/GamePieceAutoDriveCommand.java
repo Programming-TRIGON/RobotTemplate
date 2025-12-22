@@ -10,8 +10,8 @@ import frc.trigon.robot.constants.PathPlannerConstants;
 import frc.trigon.robot.misc.objectdetectioncamera.ObjectPoseEstimator;
 import frc.trigon.robot.misc.simulatedfield.SimulatedGamePieceConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveCommands;
-import org.littletonrobotics.junction.Logger;
 import lib.utilities.flippable.FlippableRotation2d;
+import org.littletonrobotics.junction.Logger;
 
 import java.util.function.Supplier;
 
@@ -53,7 +53,7 @@ public class GamePieceAutoDriveCommand extends ParallelCommandGroup {
 
     public static Command getDriveToGamePieceCommand(Supplier<Translation2d> distanceFromTrackedGamePiece) {
         return new SequentialCommandGroup(
-                new InstantCommand(() -> PathPlannerConstants.GAME_PIECE_AUTO_DRIVE_X_PID_CONTROLLER.reset(distanceFromTrackedGamePiece.get().getX(), RobotContainer.SWERVE.getSelfRelativeVelocity().vxMetersPerSecond)),
+                new InstantCommand(() -> PathPlannerConstants.GAME_PIECE_AUTO_DRIVE_X_PID_CONTROLLER.reset(distanceFromTrackedGamePiece.get().getX(), RobotContainer.SWERVE.getSelfRelativeChassisSpeeds().vxMetersPerSecond)),
                 SwerveCommands.getClosedLoopSelfRelativeDriveCommand(
                         () -> PathPlannerConstants.GAME_PIECE_AUTO_DRIVE_X_PID_CONTROLLER.calculate(distanceFromTrackedGamePiece.get().getX()),
                         () -> PathPlannerConstants.GAME_PIECE_AUTO_DRIVE_Y_PID_CONTROLLER.calculate(distanceFromTrackedGamePiece.get().getY()),

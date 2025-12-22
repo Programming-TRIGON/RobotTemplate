@@ -10,10 +10,10 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.trigon.robot.RobotContainer;
-import org.json.simple.parser.ParseException;
 import lib.hardware.RobotHardwareStats;
 import lib.utilities.LocalADStarAK;
 import lib.utilities.flippable.Flippable;
+import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
 
@@ -61,7 +61,7 @@ public class PathPlannerConstants {
         AutoBuilder.configure(
                 RobotContainer.ROBOT_POSE_ESTIMATOR::getEstimatedRobotPose,
                 RobotContainer.ROBOT_POSE_ESTIMATOR::resetPose,
-                RobotContainer.SWERVE::getSelfRelativeVelocity,
+                RobotContainer.SWERVE::getSelfRelativeChassisSpeeds,
                 (chassisSpeeds -> RobotContainer.SWERVE.drivePathPlanner(chassisSpeeds, true)),
                 AUTO_PATH_FOLLOWING_CONTROLLER,
                 ROBOT_CONFIG,

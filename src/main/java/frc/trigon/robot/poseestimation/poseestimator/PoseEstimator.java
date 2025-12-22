@@ -154,7 +154,7 @@ public class PoseEstimator implements AutoCloseable {
      * @return the predicted pose
      */
     public Pose2d getPredictedRobotPose(double seconds) {
-        final ChassisSpeeds robotVelocity = RobotContainer.SWERVE.getSelfRelativeVelocity();
+        final ChassisSpeeds robotVelocity = RobotContainer.SWERVE.getSelfRelativeChassisSpeeds();
         final double predictedX = robotVelocity.vxMetersPerSecond * seconds;
         final double predictedY = robotVelocity.vyMetersPerSecond * seconds;
         final Rotation2d predictedRotation = Rotation2d.fromRadians(robotVelocity.omegaRadiansPerSecond * seconds);
@@ -226,7 +226,7 @@ public class PoseEstimator implements AutoCloseable {
      * @return if the robot is moving slow enough to calculate an accurate offset result.
      */
     private boolean isUnderMaximumSpeedForOffsetResetting() {
-        final ChassisSpeeds chassisSpeeds = RobotContainer.SWERVE.getSelfRelativeVelocity();
+        final ChassisSpeeds chassisSpeeds = RobotContainer.SWERVE.getSelfRelativeChassisSpeeds();
         final double currentTranslationVelocityMetersPerSecond = Math.hypot(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond);
         final double currentThetaVelocityRadiansPerSecond = chassisSpeeds.omegaRadiansPerSecond;
         return currentTranslationVelocityMetersPerSecond <= PoseEstimatorConstants.MAXIMUM_TRANSLATION_VELOCITY_FOR_RELATIVE_ROBOT_POSE_SOURCE_OFFSET_RESETTING_METERS_PER_SECOND &&
