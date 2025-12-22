@@ -7,15 +7,12 @@ import edu.wpi.first.wpilibj2.command.*;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.commands.commandclasses.IntakeAssistCommand;
 import frc.trigon.robot.constants.AutonomousConstants;
-import frc.trigon.robot.constants.OperatorConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveCommands;
 import lib.utilities.flippable.FlippablePose2d;
 import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
 import java.util.function.Supplier;
-
-import static frc.trigon.robot.RobotContainer.OBJECT_POSE_ESTIMATOR;
 
 /**
  * A class that contains command factories for preparation commands and commands used during the 15-second autonomous period at the start of each match.
@@ -51,9 +48,9 @@ public class AutonomousCommands {
 
     private static Command getDriveToGamePieceCommand() {
         return new ConditionalCommand(
-                IntakeAssistCommand.getAssistIntakeCommand(IntakeAssistCommand.AssistMode.FULL_ASSIST, IntakeAssistCommand::calculateDistanceFromTrackedGamePiece, OperatorConstants.INTAKE_ASSIST_SCALAR).onlyWhile(() -> OBJECT_POSE_ESTIMATOR.getClosestObjectToRobot() != null),
-                getFindGamePieceCommand().until(() -> OBJECT_POSE_ESTIMATOR.getClosestObjectToRobot() != null),
-                () -> OBJECT_POSE_ESTIMATOR.getClosestObjectToRobot() != null
+                IntakeAssistCommand.getAssistIntakeCommand(IntakeAssistCommand.AssistMode.FULL_ASSIST, IntakeAssistCommand::calculateDistanceFromTrackedCGamePiece).onlyWhile(() -> RobotContainer.OBJECT_POSE_ESTIMATOR.getClosestObjectToRobot() != null),
+                getFindGamePieceCommand().until(() -> RobotContainer.OBJECT_POSE_ESTIMATOR.getClosestObjectToRobot() != null),
+                () -> RobotContainer.OBJECT_POSE_ESTIMATOR.getClosestObjectToRobot() != null
         );
     }
 
