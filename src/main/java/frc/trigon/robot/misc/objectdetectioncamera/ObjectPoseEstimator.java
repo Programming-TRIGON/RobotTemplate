@@ -10,6 +10,7 @@ import frc.trigon.robot.misc.simulatedfield.SimulatedGamePieceConstants;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 
 public class ObjectPoseEstimator extends SubsystemBase {
@@ -119,21 +120,9 @@ public class ObjectPoseEstimator extends SubsystemBase {
      * @return the closest object's position on the field, or null if no objects are known
      */
     public Translation2d getClosestObjectToPosition(Translation2d position) {
-        final Translation2d[] objectsTranslations = knownObjectPositions.keySet().toArray(Translation2d[]::new);
-        if (knownObjectPositions.isEmpty())
-            return null;
-        Translation2d bestObjectTranslation = objectsTranslations[0];
-        double closestObjectDistance = position.getDistance(bestObjectTranslation);
-
-        for (int i = 1; i < objectsTranslations.length; i++) {
-            final Translation2d currentObjectTranslation = objectsTranslations[i];
-            final double currentObjectDistance = position.getDistance(currentObjectTranslation);
-            if (currentObjectDistance < closestObjectDistance) {
-                closestObjectDistance = currentObjectDistance;
-                bestObjectTranslation = currentObjectTranslation;
-            }
-        }
-        return bestObjectTranslation;
+        return knownObjectPositions.keySet().stream()
+                .min(Comparator.comparingDouble(position::getDistance))
+                .orElse(null);
     }
 
     /**
