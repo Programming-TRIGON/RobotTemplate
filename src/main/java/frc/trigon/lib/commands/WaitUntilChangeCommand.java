@@ -5,7 +5,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import java.util.function.Supplier;
 
 /**
- * A command that waits until a value changes.
+ * A wait command that ends when a given value changes.
  */
 public class WaitUntilChangeCommand<T> extends Command {
     private final Supplier<T> valueSupplier;
