@@ -60,7 +60,7 @@ public class ObjectDetectionCamera extends SubsystemBase {
     }
 
     public Translation2d[] getObjectPositionsOnField(SimulatedGamePieceConstants.GamePieceType targetGamePiece) {
-        final Rotation3d[] visibleObjectsRotations = getTargetObjectsRotations(targetGamePiece);
+        final Rotation3d[] visibleObjectsRotations = getObjectsRotations(targetGamePiece);
         final Translation2d[] objectsPositionsOnField = new Translation2d[visibleObjectsRotations.length];
 
         for (int i = 0; i < visibleObjectsRotations.length; i++)
@@ -70,7 +70,7 @@ public class ObjectDetectionCamera extends SubsystemBase {
         return objectsPositionsOnField;
     }
 
-    public Rotation3d[] getTargetObjectsRotations(SimulatedGamePieceConstants.GamePieceType targetGamePiece) {
+    public Rotation3d[] getObjectsRotations(SimulatedGamePieceConstants.GamePieceType targetGamePiece) {
         return objectDetectionCameraInputs.visibleObjectRotations[targetGamePiece.id];
     }
 
