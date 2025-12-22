@@ -144,18 +144,20 @@ public class ObjectPoseEstimator extends SubsystemBase {
 
     private void updateObjectPositions() {
         final double currentTimestamp = Timer.getTimestamp();
-
         for (Translation2d visibleObject : camera.getObjectPositionsOnField(gamePieceType)) {
-            final Translation2d closestObjectToVisibleObject = knownObjectPositions.keySet().stream()
-                    .min(Comparator.comparingDouble(visibleObject::getDistance)).orElse(null);
-            if (closestObjectToVisibleObject != null) {
-                final double closestObjectToVisibleObjectDistanceMeters = closestObjectToVisibleObject.getDistance(visibleObject);
-                final boolean isObjectWithinTolerance = closestObjectToVisibleObjectDistanceMeters < ObjectDetectionCameraConstants.TRACKED_OBJECT_TOLERANCE_METERS;
-                final boolean isNotAlreadyUpdated = knownObjectPositions.get(closestObjectToVisibleObject) != currentTimestamp;
+            Translation2d closestObjectToVisibleObject = new Translation2d();
+            double closestObjectToVisibleObjectDistanceMeters = Double.POSITIVE_INFINITY;
 
-                if (isObjectWithinTolerance && isNotAlreadyUpdated)
-                    removeObject(closestObjectToVisibleObject);
+            for (Translation2d knownObject : knownObjectPositions.keySet()) {
+                final double currentObjectDistanceMeters = visibleObject.getDistance(knownObject);
+                if (currentObjectDistanceMeters < closestObjectToVisibleObjectDistanceMeters) {
+                    closestObjectToVisibleObjectDistanceMeters = currentObjectDistanceMeters;
+                    closestObjectToVisibleObject = knownObject;
+                }
             }
+
+            if (closestObjectToVisibleObjectDistanceMeters < ObjectDetectionCameraConstants.TRACKED_OBJECT_TOLERANCE_METERS && knownObjectPositions.get(closestObjectToVisibleObject) != currentTimestamp)
+                removeObject(closestObjectToVisibleObject);
             knownObjectPositions.put(visibleObject, currentTimestamp);
         }
     }
