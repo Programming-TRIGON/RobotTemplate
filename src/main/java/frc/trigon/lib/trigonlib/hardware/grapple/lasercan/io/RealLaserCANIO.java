@@ -3,7 +3,7 @@ package frc.trigon.lib.trigonlib.hardware.grapple.lasercan.io;
 import au.grapplerobotics.ConfigurationFailedException;
 import au.grapplerobotics.LaserCan;
 import frc.trigon.lib.trigonlib.hardware.grapple.lasercan.LaserCANIO;
-import frc.trigon.lib.trigonlib.hardware.grapple.lasercan.LaserCANInputsAutoLogged;
+import org.trigon.hardware.grapple.lasercan.LaserCANInputsAutoLogged;
 
 public class RealLaserCANIO extends LaserCANIO {
     private final LaserCan laserCan;

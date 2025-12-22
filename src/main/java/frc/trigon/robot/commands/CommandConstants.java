@@ -5,15 +5,15 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import frc.trigon.lib.trigonlib.commands.CameraPositionCalculationCommand;
-import frc.trigon.lib.trigonlib.commands.WheelRadiusCharacterizationCommand;
-import frc.trigon.lib.trigonlib.hardware.misc.XboxController;
-import frc.trigon.lib.trigonlib.utilities.flippable.FlippableRotation2d;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.commands.commandfactories.GeneralCommands;
 import frc.trigon.robot.constants.OperatorConstants;
 import frc.trigon.robot.constants.PathPlannerConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveCommands;
+import frc.trigon.lib.commands.CameraPositionCalculationCommand;
+import frc.trigon.lib.commands.WheelRadiusCharacterizationCommand;
+import frc.trigon.lib.hardware.misc.XboxController;
+import frc.trigon.lib.utilities.flippable.FlippableRotation2d;
 
 /**
  * A class that contains commands that only use parameters and don't require logic.

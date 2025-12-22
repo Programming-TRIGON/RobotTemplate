@@ -2,9 +2,9 @@ package frc.trigon.robot.constants;
 
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.trigon.lib.trigonlib.hardware.misc.KeyboardController;
-import frc.trigon.lib.trigonlib.hardware.misc.XboxController;
 import frc.trigon.robot.commands.commandclasses.IntakeAssistCommand;
+import frc.trigon.lib.hardware.misc.KeyboardController;
+import frc.trigon.lib.hardware.misc.XboxController;
 
 public class OperatorConstants {
     public static final double DRIVER_CONTROLLER_DEADBAND = 0.07;

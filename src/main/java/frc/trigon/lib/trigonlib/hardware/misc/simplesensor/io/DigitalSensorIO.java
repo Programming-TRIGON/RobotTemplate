@@ -2,7 +2,7 @@ package frc.trigon.lib.trigonlib.hardware.misc.simplesensor.io;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import frc.trigon.lib.trigonlib.hardware.misc.simplesensor.SimpleSensorIO;
-import frc.trigon.lib.trigonlib.hardware.misc.simplesensor.SimpleSensorInputsAutoLogged;
+import org.trigon.hardware.misc.simplesensor.SimpleSensorInputsAutoLogged;
 
 public class DigitalSensorIO extends SimpleSensorIO {
     private final DigitalInput digitalInput;

@@ -9,9 +9,9 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.trigon.lib.trigonlib.hardware.RobotHardwareStats;
-import frc.trigon.lib.trigonlib.hardware.simulation.SimpleMotorSimulation;
 import frc.trigon.robot.constants.PathPlannerConstants;
+import frc.trigon.lib.hardware.RobotHardwareStats;
+import frc.trigon.lib.hardware.simulation.SimpleMotorSimulation;
 
 public class SwerveModuleConstants {
     private static final double
