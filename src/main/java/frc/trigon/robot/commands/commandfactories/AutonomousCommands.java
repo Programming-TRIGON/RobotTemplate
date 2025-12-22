@@ -21,7 +21,7 @@ public class AutonomousCommands {
 
     /**
      * Creates a dynamic autonmous command intended for the 15-second autonomous period at the beginning of a match.
-     * By dynamic, we mean that the command isn't pre-programmed and instead autonomously collects the closest game pieces and scores in the closest scoring locations.
+     * By dynamic, we mean that the command isn't pre-programmed and instead autonomously decides what game pieces to collect and where to score.
      *
      * @param scoringLocations the locations at which to score
      * @return the command
