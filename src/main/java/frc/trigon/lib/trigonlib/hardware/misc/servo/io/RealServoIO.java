@@ -4,7 +4,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Servo;
 import frc.trigon.lib.trigonlib.hardware.misc.servo.ServoIO;
-import org.trigon.hardware.misc.servo.ServoInputsAutoLogged;
+import frc.trigon.lib.trigonlib.hardware.misc.servo.ServoInputsAutoLogged;
 
 public class RealServoIO extends ServoIO {
     private final Servo servo;

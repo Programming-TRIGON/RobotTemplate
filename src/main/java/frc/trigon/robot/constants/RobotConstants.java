@@ -1,8 +1,9 @@
 package frc.trigon.robot.constants;
 
+import frc.trigon.lib.trigonlib.hardware.RobotHardwareStats;
+import frc.trigon.lib.trigonlib.utilities.FilesHandler;
 import frc.trigon.robot.Robot;
-import frc.trigon.lib.hardware.RobotHardwareStats;
-import frc.trigon.lib.utilities.FilesHandler;
+
 
 public class RobotConstants {
     public static final String CANIVORE_NAME = "SwerveCANivore";

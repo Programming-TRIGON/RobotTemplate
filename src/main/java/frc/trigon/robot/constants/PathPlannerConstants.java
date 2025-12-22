@@ -9,11 +9,11 @@ import com.pathplanner.lib.pathfinding.Pathfinding;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import frc.trigon.lib.trigonlib.hardware.RobotHardwareStats;
+import frc.trigon.lib.trigonlib.utilities.LocalADStarAK;
+import frc.trigon.lib.trigonlib.utilities.flippable.Flippable;
 import frc.trigon.robot.RobotContainer;
 import org.json.simple.parser.ParseException;
-import frc.trigon.lib.hardware.RobotHardwareStats;
-import frc.trigon.lib.utilities.LocalADStarAK;
-import frc.trigon.lib.utilities.flippable.Flippable;
 
 import java.io.IOException;
 

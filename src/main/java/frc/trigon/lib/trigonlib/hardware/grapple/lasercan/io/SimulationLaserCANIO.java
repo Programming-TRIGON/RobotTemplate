@@ -1,7 +1,7 @@
 package frc.trigon.lib.trigonlib.hardware.grapple.lasercan.io;
 
 import frc.trigon.lib.trigonlib.hardware.grapple.lasercan.LaserCANIO;
-import org.trigon.hardware.grapple.lasercan.LaserCANInputsAutoLogged;
+import frc.trigon.lib.trigonlib.hardware.grapple.lasercan.LaserCANInputsAutoLogged;
 
 import java.util.function.DoubleSupplier;
 

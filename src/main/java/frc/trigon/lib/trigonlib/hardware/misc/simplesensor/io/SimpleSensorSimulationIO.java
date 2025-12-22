@@ -1,7 +1,7 @@
 package frc.trigon.lib.trigonlib.hardware.misc.simplesensor.io;
 
 import frc.trigon.lib.trigonlib.hardware.misc.simplesensor.SimpleSensorIO;
-import org.trigon.hardware.misc.simplesensor.SimpleSensorInputsAutoLogged;
+import frc.trigon.lib.trigonlib.hardware.misc.simplesensor.SimpleSensorInputsAutoLogged;
 
 import java.util.function.DoubleSupplier;
 

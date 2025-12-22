@@ -7,12 +7,12 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.*;
+import frc.trigon.lib.trigonlib.hardware.RobotHardwareStats;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.commands.commandfactories.GeneralCommands;
 import frc.trigon.robot.constants.OperatorConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveCommands;
 import org.littletonrobotics.junction.Logger;
-import frc.trigon.lib.hardware.RobotHardwareStats;
 
 import java.util.function.Supplier;
 
@@ -53,7 +53,7 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
      * This command is for intaking a game piece with a specific robot-relative position.
      * To create an intake assist command that selects the closest game piece automatically, use {@link IntakeAssistCommand#IntakeAssistCommand(AssistMode)} instead.
      *
-     * @param assistMode               the type of assistance
+     * @param assistMode                   the type of assistance
      * @param distanceFromTrackedGamePiece the position of the game piece relative to the robot
      * @return the command
      */

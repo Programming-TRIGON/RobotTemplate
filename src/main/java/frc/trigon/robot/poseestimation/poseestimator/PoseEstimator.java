@@ -12,14 +12,14 @@ import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.trigon.lib.trigonlib.utilities.QuickSortHandler;
+import frc.trigon.lib.trigonlib.utilities.flippable.Flippable;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.constants.FieldConstants;
 import frc.trigon.robot.poseestimation.apriltagcamera.AprilTagCamera;
 import frc.trigon.robot.poseestimation.relativerobotposesource.RelativeRobotPoseSource;
 import frc.trigon.robot.poseestimation.relativerobotposesource.RelativeRobotPoseSourceConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveConstants;
-import frc.trigon.lib.utilities.QuickSortHandler;
-import frc.trigon.lib.utilities.flippable.Flippable;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -137,7 +137,7 @@ public class PoseEstimator implements AutoCloseable {
 
     /**
      * Gets the estimated pose of the robot at the target timestamp.
-     * Unlike {@link #getPredictedRobotFuturePose} which predicts a future pose, this gets a stored pose from the estimator's buffer.
+     * Unlike {@link #getPredictedRobotPose(double)} which predicts a future pose, this gets a stored pose from the estimator's buffer.
      *
      * @param timestamp the Rio's FPGA timestamp
      * @return the robot's estimated pose at the timestamp

@@ -3,7 +3,7 @@ package frc.trigon.lib.trigonlib.hardware.misc.simplesensor.io;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DutyCycle;
 import frc.trigon.lib.trigonlib.hardware.misc.simplesensor.SimpleSensorIO;
-import org.trigon.hardware.misc.simplesensor.SimpleSensorInputsAutoLogged;
+import frc.trigon.lib.trigonlib.hardware.misc.simplesensor.SimpleSensorInputsAutoLogged;
 
 public class DutyCycleSensorIO extends SimpleSensorIO {
     private final DutyCycle dutyCycle;

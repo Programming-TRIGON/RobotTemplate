@@ -2,7 +2,7 @@ package frc.trigon.lib.trigonlib.hardware.misc.simplesensor.io;
 
 import edu.wpi.first.wpilibj.AnalogInput;
 import frc.trigon.lib.trigonlib.hardware.misc.simplesensor.SimpleSensorIO;
-import org.trigon.hardware.misc.simplesensor.SimpleSensorInputsAutoLogged;
+import frc.trigon.lib.trigonlib.hardware.misc.simplesensor.SimpleSensorInputsAutoLogged;
 
 public class AnalogSensorIO extends SimpleSensorIO {
     private final AnalogInput analogInput;

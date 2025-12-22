@@ -2,8 +2,8 @@ package frc.trigon.robot.poseestimation.apriltagcamera;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import frc.trigon.lib.trigonlib.hardware.RobotHardwareStats;
 import org.littletonrobotics.junction.AutoLog;
-import frc.trigon.lib.hardware.RobotHardwareStats;
 
 public class AprilTagCameraIO {
     static AprilTagCameraIO generateIO(AprilTagCameraConstants.AprilTagCameraType aprilTagCameraType, String name, Transform3d robotToCamera) {

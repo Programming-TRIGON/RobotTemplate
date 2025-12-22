@@ -8,14 +8,14 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
+import frc.trigon.lib.trigonlib.hardware.phoenix6.cancoder.CANcoderEncoder;
+import frc.trigon.lib.trigonlib.hardware.phoenix6.cancoder.CANcoderSignal;
+import frc.trigon.lib.trigonlib.hardware.phoenix6.talonfx.TalonFXMotor;
+import frc.trigon.lib.trigonlib.hardware.phoenix6.talonfx.TalonFXSignal;
+import frc.trigon.lib.trigonlib.utilities.Conversions;
 import frc.trigon.robot.constants.RobotConstants;
 import frc.trigon.robot.poseestimation.poseestimator.PoseEstimatorConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveConstants;
-import frc.trigon.lib.hardware.phoenix6.cancoder.CANcoderEncoder;
-import frc.trigon.lib.hardware.phoenix6.cancoder.CANcoderSignal;
-import frc.trigon.lib.hardware.phoenix6.talonfx.TalonFXMotor;
-import frc.trigon.lib.hardware.phoenix6.talonfx.TalonFXSignal;
-import frc.trigon.lib.utilities.Conversions;
 
 public class SwerveModule {
     private final TalonFXMotor

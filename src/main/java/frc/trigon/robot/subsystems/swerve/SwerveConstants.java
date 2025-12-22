@@ -7,14 +7,13 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import frc.trigon.lib.trigonlib.hardware.RobotHardwareStats;
+import frc.trigon.lib.trigonlib.hardware.phoenix6.pigeon2.Pigeon2Gyro;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.constants.PathPlannerConstants;
 import frc.trigon.robot.constants.RobotConstants;
 import frc.trigon.robot.poseestimation.poseestimator.PoseEstimatorConstants;
 import frc.trigon.robot.subsystems.swerve.swervemodule.SwerveModule;
-import frc.trigon.lib.hardware.RobotHardwareStats;
-import frc.trigon.lib.hardware.phoenix6.pigeon2.Pigeon2Gyro;
-import frc.trigon.lib.hardware.phoenix6.pigeon2.Pigeon2Signal;
 
 public class SwerveConstants {
     private static final int GYRO_ID = 0;
@@ -107,6 +106,6 @@ public class SwerveConstants {
         GYRO.applyConfiguration(config);
         GYRO.setSimulationYawVelocitySupplier(() -> RobotContainer.SWERVE.getSelfRelativeVelocity().omegaRadiansPerSecond);
 
-        GYRO.registerThreadedSignal(Pigeon2Signal.YAW, PoseEstimatorConstants.ODOMETRY_FREQUENCY_HERTZ);
+        GYRO.registerThreadedSignal(frc.trigon.lib.trigonlib.hardware.phoenix6.pigeon2.Pigeon2Signal.YAW, PoseEstimatorConstants.ODOMETRY_FREQUENCY_HERTZ);
     }
 }
