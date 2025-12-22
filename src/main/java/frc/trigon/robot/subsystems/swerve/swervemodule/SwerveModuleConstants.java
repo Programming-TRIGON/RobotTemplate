@@ -37,6 +37,7 @@ public class SwerveModuleConstants {
 
     public static final double MAXIMUM_MODULE_ROTATIONAL_SPEED_RADIANS_PER_SECOND = edu.wpi.first.math.util.Units.rotationsToRadians(7); //TODO: calibrate
     static final double VOLTAGE_COMPENSATION_SATURATION = 12;
+    static final double DRIVE_MOTOR_VELOCITY_UPDATE_FREQUENCY_HERTZ = 1000;
 
     /**
      * Creates a new SimpleMotorSimulation for the drive motor.
