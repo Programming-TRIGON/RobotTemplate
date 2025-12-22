@@ -20,7 +20,7 @@ public class KeyboardController {
             numpad9, numpadDecimal;
 
     /**
-     * Construct an instance of a device.
+     * Construct an instance of a keyboard.
      */
     public KeyboardController() {
         esc = new LoggedNetworkBoolean("/SmartDashboard/keyboard/esc");

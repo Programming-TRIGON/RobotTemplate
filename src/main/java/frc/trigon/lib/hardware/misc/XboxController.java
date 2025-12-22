@@ -9,8 +9,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
  * A class that represents an Xbox controller. Used to get the values of the sticks and buttons on a controller, with the option of a deadband and exponentiation.
  */
 public class XboxController extends CommandXboxController {
-    private
-    int
+    private int
             rightStickExponent = 1,
             leftStickExponent = 1;
     private double deadband = 0;
