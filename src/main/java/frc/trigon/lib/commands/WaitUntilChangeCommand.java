@@ -4,10 +4,19 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 import java.util.function.Supplier;
 
+/**
+ * A command that waits until a value changes.
+ */
 public class WaitUntilChangeCommand<T> extends Command {
     private final Supplier<T> valueSupplier;
     private T lastValue;
 
+    /**
+     * Creates a new WaitUntilChangeCommand.
+     * Will run until the given value supplier returns a different value than it did when the command was initialized.
+     *
+     * @param valueSupplier the supplier of the value to monitor for changes
+     */
     public WaitUntilChangeCommand(Supplier<T> valueSupplier) {
         this.valueSupplier = valueSupplier;
     }
