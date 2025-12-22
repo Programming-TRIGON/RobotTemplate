@@ -1,46 +1,46 @@
-package lib.hardware.phoenix6.talonfx;
+package lib.hardware.phoenix6.talonfxs;
 
 import com.ctre.phoenix6.BaseStatusSignal;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.configs.TalonFXSConfiguration;
 import com.ctre.phoenix6.controls.ControlRequest;
-import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.hardware.TalonFXS;
 import lib.hardware.RobotHardwareStats;
 import lib.hardware.phoenix6.Phoenix6Inputs;
-import lib.hardware.phoenix6.talonfx.io.RealTalonFXIO;
-import lib.hardware.phoenix6.talonfx.io.SimulationTalonFXIO;
+import lib.hardware.phoenix6.talonfxs.io.RealTalonFXSIO;
+import lib.hardware.phoenix6.talonfxs.io.SimulationTalonFXSIO;
 import lib.hardware.simulation.MotorPhysicsSimulation;
 import org.littletonrobotics.junction.Logger;
 
 /**
- * A class that represents a TalonFX motor controller.
- * This class provides a structured interface to control and monitor TalonFX motors both in real-world deployment, and physics-based simulation.
+ * A class that represents a TalonFXS motor controller.
+ * This class provides a structured interface to control and monitor TalonFXS motors both in real-world deployment, and physics-based simulation.
  * It incorporates features for signal management, configuration handling, and threaded processing to ensure efficient and robust motor control
  * It's also fully integrated with AdvantageKit logging.
  */
-public class TalonFXMotor {
+public class TalonFXSMotor {
     private final String motorName;
-    private final TalonFXIO motorIO;
+    private final TalonFXSIO motorIO;
     private final Phoenix6Inputs motorInputs;
     private final int id;
 
     /**
-     * Creates a new TalonFX motor.
+     * Creates a new TalonFXS motor.
      *
      * @param id        the motor's ID
      * @param motorName the name of the motor
      */
-    public TalonFXMotor(int id, String motorName) {
+    public TalonFXSMotor(int id, String motorName) {
         this(id, motorName, "");
     }
 
     /**
-     * Creates a new TalonFX motor.
+     * Creates a new TalonFXS motor.
      *
      * @param id        the motor's ID
      * @param motorName the name of the motor
      * @param canbus    the canbus' name
      */
-    public TalonFXMotor(int id, String motorName, String canbus) {
+    public TalonFXSMotor(int id, String motorName, String canbus) {
         this.motorName = motorName;
         this.motorIO = generateIO(id, canbus);
         this.motorInputs = new Phoenix6Inputs(motorName, !canbus.isEmpty());
@@ -77,7 +77,7 @@ public class TalonFXMotor {
      * @param realConfiguration       configuration to be used in real life
      * @param simulationConfiguration configuration to be used in simulation
      */
-    public void applyConfigurations(TalonFXConfiguration realConfiguration, TalonFXConfiguration simulationConfiguration) {
+    public void applyConfigurations(TalonFXSConfiguration realConfiguration, TalonFXSConfiguration simulationConfiguration) {
         if (RobotHardwareStats.isSimulation())
             motorIO.applyConfiguration(simulationConfiguration);
         else
@@ -89,7 +89,7 @@ public class TalonFXMotor {
      *
      * @param simulationAndRealConfiguration the configuration
      */
-    public void applyConfiguration(TalonFXConfiguration simulationAndRealConfiguration) {
+    public void applyConfiguration(TalonFXSConfiguration simulationAndRealConfiguration) {
         motorIO.applyConfiguration(simulationAndRealConfiguration);
     }
 
@@ -99,7 +99,7 @@ public class TalonFXMotor {
      *
      * @param realConfiguration the configuration
      */
-    public void applyRealConfiguration(TalonFXConfiguration realConfiguration) {
+    public void applyRealConfiguration(TalonFXSConfiguration realConfiguration) {
         if (!RobotHardwareStats.isSimulation())
             motorIO.applyConfiguration(realConfiguration);
     }
@@ -110,7 +110,7 @@ public class TalonFXMotor {
      *
      * @param simulationConfiguration the configuration
      */
-    public void applySimulationConfiguration(TalonFXConfiguration simulationConfiguration) {
+    public void applySimulationConfiguration(TalonFXSConfiguration simulationConfiguration) {
         if (RobotHardwareStats.isSimulation())
             motorIO.applyConfiguration(simulationConfiguration);
     }
@@ -128,7 +128,7 @@ public class TalonFXMotor {
      * @param signal the type of signal to get
      * @return the signal
      */
-    public double getSignal(TalonFXSignal signal) {
+    public double getSignal(TalonFXSSignal signal) {
         return motorInputs.getSignal(signal.name);
     }
 
@@ -139,7 +139,7 @@ public class TalonFXMotor {
      * @param signal the type of threaded signal to get
      * @return the signal
      */
-    public double[] getThreadedSignal(TalonFXSignal signal) {
+    public double[] getThreadedSignal(TalonFXSSignal signal) {
         return motorInputs.getThreadedSignal(signal.name);
     }
 
@@ -149,7 +149,7 @@ public class TalonFXMotor {
      * @param signal               the signal to register
      * @param updateFrequencyHertz the frequency at which the signal will be updated
      */
-    public void registerSignal(TalonFXSignal signal, double updateFrequencyHertz) {
+    public void registerSignal(TalonFXSSignal signal, double updateFrequencyHertz) {
         motorInputs.registerSignal(motorSignalToStatusSignal(signal), updateFrequencyHertz);
     }
 
@@ -160,7 +160,7 @@ public class TalonFXMotor {
      * @param signal               the threaded signal to register
      * @param updateFrequencyHertz the frequency at which the threaded signal will be updated
      */
-    public void registerThreadedSignal(TalonFXSignal signal, double updateFrequencyHertz) {
+    public void registerThreadedSignal(TalonFXSSignal signal, double updateFrequencyHertz) {
         motorInputs.registerThreadedSignal(motorSignalToStatusSignal(signal), updateFrequencyHertz);
     }
 
@@ -191,19 +191,19 @@ public class TalonFXMotor {
         motorIO.setBrake(brake);
     }
 
-    private BaseStatusSignal motorSignalToStatusSignal(TalonFXSignal signal) {
-        final TalonFX talonFX = motorIO.getTalonFX();
-        if (RobotHardwareStats.isReplay() || talonFX == null)
+    private BaseStatusSignal motorSignalToStatusSignal(TalonFXSSignal signal) {
+        final TalonFXS talonFXS = motorIO.getTalonFXS();
+        if (RobotHardwareStats.isReplay() || talonFXS == null)
             return null;
 
-        return signal.signalFunction.apply(talonFX);
+        return signal.signalFunction.apply(talonFXS);
     }
 
-    private TalonFXIO generateIO(int id, String canbus) {
+    private TalonFXSIO generateIO(int id, String canbus) {
         if (RobotHardwareStats.isReplay())
-            return new TalonFXIO();
+            return new TalonFXSIO();
         if (RobotHardwareStats.isSimulation())
-            return new SimulationTalonFXIO(id);
-        return new RealTalonFXIO(id, canbus);
+            return new SimulationTalonFXSIO(id);
+        return new RealTalonFXSIO(id, canbus);
     }
 }
