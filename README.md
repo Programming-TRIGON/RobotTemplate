@@ -14,7 +14,7 @@ for
 automatic Advantage Kit and Simulation
 hardware wrappers, utilities, commands, and more.
 
-## Contact us
+## Contact Us
 
 For any questions or inquiries, and some more info, please feel free to contact us through the following channels:
 
