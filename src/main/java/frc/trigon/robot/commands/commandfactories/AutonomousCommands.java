@@ -20,7 +20,7 @@ public class AutonomousCommands {
     private static FlippablePose2d TARGET_SCORING_POSE = null;
 
     /**
-     * Creates a dynamic autonmous command intended for the 15-second autonomous period at the beginning of a match.
+     * Creates a dynamic autonomous command intended for the 15-second autonomous period at the beginning of a match.
      * By dynamic, we mean that the command isn't pre-programmed and instead autonomously decides what game pieces to collect and where to score.
      *
      * @param scoringLocations the locations at which to score
@@ -30,7 +30,7 @@ public class AutonomousCommands {
         return new SequentialCommandGroup(
                 getDriveAndScoreCommand(scoringLocations),
                 getCollectCommand()
-        ).repeatedly();
+        ).repeatedly().withName(generateDynamicAutonomousRoutineName());
     }
 
     private static Command getCollectCommand() {
@@ -68,6 +68,17 @@ public class AutonomousCommands {
     private static FlippablePose2d calculateClosestOpenScoringPose(FlippablePose2d[] scoringLocations) {
         //TODO: implement
         return null;
+    }
+
+    /**
+     * Generates a name for the dynamic autonomous routine based on the scoring locations.
+     *
+     * @param scoringLocations the scoring locations
+     * @return the name of the dynamic autonomous
+     */
+    private static String generateDynamicAutonomousRoutineName(FlippablePose2d[] scoringLocations) {
+        //TODO: implement
+        return "";
     }
 
     /**
