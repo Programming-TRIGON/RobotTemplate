@@ -10,13 +10,14 @@ import frc.trigon.robot.misc.simulatedfield.SimulatedGamePieceConstants;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 public class ObjectPoseEstimator extends SubsystemBase {
     private final double deletionThresholdSeconds;
     private final SimulatedGamePieceConstants.GamePieceType gamePieceType;
-    private final ObjectDetectionCamera camera;
+    private final ObjectDetectionCamera[] cameras;
     private final HashMap<Translation2d, Double> knownObjectPositions;
     private final double rotationToTranslation;
 
@@ -26,14 +27,14 @@ public class ObjectPoseEstimator extends SubsystemBase {
      * @param deletionThresholdSeconds  the time in seconds after which an object is considered old and removed
      * @param distanceCalculationMethod the method used to calculate the distance from the game piece
      * @param gamePieceType             the type of game piece to track
-     * @param camera                    the camera used for detecting objects
+     * @param cameras                   the camera used for detecting objects
      */
     public ObjectPoseEstimator(double deletionThresholdSeconds, DistanceCalculationMethod distanceCalculationMethod,
                                SimulatedGamePieceConstants.GamePieceType gamePieceType,
-                               ObjectDetectionCamera camera) {
+                               ObjectDetectionCamera... cameras) {
         this.deletionThresholdSeconds = deletionThresholdSeconds;
         this.gamePieceType = gamePieceType;
-        this.camera = camera;
+        this.cameras = cameras;
         this.knownObjectPositions = new HashMap<>();
         this.rotationToTranslation = distanceCalculationMethod.rotationToTranslation;
     }
@@ -151,26 +152,35 @@ public class ObjectPoseEstimator extends SubsystemBase {
         final double translationDistance = poseTranslation.getDistance(objectTranslation);
         final Translation2d translationDifference = objectTranslation.minus(poseTranslation);
         final double rotationDifferenceDegrees = Math.abs(pose.getRotation().minus(translationDifference.getAngle()).getDegrees());
+
         return translationDistance * rotationToTranslation + rotationDifferenceDegrees * (1 - rotationToTranslation);
     }
 
     private void updateObjectPositions() {
         final double currentTimestamp = Timer.getTimestamp();
-        for (Translation2d visibleObject : camera.getObjectPositionsOnField(gamePieceType)) {
-            Translation2d closestObjectToVisibleObject = new Translation2d();
-            double closestObjectToVisibleObjectDistanceMeters = Double.POSITIVE_INFINITY;
+        final Set<Translation2d> objectsProcessedThisFrame = new HashSet<>();
 
-            for (Translation2d knownObject : knownObjectPositions.keySet()) {
-                final double currentObjectDistanceMeters = visibleObject.getDistance(knownObject);
-                if (currentObjectDistanceMeters < closestObjectToVisibleObjectDistanceMeters) {
-                    closestObjectToVisibleObjectDistanceMeters = currentObjectDistanceMeters;
-                    closestObjectToVisibleObject = knownObject;
+        for (ObjectDetectionCamera currentCamera : cameras) {
+            for (Translation2d visibleObject : currentCamera.getObjectPositionsOnField(gamePieceType)) {
+                Translation2d closestObjectToVisibleObject = null;
+                double closestObjectToVisibleObjectDistanceMeters = Double.POSITIVE_INFINITY;
+
+                for (Translation2d knownObject : knownObjectPositions.keySet()) {
+                    if (!objectsProcessedThisFrame.contains(knownObject)) {
+                        final double currentObjectDistanceMeters = visibleObject.getDistance(knownObject);
+                        if (currentObjectDistanceMeters < closestObjectToVisibleObjectDistanceMeters) {
+                            closestObjectToVisibleObjectDistanceMeters = currentObjectDistanceMeters;
+                            closestObjectToVisibleObject = knownObject;
+                        }
+                    }
                 }
+                if (closestObjectToVisibleObject != null
+                        && closestObjectToVisibleObjectDistanceMeters < ObjectDetectionCameraConstants.TRACKED_OBJECT_TOLERANCE_METERS
+                        && knownObjectPositions.get(closestObjectToVisibleObject) != currentTimestamp)
+                    removeObject(closestObjectToVisibleObject);
+                knownObjectPositions.put(visibleObject, currentTimestamp);
+                objectsProcessedThisFrame.add(visibleObject);
             }
-
-            if (closestObjectToVisibleObjectDistanceMeters < ObjectDetectionCameraConstants.TRACKED_OBJECT_TOLERANCE_METERS && knownObjectPositions.get(closestObjectToVisibleObject) != currentTimestamp)
-                removeObject(closestObjectToVisibleObject);
-            knownObjectPositions.put(visibleObject, currentTimestamp);
         }
     }
 

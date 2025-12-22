@@ -55,8 +55,8 @@ public class ObjectDetectionCamera extends SubsystemBase {
         return closestObjectTranslation;
     }
 
-    public boolean seesObject(SimulatedGamePieceConstants.GamePieceType targetGamePiece) {
-        return objectDetectionCameraInputs.seesObject[targetGamePiece.id];
+    public boolean hasObject(SimulatedGamePieceConstants.GamePieceType targetGamePiece) {
+        return objectDetectionCameraInputs.hasObject[targetGamePiece.id];
     }
 
     public Translation2d[] getObjectPositionsOnField(SimulatedGamePieceConstants.GamePieceType targetGamePiece) {
