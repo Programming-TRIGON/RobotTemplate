@@ -126,20 +126,20 @@ public class ObjectPoseEstimator extends SubsystemBase {
     }
 
     /**
-     * Calculates the "distance rating" of an object.
+     * Calculates the "distance rating" of an object from a given pose.
      * The "distance rating" is a unit used to calculate the distance between 2 poses.
      * It factors in both translation and rotation differences by scaling the units depending on the {@link DistanceCalculationMethod}.
      *
      * @param objectTranslation the translation of the object on the field
      * @param pose              the pose to which the distance is measured from
-     * @return the objects "distance rating"
+     * @return the objects "distance rating" from the given pose
      */
-    private double calculateObjectDistanceRating(Translation2d objectTranslation, Pose2d pose) {
-        final double translationDifference = pose.getTranslation().getDistance(objectTranslation);
-        final double xDifference = Math.abs(pose.getX() - objectTranslation.getX());
-        final double yDifference = Math.abs(pose.getY() - objectTranslation.getY());
-        final double rotationDifferenceDegrees = Math.abs(pose.getRotation().getDegrees() - Math.atan2(yDifference, xDifference));
-        return translationDifference * rotationToTranslation + rotationDifferenceDegrees * (1 - rotationToTranslation);
+    private double calculateObjectDistanceRatingFromPose(Translation2d objectTranslation, Pose2d pose) {
+        final Translation2d poseTranslation = pose.getTranslation();
+        final double translationDistance = poseTranslation.getDistance(objectTranslation);
+        final Translation2d translationDifference = objectTranslation.minus(poseTranslation);
+        final double rotationDifferenceDegrees = Math.abs(pose.getRotation().minus(translationDifference.getAngle()).getDegrees());
+        return translationDistance * rotationToTranslation + rotationDifferenceDegrees * (1 - rotationToTranslation);
     }
 
     private void updateObjectPositions() {
