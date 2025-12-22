@@ -77,6 +77,11 @@ public class SimpleSensor {
         return null;
     }
 
+    private SimpleSensor(SimpleSensorIO sensorIO, String name) {
+        this.sensorIO = sensorIO;
+        this.name = name;
+    }
+
     /**
      * Sets the scaling constants for the sensor. Used in {@link SimpleSensor#getScaledValue()} to convert the raw sensor value to a more useful unit.
      *
@@ -129,10 +134,5 @@ public class SimpleSensor {
     public void updateSensor() {
         sensorIO.updateInputs(sensorInputs);
         Logger.processInputs("SimpleSensors/" + name, sensorInputs);
-    }
-
-    private SimpleSensor(SimpleSensorIO sensorIO, String name) {
-        this.sensorIO = sensorIO;
-        this.name = name;
     }
 }
