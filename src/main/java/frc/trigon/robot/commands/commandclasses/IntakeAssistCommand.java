@@ -34,15 +34,17 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
     private Translation2d distanceFromTrackedGamePiece;
 
     /**
-     * Creates a new intake assist command of the given assist type.
+     * Creates a new intake assist command that assists the axes the user inputs.
      *
-     * @param assistMode the type of assistance
+     * @param xAssist     the assist to apply to the X-axis (Forward and backwards)
+     * @param yAssist     the assist to apply to the Y-axis (Sideways)
+     * @param thetaAssist the assist to apply to the rotation
      */
-    public IntakeAssistCommand(AssistMode assistMode) {
+    public IntakeAssistCommand(AssistAxis xAssist, AssistAxis yAssist, AssistAxis thetaAssist) {
         addCommands(
                 getTrackGamePieceCommand(),
                 GeneralCommands.getContinuousConditionalCommand(
-                        getAssistIntakeCommand(assistMode, () -> distanceFromTrackedGamePiece),
+                        getAssistIntakeCommand(xAssist, yAssist, thetaAssist, () -> distanceFromTrackedGamePiece),
                         GeneralCommands.getFieldRelativeDriveCommand(),
                         () -> RobotContainer.OBJECT_POSE_ESTIMATOR.hasObject() && distanceFromTrackedGamePiece != null
                 )
@@ -51,20 +53,23 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
 
     /**
      * Returns a command that assists the intake of a game piece at the given location.
+     * This version of the command is meant for use when there is a specific target game piece.
      * This command is for intaking a game piece with a specific robot-relative position.
-     * To create an intake assist command that selects the closest game piece automatically, use {@link IntakeAssistCommand#IntakeAssistCommand(AssistMode)} instead.
+     * To create an intake assist command that selects the closest game piece automatically, use {@link IntakeAssistCommand#IntakeAssistCommand(AssistAxis, AssistAxis, AssistAxis)} instead.
      *
-     * @param assistMode                   the type of assistance
+     * @param xAssist                      the assist to apply to the X-axis (Forward and backwards)
+     * @param yAssist                      the assist to apply to the Y-axis (Sideways)
+     * @param thetaAssist                  the assist to apply to the rotation
      * @param distanceFromTrackedGamePiece the position of the game piece relative to the robot
      * @return the command
      */
-    public static Command getAssistIntakeCommand(AssistMode assistMode, Supplier<Translation2d> distanceFromTrackedGamePiece) {
+    public static Command getAssistIntakeCommand(AssistAxis xAssist, AssistAxis yAssist, AssistAxis thetaAssist, Supplier<Translation2d> distanceFromTrackedGamePiece) {
         return new SequentialCommandGroup(
                 new InstantCommand(() -> resetPIDControllers(distanceFromTrackedGamePiece.get())),
                 SwerveCommands.getClosedLoopSelfRelativeDriveCommand(
-                        () -> calculateTranslationPower(assistMode, distanceFromTrackedGamePiece.get()).getX(),
-                        () -> calculateTranslationPower(assistMode, distanceFromTrackedGamePiece.get()).getY(),
-                        () -> calculateThetaPower(assistMode, distanceFromTrackedGamePiece.get())
+                        () -> calculateTranslationPower(true, xAssist, distanceFromTrackedGamePiece.get()),
+                        () -> calculateTranslationPower(false, yAssist, distanceFromTrackedGamePiece.get()),
+                        () -> calculateThetaPower(thetaAssist, distanceFromTrackedGamePiece.get())
                 )
         );
     }
@@ -77,62 +82,62 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
         );
     }
 
-    private static Translation2d calculateTranslationPower(AssistMode assistMode, Translation2d distanceFromTrackedGamePiece) {
+    private static double calculateTranslationPower(boolean isXAxis, AssistAxis assistAxis, Translation2d distanceFromTrackedGamePiece) {
         final Translation2d selfRelativeJoystickPower = getJoystickPosition().rotateBy(RobotContainer.SWERVE.getDriveRelativeAngle().unaryMinus());
+        final double
+                joystickPower = isXAxis ? selfRelativeJoystickPower.getX() : selfRelativeJoystickPower.getY(),
+                joystickNorm = selfRelativeJoystickPower.getNorm();
+
+        final double assistScalar = assistAxis.getAssistScalar();
+        if (assistScalar == 0)
+            return joystickPower;
 
         final double
-                xPIDOutput = clampToOutputRange(X_PID_CONTROLLER.calculate(distanceFromTrackedGamePiece.getX())),
-                yPIDOutput = clampToOutputRange(Y_PID_CONTROLLER.calculate(distanceFromTrackedGamePiece.getY()));
+                pidOutput = clampToOutputRange(isXAxis ?
+                X_PID_CONTROLLER.calculate(distanceFromTrackedGamePiece.getX()) :
+                Y_PID_CONTROLLER.calculate(distanceFromTrackedGamePiece.getY()));
 
-        if (assistMode.equals(AssistMode.ALTERNATE_ASSIST))
-            return calculateAlternateAssistTranslationPower(selfRelativeJoystickPower, xPIDOutput, yPIDOutput);
-        return calculateNormalAssistTranslationPower(assistMode, selfRelativeJoystickPower, xPIDOutput, yPIDOutput);
+        if (assistScalar == AlternateAssistAxis.ALTERNATE_ASSIST_SCALAR_VALUE)
+            return calculateAlternateAssistTranslationPower(joystickPower, joystickNorm, pidOutput);
+        return calculateNormalAssistTranslationPower(assistScalar, joystickPower, pidOutput);
     }
 
-    private static double calculateThetaPower(AssistMode assistMode, Translation2d distanceFromTrackedGamePiece) {
-        return calculateThetaAssistPower(assistMode, distanceFromTrackedGamePiece.getAngle().plus(Rotation2d.k180deg).unaryMinus());
+    private static double calculateThetaPower(AssistAxis assistAxis, Translation2d distanceFromTrackedGamePiece) {
+        return calculateThetaAssistPower(assistAxis, distanceFromTrackedGamePiece.getAngle().plus(Rotation2d.k180deg).unaryMinus());
     }
 
-    private static Translation2d calculateAlternateAssistTranslationPower(Translation2d joystickValue, double xPIDOutput, double yPIDOutput) {
-        final double pidScalar = Math.cbrt(joystickValue.getNorm());
+    private static double calculateAlternateAssistTranslationPower(double joystickValue, double joystickNorm, double pidOutput) {
         final double
-                xJoystickPower = Math.cbrt(joystickValue.getX()),
-                yJoystickPower = Math.cbrt(joystickValue.getY());
-        final double
-                xPower = calculateAlternateAssistPower(xPIDOutput, pidScalar, xJoystickPower),
-                yPower = calculateAlternateAssistPower(yPIDOutput, pidScalar, yJoystickPower);
+                xJoystickPower = Math.cbrt(joystickValue),
+                pidScalar = Math.cbrt(joystickNorm);
 
-        return new Translation2d(xPower, yPower);
+        return calculateAlternateAssistPower(pidOutput, pidScalar, xJoystickPower);
     }
 
-    private static Translation2d calculateNormalAssistTranslationPower(AssistMode assistMode, Translation2d joystickValue, double xPIDOutput, double yPIDOutput) {
-        final double
-                xJoystickPower = joystickValue.getX(),
-                yJoystickPower = joystickValue.getY();
-        final double
-                xPower = assistMode.shouldAssistX ? calculateNormalAssistPower(xPIDOutput, xJoystickPower) : xJoystickPower,
-                yPower = assistMode.shouldAssistY ? calculateNormalAssistPower(yPIDOutput, yJoystickPower) : yJoystickPower;
-
-        return new Translation2d(xPower, yPower);
+    private static double calculateNormalAssistTranslationPower(double assistScalar, double joystickValue, double pidOutput) {
+        return calculateNormalAssistPower(assistScalar, joystickValue, pidOutput);
     }
 
-    private static double calculateThetaAssistPower(AssistMode assistMode, Rotation2d thetaOffset) {
+    private static double calculateThetaAssistPower(AssistAxis assistAxis, Rotation2d thetaOffset) {
         final double
                 pidOutput = clampToOutputRange(THETA_PID_CONTROLLER.calculate(thetaOffset.getRadians())),
                 joystickValue = OperatorConstants.DRIVER_CONTROLLER.getRightX();
 
-        if (assistMode.equals(AssistMode.ALTERNATE_ASSIST))
+        final double assistScalar = assistAxis.getAssistScalar();
+        if (assistScalar == 0)
+            return joystickValue;
+
+        if (assistScalar == AlternateAssistAxis.ALTERNATE_ASSIST_SCALAR_VALUE)
             return calculateAlternateAssistPower(pidOutput, joystickValue, joystickValue);
-        return calculateNormalAssistPower(pidOutput, joystickValue);
+        return calculateNormalAssistPower(assistScalar, joystickValue, pidOutput);
     }
 
     private static double calculateAlternateAssistPower(double pidOutput, double pidScalar, double joystickPower) {
         return pidOutput * (1 - Math.abs(pidScalar)) + joystickPower;
     }
 
-    private static double calculateNormalAssistPower(double pidOutput, double joystickPower) {
-        final double intakeAssistScalar = OperatorConstants.INTAKE_ASSIST_SCALAR;
-        return (pidOutput * intakeAssistScalar) + (joystickPower * (1 - intakeAssistScalar));
+    private static double calculateNormalAssistPower(double intakeAssistScalar, double joystickPower, double pidOutput) {
+        return (joystickPower * (1 - intakeAssistScalar)) + (pidOutput * intakeAssistScalar);
     }
 
     private static double clampToOutputRange(double value) {
@@ -184,35 +189,33 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
     }
 
     /**
-     * An enum containing different modes in which the command assists the intake of the game piece.
+     * An object representing a single axis of normal intake assist.
+     * Normal intake assist adds the joystick input to the assist input after scaling down the assist by the {@code AssistScalar}.
+     *
+     * @param assistScalar the value with which to scale the assist power (0-1)
      */
-    public enum AssistMode {
-        /**
-         * An alternate method for assisting the intake where the pid output is scaled down the more input the driver gives.
-         */
-        ALTERNATE_ASSIST(true, true, true),
-        /**
-         * Applies pid values to autonomously drive to the game piece, scaled by {@link OperatorConstants#INTAKE_ASSIST_SCALAR} in addition to the driver's inputs
-         */
-        FULL_ASSIST(true, true, true),
-        /**
-         * Applies pid values to align to the game piece, scaled by {@link OperatorConstants#INTAKE_ASSIST_SCALAR} in addition to the driver's inputs
-         */
-        ALIGN_ASSIST(false, true, true),
-        /**
-         * Applies pid values to face the game piece, scaled by {@link OperatorConstants#INTAKE_ASSIST_SCALAR} in addition to the driver's inputs
-         */
-        ASSIST_ROTATION(false, false, true);
-
-        final boolean
-                shouldAssistX,
-                shouldAssistY,
-                shouldAssistTheta;
-
-        AssistMode(boolean shouldAssistX, boolean shouldAssistY, boolean shouldAssistTheta) {
-            this.shouldAssistX = shouldAssistX;
-            this.shouldAssistY = shouldAssistY;
-            this.shouldAssistTheta = shouldAssistTheta;
+    public record NormalAssistAxis(double assistScalar) implements AssistAxis {
+        @Override
+        public double getAssistScalar() {
+            return assistScalar;
         }
+    }
+
+    /**
+     * An object representing a single axis of alternate intake assist.
+     * Alternate intake assist scales down the assist power by the joystick's offset from the center.
+     * It then adds the joystick value to produce the final output power.
+     */
+    public record AlternateAssistAxis() implements AssistAxis {
+        public static double ALTERNATE_ASSIST_SCALAR_VALUE = -1;
+
+        @Override
+        public double getAssistScalar() {
+            return ALTERNATE_ASSIST_SCALAR_VALUE;
+        }
+    }
+
+    interface AssistAxis {
+        double getAssistScalar();
     }
 }
