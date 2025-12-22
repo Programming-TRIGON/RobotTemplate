@@ -30,7 +30,7 @@ public class AutonomousCommands {
         return new SequentialCommandGroup(
                 getDriveAndScoreCommand(scoringLocations),
                 getCollectCommand()
-        ).repeatedly().withName(generateDynamicAutonomousRoutineName());
+        ).repeatedly().withName(generateDynamicAutonomousRoutineName(scoringLocations));
     }
 
     private static Command getCollectCommand() {
