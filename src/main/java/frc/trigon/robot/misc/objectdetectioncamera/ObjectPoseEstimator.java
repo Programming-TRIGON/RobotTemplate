@@ -48,6 +48,13 @@ public class ObjectPoseEstimator extends SubsystemBase {
     }
 
     /**
+     * @return if the pose estimator knows any object positions
+     */
+    public boolean hasObject() {
+        return !knownObjectPositions.isEmpty();
+    }
+
+    /**
      * Gets the position of all known objects on the field.
      *
      * @return a list of Translation2d representing the positions of objects on the field
