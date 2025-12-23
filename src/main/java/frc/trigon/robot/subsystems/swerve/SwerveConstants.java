@@ -95,8 +95,7 @@ public class SwerveConstants {
 
     static {
         configureGyro();
-
-        SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER.enableContinuousInput(-SwerveConstants.MAXIMUM_PID_ANGLE, SwerveConstants.MAXIMUM_PID_ANGLE);
+        configurePIDControllers();
     }
 
     private static void configureGyro() {
@@ -112,9 +111,11 @@ public class SwerveConstants {
         GYRO.registerThreadedSignal(Pigeon2Signal.YAW, PoseEstimatorConstants.ODOMETRY_FREQUENCY_HERTZ);
     }
 
-    private static void setPIDTolerances() {
+    private static void configurePIDControllers() {
         SwerveConstants.X_TRANSLATION_PID_CONTROLLER.setTolerance(TRANSLATION_PID_TOLERANCE);
         SwerveConstants.Y_TRANSLATION_PID_CONTROLLER.setTolerance(TRANSLATION_PID_TOLERANCE);
+
         SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER.setTolerance(ROTATION_PID_TOLERANCE);
+        SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER.enableContinuousInput(-SwerveConstants.MAXIMUM_PID_ANGLE, SwerveConstants.MAXIMUM_PID_ANGLE);
     }
 }
