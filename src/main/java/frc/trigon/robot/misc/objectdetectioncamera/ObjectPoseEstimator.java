@@ -47,8 +47,11 @@ public class ObjectPoseEstimator extends SubsystemBase {
         Logger.recordOutput("ObjectPoseEstimator/knownObjectPositions", getObjectsOnField().toArray(Translation2d[]::new));
     }
 
+    /**
+     * @return if the pose estimator knows any object positions
+     */
     public boolean hasObject() {
-        return getClosestObjectToRobot() != null;
+        return !knownObjectPositions.isEmpty();
     }
 
     /**
