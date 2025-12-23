@@ -49,7 +49,7 @@ public class AutonomousCommands {
     private static Command getDriveToGamePieceCommand() {
         return new ConditionalCommand(
                 IntakeAssistCommand.getAssistIntakeCommand(IntakeAssistCommand.AssistMode.FULL_ASSIST, IntakeAssistCommand::calculateDistanceFromTrackedCGamePiece).onlyWhile(() -> RobotContainer.OBJECT_POSE_ESTIMATOR.getClosestObjectToRobot() != null),
-                getFindGamePieceCommand().until(() -> RobotContainer.OBJECT_POSE_ESTIMATOR.getClosestObjectToRobot() != null),
+                getFindGamePieceCommand(),
                 () -> RobotContainer.OBJECT_POSE_ESTIMATOR.getClosestObjectToRobot() != null
         );
     }
