@@ -2,7 +2,7 @@ package frc.trigon.robot.subsystems.swerve;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -92,18 +92,22 @@ public class Swerve extends MotorSubsystem {
         return ChassisSpeeds.fromRobotRelativeSpeeds(selfRelativeSpeeds, RobotContainer.ROBOT_POSE_ESTIMATOR.getEstimatedRobotPose().getRotation());
     }
 
-    public Transform2d getFieldRelativeVelocity() {
+    public Translation2d getFieldRelativeVelocity() {
         final ChassisSpeeds chassisSpeeds = getFieldRelativeChassisSpeeds();
-        return new Transform2d(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond, Rotation2d.fromRadians(chassisSpeeds.omegaRadiansPerSecond));
+        return new Translation2d(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond);
     }
 
     public ChassisSpeeds getSelfRelativeChassisSpeeds() {
         return SwerveConstants.KINEMATICS.toChassisSpeeds(getModuleStates());
     }
 
-    public Transform2d getSelfRelativeVelocity() {
+    public Translation2d getSelfRelativeVelocity() {
         final ChassisSpeeds chassisSpeeds = getSelfRelativeChassisSpeeds();
-        return new Transform2d(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond, Rotation2d.fromRadians(chassisSpeeds.omegaRadiansPerSecond));
+        return new Translation2d(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond);
+    }
+
+    public Rotation2d getRotationalVelocity() {
+        return Rotation2d.fromRadians(getSelfRelativeChassisSpeeds().omegaRadiansPerSecond);
     }
 
     /**
@@ -161,7 +165,7 @@ public class Swerve extends MotorSubsystem {
 
         if (isFromPathPlanner && DriverStation.isAutonomous() && !isPathPlannerDriving)
             return;
-        final ChassisSpeeds pidSpeeds = calculateSelfRelativePIDFromPoseSpeeds(new FlippablePose2d(targetPathPlannerPose, false));
+        final ChassisSpeeds pidSpeeds = calculateTargetSelfRelativeSpeedsFromPose(new FlippablePose2d(targetPathPlannerPose, false));
         final ChassisSpeeds scaledSpeeds = targetPathPlannerFeedforwardSpeeds.times(PathPlannerConstants.FEEDFORWARD_SCALAR);
         final ChassisSpeeds combinedSpeeds = pidSpeeds.plus(scaledSpeeds);
         selfRelativeDrive(combinedSpeeds);
@@ -202,7 +206,7 @@ public class Swerve extends MotorSubsystem {
      * @param targetPose the target pose, relative to the blue alliance driver station's right corner
      */
     void pidToPose(FlippablePose2d targetPose) {
-        final ChassisSpeeds targetSpeeds = calculateSelfRelativePIDFromPoseSpeeds(targetPose);
+        final ChassisSpeeds targetSpeeds = calculateTargetSelfRelativeSpeedsFromPose(targetPose);
         selfRelativeDrive(targetSpeeds);
     }
 
@@ -215,7 +219,7 @@ public class Swerve extends MotorSubsystem {
      */
     void fieldRelativeDrive(double xPower, double yPower, FlippableRotation2d targetAngle) {
         final ChassisSpeeds speeds = selfRelativeSpeedsFromFieldRelativePowers(xPower, yPower, 0);
-        speeds.omegaRadiansPerSecond = calculateProfiledAngleSpeedFromTargetAngle(targetAngle);
+        speeds.omegaRadiansPerSecond = calculateTargetAngleVelocityRadiansPerSecondFromAngle(targetAngle);
         selfRelativeDrive(speeds);
     }
 
@@ -252,7 +256,7 @@ public class Swerve extends MotorSubsystem {
      */
     void selfRelativeDrive(double xPower, double yPower, FlippableRotation2d targetAngle) {
         final ChassisSpeeds speeds = powersToSpeeds(xPower, yPower, 0);
-        speeds.omegaRadiansPerSecond = calculateProfiledAngleSpeedFromTargetAngle(targetAngle);
+        speeds.omegaRadiansPerSecond = calculateTargetAngleVelocityRadiansPerSecondFromAngle(targetAngle);
         selfRelativeDrive(speeds);
     }
 
@@ -286,7 +290,7 @@ public class Swerve extends MotorSubsystem {
         );
     }
 
-    private ChassisSpeeds calculateSelfRelativePIDFromPoseSpeeds(FlippablePose2d targetPose) {
+    private ChassisSpeeds calculateTargetSelfRelativeSpeedsFromPose(FlippablePose2d targetPose) {
         final Pose2d currentPose = RobotContainer.ROBOT_POSE_ESTIMATOR.getPredictedRobotPose(0.13);//TODO:Calibrate
         final Pose2d flippedTargetPose = targetPose.get();
 
@@ -302,7 +306,7 @@ public class Swerve extends MotorSubsystem {
         final ChassisSpeeds targetFieldRelativeSpeeds = new ChassisSpeeds(
                 xSpeed * directionSign,
                 ySpeed * directionSign,
-                calculateProfiledAngleSpeedFromTargetAngle(targetPose.getRotation())
+                calculateTargetAngleVelocityRadiansPerSecondFromAngle(targetPose.getRotation())
         );
 
         return fieldRelativeSpeedsToSelfRelativeSpeeds(targetFieldRelativeSpeeds);
@@ -334,7 +338,7 @@ public class Swerve extends MotorSubsystem {
                 Math.abs(currentTranslationVelocity) < SwerveConstants.TRANSLATION_VELOCITY_TOLERANCE;
     }
 
-    private double calculateProfiledAngleSpeedFromTargetAngle(FlippableRotation2d targetAngle) {
+    private double calculateTargetAngleVelocityRadiansPerSecondFromAngle(FlippableRotation2d targetAngle) {
         if (targetAngle == null)
             return 0;
         SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER.setGoal(targetAngle.get().getDegrees());
