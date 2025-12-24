@@ -33,7 +33,7 @@ public class AutonomousCommands {
         return new SequentialCommandGroup(
                 getDriveAndScoreCommand(scoringLocations),
                 getCollectCommand(intakeLocations)
-        ).repeatedly().withName(generateDynamicAutonomousRoutineName(scoringLocations));
+        ).repeatedly().withName(generateDynamicAutonomousRoutineName(intakeLocations, scoringLocations));
     }
 
     private static Command getCollectCommand(FlippablePose2d[] intakeLocations) {
@@ -99,12 +99,13 @@ public class AutonomousCommands {
     }
 
     /**
-     * Generates a name for the dynamic autonomous routine based on the scoring locations.
+     * Generates a name for the dynamic autonomous routine based on the intake and scoring locations.
      *
+     * @param intakeLocations  the intake locations
      * @param scoringLocations the scoring locations
-     * @return the name of the dynamic autonomous
+     * @return the name of the dynamic autonomous routine
      */
-    private static String generateDynamicAutonomousRoutineName(FlippablePose2d[] scoringLocations) {
+    private static String generateDynamicAutonomousRoutineName(FlippablePose2d[] intakeLocations, FlippablePose2d[] scoringLocations) {
         //TODO: implement
         return "";
     }
