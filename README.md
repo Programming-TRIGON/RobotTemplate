@@ -15,7 +15,7 @@ We use these a lot and highly recommend them!
 
 # TRIGONLib
 
-[TRIGON 5990's library](https://github.com/Programming-TRIGON/RobotTemplate/tree/main/src/main/java/frc/trigon/lib) for
+[TRIGON 5990's library](https://github.com/Programming-TRIGON/TRIGONLib) for
 automatic Advantage Kit and Simulation
 hardware wrappers, utilities, commands, and more.
 
