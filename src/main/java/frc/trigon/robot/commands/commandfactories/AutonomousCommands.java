@@ -9,7 +9,6 @@ import frc.trigon.robot.commands.commandclasses.GamePieceAutoDriveCommand;
 import frc.trigon.robot.constants.AutonomousConstants;
 import frc.trigon.robot.misc.simulatedfield.SimulatedGamePieceConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveCommands;
-import lib.utilities.flippable.FlippablePose2d;
 import org.json.simple.parser.ParseException;
 
 import java.io.IOException;

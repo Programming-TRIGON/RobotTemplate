@@ -11,7 +11,6 @@ import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.commands.commandfactories.GeneralCommands;
 import frc.trigon.robot.constants.OperatorConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveCommands;
-import lib.hardware.RobotHardwareStats;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.function.Supplier;

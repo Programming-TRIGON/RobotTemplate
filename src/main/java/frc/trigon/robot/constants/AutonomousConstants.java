@@ -12,9 +12,6 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import frc.trigon.robot.RobotContainer;
-import lib.hardware.RobotHardwareStats;
-import lib.utilities.LocalADStarAK;
-import lib.utilities.flippable.Flippable;
 import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
