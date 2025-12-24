@@ -83,23 +83,17 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
     }
 
     private static double calculateTranslationPower(boolean isXAxis, AssistAxis assistAxis, Translation2d distanceFromTrackedGamePiece) {
-        final Translation2d selfRelativeJoystickPower = getJoystickPosition().rotateBy(RobotContainer.SWERVE.getDriveRelativeAngle().unaryMinus());
+        final Translation2d selfRelativeJoystickValue = getJoystickPosition().rotateBy(RobotContainer.SWERVE.getDriveRelativeAngle().unaryMinus());
         final double
-                joystickPower = isXAxis ? selfRelativeJoystickPower.getX() : selfRelativeJoystickPower.getY(),
-                joystickNorm = selfRelativeJoystickPower.getNorm();
-
-        final double assistScalar = assistAxis.getAssistScalar();
-        if (assistScalar == 0)
-            return joystickPower;
+                joystickValue = isXAxis ? selfRelativeJoystickValue.getX() : selfRelativeJoystickValue.getY(),
+                joystickNorm = selfRelativeJoystickValue.getNorm();
 
         final double
                 pidOutput = clampToOutputRange(isXAxis ?
                 X_PID_CONTROLLER.calculate(distanceFromTrackedGamePiece.getX()) :
                 Y_PID_CONTROLLER.calculate(distanceFromTrackedGamePiece.getY()));
 
-        if (assistScalar == AlternateAssistAxis.ALTERNATE_ASSIST_SCALAR_VALUE)
-            return calculateAlternateAssistTranslationPower(joystickPower, joystickNorm, pidOutput);
-        return calculateNormalAssistTranslationPower(assistScalar, joystickPower, pidOutput);
+        return calculateAssistPower(assistAxis.getAssistScalar(), pidOutput, joystickValue, joystickNorm);
     }
 
     private static double calculateThetaPower(AssistAxis assistAxis, Translation2d distanceFromTrackedGamePiece) {
@@ -114,30 +108,30 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
         return calculateAlternateAssistPower(pidOutput, pidScalar, xJoystickPower);
     }
 
-    private static double calculateNormalAssistTranslationPower(double assistScalar, double joystickValue, double pidOutput) {
-        return calculateNormalAssistPower(assistScalar, joystickValue, pidOutput);
-    }
-
     private static double calculateThetaAssistPower(AssistAxis assistAxis, Rotation2d thetaOffset) {
         final double
                 pidOutput = clampToOutputRange(THETA_PID_CONTROLLER.calculate(thetaOffset.getRadians())),
-                joystickValue = OperatorConstants.DRIVER_CONTROLLER.getRightX();
+                joystickValue = OperatorConstants.DRIVER_CONTROLLER.getRightX(),
+                joystickNorm = Math.hypot(OperatorConstants.DRIVER_CONTROLLER.getRightX(), OperatorConstants.DRIVER_CONTROLLER.getRightY());
 
-        final double assistScalar = assistAxis.getAssistScalar();
+        return calculateAssistPower(assistAxis.getAssistScalar(), pidOutput, joystickValue, joystickNorm);
+    }
+
+    private static double calculateAssistPower(double assistScalar, double pidOutput, double joystickValue, double joystickNorm) {
         if (assistScalar == 0)
             return joystickValue;
 
         if (assistScalar == AlternateAssistAxis.ALTERNATE_ASSIST_SCALAR_VALUE)
-            return calculateAlternateAssistPower(pidOutput, joystickValue, joystickValue);
+            return calculateAlternateAssistPower(pidOutput, joystickNorm, joystickValue);
         return calculateNormalAssistPower(assistScalar, joystickValue, pidOutput);
     }
 
-    private static double calculateAlternateAssistPower(double pidOutput, double pidScalar, double joystickPower) {
-        return pidOutput * (1 - Math.abs(pidScalar)) + joystickPower;
+    private static double calculateAlternateAssistPower(double pidOutput, double pidScalar, double joystickValue) {
+        return pidOutput * (1 - Math.cbrt(Math.abs(pidScalar))) + joystickValue;
     }
 
-    private static double calculateNormalAssistPower(double intakeAssistScalar, double joystickPower, double pidOutput) {
-        return (joystickPower * (1 - intakeAssistScalar)) + (pidOutput * intakeAssistScalar);
+    private static double calculateNormalAssistPower(double intakeAssistScalar, double joystickValue, double pidOutput) {
+        return (joystickValue * (1 - intakeAssistScalar)) + (pidOutput * intakeAssistScalar);
     }
 
     private static double clampToOutputRange(double value) {
@@ -173,11 +167,15 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
     }
 
     private static boolean isGamePieceAssistable(Pose2d robotPose, Translation2d gamePiecePosition) {
-        final Rotation2d joystickAngle = getJoystickPosition().getAngle().rotateBy(RobotContainer.SWERVE.getDriveRelativeAngle());//Probably bad unit addition
+        final Translation2d joystickPosition = getJoystickPosition();
+        final Rotation2d joystickAngle = joystickPosition.getAngle().rotateBy(RobotContainer.SWERVE.getDriveRelativeAngle());//Probably bad unit addition
         final double gamePieceDistance = robotPose.getTranslation().getDistance(gamePiecePosition);
         final Rotation2d scaledMaximumAssistAngle = OperatorConstants.INTAKE_ASSIST_MAXIMUM_ANGLE_FROM_GAME_PIECE.times(1 / gamePieceDistance);
 
-        return Math.abs(joystickAngle.getRadians()) < Math.abs(scaledMaximumAssistAngle.getRadians());
+        final boolean
+                isWithinAngularRange = Math.abs(joystickAngle.getRadians()) < Math.abs(scaledMaximumAssistAngle.getRadians()),
+                isJoystickPastDeadband = joystickPosition.getNorm() > OperatorConstants.INTAKE_ASSIST_DEADBAND;
+        return isWithinAngularRange && isJoystickPastDeadband;
     }
 
     private static Translation2d getJoystickPosition() {
