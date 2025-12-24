@@ -16,12 +16,12 @@ import frc.trigon.robot.poseestimation.poseestimator.PoseEstimatorConstants;
 import frc.trigon.robot.subsystems.MotorSubsystem;
 import frc.trigon.robot.subsystems.swerve.swervemodule.SwerveModule;
 import frc.trigon.robot.subsystems.swerve.swervemodule.SwerveModuleConstants;
-import lib.hardware.phoenix6.Phoenix6SignalThread;
-import lib.hardware.phoenix6.pigeon2.Pigeon2Gyro;
-import lib.hardware.phoenix6.pigeon2.Pigeon2Signal;
-import lib.utilities.flippable.Flippable;
-import lib.utilities.flippable.FlippablePose2d;
-import lib.utilities.flippable.FlippableRotation2d;
+import frc.trigon.lib.hardware.phoenix6.Phoenix6SignalThread;
+import frc.trigon.lib.hardware.phoenix6.pigeon2.Pigeon2Gyro;
+import frc.trigon.lib.hardware.phoenix6.pigeon2.Pigeon2Signal;
+import frc.trigon.lib.utilities.flippable.Flippable;
+import frc.trigon.lib.utilities.flippable.FlippablePose2d;
+import frc.trigon.lib.utilities.flippable.FlippableRotation2d;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 

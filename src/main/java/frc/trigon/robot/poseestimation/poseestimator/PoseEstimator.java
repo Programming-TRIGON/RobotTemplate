@@ -18,8 +18,8 @@ import frc.trigon.robot.poseestimation.apriltagcamera.AprilTagCamera;
 import frc.trigon.robot.poseestimation.relativerobotposesource.RelativeRobotPoseSource;
 import frc.trigon.robot.poseestimation.relativerobotposesource.RelativeRobotPoseSourceConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveConstants;
-import lib.utilities.QuickSortHandler;
-import lib.utilities.flippable.Flippable;
+import frc.trigon.lib.utilities.QuickSortHandler;
+import frc.trigon.lib.utilities.flippable.Flippable;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 

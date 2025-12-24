@@ -10,10 +10,10 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.trigon.robot.RobotContainer;
-import lib.hardware.RobotHardwareStats;
-import lib.utilities.LocalADStarAK;
-import lib.utilities.flippable.Flippable;
 import org.json.simple.parser.ParseException;
+import frc.trigon.lib.hardware.RobotHardwareStats;
+import frc.trigon.lib.utilities.LocalADStarAK;
+import frc.trigon.lib.utilities.flippable.Flippable;
 
 import java.io.IOException;
 

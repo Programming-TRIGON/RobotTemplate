@@ -10,8 +10,8 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.trigon.robot.constants.PathPlannerConstants;
-import lib.hardware.RobotHardwareStats;
-import lib.hardware.simulation.SimpleMotorSimulation;
+import frc.trigon.lib.hardware.RobotHardwareStats;
+import frc.trigon.lib.hardware.simulation.SimpleMotorSimulation;
 
 public class SwerveModuleConstants {
     private static final double
