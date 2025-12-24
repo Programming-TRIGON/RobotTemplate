@@ -75,7 +75,7 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
         });
     }
 
-    public static Translation2d calculateDistanceFromTrackedCGamePiece() {
+    private static Translation2d calculateDistanceFromTrackedCGamePiece() {
         final Pose2d robotPose = RobotContainer.ROBOT_POSE_ESTIMATOR.getEstimatedRobotPose();
         final Translation2d trackedObjectPositionOnField = RobotContainer.OBJECT_POSE_ESTIMATOR.getClosestObjectToRobot();
         if (trackedObjectPositionOnField == null)

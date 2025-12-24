@@ -5,8 +5,9 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.trigon.robot.RobotContainer;
-import frc.trigon.robot.commands.commandclasses.IntakeAssistCommand;
+import frc.trigon.robot.commands.commandclasses.GamePieceAutoDriveCommand;
 import frc.trigon.robot.constants.AutonomousConstants;
+import frc.trigon.robot.misc.simulatedfield.SimulatedGamePieceConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveCommands;
 import lib.utilities.flippable.FlippablePose2d;
 import org.json.simple.parser.ParseException;
@@ -22,22 +23,23 @@ public class AutonomousCommands {
 
     /**
      * Creates a dynamic autonomous command intended for the 15-second autonomous period at the beginning of a match.
-     * By dynamic, we mean that the command isn't pre-programmed and instead autonomously decides what game pieces to collect and where to score.
+     * Dynamic means that the command isn't pre-programmed and instead autonomously decides what game pieces to collect and where to score.
      *
+     * @param intakeLocations  the locations at which to collect game pieces
      * @param scoringLocations the locations at which to score
      * @return the command
      */
-    public static Command getDynamicAutonmousCommand(FlippablePose2d... scoringLocations) {
+    public static Command getDynamicAutonmousCommand(FlippablePose2d[] intakeLocations, FlippablePose2d... scoringLocations) {
         return new SequentialCommandGroup(
                 getDriveAndScoreCommand(scoringLocations),
-                getCollectCommand()
+                getCollectCommand(intakeLocations)
         ).repeatedly().withName(generateDynamicAutonomousRoutineName(scoringLocations));
     }
 
-    private static Command getCollectCommand() {
+    private static Command getCollectCommand(FlippablePose2d[] intakeLocations) {
         return new ParallelCommandGroup(
                 getIntakeSequenceCommand(),
-                getDriveToGamePieceCommand()
+                getDriveToGamePieceCommand(intakeLocations)
         ).until(AutonomousCommands::hasGamePiece);
     }
 
@@ -46,15 +48,15 @@ public class AutonomousCommands {
         return false;
     }
 
-    private static Command getDriveToGamePieceCommand() {
+    private static Command getDriveToGamePieceCommand(FlippablePose2d[] intakeLocations) {
         return new ConditionalCommand(
-                IntakeAssistCommand.getAssistIntakeCommand(IntakeAssistCommand.AssistMode.FULL_ASSIST, IntakeAssistCommand::calculateDistanceFromTrackedCGamePiece).onlyWhile(() -> RobotContainer.OBJECT_POSE_ESTIMATOR.getClosestObjectToRobot() != null),
-                getFindGamePieceCommand(),
+                new GamePieceAutoDriveCommand(SimulatedGamePieceConstants.GamePieceType.GAME_PIECE_TYPE).onlyWhile(() -> RobotContainer.OBJECT_POSE_ESTIMATOR.getClosestObjectToRobot() != null),
+                getFindGamePieceCommand(intakeLocations),
                 () -> RobotContainer.OBJECT_POSE_ESTIMATOR.getClosestObjectToRobot() != null
         );
     }
 
-    private static Command getFindGamePieceCommand() {
+    private static Command getFindGamePieceCommand(FlippablePose2d[] intakeLocations) {
         //TODO: implement
         return null;
     }
