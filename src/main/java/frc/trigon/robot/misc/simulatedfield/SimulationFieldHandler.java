@@ -104,7 +104,7 @@ public class SimulationFieldHandler {
     }
 
     private static void ejectGamePiece(SimulatedGamePiece ejectedGamePiece) {
-        final ChassisSpeeds swerveWheelSpeeds = RobotContainer.SWERVE.getSelfRelativeVelocity();
+        final ChassisSpeeds swerveWheelSpeeds = RobotContainer.SWERVE.getSelfRelativeChassisSpeeds();
         final Translation3d robotSelfRelativeVelocity = new Translation3d(swerveWheelSpeeds.vxMetersPerSecond, swerveWheelSpeeds.vyMetersPerSecond, 0);
         final Translation3d robotRelativeReleaseVelocity = new Translation3d();
 
