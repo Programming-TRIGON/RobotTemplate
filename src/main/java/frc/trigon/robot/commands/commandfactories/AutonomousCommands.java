@@ -52,8 +52,12 @@ public class AutonomousCommands {
         return new ConditionalCommand(
                 new GamePieceAutoDriveCommand(SimulatedGamePieceConstants.GamePieceType.GAME_PIECE_TYPE).onlyWhile(() -> RobotContainer.OBJECT_POSE_ESTIMATOR.getClosestObjectToRobot() != null),
                 getFindGamePieceCommand(intakeLocations),
-                () -> RobotContainer.OBJECT_POSE_ESTIMATOR.getClosestObjectToRobot() != null
+                AutonomousCommands::shouldCollectGamePiece
         );
+    }
+
+    private static boolean shouldCollectGamePiece() {
+        return RobotContainer.OBJECT_POSE_ESTIMATOR.getClosestObjectToRobot() != null;
     }
 
     private static Command getFindGamePieceCommand(FlippablePose2d[] intakeLocations) {
