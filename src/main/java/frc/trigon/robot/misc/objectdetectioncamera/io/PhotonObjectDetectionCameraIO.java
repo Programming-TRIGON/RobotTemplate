@@ -43,7 +43,7 @@ public class PhotonObjectDetectionCameraIO extends ObjectDetectionCameraIO {
     }
 
     private void updateNoNewResultInputs(ObjectDetectionCameraInputsAutoLogged inputs) {
-        inputs.hasTarget = new boolean[ObjectDetectionCameraConstants.NUMBER_OF_GAME_PIECE_TYPES];
+        inputs.hasObject = new boolean[ObjectDetectionCameraConstants.NUMBER_OF_GAME_PIECE_TYPES];
         inputs.visibleObjectRotations = new Rotation3d[ObjectDetectionCameraConstants.NUMBER_OF_GAME_PIECE_TYPES][0];
     }
 
@@ -51,14 +51,14 @@ public class PhotonObjectDetectionCameraIO extends ObjectDetectionCameraIO {
         final List<Rotation3d>[] visibleObjectsRotations = new List[ObjectDetectionCameraConstants.NUMBER_OF_GAME_PIECE_TYPES];
         for (int i = 0; i < ObjectDetectionCameraConstants.NUMBER_OF_GAME_PIECE_TYPES; i++)
             visibleObjectsRotations[i] = new ArrayList<>();
-        Arrays.fill(inputs.hasTarget, false);
+        Arrays.fill(inputs.hasObject, false);
         inputs.latestResultTimestamp = result.getTimestampSeconds();
 
         for (PhotonTrackedTarget currentTarget : result.getTargets()) {
             if (currentTarget.getDetectedObjectClassID() == -1)
                 continue;
 
-            inputs.hasTarget[currentTarget.getDetectedObjectClassID()] = true;
+            inputs.hasObject[currentTarget.getDetectedObjectClassID()] = true;
             visibleObjectsRotations[currentTarget.getDetectedObjectClassID()].add(extractRotation3d(currentTarget));
         }
 

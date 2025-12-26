@@ -1,4 +1,4 @@
-package frc.trigon.robot.misc.objectdetectioncamera;
+package frc.trigon.robot.poseestimation.poseestimator;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -6,32 +6,37 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.trigon.robot.RobotContainer;
+import frc.trigon.robot.misc.objectdetectioncamera.ObjectDetectionCamera;
+import frc.trigon.robot.misc.objectdetectioncamera.ObjectDetectionCameraConstants;
 import frc.trigon.robot.misc.simulatedfield.SimulatedGamePieceConstants;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 public class ObjectPoseEstimator extends SubsystemBase {
-    private final HashMap<Translation2d, Double> knownObjectPositions;
-    private final ObjectDetectionCamera camera;
     private final double deletionThresholdSeconds;
     private final SimulatedGamePieceConstants.GamePieceType gamePieceType;
+    private final ObjectDetectionCamera[] cameras;
+    private final HashMap<Translation2d, Double> knownObjectPositions;
     private final double rotationToTranslation;
 
     /**
      * Constructs an ObjectPoseEstimator for estimating the positions of objects detected by camera.
      *
-     * @param deletionThresholdSeconds the time in seconds after which an object is considered old and removed
-     * @param gamePieceType            the type of game piece to track
-     * @param camera                   the camera used for detecting objects
+     * @param deletionThresholdSeconds  the time in seconds after which an object is considered old and removed
+     * @param distanceCalculationMethod the method used to calculate the distance from the game piece
+     * @param gamePieceType             the type of game piece to track
+     * @param cameras                   the camera used for detecting objects
      */
     public ObjectPoseEstimator(double deletionThresholdSeconds, DistanceCalculationMethod distanceCalculationMethod,
                                SimulatedGamePieceConstants.GamePieceType gamePieceType,
-                               ObjectDetectionCamera camera) {
+                               ObjectDetectionCamera... cameras) {
         this.deletionThresholdSeconds = deletionThresholdSeconds;
         this.gamePieceType = gamePieceType;
-        this.camera = camera;
+        this.cameras = cameras;
         this.knownObjectPositions = new HashMap<>();
         this.rotationToTranslation = distanceCalculationMethod.rotationToTranslation;
     }
@@ -121,54 +126,63 @@ public class ObjectPoseEstimator extends SubsystemBase {
         final Translation2d[] objectsTranslations = knownObjectPositions.keySet().toArray(Translation2d[]::new);
         if (knownObjectPositions.isEmpty())
             return null;
-        Translation2d bestObjectTranslation = objectsTranslations[0];
-        double closestObjectDistance = position.getDistance(bestObjectTranslation);
+        Translation2d closestObjectTranslation = objectsTranslations[0];
+        double closestObjectDistance = position.getDistance(closestObjectTranslation);
 
         for (int i = 1; i < objectsTranslations.length; i++) {
             final Translation2d currentObjectTranslation = objectsTranslations[i];
             final double currentObjectDistance = position.getDistance(currentObjectTranslation);
             if (currentObjectDistance < closestObjectDistance) {
                 closestObjectDistance = currentObjectDistance;
-                bestObjectTranslation = currentObjectTranslation;
+                closestObjectTranslation = currentObjectTranslation;
             }
         }
-        return bestObjectTranslation;
+        return closestObjectTranslation;
     }
 
     /**
-     * Calculates the "distance rating" of an object.
+     * Calculates the "distance rating" of an object from a given pose.
      * The "distance rating" is a unit used to calculate the distance between 2 poses.
      * It factors in both translation and rotation differences by scaling the units depending on the {@link DistanceCalculationMethod}.
      *
      * @param objectTranslation the translation of the object on the field
      * @param pose              the pose to which the distance is measured from
-     * @return the objects "distance rating"
+     * @return the objects "distance rating" from the given pose
      */
-    private double calculateObjectDistanceRating(Translation2d objectTranslation, Pose2d pose) {
-        final double translationDifference = pose.getTranslation().getDistance(objectTranslation);
-        final double xDifference = Math.abs(pose.getX() - objectTranslation.getX());
-        final double yDifference = Math.abs(pose.getY() - objectTranslation.getY());
-        final double rotationDifferenceDegrees = Math.abs(pose.getRotation().getDegrees() - Math.atan2(yDifference, xDifference));
-        return translationDifference * rotationToTranslation + rotationDifferenceDegrees * (1 - rotationToTranslation);
+    private double calculateObjectDistanceRatingFromPose(Translation2d objectTranslation, Pose2d pose) {
+        final Translation2d poseTranslation = pose.getTranslation();
+        final double translationDistance = poseTranslation.getDistance(objectTranslation);
+        final Translation2d translationDifference = objectTranslation.minus(poseTranslation);
+        final double rotationDifferenceDegrees = Math.abs(pose.getRotation().minus(translationDifference.getAngle()).getDegrees());
+
+        return translationDistance * rotationToTranslation + rotationDifferenceDegrees * (1 - rotationToTranslation);
     }
 
     private void updateObjectPositions() {
         final double currentTimestamp = Timer.getTimestamp();
-        for (Translation2d visibleObject : camera.getObjectPositionsOnField(gamePieceType)) {
-            Translation2d closestObjectToVisibleObject = new Translation2d();
-            double closestObjectToVisibleObjectDistanceMeters = Double.POSITIVE_INFINITY;
+        final Set<Translation2d> objectsProcessedThisFrame = new HashSet<>();
 
-            for (Translation2d knownObject : knownObjectPositions.keySet()) {
-                final double currentObjectDistanceMeters = visibleObject.getDistance(knownObject);
-                if (currentObjectDistanceMeters < closestObjectToVisibleObjectDistanceMeters) {
-                    closestObjectToVisibleObjectDistanceMeters = currentObjectDistanceMeters;
-                    closestObjectToVisibleObject = knownObject;
+        for (ObjectDetectionCamera currentCamera : cameras) {
+            for (Translation2d visibleObject : currentCamera.getObjectPositionsOnField(gamePieceType)) {
+                Translation2d closestObjectToVisibleObject = null;
+                double closestObjectToVisibleObjectDistanceMeters = Double.POSITIVE_INFINITY;
+
+                for (Translation2d knownObject : knownObjectPositions.keySet()) {
+                    if (!objectsProcessedThisFrame.contains(knownObject)) {
+                        final double currentObjectDistanceMeters = visibleObject.getDistance(knownObject);
+                        if (currentObjectDistanceMeters < closestObjectToVisibleObjectDistanceMeters) {
+                            closestObjectToVisibleObjectDistanceMeters = currentObjectDistanceMeters;
+                            closestObjectToVisibleObject = knownObject;
+                        }
+                    }
                 }
+                if (closestObjectToVisibleObject != null
+                        && closestObjectToVisibleObjectDistanceMeters < ObjectDetectionCameraConstants.TRACKED_OBJECT_TOLERANCE_METERS
+                        && knownObjectPositions.get(closestObjectToVisibleObject) != currentTimestamp)
+                    removeObject(closestObjectToVisibleObject);
+                knownObjectPositions.put(visibleObject, currentTimestamp);
+                objectsProcessedThisFrame.add(visibleObject);
             }
-
-            if (closestObjectToVisibleObjectDistanceMeters < ObjectDetectionCameraConstants.TRACKED_OBJECT_TOLERANCE_METERS && knownObjectPositions.get(closestObjectToVisibleObject) != currentTimestamp)
-                removeObject(closestObjectToVisibleObject);
-            knownObjectPositions.put(visibleObject, currentTimestamp);
         }
     }
 
