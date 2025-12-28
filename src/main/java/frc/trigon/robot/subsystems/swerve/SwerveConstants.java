@@ -8,7 +8,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import frc.trigon.robot.RobotContainer;
-import frc.trigon.robot.constants.PathPlannerConstants;
+import frc.trigon.robot.constants.AutonomousConstants;
 import frc.trigon.robot.constants.RobotConstants;
 import frc.trigon.robot.poseestimation.poseestimator.PoseEstimatorConstants;
 import frc.trigon.robot.subsystems.swerve.swervemodule.SwerveModule;
@@ -44,7 +44,7 @@ public class SwerveConstants {
             new SwerveModule(REAR_RIGHT_ID, REAR_RIGHT_STEER_ENCODER_OFFSET, REAR_RIGHT_WHEEL_DIAMETER)
     };
 
-    public static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(PathPlannerConstants.ROBOT_CONFIG.moduleLocations);
+    public static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(AutonomousConstants.ROBOT_CONFIG.moduleLocations);
     static final double
             TRANSLATION_TOLERANCE_METERS = 0.035,
             ROTATION_TOLERANCE_DEGREES = 1.5,
@@ -55,8 +55,8 @@ public class SwerveConstants {
             ROTATION_NEUTRAL_DEADBAND = 0.2;
 
     public static final double
-            MAXIMUM_SPEED_METERS_PER_SECOND = PathPlannerConstants.ROBOT_CONFIG.moduleConfig.maxDriveVelocityMPS,
-            MAXIMUM_ROTATIONAL_SPEED_RADIANS_PER_SECOND = PathPlannerConstants.ROBOT_CONFIG.moduleConfig.maxDriveVelocityMPS / PathPlannerConstants.ROBOT_CONFIG.modulePivotDistance[0];
+            MAXIMUM_SPEED_METERS_PER_SECOND = AutonomousConstants.ROBOT_CONFIG.moduleConfig.maxDriveVelocityMPS,
+            MAXIMUM_ROTATIONAL_SPEED_RADIANS_PER_SECOND = AutonomousConstants.ROBOT_CONFIG.moduleConfig.maxDriveVelocityMPS / AutonomousConstants.ROBOT_CONFIG.modulePivotDistance[0];
 
     private static final PIDConstants
             TRANSLATION_PID_CONSTANTS = RobotHardwareStats.isSimulation() ?
