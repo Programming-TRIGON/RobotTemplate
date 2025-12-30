@@ -3,8 +3,8 @@ package frc.trigon.robot.constants;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import lib.hardware.misc.KeyboardController;
-import lib.hardware.misc.XboxController;
+import frc.trigon.lib.hardware.misc.KeyboardController;
+import frc.trigon.lib.hardware.misc.XboxController;
 
 public class OperatorConstants {
     public static final double DRIVER_CONTROLLER_DEADBAND = 0.07;

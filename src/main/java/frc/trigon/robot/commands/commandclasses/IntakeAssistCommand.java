@@ -7,11 +7,11 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.*;
+import frc.trigon.lib.hardware.RobotHardwareStats;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.commands.commandfactories.GeneralCommands;
 import frc.trigon.robot.constants.OperatorConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveCommands;
-import lib.hardware.RobotHardwareStats;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.ArrayList;
@@ -56,10 +56,15 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
      * This version of the command is meant for use when there is a specific target game piece.
      * This command is for intaking a game piece with a specific robot-relative position.
      * To create an intake assist command that selects the closest game piece automatically, use {@link IntakeAssistCommand#IntakeAssistCommand(AssistAxis, AssistAxis, AssistAxis)} instead.
+     * <p>
+     * <<<<<<< HEAD
      *
      * @param xAssist                      the assist to apply to the X-axis (Forward and backwards)
      * @param yAssist                      the assist to apply to the Y-axis (Sideways)
      * @param thetaAssist                  the assist to apply to the rotation
+     *                                     =======
+     * @param assistMode                   the type of assistance
+     *                                     >>>>>>> main
      * @param distanceFromTrackedGamePiece the position of the game piece relative to the robot
      * @return the command
      */
