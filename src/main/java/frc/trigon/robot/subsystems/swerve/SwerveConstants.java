@@ -90,8 +90,8 @@ public class SwerveConstants {
                     TRANSLATION_PID_CONSTANTS.kD
             );
     private static final double
-            ROTATION_PID_TOLERANCE = 1,
-            TRANSLATION_PID_TOLERANCE = 0.02;
+            ROTATION_PID_TOLERANCE_DEGREES = 1,
+            TRANSLATION_PID_TOLERANCE_METERS = 0.02;
     static final double PID_TO_POSE_PREDICTION_TIME_SECONDS = 0.13;//TODO:Calibrate
 
     static {
@@ -113,10 +113,10 @@ public class SwerveConstants {
     }
 
     private static void configurePIDControllers() {
-        SwerveConstants.X_TRANSLATION_PID_CONTROLLER.setTolerance(TRANSLATION_PID_TOLERANCE);
-        SwerveConstants.Y_TRANSLATION_PID_CONTROLLER.setTolerance(TRANSLATION_PID_TOLERANCE);
+        SwerveConstants.X_TRANSLATION_PID_CONTROLLER.setTolerance(TRANSLATION_PID_TOLERANCE_METERS);
+        SwerveConstants.Y_TRANSLATION_PID_CONTROLLER.setTolerance(TRANSLATION_PID_TOLERANCE_METERS);
 
-        SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER.setTolerance(ROTATION_PID_TOLERANCE);
+        SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER.setTolerance(ROTATION_PID_TOLERANCE_DEGREES);
         SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER.enableContinuousInput(-SwerveConstants.MAXIMUM_PID_ANGLE, SwerveConstants.MAXIMUM_PID_ANGLE);
     }
 }
