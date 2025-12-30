@@ -93,19 +93,11 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
                 X_PID_CONTROLLER.calculate(distanceFromTrackedGamePiece.getX()) :
                 Y_PID_CONTROLLER.calculate(distanceFromTrackedGamePiece.getY()));
 
-        return calculateAssistPower(assistAxis.getAssistScalar(), pidOutput, joystickValue, joystickNorm);
+        return assistAxis.calculatePower(pidOutput, joystickValue, joystickNorm);
     }
 
     private static double calculateThetaPower(AssistAxis assistAxis, Translation2d distanceFromTrackedGamePiece) {
         return calculateThetaAssistPower(assistAxis, distanceFromTrackedGamePiece.getAngle().plus(Rotation2d.k180deg).unaryMinus());
-    }
-
-    private static double calculateAlternateAssistTranslationPower(double joystickValue, double joystickNorm, double pidOutput) {
-        final double
-                xJoystickPower = Math.cbrt(joystickValue),
-                pidScalar = Math.cbrt(joystickNorm);
-
-        return calculateAlternateAssistPower(pidOutput, pidScalar, xJoystickPower);
     }
 
     private static double calculateThetaAssistPower(AssistAxis assistAxis, Rotation2d thetaOffset) {
@@ -114,24 +106,7 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
                 joystickValue = OperatorConstants.DRIVER_CONTROLLER.getRightX(),
                 joystickNorm = Math.hypot(OperatorConstants.DRIVER_CONTROLLER.getRightX(), OperatorConstants.DRIVER_CONTROLLER.getRightY());
 
-        return calculateAssistPower(assistAxis.getAssistScalar(), pidOutput, joystickValue, joystickNorm);
-    }
-
-    private static double calculateAssistPower(double assistScalar, double pidOutput, double joystickValue, double joystickNorm) {
-        if (assistScalar == 0)
-            return joystickValue;
-
-        if (assistScalar == AlternateAssistAxis.ALTERNATE_ASSIST_SCALAR_VALUE)
-            return calculateAlternateAssistPower(pidOutput, joystickNorm, joystickValue);
-        return calculateNormalAssistPower(assistScalar, joystickValue, pidOutput);
-    }
-
-    private static double calculateAlternateAssistPower(double pidOutput, double pidScalar, double joystickValue) {
-        return pidOutput * (1 - Math.cbrt(Math.abs(pidScalar))) + joystickValue;
-    }
-
-    private static double calculateNormalAssistPower(double intakeAssistScalar, double joystickValue, double pidOutput) {
-        return (joystickValue * (1 - intakeAssistScalar)) + (pidOutput * intakeAssistScalar);
+        return assistAxis.calculatePower(pidOutput, joystickValue, joystickNorm);
     }
 
     private static double clampToOutputRange(double value) {
@@ -194,8 +169,10 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
      */
     public record NormalAssistAxis(double assistScalar) implements AssistAxis {
         @Override
-        public double getAssistScalar() {
-            return assistScalar;
+        public double calculatePower(double pidOutput, double joystickValue, double joystickNorm) {
+            if (assistScalar == 0)
+                return joystickValue;
+            return (joystickValue * (1 - assistScalar)) + (pidOutput * assistScalar);
         }
     }
 
@@ -205,15 +182,13 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
      * It then adds the joystick value to produce the final output power.
      */
     public record AlternateAssistAxis() implements AssistAxis {
-        public static double ALTERNATE_ASSIST_SCALAR_VALUE = -1;
-
         @Override
-        public double getAssistScalar() {
-            return ALTERNATE_ASSIST_SCALAR_VALUE;
+        public double calculatePower(double pidOutput, double joystickValue, double joystickNorm) {
+            return pidOutput * (1 - Math.cbrt(Math.abs(joystickNorm))) + joystickValue;
         }
     }
 
     interface AssistAxis {
-        double getAssistScalar();
+        double calculatePower(double pidOutput, double joystickValue, double joystickNorm);
     }
 }
