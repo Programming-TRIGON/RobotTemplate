@@ -1,4 +1,4 @@
-package frc.trigon.robot.poseestimation.poseestimator;
+package frc.trigon.robot.poseestimation;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -6,8 +6,8 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.trigon.robot.RobotContainer;
-import frc.trigon.robot.misc.objectdetectioncamera.ObjectDetectionCamera;
-import frc.trigon.robot.misc.objectdetectioncamera.ObjectDetectionCameraConstants;
+import frc.trigon.robot.poseestimation.objectdetectioncamera.ObjectDetectionCamera;
+import frc.trigon.robot.poseestimation.objectdetectioncamera.ObjectDetectionCameraConstants;
 import frc.trigon.robot.misc.simulatedfield.SimulatedGamePieceConstants;
 import org.littletonrobotics.junction.Logger;
 
@@ -29,7 +29,7 @@ public class ObjectPoseEstimator extends SubsystemBase {
      * @param deletionThresholdSeconds  the time in seconds after which an object is considered old and removed
      * @param distanceCalculationMethod the method used to calculate the distance from the game piece
      * @param gamePieceType             the type of game piece to track
-     * @param cameras                   the camera used for detecting objects
+     * @param cameras                   the cameras used for detecting objects
      */
     public ObjectPoseEstimator(double deletionThresholdSeconds, DistanceCalculationMethod distanceCalculationMethod,
                                SimulatedGamePieceConstants.GamePieceType gamePieceType,

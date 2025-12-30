@@ -12,7 +12,7 @@ import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.constants.PathPlannerConstants;
-import frc.trigon.robot.poseestimation.poseestimator.PoseEstimatorConstants;
+import frc.trigon.robot.poseestimation.robotposeestimator.RobotPoseEstimatorConstants;
 import frc.trigon.robot.subsystems.MotorSubsystem;
 import frc.trigon.robot.subsystems.swerve.swervemodule.SwerveModule;
 import frc.trigon.robot.subsystems.swerve.swervemodule.SwerveModuleConstants;
@@ -34,7 +34,7 @@ public class Swerve extends MotorSubsystem {
 
     public Swerve() {
         setName("Swerve");
-        phoenix6SignalThread.setThreadFrequencyHertz(PoseEstimatorConstants.ODOMETRY_FREQUENCY_HERTZ);
+        phoenix6SignalThread.setThreadFrequencyHertz(RobotPoseEstimatorConstants.ODOMETRY_FREQUENCY_HERTZ);
     }
 
     @Override

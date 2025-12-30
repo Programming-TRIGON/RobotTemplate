@@ -10,7 +10,7 @@ import edu.wpi.first.math.util.Units;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.constants.PathPlannerConstants;
 import frc.trigon.robot.constants.RobotConstants;
-import frc.trigon.robot.poseestimation.poseestimator.PoseEstimatorConstants;
+import frc.trigon.robot.poseestimation.robotposeestimator.RobotPoseEstimatorConstants;
 import frc.trigon.robot.subsystems.swerve.swervemodule.SwerveModule;
 import lib.hardware.RobotHardwareStats;
 import lib.hardware.phoenix6.pigeon2.Pigeon2Gyro;
@@ -107,6 +107,6 @@ public class SwerveConstants {
         GYRO.applyConfiguration(config);
         GYRO.setSimulationYawVelocitySupplier(() -> RobotContainer.SWERVE.getSelfRelativeVelocity().omegaRadiansPerSecond);
 
-        GYRO.registerThreadedSignal(Pigeon2Signal.YAW, PoseEstimatorConstants.ODOMETRY_FREQUENCY_HERTZ);
+        GYRO.registerThreadedSignal(Pigeon2Signal.YAW, RobotPoseEstimatorConstants.ODOMETRY_FREQUENCY_HERTZ);
     }
 }

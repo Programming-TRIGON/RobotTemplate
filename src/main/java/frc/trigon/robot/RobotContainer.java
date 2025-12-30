@@ -15,16 +15,16 @@ import frc.trigon.robot.constants.CameraConstants;
 import frc.trigon.robot.constants.LEDConstants;
 import frc.trigon.robot.constants.OperatorConstants;
 import frc.trigon.robot.constants.PathPlannerConstants;
-import frc.trigon.robot.poseestimation.poseestimator.ObjectPoseEstimator;
+import frc.trigon.robot.poseestimation.ObjectPoseEstimator;
 import frc.trigon.robot.misc.simulatedfield.SimulatedGamePieceConstants;
-import frc.trigon.robot.poseestimation.poseestimator.PoseEstimator;
+import frc.trigon.robot.poseestimation.robotposeestimator.RobotPoseEstimator;
 import frc.trigon.robot.subsystems.MotorSubsystem;
 import frc.trigon.robot.subsystems.swerve.Swerve;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import lib.utilities.flippable.Flippable;
 
 public class RobotContainer {
-    public static final PoseEstimator ROBOT_POSE_ESTIMATOR = new PoseEstimator();
+    public static final RobotPoseEstimator ROBOT_POSE_ESTIMATOR = new RobotPoseEstimator();
     public static final ObjectPoseEstimator OBJECT_POSE_ESTIMATOR = new ObjectPoseEstimator(
             CameraConstants.OBJECT_POSE_ESTIMATOR_DELETION_THRESHOLD_SECONDS,
             ObjectPoseEstimator.DistanceCalculationMethod.ROTATION_AND_TRANSLATION,

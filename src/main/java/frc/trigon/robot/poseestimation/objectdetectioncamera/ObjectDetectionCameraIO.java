@@ -1,4 +1,4 @@
-package frc.trigon.robot.misc.objectdetectioncamera;
+package frc.trigon.robot.poseestimation.objectdetectioncamera;
 
 import edu.wpi.first.math.geometry.Rotation3d;
 import org.littletonrobotics.junction.AutoLog;

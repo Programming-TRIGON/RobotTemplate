@@ -1,4 +1,4 @@
-package frc.trigon.robot.poseestimation.poseestimator;
+package frc.trigon.robot.poseestimation.robotposeestimator;
 
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.VecBuilder;
@@ -29,7 +29,7 @@ import java.util.Map;
 /**
  * A class that estimates the robot's pose using WPILib's {@link SwerveDrivePoseEstimator} and {@link SwerveDriveOdometry}.
  */
-public class PoseEstimator implements AutoCloseable {
+public class RobotPoseEstimator implements AutoCloseable {
     private final SwerveDrivePoseEstimator swerveDrivePoseEstimator = createSwerveDrivePoseEstimator();
     private final SwerveDriveOdometry swerveDriveOdometry = createSwerveDriveOdometry();
     private final Field2d field = new Field2d();
@@ -44,7 +44,7 @@ public class PoseEstimator implements AutoCloseable {
      * @param relativeRobotPoseSource the relative robot pose source that should be used to update the pose estimator
      * @param aprilTagCameras         the apriltag cameras that should be used to update the relative robot pose source
      */
-    public PoseEstimator(RelativeRobotPoseSource relativeRobotPoseSource, AprilTagCamera... aprilTagCameras) {
+    public RobotPoseEstimator(RelativeRobotPoseSource relativeRobotPoseSource, AprilTagCamera... aprilTagCameras) {
         this.aprilTagCameras = aprilTagCameras;
         this.relativeRobotPoseSource = relativeRobotPoseSource;
         this.shouldUseRelativeRobotPoseSource = true;
@@ -58,7 +58,7 @@ public class PoseEstimator implements AutoCloseable {
      *
      * @param aprilTagCameras the cameras that should be used to update the pose estimator
      */
-    public PoseEstimator(AprilTagCamera... aprilTagCameras) {
+    public RobotPoseEstimator(AprilTagCamera... aprilTagCameras) {
         this.aprilTagCameras = aprilTagCameras;
         this.relativeRobotPoseSource = null;
         this.shouldUseRelativeRobotPoseSource = false;
@@ -229,8 +229,8 @@ public class PoseEstimator implements AutoCloseable {
         final ChassisSpeeds chassisSpeeds = RobotContainer.SWERVE.getSelfRelativeVelocity();
         final double currentTranslationVelocityMetersPerSecond = Math.hypot(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond);
         final double currentThetaVelocityRadiansPerSecond = chassisSpeeds.omegaRadiansPerSecond;
-        return currentTranslationVelocityMetersPerSecond <= PoseEstimatorConstants.MAXIMUM_TRANSLATION_VELOCITY_FOR_RELATIVE_ROBOT_POSE_SOURCE_OFFSET_RESETTING_METERS_PER_SECOND &&
-                currentThetaVelocityRadiansPerSecond <= PoseEstimatorConstants.MAXIMUM_THETA_VELOCITY_FOR_RELATIVE_ROBOT_POSE_SOURCE_OFFSET_RESETTING_RADIANS_PER_SECOND;
+        return currentTranslationVelocityMetersPerSecond <= RobotPoseEstimatorConstants.MAXIMUM_TRANSLATION_VELOCITY_FOR_RELATIVE_ROBOT_POSE_SOURCE_OFFSET_RESETTING_METERS_PER_SECOND &&
+                currentThetaVelocityRadiansPerSecond <= RobotPoseEstimatorConstants.MAXIMUM_THETA_VELOCITY_FOR_RELATIVE_ROBOT_POSE_SOURCE_OFFSET_RESETTING_RADIANS_PER_SECOND;
     }
 
     private AprilTagCamera[] getCamerasWithResults() {
@@ -280,7 +280,7 @@ public class PoseEstimator implements AutoCloseable {
                 new Rotation2d(),
                 swerveModulePositions,
                 new Pose2d(),
-                PoseEstimatorConstants.ODOMETRY_STANDARD_DEVIATIONS.toMatrix(),
+                RobotPoseEstimatorConstants.ODOMETRY_STANDARD_DEVIATIONS.toMatrix(),
                 VecBuilder.fill(0, 0, 0)
         );
     }
