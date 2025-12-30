@@ -92,6 +92,7 @@ public class SwerveConstants {
     private static final double
             ROTATION_PID_TOLERANCE = 1,
             TRANSLATION_PID_TOLERANCE = 0.02;
+    static final double PID_TO_POSE_PREDICTION_TIME_SECONDS = 0.13;//TODO:Calibrate
 
     static {
         configureGyro();
