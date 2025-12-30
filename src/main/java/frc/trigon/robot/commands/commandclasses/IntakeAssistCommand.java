@@ -124,12 +124,15 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
         final ArrayList<Translation2d> objectPositionsOnField = RobotContainer.OBJECT_POSE_ESTIMATOR.getObjectsOnField();
 
         Translation2d bestObjectPosition = null;
+        double bestObjectDistance = Double.POSITIVE_INFINITY;
         for (Translation2d currentObjectPosition : objectPositionsOnField) {
             if (!isGamePieceAssistable(robotPose, currentObjectPosition))
                 continue;
             final double currentObjectDistanceFromRobotMeters = currentObjectPosition.getDistance(robotPose.getTranslation());
-            if (bestObjectPosition == null || currentObjectDistanceFromRobotMeters < bestObjectPosition.getDistance(robotPose.getTranslation()))
+            if (currentObjectDistanceFromRobotMeters < bestObjectDistance) {
                 bestObjectPosition = currentObjectPosition;
+                bestObjectDistance = bestObjectPosition.getDistance(robotPose.getTranslation());
+            }
         }
 
         if (bestObjectPosition == null)
