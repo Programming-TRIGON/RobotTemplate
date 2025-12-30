@@ -8,8 +8,8 @@ import frc.trigon.robot.poseestimation.poseestimator.StandardDeviations;
 import org.littletonrobotics.junction.Logger;
 
 /**
- * AprilTagCamera is a class that provides the robot's pose from a camera using one or multiple april tags.
- * An april tag is like a 2d QR-code used to find the robot's position on the field.
+ * AprilTagCamera is an object that provides the robot's pose from a camera using one or multiple april tags.
+ * An apriltag is a 2d QR-code used to find the robot's position on the field.
  * Since the tag's position on the field is known, we can calculate our position relative to it, therefore estimating our position on the field.
  */
 public class AprilTagCamera {
