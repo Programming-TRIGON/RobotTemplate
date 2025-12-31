@@ -87,23 +87,23 @@ public class Swerve extends MotorSubsystem {
         return Rotation2d.fromDegrees(SwerveConstants.GYRO.getSignal(Pigeon2Signal.YAW));
     }
 
-    public ChassisSpeeds getFieldRelativeChassisSpeeds() {
-        final ChassisSpeeds selfRelativeSpeeds = getSelfRelativeChassisSpeeds();
-        return ChassisSpeeds.fromRobotRelativeSpeeds(selfRelativeSpeeds, RobotContainer.ROBOT_POSE_ESTIMATOR.getEstimatedRobotPose().getRotation());
-    }
-
     public Translation2d getFieldRelativeVelocity() {
         final ChassisSpeeds chassisSpeeds = getFieldRelativeChassisSpeeds();
         return new Translation2d(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond);
     }
 
-    public ChassisSpeeds getSelfRelativeChassisSpeeds() {
-        return SwerveConstants.KINEMATICS.toChassisSpeeds(getModuleStates());
+    public ChassisSpeeds getFieldRelativeChassisSpeeds() {
+        final ChassisSpeeds selfRelativeSpeeds = getSelfRelativeChassisSpeeds();
+        return ChassisSpeeds.fromRobotRelativeSpeeds(selfRelativeSpeeds, RobotContainer.ROBOT_POSE_ESTIMATOR.getEstimatedRobotPose().getRotation());
     }
 
     public Translation2d getSelfRelativeVelocity() {
         final ChassisSpeeds chassisSpeeds = getSelfRelativeChassisSpeeds();
         return new Translation2d(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond);
+    }
+
+    public ChassisSpeeds getSelfRelativeChassisSpeeds() {
+        return SwerveConstants.KINEMATICS.toChassisSpeeds(getModuleStates());
     }
 
     public double getRotationalVelocityRadiansPerSecond() {
@@ -291,16 +291,15 @@ public class Swerve extends MotorSubsystem {
     }
 
     private ChassisSpeeds calculateSelfRelativePIDSpeedsToPose(FlippablePose2d targetPose) {
-        final Pose2d currentPose = RobotContainer.ROBOT_POSE_ESTIMATOR.getPredictedRobotPose(SwerveConstants.PID_TO_POSE_PREDICTION_TIME_SECONDS);//TODO:Calibrate
+        final Pose2d currentPose = RobotContainer.ROBOT_POSE_ESTIMATOR.getPredictedRobotPose(SwerveConstants.PID_TO_POSE_PREDICTION_TIME_SECONDS);
         final Pose2d flippedTargetPose = targetPose.get();
 
-        final double
-                xSpeed = SwerveConstants.X_TRANSLATION_PID_CONTROLLER.atSetpoint() ?
+        final double xSpeed = SwerveConstants.X_TRANSLATION_PID_CONTROLLER.atSetpoint() ?
                 0 :
-                SwerveConstants.X_TRANSLATION_PID_CONTROLLER.calculate(currentPose.getX(), flippedTargetPose.getX()),
-                ySpeed = SwerveConstants.Y_TRANSLATION_PID_CONTROLLER.atSetpoint() ?
-                        0 :
-                        SwerveConstants.Y_TRANSLATION_PID_CONTROLLER.calculate(currentPose.getY(), flippedTargetPose.getY());
+                SwerveConstants.X_TRANSLATION_PID_CONTROLLER.calculate(currentPose.getX(), flippedTargetPose.getX());
+        final double ySpeed = SwerveConstants.Y_TRANSLATION_PID_CONTROLLER.atSetpoint() ?
+                0 :
+                SwerveConstants.Y_TRANSLATION_PID_CONTROLLER.calculate(currentPose.getY(), flippedTargetPose.getY());
 
         final int directionSign = Flippable.isRedAlliance() ? -1 : 1;
         final ChassisSpeeds targetFieldRelativeSpeeds = new ChassisSpeeds(
