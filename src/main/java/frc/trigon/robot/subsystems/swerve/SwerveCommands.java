@@ -4,9 +4,9 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.trigon.robot.RobotContainer;
-import lib.commands.InitExecuteCommand;
-import lib.utilities.flippable.FlippablePose2d;
-import lib.utilities.flippable.FlippableRotation2d;
+import frc.trigon.lib.commands.InitExecuteCommand;
+import frc.trigon.lib.utilities.flippable.FlippablePose2d;
+import frc.trigon.lib.utilities.flippable.FlippableRotation2d;
 
 import java.util.Set;
 import java.util.function.DoubleSupplier;
