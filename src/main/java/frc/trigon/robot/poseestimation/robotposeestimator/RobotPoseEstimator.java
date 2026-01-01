@@ -38,7 +38,7 @@ public class RobotPoseEstimator implements AutoCloseable {
     private final boolean shouldUseRelativeRobotPoseSource;
 
     /**
-     * Constructs a new PoseEstimator and sets the relativeRobotPoseSource.
+     * Constructs a new RobotPoseEstimator and sets the relativeRobotPoseSource.
      * This constructor enables usage of a relative robot pose source and disables the use of april tags for pose estimation, and instead uses them to reset the relative robot pose source's offset.
      *
      * @param relativeRobotPoseSource the relative robot pose source that should be used to update the pose estimator
@@ -53,7 +53,7 @@ public class RobotPoseEstimator implements AutoCloseable {
     }
 
     /**
-     * Constructs a new PoseEstimator.
+     * Constructs a new RobotPoseEstimator.
      * This constructor disables the use of a relative robot pose source and instead uses april tags cameras for pose estimation.
      *
      * @param aprilTagCameras the cameras that should be used to update the pose estimator
