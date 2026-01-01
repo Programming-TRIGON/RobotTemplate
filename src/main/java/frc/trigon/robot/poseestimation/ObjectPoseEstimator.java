@@ -182,7 +182,7 @@ public class ObjectPoseEstimator extends SubsystemBase {
     private boolean shouldReplaceObject(Translation2d object, double closestObjectToVisibleDistanceMeters, double currentTimestamp) {
         return object != null
                 && closestObjectToVisibleDistanceMeters < ObjectDetectionCameraConstants.TRACKED_OBJECT_TOLERANCE_METERS
-                && knownObjectPositions.get(object) != currentTimestamp;
+                && knownObjectPositions.get(object).equals(currentTimestamp);
     }
 
     private Translation2d getClosestKnownObjectToVisibleObject(Translation2d visibleObject, Set<Translation2d> processedObjects) {
