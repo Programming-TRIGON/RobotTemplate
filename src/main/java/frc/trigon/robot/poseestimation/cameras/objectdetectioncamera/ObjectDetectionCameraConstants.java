@@ -1,4 +1,4 @@
-package frc.trigon.robot.poseestimation.objectdetectioncamera;
+package frc.trigon.robot.poseestimation.cameras.objectdetectioncamera;
 
 import frc.trigon.robot.misc.simulatedfield.SimulatedGamePieceConstants;
 

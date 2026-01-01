@@ -1,4 +1,4 @@
-package frc.trigon.robot.poseestimation.apriltagcamera;
+package frc.trigon.robot.poseestimation.cameras.apriltagcamera;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;

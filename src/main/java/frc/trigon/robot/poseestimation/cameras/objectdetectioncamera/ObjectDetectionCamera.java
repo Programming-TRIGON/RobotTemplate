@@ -1,10 +1,10 @@
-package frc.trigon.robot.poseestimation.objectdetectioncamera;
+package frc.trigon.robot.poseestimation.cameras.objectdetectioncamera;
 
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.trigon.robot.RobotContainer;
-import frc.trigon.robot.poseestimation.objectdetectioncamera.io.PhotonObjectDetectionCameraIO;
-import frc.trigon.robot.poseestimation.objectdetectioncamera.io.SimulationObjectDetectionCameraIO;
+import frc.trigon.robot.poseestimation.cameras.objectdetectioncamera.io.PhotonObjectDetectionCameraIO;
+import frc.trigon.robot.poseestimation.cameras.objectdetectioncamera.io.SimulationObjectDetectionCameraIO;
 import frc.trigon.robot.misc.simulatedfield.SimulatedGamePieceConstants;
 import org.littletonrobotics.junction.Logger;
 import frc.trigon.lib.hardware.RobotHardwareStats;

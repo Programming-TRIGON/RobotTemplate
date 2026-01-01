@@ -6,8 +6,8 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.trigon.robot.RobotContainer;
-import frc.trigon.robot.poseestimation.objectdetectioncamera.ObjectDetectionCamera;
-import frc.trigon.robot.poseestimation.objectdetectioncamera.ObjectDetectionCameraConstants;
+import frc.trigon.robot.poseestimation.cameras.objectdetectioncamera.ObjectDetectionCamera;
+import frc.trigon.robot.poseestimation.cameras.objectdetectioncamera.ObjectDetectionCameraConstants;
 import frc.trigon.robot.misc.simulatedfield.SimulatedGamePieceConstants;
 import org.littletonrobotics.junction.Logger;
 
