@@ -2,12 +2,12 @@ package frc.trigon.robot.poseestimation.cameras.objectdetectioncamera;
 
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.trigon.lib.hardware.RobotHardwareStats;
 import frc.trigon.robot.RobotContainer;
+import frc.trigon.robot.misc.simulatedfield.SimulatedGamePieceConstants;
 import frc.trigon.robot.poseestimation.cameras.objectdetectioncamera.io.PhotonObjectDetectionCameraIO;
 import frc.trigon.robot.poseestimation.cameras.objectdetectioncamera.io.SimulationObjectDetectionCameraIO;
-import frc.trigon.robot.misc.simulatedfield.SimulatedGamePieceConstants;
 import org.littletonrobotics.junction.Logger;
-import frc.trigon.lib.hardware.RobotHardwareStats;
 
 /**
  * An object detection camera is a class that represents a camera that detects objects other than apriltags, most likely game pieces.

@@ -161,11 +161,11 @@ public class ObjectPoseEstimator extends SubsystemBase {
 
     private void updateObjectPositions() {
         final double currentTimestamp = Timer.getTimestamp();
-        final Set<Translation2d> objectsProcessedThisFrame = new HashSet<>();
+        final Set<Translation2d> objectsProcessed = new HashSet<>();
 
         for (ObjectDetectionCamera currentCamera : cameras) {
             for (Translation2d visibleObject : currentCamera.getObjectPositionsOnField(gamePieceType)) {
-                Translation2d closestKnownObjectToVisibleObject = getClosestKnownObjectToVisibleObject(visibleObject, objectsProcessedThisFrame);
+                Translation2d closestKnownObjectToVisibleObject = getClosestKnownObjectToVisibleObject(visibleObject, objectsProcessed);
                 double closestKnownObjectToVisibleObjectDistanceMeters = closestKnownObjectToVisibleObject != null
                         ? visibleObject.getDistance(closestKnownObjectToVisibleObject)
                         : Double.POSITIVE_INFINITY;
@@ -174,7 +174,7 @@ public class ObjectPoseEstimator extends SubsystemBase {
                     removeObject(closestKnownObjectToVisibleObject);
 
                 knownObjectPositions.put(visibleObject, currentTimestamp);
-                objectsProcessedThisFrame.add(visibleObject);
+                objectsProcessed.add(visibleObject);
             }
         }
     }
@@ -182,7 +182,7 @@ public class ObjectPoseEstimator extends SubsystemBase {
     private boolean shouldReplaceObject(Translation2d object, double closestObjectToVisibleDistanceMeters, double currentTimestamp) {
         return object != null
                 && closestObjectToVisibleDistanceMeters < ObjectDetectionCameraConstants.TRACKED_OBJECT_TOLERANCE_METERS
-                && knownObjectPositions.get(object).equals(currentTimestamp);
+                && !knownObjectPositions.get(object).equals(currentTimestamp);
     }
 
     private Translation2d getClosestKnownObjectToVisibleObject(Translation2d visibleObject, Set<Translation2d> processedObjects) {
