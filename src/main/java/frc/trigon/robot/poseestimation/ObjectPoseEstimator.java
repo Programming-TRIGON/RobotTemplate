@@ -6,9 +6,9 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.trigon.robot.RobotContainer;
+import frc.trigon.robot.misc.simulatedfield.SimulatedGamePieceConstants;
 import frc.trigon.robot.poseestimation.cameras.objectdetectioncamera.ObjectDetectionCamera;
 import frc.trigon.robot.poseestimation.cameras.objectdetectioncamera.ObjectDetectionCameraConstants;
-import frc.trigon.robot.misc.simulatedfield.SimulatedGamePieceConstants;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.ArrayList;
@@ -158,32 +158,47 @@ public class ObjectPoseEstimator extends SubsystemBase {
         return translationDistance * rotationToTranslation + rotationDifferenceDegrees * (1 - rotationToTranslation);
     }
 
+
     private void updateObjectPositions() {
         final double currentTimestamp = Timer.getTimestamp();
         final Set<Translation2d> objectsProcessedThisFrame = new HashSet<>();
 
         for (ObjectDetectionCamera currentCamera : cameras) {
             for (Translation2d visibleObject : currentCamera.getObjectPositionsOnField(gamePieceType)) {
-                Translation2d closestObjectToVisibleObject = null;
-                double closestObjectToVisibleObjectDistanceMeters = Double.POSITIVE_INFINITY;
+                Translation2d closestKnownObjectToVisibleObject = getClosestKnownObjectToVisibleObject(visibleObject, objectsProcessedThisFrame);
+                double closestKnownObjectToVisibleObjectDistanceMeters = closestKnownObjectToVisibleObject != null
+                        ? visibleObject.getDistance(closestKnownObjectToVisibleObject)
+                        : Double.POSITIVE_INFINITY;
 
-                for (Translation2d knownObject : knownObjectPositions.keySet()) {
-                    if (!objectsProcessedThisFrame.contains(knownObject)) {
-                        final double currentObjectDistanceMeters = visibleObject.getDistance(knownObject);
-                        if (currentObjectDistanceMeters < closestObjectToVisibleObjectDistanceMeters) {
-                            closestObjectToVisibleObjectDistanceMeters = currentObjectDistanceMeters;
-                            closestObjectToVisibleObject = knownObject;
-                        }
-                    }
-                }
-                if (closestObjectToVisibleObject != null
-                        && closestObjectToVisibleObjectDistanceMeters < ObjectDetectionCameraConstants.TRACKED_OBJECT_TOLERANCE_METERS
-                        && knownObjectPositions.get(closestObjectToVisibleObject) != currentTimestamp)
-                    removeObject(closestObjectToVisibleObject);
+                if (shouldReplaceObject(closestKnownObjectToVisibleObject, closestKnownObjectToVisibleObjectDistanceMeters, currentTimestamp))
+                    removeObject(closestKnownObjectToVisibleObject);
+
                 knownObjectPositions.put(visibleObject, currentTimestamp);
                 objectsProcessedThisFrame.add(visibleObject);
             }
         }
+    }
+
+    private boolean shouldReplaceObject(Translation2d object, double closestObjectToVisibleDistanceMeters, double currentTimestamp) {
+        return object != null
+                && closestObjectToVisibleDistanceMeters < ObjectDetectionCameraConstants.TRACKED_OBJECT_TOLERANCE_METERS
+                && knownObjectPositions.get(object) != currentTimestamp;
+    }
+
+    private Translation2d getClosestKnownObjectToVisibleObject(Translation2d visibleObject, Set<Translation2d> processedObjects) {
+        Translation2d closestObjectToVisibleObject = null;
+        double closestObjectToVisibleObjectDistanceMeters = Double.POSITIVE_INFINITY;
+
+        for (Translation2d currentObject : knownObjectPositions.keySet()) {
+            if (!processedObjects.contains(currentObject)) {
+                final double currentObjectDistanceMeters = visibleObject.getDistance(currentObject);
+                if (currentObjectDistanceMeters < closestObjectToVisibleObjectDistanceMeters) {
+                    closestObjectToVisibleObjectDistanceMeters = currentObjectDistanceMeters;
+                    closestObjectToVisibleObject = currentObject;
+                }
+            }
+        }
+        return closestObjectToVisibleObject;
     }
 
     private void removeOldObjects() {
