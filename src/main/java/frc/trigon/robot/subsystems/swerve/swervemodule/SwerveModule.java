@@ -23,9 +23,9 @@ public class SwerveModule {
             steerMotor;
     private final CANcoderEncoder steerEncoder;
     private final PositionVoltage steerPositionRequest = new PositionVoltage(0).withEnableFOC(SwerveModuleConstants.ENABLE_FOC);
-    private final double wheelDiameter;
-    private final VelocityVoltage driveVelocityRequest = new VelocityVoltage(0).withUpdateFreqHz(1000);
+    private final VelocityVoltage driveVelocityRequest = new VelocityVoltage(0).withUpdateFreqHz(SwerveModuleConstants.DRIVE_VELOCITY_REQUEST_UPDATE_FREQUENCY_HERTZ).withEnableFOC(SwerveModuleConstants.ENABLE_FOC);
     private final VoltageOut driveVoltageRequest = new VoltageOut(0).withEnableFOC(SwerveModuleConstants.ENABLE_FOC);
+    private final double wheelDiameter;
     private boolean shouldDriveMotorUseClosedLoop = true;
     private SwerveModuleState targetState = new SwerveModuleState();
     private double[]
@@ -33,7 +33,7 @@ public class SwerveModule {
             latestOdometrySteerPositions;
 
     /**
-     * Constructs a new SwerveModule with the given module ID, wheel diameter, and offset rotations.
+     * Constructs a new SwerveModule with the given module ID, wheel diameter, and encoder offset.
      *
      * @param moduleID        the ID of the module
      * @param offsetRotations the module's encoder offset in rotations
@@ -50,12 +50,12 @@ public class SwerveModule {
 
     public void setTargetState(SwerveModuleState targetState) {
         if (willOptimize(targetState)) {
-            targetState.optimize(getCurrentAngle());
+            targetState.optimize(getCurrentSteerAngle());
         }
 
         this.targetState = targetState;
-        setTargetAngle(targetState.angle);
-        setTargetVelocity(targetState.speedMetersPerSecond);
+        setTargetSteerAngle(targetState.angle);
+        setTargetDriveVelocity(targetState.speedMetersPerSecond);
     }
 
     public void setBrake(boolean brake) {
@@ -93,16 +93,16 @@ public class SwerveModule {
         this.shouldDriveMotorUseClosedLoop = shouldDriveMotorUseClosedLoop;
     }
 
-    public void setDriveMotorTargetVoltage(double targetVoltage) {
+    public void setTargetDriveVoltage(double targetVoltage) {
         driveMotor.setControl(driveVoltageRequest.withOutput(targetVoltage));
     }
 
-    public void setTargetAngle(Rotation2d angle) {
+    public void setTargetSteerAngle(Rotation2d angle) {
         steerMotor.setControl(steerPositionRequest.withPosition(angle.getRotations()));
     }
 
     public SwerveModuleState getCurrentState() {
-        return new SwerveModuleState(driveWheelRotationsToMeters(driveMotor.getSignal(TalonFXSignal.VELOCITY)), getCurrentAngle());
+        return new SwerveModuleState(driveWheelRotationsToMeters(driveMotor.getSignal(TalonFXSignal.VELOCITY)), getCurrentSteerAngle());
     }
 
     public SwerveModuleState getTargetState() {
@@ -119,10 +119,10 @@ public class SwerveModule {
     }
 
     /**
-     * The odometry thread can update itself faster than the main code loop (which is 50 hertz).
-     * Instead of using the latest odometry update, we use the accumulated odometry positions since the last loop to get a more accurate position.
+     * Since the odometry updates faster than the main code thread,
+     * the odometry position is calculated with all odometry positions since the last main thread update.
      *
-     * @param odometryUpdateIndex the index of the odometry update
+     * @param odometryUpdateIndex the index of the new odometry information since the last main thread update
      * @return the position of the module at the given odometry update index
      */
     public SwerveModulePosition getOdometryPosition(int odometryUpdateIndex) {
@@ -133,42 +133,43 @@ public class SwerveModule {
     }
 
     private boolean willOptimize(SwerveModuleState state) {
-        final Rotation2d delta = state.angle.minus(getCurrentAngle());
-        return Math.abs(delta.getDegrees()) > 90.0;
+        final Rotation2d angularDelta = state.angle.minus(getCurrentSteerAngle());
+        return Math.abs(angularDelta.getRadians()) > Math.PI / 2;
     }
 
     /**
-     * Sets the target velocity for the module.
-     * The target velocity is set using either closed loop or open loop depending on {@link this#shouldDriveMotorUseClosedLoop}.
+     * Sets the target drive velocity for the module.
+     * The target velocity is set using either closed loop or open loop control, depending on {@link this#shouldDriveMotorUseClosedLoop}.
      *
-     * @param targetVelocityMetersPerSecond the target velocity, in meters per second
+     * @param targetVelocityMetersPerSecond the target drive velocity, in meters per second
      */
-    private void setTargetVelocity(double targetVelocityMetersPerSecond) {
+    private void setTargetDriveVelocity(double targetVelocityMetersPerSecond) {
         if (shouldDriveMotorUseClosedLoop) {
-            setTargetClosedLoopVelocity(targetVelocityMetersPerSecond);
+            setTargetClosedLoopDriveVelocity(targetVelocityMetersPerSecond);
             return;
         }
 
-        setTargetOpenLoopVelocity(targetVelocityMetersPerSecond);
+        setTargetOpenLoopDriveVelocity(targetVelocityMetersPerSecond);
     }
 
-    private void setTargetClosedLoopVelocity(double targetVelocityMetersPerSecond) {
-        final double targetVelocityRotationsPerSecond = metersToDriveWheelRotations(targetVelocityMetersPerSecond);
-        driveMotor.setControl(driveVelocityRequest.withVelocity(targetVelocityRotationsPerSecond));
+    private void setTargetClosedLoopDriveVelocity(double targetVelocityMetersPerSecond) {
+        final double targetDriveVelocityRotationsPerSecond = metersToDriveWheelRotations(targetVelocityMetersPerSecond);
+
+        driveMotor.setControl(driveVelocityRequest.withVelocity(targetDriveVelocityRotationsPerSecond));
     }
 
-    private void setTargetOpenLoopVelocity(double targetVelocityMetersPerSecond) {
-        final double power = targetVelocityMetersPerSecond / SwerveConstants.MAXIMUM_SPEED_METERS_PER_SECOND;
-        final double voltage = Conversions.compensatedPowerToVoltage(power, SwerveModuleConstants.VOLTAGE_COMPENSATION_SATURATION);
-        driveMotor.setControl(driveVoltageRequest.withOutput(voltage));
+    private void setTargetOpenLoopDriveVelocity(double targetVelocityMetersPerSecond) {
+        final double targetDrivePower = targetVelocityMetersPerSecond / SwerveConstants.MAXIMUM_SPEED_METERS_PER_SECOND;
+        final double targetDriveVoltage = Conversions.compensatedPowerToVoltage(targetDrivePower, SwerveModuleConstants.VOLTAGE_COMPENSATION_SATURATION);
+        driveMotor.setControl(driveVoltageRequest.withOutput(targetDriveVoltage));
     }
 
-    private Rotation2d getCurrentAngle() {
+    private Rotation2d getCurrentSteerAngle() {
         return Rotation2d.fromRotations(steerMotor.getSignal(TalonFXSignal.POSITION));
     }
 
     /**
-     * Converts the drive wheel rotations to meters.
+     * Converts drive wheel rotations distance to meters.
      *
      * @param rotations the rotations of the drive wheel
      * @return the distance the drive wheel has traveled in meters
@@ -178,7 +179,7 @@ public class SwerveModule {
     }
 
     /**
-     * Converts meters to the rotations of the drive wheel.
+     * Converts meters to number of rotations from the drive wheel.
      *
      * @param meters the meters to be converted
      * @return the distance the drive wheel has traveled in drive wheel rotations
@@ -208,6 +209,7 @@ public class SwerveModule {
         steerMotor.setPhysicsSimulation(SwerveModuleConstants.createSteerMotorSimulation());
 
         steerMotor.registerSignal(TalonFXSignal.VELOCITY, 100);
+        steerMotor.registerSignal(TalonFXSignal.TORQUE_CURRENT, 100);
         steerMotor.registerSignal(TalonFXSignal.MOTOR_VOLTAGE, 100);
         steerMotor.registerThreadedSignal(TalonFXSignal.POSITION, PoseEstimatorConstants.ODOMETRY_FREQUENCY_HERTZ);
     }
