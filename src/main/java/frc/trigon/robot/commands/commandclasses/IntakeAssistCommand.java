@@ -6,8 +6,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import frc.trigon.lib.hardware.RobotHardwareStats;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.constants.OperatorConstants;
@@ -42,8 +42,8 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
      */
     public IntakeAssistCommand(AssistAxis xAssist, AssistAxis yAssist, AssistAxis thetaAssist) {
         addCommands(
-                new InstantCommand(this::resetPIDControllers),
-                new InstantCommand(this::trackGamePiece),
+                new RunCommand(this::trackGamePiece),
+                new RunCommand(this::resetPIDControllers),
                 SwerveCommands.getClosedLoopSelfRelativeDriveCommand(
                         () -> calculateTranslationPower(true, xAssist),
                         () -> calculateTranslationPower(false, yAssist),
@@ -53,6 +53,9 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
     }
 
     private void resetPIDControllers() {
+        if (hasNoTrackedGamePiece())
+            return;
+
         X_PID_CONTROLLER.reset(distanceFromTrackedGamePiece.getX(), RobotContainer.SWERVE.getSelfRelativeVelocity().vxMetersPerSecond);
         Y_PID_CONTROLLER.reset(distanceFromTrackedGamePiece.getY(), RobotContainer.SWERVE.getSelfRelativeVelocity().vyMetersPerSecond);
         THETA_PID_CONTROLLER.reset(distanceFromTrackedGamePiece.getAngle().getRadians(), RobotContainer.SWERVE.getSelfRelativeVelocity().omegaRadiansPerSecond);
@@ -66,14 +69,16 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
 
     private double calculateTranslationPower(boolean isXAxis, AssistAxis assistAxis) {
         final Translation2d selfRelativeJoystickValue = getJoystickPosition().rotateBy(RobotContainer.SWERVE.getDriveRelativeAngle().unaryMinus());
-        final double
-                joystickValue = isXAxis ? selfRelativeJoystickValue.getX() : selfRelativeJoystickValue.getY(),
-                joystickNorm = selfRelativeJoystickValue.getNorm();
+        final double joystickValue = isXAxis ? selfRelativeJoystickValue.getX() : selfRelativeJoystickValue.getY();
+
+        if (hasNoTrackedGamePiece())
+            return joystickValue;
 
         final double
                 pidOutput = clampToOutputRange(isXAxis ?
                 X_PID_CONTROLLER.calculate(distanceFromTrackedGamePiece.getX()) :
                 Y_PID_CONTROLLER.calculate(distanceFromTrackedGamePiece.getY()));
+        final double joystickNorm = selfRelativeJoystickValue.getNorm();
 
         return assistAxis.calculatePower(pidOutput, joystickValue, joystickNorm);
     }
@@ -82,10 +87,13 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
         return calculateThetaAssistPower(assistAxis, distanceFromTrackedGamePiece.getAngle().plus(Rotation2d.k180deg).unaryMinus());
     }
 
-    private static double calculateThetaAssistPower(AssistAxis assistAxis, Rotation2d thetaOffset) {
+    private double calculateThetaAssistPower(AssistAxis assistAxis, Rotation2d thetaOffset) {
+        final double joystickValue = OperatorConstants.DRIVER_CONTROLLER.getRightX();
+        if (hasNoTrackedGamePiece())
+            return joystickValue;
+
         final double
                 pidOutput = clampToOutputRange(THETA_PID_CONTROLLER.calculate(thetaOffset.getRadians())),
-                joystickValue = OperatorConstants.DRIVER_CONTROLLER.getRightX(),
                 joystickNorm = Math.hypot(OperatorConstants.DRIVER_CONTROLLER.getRightX(), OperatorConstants.DRIVER_CONTROLLER.getRightY());
 
         return assistAxis.calculatePower(pidOutput, joystickValue, joystickNorm);
@@ -93,6 +101,10 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
 
     private static double clampToOutputRange(double value) {
         return MathUtil.clamp(value, -1, 1);
+    }
+
+    private boolean hasNoTrackedGamePiece() {
+        return distanceFromTrackedGamePiece == null;
     }
 
     private static Translation2d calculateDistanceFromBestGamePiece() {
