@@ -56,17 +56,6 @@ public class RobotContainer {
         SWERVE.setDefaultCommand(GeneralCommands.getFieldRelativeDriveCommand());
     }
 
-    /**
-     * Initializes the general systems of the robot.
-     * Some systems need to be initialized at the start of the robot code so that others can use their functions.
-     * For example, the LEDConstants need to be initialized so that the other systems can use them.
-     */
-    private void initializeGeneralSystems() {
-        Flippable.init();
-        LEDConstants.init();
-        AutonomousConstants.init();
-    }
-
     private void bindControllerCommands() {
         OperatorConstants.RESET_HEADING_TRIGGER.onTrue(CommandConstants.RESET_HEADING_COMMAND);
         OperatorConstants.DRIVE_FROM_DPAD_TRIGGER.whileTrue(CommandConstants.SELF_RELATIVE_DRIVE_FROM_DPAD_COMMAND);
@@ -79,6 +68,17 @@ public class RobotContainer {
         OperatorConstants.FORWARD_DYNAMIC_CHARACTERIZATION_TRIGGER.whileTrue(subsystem.getDynamicCharacterizationCommand(SysIdRoutine.Direction.kForward));
         OperatorConstants.BACKWARD_DYNAMIC_CHARACTERIZATION_TRIGGER.whileTrue(subsystem.getDynamicCharacterizationCommand(SysIdRoutine.Direction.kReverse));
         subsystem.setDefaultCommand(Commands.idle(subsystem));
+    }
+
+    /**
+     * Initializes the general systems of the robot.
+     * Some systems need to be initialized at the start of the robot code so that others can use their functions.
+     * For example, the LEDConstants need to be initialized so that the other systems can use them.
+     */
+    private void initializeGeneralSystems() {
+        Flippable.init();
+        LEDConstants.init();
+        AutonomousConstants.init();
     }
 
     private void buildAutoChooser() {
