@@ -6,16 +6,16 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.wpilibj2.command.*;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import frc.trigon.lib.hardware.RobotHardwareStats;
 import frc.trigon.robot.RobotContainer;
-import frc.trigon.robot.commands.commandfactories.GeneralCommands;
 import frc.trigon.robot.constants.OperatorConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveCommands;
+import frc.trigon.robot.subsystems.swerve.SwerveConstants;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.ArrayList;
-import java.util.function.Supplier;
 
 /**
  * A command class to assist in the intaking of a game piece.
@@ -42,52 +42,29 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
      */
     public IntakeAssistCommand(AssistAxis xAssist, AssistAxis yAssist, AssistAxis thetaAssist) {
         addCommands(
-                getTrackGamePieceCommand(),
-                GeneralCommands.getContinuousConditionalCommand(
-                        getAssistIntakeCommand(xAssist, yAssist, thetaAssist, () -> distanceFromTrackedGamePiece),
-                        GeneralCommands.getFieldRelativeDriveCommand(),
-                        () -> RobotContainer.OBJECT_POSE_ESTIMATOR.hasObject() && distanceFromTrackedGamePiece != null
-                )
-        );
-    }
-
-    /**
-     * Returns a command that assists the intake of a game piece at the given location.
-     * This version of the command is meant for use when there is a specific target game piece.
-     * This command is for intaking a game piece with a specific robot-relative position.
-     * To create an intake assist command that selects the closest game piece automatically, use {@link IntakeAssistCommand#IntakeAssistCommand(AssistAxis, AssistAxis, AssistAxis)} instead.
-     * <p>
-     * <<<<<<< HEAD
-     *
-     * @param xAssist                      the assist to apply to the X-axis (Forward and backwards)
-     * @param yAssist                      the assist to apply to the Y-axis (Sideways)
-     * @param thetaAssist                  the assist to apply to the rotation
-     *                                     =======
-     * @param assistMode                   the type of assistance
-     *                                     >>>>>>> main
-     * @param distanceFromTrackedGamePiece the position of the game piece relative to the robot
-     * @return the command
-     */
-    public static Command getAssistIntakeCommand(AssistAxis xAssist, AssistAxis yAssist, AssistAxis thetaAssist, Supplier<Translation2d> distanceFromTrackedGamePiece) {
-        return new SequentialCommandGroup(
-                new InstantCommand(() -> resetPIDControllers(distanceFromTrackedGamePiece.get())),
+                new InstantCommand(this::resetPIDControllers),
+                new InstantCommand(this::trackGamePiece),
                 SwerveCommands.getClosedLoopSelfRelativeDriveCommand(
-                        () -> calculateTranslationPower(true, xAssist, distanceFromTrackedGamePiece.get()),
-                        () -> calculateTranslationPower(false, yAssist, distanceFromTrackedGamePiece.get()),
-                        () -> calculateThetaPower(thetaAssist, distanceFromTrackedGamePiece.get())
+                        () -> calculateTranslationPower(true, xAssist),
+                        () -> calculateTranslationPower(false, yAssist),
+                        () -> calculateThetaPower(thetaAssist)
                 )
         );
     }
 
-    private Command getTrackGamePieceCommand() {
-        return new RunCommand(() ->
-                distanceFromTrackedGamePiece = RobotContainer.OBJECT_POSE_ESTIMATOR.hasObject() ?
-                        calculateDistanceFromBestGamePiece() :
-                        null
-        );
+    private void resetPIDControllers() {
+        X_PID_CONTROLLER.reset(distanceFromTrackedGamePiece.getX(), RobotContainer.SWERVE.getSelfRelativeVelocity().vxMetersPerSecond);
+        Y_PID_CONTROLLER.reset(distanceFromTrackedGamePiece.getY(), RobotContainer.SWERVE.getSelfRelativeVelocity().vyMetersPerSecond);
+        THETA_PID_CONTROLLER.reset(distanceFromTrackedGamePiece.getAngle().getRadians(), RobotContainer.SWERVE.getSelfRelativeVelocity().omegaRadiansPerSecond);
     }
 
-    private static double calculateTranslationPower(boolean isXAxis, AssistAxis assistAxis, Translation2d distanceFromTrackedGamePiece) {
+    private void trackGamePiece() {
+        distanceFromTrackedGamePiece = RobotContainer.OBJECT_POSE_ESTIMATOR.hasObject() ?
+                calculateDistanceFromBestGamePiece() :
+                null;
+    }
+
+    private double calculateTranslationPower(boolean isXAxis, AssistAxis assistAxis) {
         final Translation2d selfRelativeJoystickValue = getJoystickPosition().rotateBy(RobotContainer.SWERVE.getDriveRelativeAngle().unaryMinus());
         final double
                 joystickValue = isXAxis ? selfRelativeJoystickValue.getX() : selfRelativeJoystickValue.getY(),
@@ -101,7 +78,7 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
         return assistAxis.calculatePower(pidOutput, joystickValue, joystickNorm);
     }
 
-    private static double calculateThetaPower(AssistAxis assistAxis, Translation2d distanceFromTrackedGamePiece) {
+    private double calculateThetaPower(AssistAxis assistAxis) {
         return calculateThetaAssistPower(assistAxis, distanceFromTrackedGamePiece.getAngle().plus(Rotation2d.k180deg).unaryMinus());
     }
 
@@ -116,12 +93,6 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
 
     private static double clampToOutputRange(double value) {
         return MathUtil.clamp(value, -1, 1);
-    }
-
-    private static void resetPIDControllers(Translation2d distanceFromTrackedGamePiece) {
-        X_PID_CONTROLLER.reset(distanceFromTrackedGamePiece.getX(), RobotContainer.SWERVE.getSelfRelativeVelocity().vxMetersPerSecond);
-        Y_PID_CONTROLLER.reset(distanceFromTrackedGamePiece.getY(), RobotContainer.SWERVE.getSelfRelativeVelocity().vyMetersPerSecond);
-        THETA_PID_CONTROLLER.reset(distanceFromTrackedGamePiece.getAngle().getRadians(), RobotContainer.SWERVE.getSelfRelativeVelocity().omegaRadiansPerSecond);
     }
 
     private static Translation2d calculateDistanceFromBestGamePiece() {
@@ -150,15 +121,15 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
     }
 
     private static boolean isGamePieceAssistable(Pose2d robotPose, Translation2d gamePiecePosition) {
-        final Translation2d joystickPosition = getJoystickPosition();
-        final Rotation2d joystickAngle = joystickPosition.getAngle().rotateBy(RobotContainer.SWERVE.getDriveRelativeAngle());//Probably bad unit addition
+        final Translation2d fieldRelativeDesiredVelocity = getJoystickPosition().times(SwerveConstants.MAXIMUM_SPEED_METERS_PER_SECOND);
+        final Rotation2d selfRelativeVelocityAngle = fieldRelativeDesiredVelocity.getAngle().rotateBy(RobotContainer.SWERVE.getDriveRelativeAngle());//Probably bad unit addition
         final double gamePieceDistance = robotPose.getTranslation().getDistance(gamePiecePosition);
         final Rotation2d scaledMaximumAssistAngle = OperatorConstants.INTAKE_ASSIST_MAXIMUM_ANGLE_FROM_GAME_PIECE.times(1 / gamePieceDistance);
 
         final boolean
-                isWithinAngularRange = Math.abs(joystickAngle.getRadians()) < Math.abs(scaledMaximumAssistAngle.getRadians()),
-                isJoystickPastDeadband = joystickPosition.getNorm() > OperatorConstants.INTAKE_ASSIST_DEADBAND;
-        return isWithinAngularRange && isJoystickPastDeadband;
+                isWithinAngularRange = Math.abs(selfRelativeVelocityAngle.getRadians()) < Math.abs(scaledMaximumAssistAngle.getRadians()),
+                isAboveMinimumSpeed = fieldRelativeDesiredVelocity.getNorm() > OperatorConstants.MINIMUM_SPEED_FOR_INTAKE_ASSIST_METERS_PER_SECOND;
+        return isWithinAngularRange && isAboveMinimumSpeed;
     }
 
     private static Translation2d getJoystickPosition() {
@@ -196,7 +167,7 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
         }
     }
 
-    interface AssistAxis {
+    private interface AssistAxis {
         double calculatePower(double pidOutput, double joystickValue, double joystickNorm);
     }
 }

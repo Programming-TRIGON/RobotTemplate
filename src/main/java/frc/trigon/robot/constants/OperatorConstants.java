@@ -22,8 +22,8 @@ public class OperatorConstants {
             TRANSLATION_STICK_SPEED_DIVIDER = 1,
             ROTATION_STICK_SPEED_DIVIDER = 1;
 
-    public static final double INTAKE_ASSIST_DEADBAND = 0.5;
-    public static final Rotation2d INTAKE_ASSIST_MAXIMUM_ANGLE_FROM_GAME_PIECE = Rotation2d.fromDegrees(30);
+    public static final double MINIMUM_SPEED_FOR_INTAKE_ASSIST_METERS_PER_SECOND = 2;
+    public static final Rotation2d INTAKE_ASSIST_MAXIMUM_ANGLE_FROM_GAME_PIECE = Rotation2d.fromDegrees(15);
 
     public static final Trigger
             RESET_HEADING_TRIGGER = DRIVER_CONTROLLER.y(),
