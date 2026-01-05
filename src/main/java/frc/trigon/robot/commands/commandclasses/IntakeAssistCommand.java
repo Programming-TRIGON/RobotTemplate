@@ -64,9 +64,9 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
         if (hasNoTrackedGamePiece())
             return;
 
-        X_PID_CONTROLLER.reset(distanceFromTrackedGamePiece.getX(), RobotContainer.SWERVE.getSelfRelativeVelocity().vxMetersPerSecond);
-        Y_PID_CONTROLLER.reset(distanceFromTrackedGamePiece.getY(), RobotContainer.SWERVE.getSelfRelativeVelocity().vyMetersPerSecond);
-        THETA_PID_CONTROLLER.reset(distanceFromTrackedGamePiece.getAngle().getRadians(), RobotContainer.SWERVE.getSelfRelativeVelocity().omegaRadiansPerSecond);
+        X_PID_CONTROLLER.reset(distanceFromTrackedGamePiece.getX(), RobotContainer.SWERVE.getSelfRelativeVelocity().getX());
+        Y_PID_CONTROLLER.reset(distanceFromTrackedGamePiece.getY(), RobotContainer.SWERVE.getSelfRelativeVelocity().getY());
+        THETA_PID_CONTROLLER.reset(distanceFromTrackedGamePiece.getAngle().getRadians(), RobotContainer.SWERVE.getRotationalVelocityRadiansPerSecond());
     }
 
     private void trackGamePiece() {
