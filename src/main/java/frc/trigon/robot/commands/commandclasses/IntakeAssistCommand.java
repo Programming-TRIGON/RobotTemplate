@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import frc.trigon.lib.commands.WaitUntilChangeCommand;
 import frc.trigon.lib.hardware.RobotHardwareStats;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.constants.OperatorConstants;
@@ -42,8 +43,10 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
      */
     public IntakeAssistCommand(AssistAxis xAssist, AssistAxis yAssist, AssistAxis thetaAssist) {
         addCommands(
+                new WaitUntilChangeCommand<>(this::hasNoTrackedGamePiece).andThen(
+                        this::resetPIDControllers
+                ).repeatedly(),
                 new RunCommand(this::trackGamePiece),
-                new RunCommand(this::resetPIDControllers),
                 SwerveCommands.getClosedLoopSelfRelativeDriveCommand(
                         () -> calculateTranslationPower(true, xAssist),
                         () -> calculateTranslationPower(false, yAssist),
@@ -51,6 +54,11 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
                 )
         );
     }
+
+    private boolean hasNoTrackedGamePiece() {
+        return distanceFromTrackedGamePiece == null;
+    }
+
 
     private void resetPIDControllers() {
         if (hasNoTrackedGamePiece())
@@ -84,11 +92,15 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
     }
 
     private double calculateThetaPower(AssistAxis assistAxis) {
-        return calculateThetaAssistPower(assistAxis, distanceFromTrackedGamePiece.getAngle().plus(Rotation2d.k180deg).unaryMinus());
+        final double joystickValue = OperatorConstants.DRIVER_CONTROLLER.getRightX();
+
+        if (hasNoTrackedGamePiece())
+            return joystickValue;
+
+        return calculateThetaAssistPower(assistAxis, joystickValue, distanceFromTrackedGamePiece.getAngle().plus(Rotation2d.k180deg).unaryMinus());
     }
 
-    private double calculateThetaAssistPower(AssistAxis assistAxis, Rotation2d thetaOffset) {
-        final double joystickValue = OperatorConstants.DRIVER_CONTROLLER.getRightX();
+    private double calculateThetaAssistPower(AssistAxis assistAxis, double joystickValue, Rotation2d thetaOffset) {
         if (hasNoTrackedGamePiece())
             return joystickValue;
 
@@ -101,10 +113,6 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
 
     private static double clampToOutputRange(double value) {
         return MathUtil.clamp(value, -1, 1);
-    }
-
-    private boolean hasNoTrackedGamePiece() {
-        return distanceFromTrackedGamePiece == null;
     }
 
     private static Translation2d calculateDistanceFromBestGamePiece() {
