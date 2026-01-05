@@ -19,7 +19,7 @@ import frc.trigon.lib.utilities.flippable.FlippableRotation2d;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.constants.AutonomousConstants;
 import frc.trigon.robot.poseestimation.poseestimator.PoseEstimatorConstants;
-import lib.subsystems.MotorSubsystem;
+import frc.trigon.lib.subsystems.MotorSubsystem;
 import frc.trigon.robot.subsystems.swerve.swervemodule.SwerveModule;
 import frc.trigon.robot.subsystems.swerve.swervemodule.SwerveModuleConstants;
 import org.littletonrobotics.junction.AutoLogOutput;
