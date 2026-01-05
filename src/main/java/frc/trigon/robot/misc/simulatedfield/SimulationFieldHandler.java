@@ -4,7 +4,6 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.trigon.robot.RobotContainer;
 import org.littletonrobotics.junction.Logger;
 
@@ -104,9 +103,8 @@ public class SimulationFieldHandler {
     }
 
     private static void ejectGamePiece(SimulatedGamePiece ejectedGamePiece) {
-        final ChassisSpeeds swerveWheelSpeeds = RobotContainer.SWERVE.getSelfRelativeVelocity();
-        final Translation3d robotSelfRelativeVelocity = new Translation3d(swerveWheelSpeeds.vxMetersPerSecond, swerveWheelSpeeds.vyMetersPerSecond, 0);
-        final Translation3d robotRelativeReleaseVelocity = new Translation3d();
+        final Translation3d robotSelfRelativeVelocity = new Translation3d(RobotContainer.SWERVE.getSelfRelativeVelocity());
+        final Translation3d robotRelativeReleaseVelocity = new Translation3d();//TODO:This should be extracted to a method in a different branch...
 
         ejectedGamePiece.release(robotSelfRelativeVelocity.plus(robotRelativeReleaseVelocity).rotateBy(new Rotation3d(RobotContainer.SWERVE.getHeading())));
     }

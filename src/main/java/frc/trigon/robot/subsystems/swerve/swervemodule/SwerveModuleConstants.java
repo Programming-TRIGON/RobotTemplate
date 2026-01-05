@@ -9,9 +9,9 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.trigon.robot.constants.PathPlannerConstants;
-import lib.hardware.RobotHardwareStats;
-import lib.hardware.simulation.SimpleMotorSimulation;
+import frc.trigon.lib.hardware.RobotHardwareStats;
+import frc.trigon.lib.hardware.simulation.SimpleMotorSimulation;
+import frc.trigon.robot.constants.AutonomousConstants;
 
 public class SwerveModuleConstants {
     private static final double
@@ -37,6 +37,7 @@ public class SwerveModuleConstants {
 
     public static final double MAXIMUM_MODULE_ROTATIONAL_SPEED_RADIANS_PER_SECOND = edu.wpi.first.math.util.Units.rotationsToRadians(7); //TODO: calibrate
     static final double VOLTAGE_COMPENSATION_SATURATION = 12;
+    static final double DRIVE_VELOCITY_REQUEST_UPDATE_FREQUENCY_HERTZ = 1000;
 
     /**
      * Creates a new SimpleMotorSimulation for the drive motor.
@@ -68,7 +69,7 @@ public class SwerveModuleConstants {
         config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         config.Feedback.SensorToMechanismRatio = DRIVE_MOTOR_GEAR_RATIO;
 
-        final double driveMotorSlipCurrent = PathPlannerConstants.ROBOT_CONFIG.moduleConfig.driveCurrentLimit;
+        final double driveMotorSlipCurrent = AutonomousConstants.ROBOT_CONFIG.moduleConfig.driveCurrentLimit;
         config.TorqueCurrent.PeakForwardTorqueCurrent = driveMotorSlipCurrent;
         config.TorqueCurrent.PeakReverseTorqueCurrent = -driveMotorSlipCurrent;
         config.CurrentLimits.StatorCurrentLimit = driveMotorSlipCurrent;
