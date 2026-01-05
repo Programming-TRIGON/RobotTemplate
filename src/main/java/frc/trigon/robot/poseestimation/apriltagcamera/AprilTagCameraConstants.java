@@ -1,12 +1,12 @@
-package frc.trigon.robot.poseestimation.cameras.apriltagcamera;
+package frc.trigon.robot.poseestimation.apriltagcamera;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import frc.trigon.robot.constants.FieldConstants;
-import frc.trigon.robot.poseestimation.cameras.apriltagcamera.io.AprilTagLimelightIO;
-import frc.trigon.robot.poseestimation.cameras.apriltagcamera.io.AprilTagPhotonCameraIO;
-import frc.trigon.robot.poseestimation.cameras.apriltagcamera.io.AprilTagSimulationCameraIO;
+import frc.trigon.robot.poseestimation.apriltagcamera.io.AprilTagLimelightIO;
+import frc.trigon.robot.poseestimation.apriltagcamera.io.AprilTagPhotonCameraIO;
+import frc.trigon.robot.poseestimation.apriltagcamera.io.AprilTagSimulationCameraIO;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;

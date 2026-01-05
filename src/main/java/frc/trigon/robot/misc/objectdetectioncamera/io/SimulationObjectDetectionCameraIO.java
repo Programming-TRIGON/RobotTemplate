@@ -1,12 +1,12 @@
-package frc.trigon.robot.poseestimation.cameras.objectdetectioncamera.io;
+package frc.trigon.robot.misc.objectdetectioncamera.io;
 
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj.Timer;
 import frc.trigon.robot.RobotContainer;
-import frc.trigon.robot.poseestimation.cameras.objectdetectioncamera.ObjectDetectionCameraConstants;
-import frc.trigon.robot.poseestimation.cameras.objectdetectioncamera.ObjectDetectionCameraIO;
-import frc.trigon.robot.poseestimation.cameras.objectdetectioncamera.ObjectDetectionCameraInputsAutoLogged;
+import frc.trigon.robot.misc.objectdetectioncamera.ObjectDetectionCameraConstants;
+import frc.trigon.robot.misc.objectdetectioncamera.ObjectDetectionCameraIO;
+import frc.trigon.robot.misc.objectdetectioncamera.ObjectDetectionCameraInputsAutoLogged;
 import frc.trigon.robot.misc.simulatedfield.SimulatedGamePiece;
 import frc.trigon.robot.misc.simulatedfield.SimulatedGamePieceConstants;
 import frc.trigon.robot.misc.simulatedfield.SimulationFieldHandler;

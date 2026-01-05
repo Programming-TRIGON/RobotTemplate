@@ -14,7 +14,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.constants.FieldConstants;
-import frc.trigon.robot.poseestimation.cameras.apriltagcamera.AprilTagCamera;
+import frc.trigon.robot.poseestimation.apriltagcamera.AprilTagCamera;
 import frc.trigon.robot.poseestimation.relativerobotposesource.RelativeRobotPoseSource;
 import frc.trigon.robot.poseestimation.relativerobotposesource.RelativeRobotPoseSourceConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveConstants;

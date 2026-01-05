@@ -1,4 +1,4 @@
-package frc.trigon.robot.poseestimation;
+package frc.trigon.robot.misc;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -7,8 +7,8 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.misc.simulatedfield.SimulatedGamePieceConstants;
-import frc.trigon.robot.poseestimation.cameras.objectdetectioncamera.ObjectDetectionCamera;
-import frc.trigon.robot.poseestimation.cameras.objectdetectioncamera.ObjectDetectionCameraConstants;
+import frc.trigon.robot.misc.objectdetectioncamera.ObjectDetectionCamera;
+import frc.trigon.robot.misc.objectdetectioncamera.ObjectDetectionCameraConstants;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.ArrayList;

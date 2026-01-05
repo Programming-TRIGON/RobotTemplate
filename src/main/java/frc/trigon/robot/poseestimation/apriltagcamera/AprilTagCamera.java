@@ -1,4 +1,4 @@
-package frc.trigon.robot.poseestimation.cameras.apriltagcamera;
+package frc.trigon.robot.poseestimation.apriltagcamera;
 
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj.DriverStation;

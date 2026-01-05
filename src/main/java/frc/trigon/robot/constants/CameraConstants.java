@@ -4,7 +4,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
-import frc.trigon.robot.poseestimation.cameras.objectdetectioncamera.ObjectDetectionCamera;
+import frc.trigon.robot.misc.objectdetectioncamera.ObjectDetectionCamera;
 
 public class CameraConstants {
     private static final Transform3d ROBOT_CENTER_TO_OBJECT_DETECTION_CAMERA = new Transform3d(

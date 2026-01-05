@@ -1,7 +1,7 @@
-package frc.trigon.robot.poseestimation.cameras.apriltagcamera.io;
+package frc.trigon.robot.poseestimation.apriltagcamera.io;
 
 import edu.wpi.first.math.geometry.Transform3d;
-import frc.trigon.robot.poseestimation.cameras.apriltagcamera.AprilTagCameraConstants;
+import frc.trigon.robot.poseestimation.apriltagcamera.AprilTagCameraConstants;
 import org.photonvision.simulation.PhotonCameraSim;
 
 public class AprilTagSimulationCameraIO extends AprilTagPhotonCameraIO {
