@@ -7,14 +7,14 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import frc.trigon.lib.hardware.RobotHardwareStats;
+import frc.trigon.lib.hardware.phoenix6.pigeon2.Pigeon2Gyro;
+import frc.trigon.lib.hardware.phoenix6.pigeon2.Pigeon2Signal;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.constants.AutonomousConstants;
 import frc.trigon.robot.constants.RobotConstants;
 import frc.trigon.robot.poseestimation.robotposeestimator.RobotPoseEstimatorConstants;
 import frc.trigon.robot.subsystems.swerve.swervemodule.SwerveModule;
-import frc.trigon.lib.hardware.RobotHardwareStats;
-import frc.trigon.lib.hardware.phoenix6.pigeon2.Pigeon2Gyro;
-import frc.trigon.lib.hardware.phoenix6.pigeon2.Pigeon2Signal;
 
 public class SwerveConstants {
     private static final int GYRO_ID = 0;
@@ -23,25 +23,24 @@ public class SwerveConstants {
 
     public static final int
             FRONT_LEFT_ID = 1,
-            FRONT_RIGHT_ID = 2;
-    private static final int
+            FRONT_RIGHT_ID = 2,
             REAR_LEFT_ID = 3,
             REAR_RIGHT_ID = 4;
     private static final double
-            FRONT_LEFT_STEER_ENCODER_OFFSET = 0,
-            FRONT_RIGHT_STEER_ENCODER_OFFSET = 0,
-            REAR_LEFT_STEER_ENCODER_OFFSET = 0,
-            REAR_RIGHT_STEER_ENCODER_OFFSET = 0;
-    private static final double
+            FRONT_LEFT_STEER_ENCODER_OFFSET_ROTATIONS = 0,
+            FRONT_RIGHT_STEER_ENCODER_OFFSET_ROTATIONS = 0,
+            REAR_LEFT_STEER_ENCODER_OFFSET_ROTATIONS = 0,
+            REAR_RIGHT_STEER_ENCODER_OFFSET_ROTATIONS = 0;
+    private static final double//TODO:Calibrate
             FRONT_LEFT_WHEEL_DIAMETER = 0.05 * 2,
             FRONT_RIGHT_WHEEL_DIAMETER = 0.05 * 2,
             REAR_LEFT_WHEEL_DIAMETER = 0.05 * 2,
             REAR_RIGHT_WHEEL_DIAMETER = 0.05 * 2;
     static final SwerveModule[] SWERVE_MODULES = new SwerveModule[]{
-            new SwerveModule(FRONT_LEFT_ID, FRONT_LEFT_STEER_ENCODER_OFFSET, FRONT_LEFT_WHEEL_DIAMETER),
-            new SwerveModule(FRONT_RIGHT_ID, FRONT_RIGHT_STEER_ENCODER_OFFSET, FRONT_RIGHT_WHEEL_DIAMETER),
-            new SwerveModule(REAR_LEFT_ID, REAR_LEFT_STEER_ENCODER_OFFSET, REAR_LEFT_WHEEL_DIAMETER),
-            new SwerveModule(REAR_RIGHT_ID, REAR_RIGHT_STEER_ENCODER_OFFSET, REAR_RIGHT_WHEEL_DIAMETER)
+            new SwerveModule(FRONT_LEFT_ID, FRONT_LEFT_STEER_ENCODER_OFFSET_ROTATIONS, FRONT_LEFT_WHEEL_DIAMETER),
+            new SwerveModule(FRONT_RIGHT_ID, FRONT_RIGHT_STEER_ENCODER_OFFSET_ROTATIONS, FRONT_RIGHT_WHEEL_DIAMETER),
+            new SwerveModule(REAR_LEFT_ID, REAR_LEFT_STEER_ENCODER_OFFSET_ROTATIONS, REAR_LEFT_WHEEL_DIAMETER),
+            new SwerveModule(REAR_RIGHT_ID, REAR_RIGHT_STEER_ENCODER_OFFSET_ROTATIONS, REAR_RIGHT_WHEEL_DIAMETER)
     };
 
     public static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(AutonomousConstants.ROBOT_CONFIG.moduleLocations);
@@ -90,23 +89,34 @@ public class SwerveConstants {
                     TRANSLATION_PID_CONSTANTS.kI,
                     TRANSLATION_PID_CONSTANTS.kD
             );
+    private static final double
+            ROTATION_PID_TOLERANCE_DEGREES = 1,
+            TRANSLATION_PID_TOLERANCE_METERS = 0.02;
+    static final double PID_TO_POSE_PREDICTION_TIME_SECONDS = 0.13;//TODO:Calibrate
 
     static {
         configureGyro();
-        SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER.enableContinuousInput(-SwerveConstants.MAXIMUM_PID_ANGLE, SwerveConstants.MAXIMUM_PID_ANGLE);
-        SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER.setTolerance(1);
-        SwerveConstants.X_TRANSLATION_PID_CONTROLLER.setTolerance(0.02);
-        SwerveConstants.Y_TRANSLATION_PID_CONTROLLER.setTolerance(0.02);
+        configurePIDControllers();
     }
 
     private static void configureGyro() {
         final Pigeon2Configuration config = new Pigeon2Configuration();
+        //TODO:Calibrate
         config.MountPose.MountPoseYaw = 0;
         config.MountPose.MountPosePitch = 0;
         config.MountPose.MountPoseRoll = 0;
+
         GYRO.applyConfiguration(config);
-        GYRO.setSimulationYawVelocitySupplier(() -> RobotContainer.SWERVE.getSelfRelativeVelocity().omegaRadiansPerSecond);
+        GYRO.setSimulationYawVelocitySupplier(() -> Units.radiansToDegrees(RobotContainer.SWERVE.getRotationalVelocityRadiansPerSecond()));
 
         GYRO.registerThreadedSignal(Pigeon2Signal.YAW, RobotPoseEstimatorConstants.ODOMETRY_FREQUENCY_HERTZ);
+    }
+
+    private static void configurePIDControllers() {
+        SwerveConstants.X_TRANSLATION_PID_CONTROLLER.setTolerance(TRANSLATION_PID_TOLERANCE_METERS);
+        SwerveConstants.Y_TRANSLATION_PID_CONTROLLER.setTolerance(TRANSLATION_PID_TOLERANCE_METERS);
+
+        SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER.setTolerance(ROTATION_PID_TOLERANCE_DEGREES);
+        SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER.enableContinuousInput(-SwerveConstants.MAXIMUM_PID_ANGLE, SwerveConstants.MAXIMUM_PID_ANGLE);
     }
 }

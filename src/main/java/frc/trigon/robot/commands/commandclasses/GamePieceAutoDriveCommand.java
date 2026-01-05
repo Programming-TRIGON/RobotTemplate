@@ -53,7 +53,7 @@ public class GamePieceAutoDriveCommand extends ParallelCommandGroup {
 
     public static Command getDriveToGamePieceCommand(Supplier<Translation2d> distanceFromTrackedGamePiece) {
         return new SequentialCommandGroup(
-                new InstantCommand(() -> AutonomousConstants.GAME_PIECE_AUTO_DRIVE_X_PID_CONTROLLER.reset(distanceFromTrackedGamePiece.get().getX(), RobotContainer.SWERVE.getSelfRelativeVelocity().vxMetersPerSecond)),
+                new InstantCommand(() -> AutonomousConstants.GAME_PIECE_AUTO_DRIVE_X_PID_CONTROLLER.reset(distanceFromTrackedGamePiece.get().getX(), RobotContainer.SWERVE.getSelfRelativeVelocity().getX())),
                 SwerveCommands.getClosedLoopSelfRelativeDriveCommand(
                         () -> AutonomousConstants.GAME_PIECE_AUTO_DRIVE_X_PID_CONTROLLER.calculate(distanceFromTrackedGamePiece.get().getX()),
                         () -> AutonomousConstants.GAME_PIECE_AUTO_DRIVE_Y_PID_CONTROLLER.calculate(distanceFromTrackedGamePiece.get().getY()),
