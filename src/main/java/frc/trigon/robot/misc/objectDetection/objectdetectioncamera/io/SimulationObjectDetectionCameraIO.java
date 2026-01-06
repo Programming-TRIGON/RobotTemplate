@@ -1,12 +1,12 @@
-package frc.trigon.robot.misc.objectdetectioncamera.io;
+package frc.trigon.robot.misc.objectDetection.objectdetectioncamera.io;
 
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj.Timer;
 import frc.trigon.robot.RobotContainer;
-import frc.trigon.robot.misc.objectdetectioncamera.ObjectDetectionCameraConstants;
-import frc.trigon.robot.misc.objectdetectioncamera.ObjectDetectionCameraIO;
-import frc.trigon.robot.misc.objectdetectioncamera.ObjectDetectionCameraInputsAutoLogged;
+import frc.trigon.robot.misc.objectDetection.ObjectDetectionConstants;
+import frc.trigon.robot.misc.objectDetection.objectdetectioncamera.ObjectDetectionCameraIO;
+import frc.trigon.robot.misc.objectDetection.objectdetectioncamera.ObjectDetectionCameraInputsAutoLogged;
 import frc.trigon.robot.misc.simulatedfield.SimulatedGamePiece;
 import frc.trigon.robot.misc.simulatedfield.SimulatedGamePieceConstants;
 import frc.trigon.robot.misc.simulatedfield.SimulationFieldHandler;
@@ -34,7 +34,7 @@ public class SimulationObjectDetectionCameraIO extends ObjectDetectionCameraIO {
         final ArrayList<Pair<SimulatedGamePiece, Rotation3d>>[] visibleGamePieces = calculateAllVisibleGamePieces(cameraPose);
 
         boolean hasAnyTarget = false;
-        for (int i = 0; i < ObjectDetectionCameraConstants.NUMBER_OF_GAME_PIECE_TYPES; i++) {
+        for (int i = 0; i < ObjectDetectionConstants.NUMBER_OF_GAME_PIECE_TYPES; i++) {
             inputs.hasObject[i] = !visibleGamePieces[i].isEmpty();
             if (inputs.hasObject[i])
                 hasAnyTarget = true;
@@ -49,15 +49,15 @@ public class SimulationObjectDetectionCameraIO extends ObjectDetectionCameraIO {
     }
 
     private ArrayList<Pair<SimulatedGamePiece, Rotation3d>>[] calculateAllVisibleGamePieces(Pose3d cameraPose) {
-        final ArrayList<Pair<SimulatedGamePiece, Rotation3d>>[] visibleGamePieces = new ArrayList[ObjectDetectionCameraConstants.NUMBER_OF_GAME_PIECE_TYPES];
+        final ArrayList<Pair<SimulatedGamePiece, Rotation3d>>[] visibleGamePieces = new ArrayList[ObjectDetectionConstants.NUMBER_OF_GAME_PIECE_TYPES];
         for (int i = 0; i < visibleGamePieces.length; i++)
             visibleGamePieces[i] = calculateVisibleGamePiecesPlacement(cameraPose, i);
         return visibleGamePieces;
     }
 
     private void updateNoNewResultInputs(ObjectDetectionCameraInputsAutoLogged inputs) {
-        inputs.hasObject = new boolean[ObjectDetectionCameraConstants.NUMBER_OF_GAME_PIECE_TYPES];
-        inputs.visibleObjectRotations = new Rotation3d[ObjectDetectionCameraConstants.NUMBER_OF_GAME_PIECE_TYPES][0];
+        inputs.hasObject = new boolean[ObjectDetectionConstants.NUMBER_OF_GAME_PIECE_TYPES];
+        inputs.visibleObjectRotations = new Rotation3d[ObjectDetectionConstants.NUMBER_OF_GAME_PIECE_TYPES][0];
     }
 
     private void updateHasNewResultInputs(ObjectDetectionCameraInputsAutoLogged inputs, ArrayList<Pair<SimulatedGamePiece, Rotation3d>>[] visibleGamePieces) {
@@ -81,17 +81,17 @@ public class SimulationObjectDetectionCameraIO extends ObjectDetectionCameraIO {
      */
     private ArrayList<Pair<SimulatedGamePiece, Rotation3d>> calculateVisibleGamePiecesPlacement(Pose3d cameraPose, int objectID) {
         final ArrayList<SimulatedGamePiece> gamePiecesOnField = SimulationFieldHandler.getSimulatedGamePieces();
-        final ArrayList<Pair<SimulatedGamePiece, Rotation3d>> visibleTargetObjects = new ArrayList<>();
+        final ArrayList<Pair<SimulatedGamePiece, Rotation3d>> visibleObjects = new ArrayList<>();
         for (SimulatedGamePiece currentObject : gamePiecesOnField) {
             if (currentObject.isScored())
                 continue;
             final Rotation3d cameraAngleToObject = calculateCameraAngleToObject(currentObject.getPose(), cameraPose);
 
             if (isObjectWithinFOV(cameraAngleToObject))
-                visibleTargetObjects.add(new Pair<>(currentObject, cameraAngleToObject));
+                visibleObjects.add(new Pair<>(currentObject, cameraAngleToObject));
         }
 
-        return visibleTargetObjects;
+        return visibleObjects;
     }
 
     private Rotation3d calculateCameraAngleToObject(Pose3d objectPose, Pose3d cameraPose) {

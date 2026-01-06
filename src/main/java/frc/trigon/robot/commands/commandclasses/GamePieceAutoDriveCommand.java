@@ -7,7 +7,7 @@ import edu.wpi.first.wpilibj2.command.*;
 import frc.trigon.lib.utilities.flippable.FlippableRotation2d;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.commands.commandfactories.GeneralCommands;
-import frc.trigon.robot.misc.ObjectPoseEstimator;
+import frc.trigon.robot.misc.objectDetection.ObjectPoseEstimator;
 import frc.trigon.robot.constants.AutonomousConstants;
 import frc.trigon.robot.misc.simulatedfield.SimulatedGamePieceConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveCommands;

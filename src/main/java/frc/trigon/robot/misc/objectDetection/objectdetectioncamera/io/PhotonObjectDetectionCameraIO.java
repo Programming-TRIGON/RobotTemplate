@@ -1,10 +1,10 @@
-package frc.trigon.robot.misc.objectdetectioncamera.io;
+package frc.trigon.robot.misc.objectDetection.objectdetectioncamera.io;
 
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.util.Units;
-import frc.trigon.robot.misc.objectdetectioncamera.ObjectDetectionCameraConstants;
-import frc.trigon.robot.misc.objectdetectioncamera.ObjectDetectionCameraIO;
-import frc.trigon.robot.misc.objectdetectioncamera.ObjectDetectionCameraInputsAutoLogged;
+import frc.trigon.robot.misc.objectDetection.ObjectDetectionConstants;
+import frc.trigon.robot.misc.objectDetection.objectdetectioncamera.ObjectDetectionCameraIO;
+import frc.trigon.robot.misc.objectDetection.objectdetectioncamera.ObjectDetectionCameraInputsAutoLogged;
 import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
@@ -43,13 +43,13 @@ public class PhotonObjectDetectionCameraIO extends ObjectDetectionCameraIO {
     }
 
     private void updateNoNewResultInputs(ObjectDetectionCameraInputsAutoLogged inputs) {
-        inputs.hasObject = new boolean[ObjectDetectionCameraConstants.NUMBER_OF_GAME_PIECE_TYPES];
-        inputs.visibleObjectRotations = new Rotation3d[ObjectDetectionCameraConstants.NUMBER_OF_GAME_PIECE_TYPES][0];
+        inputs.hasObject = new boolean[ObjectDetectionConstants.NUMBER_OF_GAME_PIECE_TYPES];
+        inputs.visibleObjectRotations = new Rotation3d[ObjectDetectionConstants.NUMBER_OF_GAME_PIECE_TYPES][0];
     }
 
     private void updateHasNewResultInputs(ObjectDetectionCameraInputsAutoLogged inputs, PhotonPipelineResult result) {
-        final List<Rotation3d>[] visibleObjectsRotations = new List[ObjectDetectionCameraConstants.NUMBER_OF_GAME_PIECE_TYPES];
-        for (int i = 0; i < ObjectDetectionCameraConstants.NUMBER_OF_GAME_PIECE_TYPES; i++)
+        final List<Rotation3d>[] visibleObjectsRotations = new List[ObjectDetectionConstants.NUMBER_OF_GAME_PIECE_TYPES];
+        for (int i = 0; i < ObjectDetectionConstants.NUMBER_OF_GAME_PIECE_TYPES; i++)
             visibleObjectsRotations[i] = new ArrayList<>();
         Arrays.fill(inputs.hasObject, false);
         inputs.latestResultTimestamp = result.getTimestampSeconds();
@@ -62,7 +62,7 @@ public class PhotonObjectDetectionCameraIO extends ObjectDetectionCameraIO {
             visibleObjectsRotations[currentTarget.getDetectedObjectClassID()].add(extractRotation3d(currentTarget));
         }
 
-        for (int i = 0; i < ObjectDetectionCameraConstants.NUMBER_OF_GAME_PIECE_TYPES; i++)
+        for (int i = 0; i < ObjectDetectionConstants.NUMBER_OF_GAME_PIECE_TYPES; i++)
             inputs.visibleObjectRotations[i] = toArray(visibleObjectsRotations[i]);
     }
 

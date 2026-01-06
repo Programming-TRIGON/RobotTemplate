@@ -1,4 +1,4 @@
-package frc.trigon.robot.misc;
+package frc.trigon.robot.misc.objectDetection;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -7,8 +7,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.misc.simulatedfield.SimulatedGamePieceConstants;
-import frc.trigon.robot.misc.objectdetectioncamera.ObjectDetectionCamera;
-import frc.trigon.robot.misc.objectdetectioncamera.ObjectDetectionCameraConstants;
+import frc.trigon.robot.misc.objectDetection.objectdetectioncamera.ObjectDetectionCamera;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.ArrayList;
@@ -181,7 +180,7 @@ public class ObjectPoseEstimator extends SubsystemBase {
 
     private boolean shouldReplaceObject(Translation2d object, double closestObjectToVisibleDistanceMeters, double currentTimestamp) {
         return object != null
-                && closestObjectToVisibleDistanceMeters < ObjectDetectionCameraConstants.TRACKED_OBJECT_TOLERANCE_METERS
+                && closestObjectToVisibleDistanceMeters < ObjectDetectionConstants.TRACKED_OBJECT_TOLERANCE_METERS
                 && !knownObjectPositions.get(object).equals(currentTimestamp);
     }
 
