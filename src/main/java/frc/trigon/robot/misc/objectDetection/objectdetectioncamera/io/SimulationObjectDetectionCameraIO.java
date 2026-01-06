@@ -33,14 +33,14 @@ public class SimulationObjectDetectionCameraIO extends ObjectDetectionCameraIO {
         final Pose3d cameraPose = new Pose3d(robotPose).plus(robotCenterToCamera);
         final ArrayList<Pair<SimulatedGamePiece, Rotation3d>>[] visibleGamePieces = calculateAllVisibleGamePieces(cameraPose);
 
-        boolean hasAnyTarget = false;
+        boolean hasAnyObject = false;
         for (int i = 0; i < ObjectDetectionConstants.NUMBER_OF_GAME_PIECE_TYPES; i++) {
             inputs.hasObject[i] = !visibleGamePieces[i].isEmpty();
             if (inputs.hasObject[i])
-                hasAnyTarget = true;
+                hasAnyObject = true;
         }
 
-        if (hasAnyTarget) {
+        if (hasAnyObject) {
             updateHasNewResultInputs(inputs, visibleGamePieces);
             return;
         }
@@ -51,7 +51,7 @@ public class SimulationObjectDetectionCameraIO extends ObjectDetectionCameraIO {
     private ArrayList<Pair<SimulatedGamePiece, Rotation3d>>[] calculateAllVisibleGamePieces(Pose3d cameraPose) {
         final ArrayList<Pair<SimulatedGamePiece, Rotation3d>>[] visibleGamePieces = new ArrayList[ObjectDetectionConstants.NUMBER_OF_GAME_PIECE_TYPES];
         for (int i = 0; i < visibleGamePieces.length; i++)
-            visibleGamePieces[i] = calculateVisibleGamePiecesPlacement(cameraPose, i);
+            visibleGamePieces[i] = calculateVisibleGamePiecesRotations(cameraPose, i);
         return visibleGamePieces;
     }
 
@@ -79,7 +79,7 @@ public class SimulationObjectDetectionCameraIO extends ObjectDetectionCameraIO {
      * @param objectID   the ID of the object to check for visibility
      * @return the placements of the visible objects, as a pair of the object and the rotation of the object relative to the camera
      */
-    private ArrayList<Pair<SimulatedGamePiece, Rotation3d>> calculateVisibleGamePiecesPlacement(Pose3d cameraPose, int objectID) {
+    private ArrayList<Pair<SimulatedGamePiece, Rotation3d>> calculateVisibleGamePiecesRotations(Pose3d cameraPose, int objectID) {
         final ArrayList<SimulatedGamePiece> gamePiecesOnField = SimulationFieldHandler.getSimulatedGamePieces();
         final ArrayList<Pair<SimulatedGamePiece, Rotation3d>> visibleObjects = new ArrayList<>();
         for (SimulatedGamePiece currentObject : gamePiecesOnField) {
