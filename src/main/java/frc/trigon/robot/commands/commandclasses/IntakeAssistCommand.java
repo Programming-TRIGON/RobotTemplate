@@ -127,8 +127,8 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
     }
 
     private Translation2d getBestGamePieceFieldRelativePosition(Translation2d robotPosition) {
-        final ArrayList<Translation2d> gamePiecePositionsOnField = getGamePiecesInAssistFOV(robotPosition);
-        return getClosestGamePieceInDesiredVelocityDirection(robotPosition, gamePiecePositionsOnField);
+        final ArrayList<Translation2d> assistableGamePiecePositionsOnField = getGamePiecesInAssistFOV(robotPosition);
+        return getClosestGamePieceInDesiredVelocityDirection(robotPosition, assistableGamePiecePositionsOnField);
     }
 
     private ArrayList<Translation2d> getGamePiecesInAssistFOV(Translation2d robotPosition) {
@@ -138,6 +138,13 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
         );
 
         return gamePiecePositionsOnField;
+    }
+
+    private boolean isGamePieceWithinAssistFOV(Translation2d robotPosition, Translation2d gamePiecePosition) {
+        final double gamePieceDistance = robotPosition.getDistance(gamePiecePosition);
+        final Rotation2d scaledMaximumAssistAngle = OperatorConstants.INTAKE_ASSIST_MAXIMUM_ANGLE_FROM_GAME_PIECE.times(1 / gamePieceDistance);
+
+        return Math.abs(getSelfRelativeJoystickPosition().getAngle().getRadians()) < Math.abs(scaledMaximumAssistAngle.getRadians());
     }
 
     private Translation2d getClosestGamePieceInDesiredVelocityDirection(Translation2d robotPosition, ArrayList<Translation2d> gamePiecePositionsOnField) {
@@ -156,13 +163,6 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
         }
 
         return closestGamePieceFieldRelativePosition;
-    }
-
-    private boolean isGamePieceWithinAssistFOV(Translation2d robotPosition, Translation2d gamePiecePosition) {
-        final double gamePieceDistance = robotPosition.getDistance(gamePiecePosition);
-        final Rotation2d scaledMaximumAssistAngle = OperatorConstants.INTAKE_ASSIST_MAXIMUM_ANGLE_FROM_GAME_PIECE.times(1 / gamePieceDistance);
-
-        return Math.abs(getSelfRelativeJoystickPosition().getAngle().getRadians()) < Math.abs(scaledMaximumAssistAngle.getRadians());
     }
 
     private boolean isDrivingTowardsGamePiece(Translation2d gamePieceFieldRelativePosition, Translation2d robotPosition) {
