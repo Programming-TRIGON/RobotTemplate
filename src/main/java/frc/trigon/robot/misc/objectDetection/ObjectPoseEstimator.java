@@ -20,24 +20,21 @@ public class ObjectPoseEstimator extends SubsystemBase {
     private final SimulatedGamePieceConstants.GamePieceType gamePieceType;
     private final ObjectDetectionCamera[] cameras;
     private final HashMap<Translation2d, Double> knownObjectPositions;
-    private final double rotationToTranslation;
 
     /**
      * Constructs an ObjectPoseEstimator for estimating the positions of objects detected by camera.
      *
      * @param deletionThresholdSeconds  the time in seconds after which an object is considered old and removed
-     * @param distanceCalculationMethod the method used to calculate the distance from the game piece
      * @param gamePieceType             the type of game piece to track
      * @param cameras                   the cameras used for detecting objects
      */
-    public ObjectPoseEstimator(double deletionThresholdSeconds, DistanceCalculationMethod distanceCalculationMethod,
+    public ObjectPoseEstimator(double deletionThresholdSeconds,
                                SimulatedGamePieceConstants.GamePieceType gamePieceType,
                                ObjectDetectionCamera... cameras) {
         this.deletionThresholdSeconds = deletionThresholdSeconds;
         this.gamePieceType = gamePieceType;
         this.cameras = cameras;
         this.knownObjectPositions = new HashMap<>();
-        this.rotationToTranslation = distanceCalculationMethod.rotationToTranslation;
     }
 
     /**
@@ -187,23 +184,5 @@ public class ObjectPoseEstimator extends SubsystemBase {
 
     private boolean isTooOld(double timestamp) {
         return Timer.getTimestamp() - timestamp > deletionThresholdSeconds;
-    }
-
-    public enum DistanceCalculationMethod {
-        ROTATION(0),
-        TRANSLATION(1),
-        ROTATION_AND_TRANSLATION(0.1);
-
-        /**
-         * The ratio of rotation to translation in the distance rating calculation.
-         * A value of 0 means only rotation is considered, 1 means only translation is considered.
-         * Values in between are the ratio of rotation to translation in the distance rating calculation.
-         * For example, a value of 0.1 means that 9 cm of translation is considered equivalent to 1 degree of rotation.
-         */
-        final double rotationToTranslation;
-
-        DistanceCalculationMethod(double rotationToTranslation) {
-            this.rotationToTranslation = rotationToTranslation;
-        }
     }
 }
