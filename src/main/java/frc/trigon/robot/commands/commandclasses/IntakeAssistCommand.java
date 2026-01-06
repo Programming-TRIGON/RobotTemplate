@@ -133,10 +133,10 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
         if (bestObjectPosition == null)
             return null;
 
-        final Translation2d robotToBestGamePiece = robotPose.getTranslation().minus(bestObjectPosition);
-        final Translation2d robotToBestGamePieceDistance = robotToBestGamePiece.rotateBy(robotPose.getRotation().unaryMinus());
-        Logger.recordOutput("IntakeAssist/TargetGamePieceDistance", robotToBestGamePieceDistance);
-        return robotToBestGamePieceDistance;
+        final Translation2d bestGamePieceDistanceFromRobot = robotPose.getTranslation().minus(bestObjectPosition);
+        final Translation2d bestGamePieceOffsetFromRobot = bestGamePieceDistanceFromRobot.rotateBy(robotPose.getRotation().unaryMinus());
+        Logger.recordOutput("IntakeAssist/TargetGamePieceOffset", bestGamePieceOffsetFromRobot);
+        return bestGamePieceOffsetFromRobot;
     }
 
     private boolean isGamePieceAssistable(Pose2d robotPose, Translation2d gamePiecePosition) {
