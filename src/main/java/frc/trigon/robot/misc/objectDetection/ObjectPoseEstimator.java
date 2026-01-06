@@ -6,8 +6,8 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.trigon.robot.RobotContainer;
-import frc.trigon.robot.misc.simulatedfield.SimulatedGamePieceConstants;
 import frc.trigon.robot.misc.objectDetection.objectdetectioncamera.ObjectDetectionCamera;
+import frc.trigon.robot.misc.simulatedfield.SimulatedGamePieceConstants;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.ArrayList;
@@ -138,25 +138,6 @@ public class ObjectPoseEstimator extends SubsystemBase {
         }
         return closestObjectTranslation;
     }
-
-    /**
-     * Calculates the "distance rating" of an object from a given pose.
-     * The "distance rating" is a unit used to calculate the distance between 2 poses.
-     * It factors in both translation and rotation differences by scaling the units depending on the {@link DistanceCalculationMethod}.
-     *
-     * @param objectTranslation the translation of the object on the field
-     * @param pose              the pose to which the distance is measured from
-     * @return the objects "distance rating" from the given pose
-     */
-    private double calculateObjectDistanceRatingFromPose(Translation2d objectTranslation, Pose2d pose) {
-        final Translation2d poseTranslation = pose.getTranslation();
-        final double translationDistance = poseTranslation.getDistance(objectTranslation);
-        final Translation2d translationDifference = objectTranslation.minus(poseTranslation);
-        final double rotationDifferenceDegrees = Math.abs(pose.getRotation().minus(translationDifference.getAngle()).getDegrees());
-
-        return translationDistance * rotationToTranslation + rotationDifferenceDegrees * (1 - rotationToTranslation);
-    }
-
 
     private void updateObjectPositions() {
         final double currentTimestamp = Timer.getTimestamp();
