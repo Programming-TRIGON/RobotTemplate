@@ -15,6 +15,6 @@ public class CameraConstants {
     public static final double OBJECT_POSE_ESTIMATOR_DELETION_THRESHOLD_SECONDS = 0.5;
     public static final ObjectDetectionCamera OBJECT_DETECTION_CAMERA = new ObjectDetectionCamera(
             "ObjectDetectionCamera",
-            ROBOT_CENTER_TO_OBJECT_DETECTION_CAMERA
+            0
     );
 }
