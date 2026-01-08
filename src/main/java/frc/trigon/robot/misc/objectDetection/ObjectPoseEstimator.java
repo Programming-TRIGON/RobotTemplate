@@ -143,6 +143,7 @@ public class ObjectPoseEstimator extends SubsystemBase {
     private void updateObjectPositions() {
         final double currentTimestamp = Timer.getTimestamp();
         final Set<Translation2d> recognizedObjects = new HashSet<>();
+        final HashMap<Translation2d, Double> newObjects = new HashMap<>();
 
         for (Translation2d currentObject : objectPositionsToTimeStamp.keySet()) {
             recognizedObjects.clear();
@@ -151,13 +152,14 @@ public class ObjectPoseEstimator extends SubsystemBase {
                     if (isObjectWithinTolerance(visibleObject, currentObject))
                         recognizedObjects.add(visibleObject);
                     else if (isObjectNew(visibleObject)) {
-                        objectPositionsToTimeStamp.put(visibleObject, currentTimestamp);
+                        newObjects.put(visibleObject, currentTimestamp);
                     }
                 }
             }
             if (!recognizedObjects.isEmpty())
                 updateObject(currentObject, getClosestObjectFromSetToPosition(currentObject, recognizedObjects), currentTimestamp);
         }
+        objectPositionsToTimeStamp.putAll(newObjects);
     }
 
     private void updateObject(Translation2d oldObject, Translation2d newObject, double currentTimestamp) {
@@ -166,6 +168,8 @@ public class ObjectPoseEstimator extends SubsystemBase {
     }
 
     private boolean isObjectNew(Translation2d object) {
+        if (objectPositionsToTimeStamp.isEmpty())
+            return true;
         return !isObjectWithinTolerance(getClosestKnownObjectToVisibleObject(object), object);
     }
 
