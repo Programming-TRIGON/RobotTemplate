@@ -107,7 +107,7 @@ public class SwerveConstants {
         config.MountPose.MountPoseRoll = 0;
 
         GYRO.applyConfiguration(config);
-        GYRO.setSimulationYawVelocitySupplier(() -> Units.radiansToDegrees(RobotContainer.SWERVE.getRotationalVelocityRadiansPerSecond()));
+        GYRO.setSimulationYawVelocitySupplier(() -> RobotContainer.SWERVE.getRotationalVelocityRadiansPerSecond());
 
         GYRO.registerThreadedSignal(Pigeon2Signal.YAW, PoseEstimatorConstants.ODOMETRY_FREQUENCY_HERTZ);
     }

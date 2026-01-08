@@ -1,11 +1,12 @@
 package frc.trigon.robot.constants;
 
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.trigon.lib.hardware.misc.KeyboardController;
 import frc.trigon.lib.hardware.misc.XboxController;
+
+import java.util.function.DoubleUnaryOperator;
 
 public class OperatorConstants {
     public static final double DRIVER_CONTROLLER_DEADBAND = 0.07;
@@ -23,11 +24,16 @@ public class OperatorConstants {
             TRANSLATION_STICK_SPEED_DIVIDER = 1,
             ROTATION_STICK_SPEED_DIVIDER = 1;
 
-    public static final double MINIMUM_VELOCITY_FOR_INTAKE_ASSIST_METERS_PER_SECOND = 2;
-    public static final InterpolatingDoubleTreeMap INTAKE_ASSIST_MAXIMUM_ANGLE_DEGREES_TABLE = new InterpolatingDoubleTreeMap();
-    private static final Rotation2d
-            INTAKE_ASSIST_MAXIMUM_ANGLE_AT_ZERO_METERS_FROM_GAME_PIECE = Rotation2d.fromDegrees(45),
-            INTAKE_ASSIST_MAXIMUM_ANGLE_AT_ONE_METER_FROM_GAME_PIECE = Rotation2d.fromDegrees(15);
+    public static final double MINIMUM_VELOCITY_FOR_INTAKE_ASSIST_METERS_PER_SECOND = 1;
+    private static final double
+            INTAKE_ASSIST_MAXIMUM_ASSISTABLE_ANGLE_FORMULA_INTERCEPT = 60,
+            INTAKE_ASSIST_MAXIMUM_ASSISTABLE_ANGLE_FORMULA_SLOPE = -15;
+    public static final DoubleUnaryOperator INTAKE_ASSIST_MAXIMUM_ASSISTABLE_ANGLE_FORMULA =
+            x -> MathUtil.clamp(
+                    (INTAKE_ASSIST_MAXIMUM_ASSISTABLE_ANGLE_FORMULA_SLOPE * x) + INTAKE_ASSIST_MAXIMUM_ASSISTABLE_ANGLE_FORMULA_INTERCEPT,
+                    0,
+                    INTAKE_ASSIST_MAXIMUM_ASSISTABLE_ANGLE_FORMULA_INTERCEPT
+            );
 
     public static final Trigger
             RESET_HEADING_TRIGGER = DRIVER_CONTROLLER.y(),
@@ -38,9 +44,4 @@ public class OperatorConstants {
             BACKWARD_QUASISTATIC_CHARACTERIZATION_TRIGGER = OPERATOR_CONTROLLER.left(),
             FORWARD_DYNAMIC_CHARACTERIZATION_TRIGGER = OPERATOR_CONTROLLER.up(),
             BACKWARD_DYNAMIC_CHARACTERIZATION_TRIGGER = OPERATOR_CONTROLLER.down();
-
-    static {
-        INTAKE_ASSIST_MAXIMUM_ANGLE_DEGREES_TABLE.put(0.0, INTAKE_ASSIST_MAXIMUM_ANGLE_AT_ZERO_METERS_FROM_GAME_PIECE.getDegrees());
-        INTAKE_ASSIST_MAXIMUM_ANGLE_DEGREES_TABLE.put(1.0, INTAKE_ASSIST_MAXIMUM_ANGLE_AT_ONE_METER_FROM_GAME_PIECE.getDegrees());
-    }
 }

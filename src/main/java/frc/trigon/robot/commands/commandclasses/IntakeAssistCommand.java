@@ -6,15 +6,13 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
+import edu.wpi.first.wpilibj2.command.*;
 import frc.trigon.lib.hardware.RobotHardwareStats;
 import frc.trigon.lib.utilities.flippable.Flippable;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.constants.OperatorConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveCommands;
+import frc.trigon.robot.subsystems.swerve.SwerveConstants;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.ArrayList;
@@ -25,13 +23,13 @@ import java.util.ArrayList;
 public class IntakeAssistCommand extends ParallelCommandGroup {
     private static final ProfiledPIDController
             X_PID_CONTROLLER = RobotHardwareStats.isSimulation() ?
-            new ProfiledPIDController(0.5, 0, 0, new TrapezoidProfile.Constraints(2.8, 5)) :
+            new ProfiledPIDController(5, 0, 0, new TrapezoidProfile.Constraints(5, 15)) :
             new ProfiledPIDController(2.4, 0, 0, new TrapezoidProfile.Constraints(2.65, 5.5)),
             Y_PID_CONTROLLER = RobotHardwareStats.isSimulation() ?
-                    new ProfiledPIDController(0.5, 0, 0, new TrapezoidProfile.Constraints(2.8, 5)) :
+                    new ProfiledPIDController(3, 0, 0.01, new TrapezoidProfile.Constraints(5, 15)) :
                     new ProfiledPIDController(0.3, 0, 0.03, new TrapezoidProfile.Constraints(2.65, 5.5)),
             THETA_PID_CONTROLLER = RobotHardwareStats.isSimulation() ?
-                    new ProfiledPIDController(0.4, 0, 0, new TrapezoidProfile.Constraints(2.8, 5)) :
+                    new ProfiledPIDController(0.1, 0, 0, new TrapezoidProfile.Constraints(2.8, 5)) :
                     new ProfiledPIDController(2.4, 0, 0, new TrapezoidProfile.Constraints(2.65, 5.5));
     private Translation2d distanceFromTrackedGamePiece;
 
@@ -42,13 +40,14 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
      * @param yAssist     the assist to apply to the Y-axis (Sideways)
      * @param thetaAssist the assist to apply to the rotation
      */
-    public IntakeAssistCommand(AssistAxis xAssist, AssistAxis yAssist, AssistAxis thetaAssist) {
+    public IntakeAssistCommand(double xAssist, double yAssist, double thetaAssist) {
         addCommands(
-                new InstantCommand(this::resetPIDControllers).andThen(
-                        new WaitUntilCommand(this::hasNoTrackedGamePiece),
-                        new WaitUntilCommand(() -> !hasNoTrackedGamePiece())
-                ).repeatedly(),
                 new RunCommand(this::trackGamePiece),
+                new SequentialCommandGroup(
+                        new WaitUntilCommand(() -> distanceFromTrackedGamePiece != null),
+                        new InstantCommand(this::resetPIDControllers),
+                        new WaitUntilCommand(this::hasNoTrackedGamePiece)
+                ).repeatedly(),
                 SwerveCommands.getClosedLoopSelfRelativeDriveCommand(
                         () -> calculateTranslationPower(true, xAssist),
                         () -> calculateTranslationPower(false, yAssist),
@@ -58,15 +57,12 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
     }
 
     private void resetPIDControllers() {
-        if (hasNoTrackedGamePiece())
-            return;
-
         X_PID_CONTROLLER.reset(distanceFromTrackedGamePiece.getX(), RobotContainer.SWERVE.getSelfRelativeVelocity().getX());
         Y_PID_CONTROLLER.reset(distanceFromTrackedGamePiece.getY(), RobotContainer.SWERVE.getSelfRelativeVelocity().getY());
         THETA_PID_CONTROLLER.reset(distanceFromTrackedGamePiece.getAngle().getRadians(), RobotContainer.SWERVE.getRotationalVelocityRadiansPerSecond());
     }
 
-    private double calculateTranslationPower(boolean isXAxis, AssistAxis assistAxis) {
+    private double calculateTranslationPower(boolean isXAxis, double assistScalar) {
         final Translation2d selfRelativeJoystickValue = getSelfRelativeJoystickPosition();
         final double joystickValue = isXAxis ? selfRelativeJoystickValue.getX() : selfRelativeJoystickValue.getY();
 
@@ -77,26 +73,28 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
                 pidOutput = clampToSwerveOutputRange(isXAxis ?
                 X_PID_CONTROLLER.calculate(distanceFromTrackedGamePiece.getX()) :
                 Y_PID_CONTROLLER.calculate(distanceFromTrackedGamePiece.getY()));
-        final double joystickNorm = selfRelativeJoystickValue.getNorm();
 
-        return assistAxis.calculatePower(pidOutput, joystickValue, joystickNorm);
+        return calculateAssistPower(assistScalar, pidOutput, joystickValue);
     }
 
-    private double calculateThetaPower(AssistAxis assistAxis) {
+    private double calculateThetaPower(double assistScalar) {
         final double joystickValue = OperatorConstants.DRIVER_CONTROLLER.getRightX();
 
         if (hasNoTrackedGamePiece())
             return joystickValue;
 
-        return calculateThetaAssistPower(assistAxis, joystickValue, distanceFromTrackedGamePiece.getAngle().plus(Rotation2d.k180deg).unaryMinus());
+        return calculateThetaAssistPower(assistScalar, joystickValue, distanceFromTrackedGamePiece.getAngle().plus(Rotation2d.k180deg).unaryMinus());
     }
 
-    private double calculateThetaAssistPower(AssistAxis assistAxis, double joystickValue, Rotation2d thetaOffset) {
-        final double
-                pidOutput = clampToSwerveOutputRange(THETA_PID_CONTROLLER.calculate(thetaOffset.getRadians())),
-                joystickNorm = Math.hypot(OperatorConstants.DRIVER_CONTROLLER.getRightX(), OperatorConstants.DRIVER_CONTROLLER.getRightY());
+    private double calculateThetaAssistPower(double assistScalar, double joystickValue, Rotation2d thetaOffset) {
+        final double pidOutput = clampToSwerveOutputRange(THETA_PID_CONTROLLER.calculate(thetaOffset.getRadians()));
+        return calculateAssistPower(assistScalar, pidOutput, joystickValue);
+    }
 
-        return assistAxis.calculatePower(pidOutput, joystickValue, joystickNorm);
+    private double calculateAssistPower(double assistScalar, double pidOutput, double joystickValue) {
+        if (assistScalar == 0)
+            return joystickValue;
+        return (joystickValue * (1 - assistScalar)) + (pidOutput * assistScalar);
     }
 
     private boolean hasNoTrackedGamePiece() {
@@ -111,7 +109,7 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
 
     private Translation2d calculateDistanceFromBestGamePiece() {
         final Pose2d robotPose = RobotContainer.ROBOT_POSE_ESTIMATOR.getEstimatedRobotPose();
-        final Translation2d bestGamePieceFieldRelativePosition = getBestGamePieceFieldRelativePosition(robotPose.getTranslation());
+        final Translation2d bestGamePieceFieldRelativePosition = getBestGamePieceFieldRelativePosition(robotPose);
 
         if (bestGamePieceFieldRelativePosition == null)
             return null;
@@ -122,42 +120,52 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
         return bestGamePieceOffsetFromRobot;
     }
 
-    private Translation2d getBestGamePieceFieldRelativePosition(Translation2d robotPosition) {
-        return getClosestGamePiece(robotPosition, getAssistableGamePieces(robotPosition));
+    private Translation2d getBestGamePieceFieldRelativePosition(Pose2d robotPose) {
+        return getClosestGamePiece(robotPose.getTranslation(), getAssistableGamePieces(robotPose));
     }
 
-    private ArrayList<Translation2d> getAssistableGamePieces(Translation2d robotPosition) {
-        final ArrayList<Translation2d> gamePiecePositionsOnField = RobotContainer.OBJECT_POSE_ESTIMATOR.getObjectsOnField();
+    private ArrayList<Translation2d> getAssistableGamePieces(Pose2d robotPose) {
+        final ArrayList<Translation2d> gamePiecePositionsOnField = new ArrayList<>(RobotContainer.OBJECT_POSE_ESTIMATOR.getObjectsOnField());
         gamePiecePositionsOnField.removeIf(
                 gamePiecePosition ->
-                        !isGamePieceWithinAssistFOV(robotPosition, gamePiecePosition) ||
-                                !isDrivingTowardsGamePiece(gamePiecePosition, robotPosition)
+                        !isGamePieceWithinAssistFOV(robotPose, gamePiecePosition) ||
+                                !isDrivingTowardsGamePiece(gamePiecePosition, robotPose.getTranslation())
         );
 
         return gamePiecePositionsOnField;
     }
 
-    private boolean isGamePieceWithinAssistFOV(Translation2d robotPosition, Translation2d gamePiecePosition) {
-        final double gamePieceDistance = robotPosition.getDistance(gamePiecePosition);
-        final Rotation2d scaledMaximumAssistAngle = calculateMaximumAssistAngle(gamePieceDistance);
+    private boolean isGamePieceWithinAssistFOV(Pose2d robotPose, Translation2d gamePiecePosition) {
+        final Translation2d distanceFromGamePiece = gamePiecePosition.minus(robotPose.getTranslation());
+        final Rotation2d robotToGamePieceAngle = distanceFromGamePiece.rotateBy(robotPose.getRotation().unaryMinus()).getAngle();
 
-        return Math.abs(getSelfRelativeJoystickPosition().getAngle().getRadians()) < Math.abs(scaledMaximumAssistAngle.getRadians());
+        final double scaledMaximumAssistAngleDegrees = calculateMaximumAssistAngleDegrees(distanceFromGamePiece.getNorm());
+
+        final Rotation2d angleOffset = getSelfRelativeJoystickPosition().getAngle().minus(robotToGamePieceAngle);
+        return Math.abs(angleOffset.getDegrees()) < scaledMaximumAssistAngleDegrees;
     }
 
-    private Rotation2d calculateMaximumAssistAngle(double gamePieceDistance) {
-        return Rotation2d.fromDegrees(OperatorConstants.INTAKE_ASSIST_MAXIMUM_ANGLE_DEGREES_TABLE.get(gamePieceDistance));
+    private double calculateMaximumAssistAngleDegrees(double gamePieceDistance) {
+        return OperatorConstants.INTAKE_ASSIST_MAXIMUM_ASSISTABLE_ANGLE_FORMULA.applyAsDouble(gamePieceDistance);
     }
 
     private boolean isDrivingTowardsGamePiece(Translation2d gamePieceFieldRelativePosition, Translation2d robotPosition) {
-        final Translation2d fieldRelativeJoystickPosition = getFieldRelativeJoystickPosition();
         final Translation2d fieldRelativeDistanceFromGamePiece = gamePieceFieldRelativePosition.minus(robotPosition);
+
+        final double velocityTowardsGamePiece = getVelocityTowardsGamePiece(fieldRelativeDistanceFromGamePiece);
+        return velocityTowardsGamePiece > OperatorConstants.MINIMUM_VELOCITY_FOR_INTAKE_ASSIST_METERS_PER_SECOND;
+    }
+
+    private double getVelocityTowardsGamePiece(Translation2d fieldRelativeDistanceFromGamePiece) {
+        final Translation2d fieldRelativeJoystickPosition = getFieldRelativeJoystickPosition();
 
         final Rotation2d joystickAngle = fieldRelativeJoystickPosition.getAngle();
         final Rotation2d fieldRelativeGamePieceAngleFromRobot = fieldRelativeDistanceFromGamePiece.getAngle();
         final Rotation2d angularOffset = joystickAngle.minus(fieldRelativeGamePieceAngleFromRobot);
 
-        final double velocityTowardsGamePiece = angularOffset.getCos() * fieldRelativeJoystickPosition.getNorm();
-        return velocityTowardsGamePiece > OperatorConstants.MINIMUM_VELOCITY_FOR_INTAKE_ASSIST_METERS_PER_SECOND;
+        final double desiredRobotVelocity = fieldRelativeJoystickPosition.getNorm() * SwerveConstants.MAXIMUM_SPEED_METERS_PER_SECOND;
+
+        return angularOffset.getCos() * desiredRobotVelocity;
     }
 
     private Translation2d getClosestGamePiece(Translation2d robotPosition, ArrayList<Translation2d> gamePiecePositionsOnField) {
@@ -184,7 +192,7 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
                 joystickX = OperatorConstants.DRIVER_CONTROLLER.getLeftX(),
                 joystickY = OperatorConstants.DRIVER_CONTROLLER.getLeftY();
 
-        return new Translation2d(joystickX, joystickY).rotateBy(RobotContainer.SWERVE.getDriveRelativeAngle().unaryMinus());//¯\_(ツ)_/¯
+        return new Translation2d(joystickY, joystickX).rotateBy(RobotContainer.SWERVE.getDriveRelativeAngle().unaryMinus());//¯\_(ツ)_/¯
     }
 
     private Translation2d getFieldRelativeJoystickPosition() {
@@ -192,37 +200,6 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
                 joystickX = OperatorConstants.DRIVER_CONTROLLER.getLeftX(),
                 joystickY = OperatorConstants.DRIVER_CONTROLLER.getLeftY();
 
-        return new Translation2d(joystickX, joystickY).rotateBy(Flippable.isRedAlliance() ? Rotation2d.k180deg : Rotation2d.kZero);//¯\_(ツ)_/¯
-    }
-
-    /**
-     * An object representing a single axis of normal intake assist.
-     * Normal intake assist adds the joystick input to the assist input after scaling down the assist by the {@code AssistScalar}.
-     *
-     * @param assistScalar the value with which to scale the assist power (0-1)
-     */
-    public record NormalAssistAxis(double assistScalar) implements AssistAxis {
-        @Override
-        public double calculatePower(double pidOutput, double joystickValue, double joystickNorm) {
-            if (assistScalar == 0)
-                return joystickValue;
-            return (joystickValue * (1 - assistScalar)) + (pidOutput * assistScalar);
-        }
-    }
-
-    /**
-     * An object representing a single axis of alternate intake assist.
-     * Alternate intake assist scales down the assist power by the joystick's offset from the center.
-     * It then adds the joystick value to produce the final output power.
-     */
-    public record AlternateAssistAxis() implements AssistAxis {
-        @Override
-        public double calculatePower(double pidOutput, double joystickValue, double joystickNorm) {
-            return pidOutput * (1 - Math.cbrt(Math.abs(joystickNorm))) + joystickValue;
-        }
-    }
-
-    private interface AssistAxis {
-        double calculatePower(double pidOutput, double joystickValue, double joystickNorm);
+        return new Translation2d(joystickY, joystickX).rotateBy(Flippable.isRedAlliance() ? Rotation2d.k180deg : Rotation2d.kZero);//¯\_(ツ)_/¯
     }
 }
