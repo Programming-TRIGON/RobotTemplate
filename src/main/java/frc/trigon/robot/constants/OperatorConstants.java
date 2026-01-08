@@ -1,6 +1,7 @@
 package frc.trigon.robot.constants;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.trigon.lib.hardware.misc.KeyboardController;
@@ -23,7 +24,10 @@ public class OperatorConstants {
             ROTATION_STICK_SPEED_DIVIDER = 1;
 
     public static final double MINIMUM_VELOCITY_FOR_INTAKE_ASSIST_METERS_PER_SECOND = 2;
-    public static final Rotation2d INTAKE_ASSIST_MAXIMUM_ANGLE_FROM_GAME_PIECE = Rotation2d.fromDegrees(15);
+    public static final InterpolatingDoubleTreeMap INTAKE_ASSIST_MAXIMUM_ANGLE_DEGREES_TABLE = new InterpolatingDoubleTreeMap();
+    private static final Rotation2d
+            INTAKE_ASSIST_MAXIMUM_ANGLE_AT_ZERO_METERS_FROM_GAME_PIECE = Rotation2d.fromDegrees(45),
+            INTAKE_ASSIST_MAXIMUM_ANGLE_AT_ONE_METER_FROM_GAME_PIECE = Rotation2d.fromDegrees(15);
 
     public static final Trigger
             RESET_HEADING_TRIGGER = DRIVER_CONTROLLER.y(),
@@ -34,4 +38,9 @@ public class OperatorConstants {
             BACKWARD_QUASISTATIC_CHARACTERIZATION_TRIGGER = OPERATOR_CONTROLLER.left(),
             FORWARD_DYNAMIC_CHARACTERIZATION_TRIGGER = OPERATOR_CONTROLLER.up(),
             BACKWARD_DYNAMIC_CHARACTERIZATION_TRIGGER = OPERATOR_CONTROLLER.down();
+
+    static {
+        INTAKE_ASSIST_MAXIMUM_ANGLE_DEGREES_TABLE.put(0.0, INTAKE_ASSIST_MAXIMUM_ANGLE_AT_ZERO_METERS_FROM_GAME_PIECE.getDegrees());
+        INTAKE_ASSIST_MAXIMUM_ANGLE_DEGREES_TABLE.put(1.0, INTAKE_ASSIST_MAXIMUM_ANGLE_AT_ONE_METER_FROM_GAME_PIECE.getDegrees());
+    }
 }

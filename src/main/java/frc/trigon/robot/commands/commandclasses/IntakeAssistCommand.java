@@ -74,7 +74,7 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
             return joystickValue;
 
         final double
-                pidOutput = clampToOutputRange(isXAxis ?
+                pidOutput = clampToSwerveOutputRange(isXAxis ?
                 X_PID_CONTROLLER.calculate(distanceFromTrackedGamePiece.getX()) :
                 Y_PID_CONTROLLER.calculate(distanceFromTrackedGamePiece.getY()));
         final double joystickNorm = selfRelativeJoystickValue.getNorm();
@@ -93,7 +93,7 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
 
     private double calculateThetaAssistPower(AssistAxis assistAxis, double joystickValue, Rotation2d thetaOffset) {
         final double
-                pidOutput = clampToOutputRange(THETA_PID_CONTROLLER.calculate(thetaOffset.getRadians())),
+                pidOutput = clampToSwerveOutputRange(THETA_PID_CONTROLLER.calculate(thetaOffset.getRadians())),
                 joystickNorm = Math.hypot(OperatorConstants.DRIVER_CONTROLLER.getRightX(), OperatorConstants.DRIVER_CONTROLLER.getRightY());
 
         return assistAxis.calculatePower(pidOutput, joystickValue, joystickNorm);
@@ -107,10 +107,6 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
         distanceFromTrackedGamePiece = RobotContainer.OBJECT_POSE_ESTIMATOR.hasObject() ?
                 calculateDistanceFromBestGamePiece() :
                 null;
-    }
-
-    private double clampToOutputRange(double value) {
-        return MathUtil.clamp(value, -1, 1);
     }
 
     private Translation2d calculateDistanceFromBestGamePiece() {
@@ -127,14 +123,15 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
     }
 
     private Translation2d getBestGamePieceFieldRelativePosition(Translation2d robotPosition) {
-        final ArrayList<Translation2d> assistableGamePiecePositionsOnField = getGamePiecesInAssistFOV(robotPosition);
-        return getClosestGamePieceInDesiredVelocityDirection(robotPosition, assistableGamePiecePositionsOnField);
+        return getClosestGamePiece(robotPosition, getAssistableGamePieces(robotPosition));
     }
 
-    private ArrayList<Translation2d> getGamePiecesInAssistFOV(Translation2d robotPosition) {
+    private ArrayList<Translation2d> getAssistableGamePieces(Translation2d robotPosition) {
         final ArrayList<Translation2d> gamePiecePositionsOnField = RobotContainer.OBJECT_POSE_ESTIMATOR.getObjectsOnField();
         gamePiecePositionsOnField.removeIf(
-                gamePiecePosition -> !isGamePieceWithinAssistFOV(robotPosition, gamePiecePosition)
+                gamePiecePosition ->
+                        !isGamePieceWithinAssistFOV(robotPosition, gamePiecePosition) ||
+                                !isDrivingTowardsGamePiece(gamePiecePosition, robotPosition)
         );
 
         return gamePiecePositionsOnField;
@@ -142,27 +139,13 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
 
     private boolean isGamePieceWithinAssistFOV(Translation2d robotPosition, Translation2d gamePiecePosition) {
         final double gamePieceDistance = robotPosition.getDistance(gamePiecePosition);
-        final Rotation2d scaledMaximumAssistAngle = OperatorConstants.INTAKE_ASSIST_MAXIMUM_ANGLE_FROM_GAME_PIECE.times(1 / gamePieceDistance);
+        final Rotation2d scaledMaximumAssistAngle = calculateMaximumAssistAngle(gamePieceDistance);
 
         return Math.abs(getSelfRelativeJoystickPosition().getAngle().getRadians()) < Math.abs(scaledMaximumAssistAngle.getRadians());
     }
 
-    private Translation2d getClosestGamePieceInDesiredVelocityDirection(Translation2d robotPosition, ArrayList<Translation2d> gamePiecePositionsOnField) {
-        Translation2d closestGamePieceFieldRelativePosition = null;
-        double distanceFromClosestGamePiece = Double.POSITIVE_INFINITY;
-
-        for (Translation2d gamePieceFieldRelativePosition : gamePiecePositionsOnField) {
-            if (!isDrivingTowardsGamePiece(gamePieceFieldRelativePosition, robotPosition))
-                continue;
-
-            final double distanceFromCurrentGamePiece = gamePieceFieldRelativePosition.getDistance(robotPosition);
-            if (distanceFromCurrentGamePiece < distanceFromClosestGamePiece) {
-                closestGamePieceFieldRelativePosition = gamePieceFieldRelativePosition;
-                distanceFromClosestGamePiece = distanceFromCurrentGamePiece;
-            }
-        }
-
-        return closestGamePieceFieldRelativePosition;
+    private Rotation2d calculateMaximumAssistAngle(double gamePieceDistance) {
+        return Rotation2d.fromDegrees(OperatorConstants.INTAKE_ASSIST_MAXIMUM_ANGLE_DEGREES_TABLE.get(gamePieceDistance));
     }
 
     private boolean isDrivingTowardsGamePiece(Translation2d gamePieceFieldRelativePosition, Translation2d robotPosition) {
@@ -175,6 +158,25 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
 
         final double velocityTowardsGamePiece = angularOffset.getCos() * fieldRelativeJoystickPosition.getNorm();
         return velocityTowardsGamePiece > OperatorConstants.MINIMUM_VELOCITY_FOR_INTAKE_ASSIST_METERS_PER_SECOND;
+    }
+
+    private Translation2d getClosestGamePiece(Translation2d robotPosition, ArrayList<Translation2d> gamePiecePositionsOnField) {
+        Translation2d closestGamePieceFieldRelativePosition = null;
+        double distanceFromClosestGamePiece = Double.POSITIVE_INFINITY;
+
+        for (Translation2d gamePieceFieldRelativePosition : gamePiecePositionsOnField) {
+            final double distanceFromCurrentGamePiece = gamePieceFieldRelativePosition.getDistance(robotPosition);
+            if (distanceFromCurrentGamePiece < distanceFromClosestGamePiece) {
+                closestGamePieceFieldRelativePosition = gamePieceFieldRelativePosition;
+                distanceFromClosestGamePiece = distanceFromCurrentGamePiece;
+            }
+        }
+
+        return closestGamePieceFieldRelativePosition;
+    }
+
+    private double clampToSwerveOutputRange(double value) {
+        return MathUtil.clamp(value, -1, 1);
     }
 
     private Translation2d getSelfRelativeJoystickPosition() {
