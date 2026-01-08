@@ -10,10 +10,7 @@ import frc.trigon.robot.misc.objectDetection.objectdetectioncamera.ObjectDetecti
 import frc.trigon.robot.misc.simulatedfield.SimulatedGamePieceConstants;
 import org.littletonrobotics.junction.Logger;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class ObjectPoseEstimator extends SubsystemBase {
     private final double deletionThresholdSeconds;
@@ -122,9 +119,9 @@ public class ObjectPoseEstimator extends SubsystemBase {
         return getClosestObjectFromSetToPosition(position, objectPositionsToTimeStamp.keySet());
     }
 
-    public Translation2d getClosestObjectFromSetToPosition(Translation2d position, Set<Translation2d> recognizedObjects) {
-        final Translation2d[] objectsTranslations = recognizedObjects.toArray(Translation2d[]::new);
-        if (recognizedObjects.isEmpty())
+    public Translation2d getClosestObjectFromSetToPosition(Translation2d position, Set<Translation2d> objects) {
+        final Translation2d[] objectsTranslations = objects.toArray(Translation2d[]::new);
+        if (objects.isEmpty())
             return null;
         Translation2d closestObjectTranslation = objectsTranslations[0];
         double closestObjectDistance = position.getDistance(closestObjectTranslation);
@@ -142,24 +139,32 @@ public class ObjectPoseEstimator extends SubsystemBase {
 
     private void updateObjectPositions() {
         final double currentTimestamp = Timer.getTimestamp();
-        final Set<Translation2d> recognizedObjects = new HashSet<>();
-        final HashMap<Translation2d, Double> newObjects = new HashMap<>();
+        final Set<Translation2d> visibleObjects = getVisibleObjects();
 
+        updateKnownObjects(visibleObjects, currentTimestamp);
+        addNewObjects(visibleObjects, currentTimestamp);
+    }
+
+    private void updateKnownObjects(Set<Translation2d> newObjects, double currentTimestamp) {
         for (Translation2d currentObject : objectPositionsToTimeStamp.keySet()) {
-            recognizedObjects.clear();
-            for (ObjectDetectionCamera currentCamera : cameras) {
-                for (Translation2d visibleObject : currentCamera.getObjectsPositionsOnField(gamePieceType)) {
-                    if (isObjectWithinTolerance(visibleObject, currentObject))
-                        recognizedObjects.add(visibleObject);
-                    else if (isObjectNew(visibleObject)) {
-                        newObjects.put(visibleObject, currentTimestamp);
-                    }
-                }
-            }
-            if (!recognizedObjects.isEmpty())
-                updateObject(currentObject, getClosestObjectFromSetToPosition(currentObject, recognizedObjects), currentTimestamp);
+            Translation2d closestNewObjectToCurrentObject = getClosestObjectFromSetToPosition(currentObject, newObjects);
+            if (isObjectWithinTolerance(closestNewObjectToCurrentObject, currentObject))
+                updateObject(currentObject, closestNewObjectToCurrentObject, currentTimestamp);
         }
-        objectPositionsToTimeStamp.putAll(newObjects);
+    }
+
+    private void addNewObjects(Set<Translation2d> objects, double currentTimestamp) {
+        for (Translation2d object : objects) {
+            if (isObjectNew(object))
+                objectPositionsToTimeStamp.put(object, currentTimestamp);
+        }
+    }
+
+    private Set<Translation2d> getVisibleObjects() {
+        final Set<Translation2d> visibleObjects = new HashSet<>();
+        for (ObjectDetectionCamera currentCamera : cameras)
+            visibleObjects.addAll(Arrays.asList(currentCamera.getObjectsPositionsOnField(gamePieceType)));
+        return visibleObjects;
     }
 
     private void updateObject(Translation2d oldObject, Translation2d newObject, double currentTimestamp) {
