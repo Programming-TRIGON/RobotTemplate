@@ -21,14 +21,14 @@ import java.util.ArrayList;
  * A command class to assist in the intaking of a game piece.
  */
 public class IntakeAssistCommand extends ParallelCommandGroup {
-    private static final ProfiledPIDController
-            X_PID_CONTROLLER = RobotHardwareStats.isSimulation() ?
+    private final ProfiledPIDController
+            xPIDController = RobotHardwareStats.isSimulation() ?
             new ProfiledPIDController(5, 0, 0, new TrapezoidProfile.Constraints(5, 15)) :
             new ProfiledPIDController(2.4, 0, 0, new TrapezoidProfile.Constraints(2.65, 5.5)),
-            Y_PID_CONTROLLER = RobotHardwareStats.isSimulation() ?
+            yPIDController = RobotHardwareStats.isSimulation() ?
                     new ProfiledPIDController(3, 0, 0.01, new TrapezoidProfile.Constraints(5, 15)) :
                     new ProfiledPIDController(0.3, 0, 0.03, new TrapezoidProfile.Constraints(2.65, 5.5)),
-            THETA_PID_CONTROLLER = RobotHardwareStats.isSimulation() ?
+            thetaPIDController = RobotHardwareStats.isSimulation() ?
                     new ProfiledPIDController(0.1, 0, 0, new TrapezoidProfile.Constraints(2.8, 5)) :
                     new ProfiledPIDController(2.4, 0, 0, new TrapezoidProfile.Constraints(2.65, 5.5));
     private Translation2d distanceFromTrackedGamePiece;
@@ -57,9 +57,13 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
     }
 
     private void resetPIDControllers() {
-        X_PID_CONTROLLER.reset(distanceFromTrackedGamePiece.getX(), RobotContainer.SWERVE.getSelfRelativeVelocity().getX());
-        Y_PID_CONTROLLER.reset(distanceFromTrackedGamePiece.getY(), RobotContainer.SWERVE.getSelfRelativeVelocity().getY());
-        THETA_PID_CONTROLLER.reset(distanceFromTrackedGamePiece.getAngle().getRadians(), RobotContainer.SWERVE.getRotationalVelocityRadiansPerSecond());
+        xPIDController.reset(distanceFromTrackedGamePiece.getX(), RobotContainer.SWERVE.getSelfRelativeVelocity().getX());
+        yPIDController.reset(distanceFromTrackedGamePiece.getY(), RobotContainer.SWERVE.getSelfRelativeVelocity().getY());
+        thetaPIDController.reset(distanceFromTrackedGamePiece.getAngle().getRadians(), RobotContainer.SWERVE.getRotationalVelocityRadiansPerSecond());
+
+        xPIDController.setGoal(0);
+        yPIDController.setGoal(0);
+        thetaPIDController.setGoal(0);
     }
 
     private double calculateTranslationPower(boolean isXAxis, double assistScalar) {
@@ -71,8 +75,8 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
 
         final double
                 pidOutput = clampToSwerveOutputRange(isXAxis ?
-                X_PID_CONTROLLER.calculate(distanceFromTrackedGamePiece.getX()) :
-                Y_PID_CONTROLLER.calculate(distanceFromTrackedGamePiece.getY()));
+                xPIDController.calculate(distanceFromTrackedGamePiece.getX()) :
+                yPIDController.calculate(distanceFromTrackedGamePiece.getY()));
 
         return calculateAssistPower(assistScalar, pidOutput, joystickValue);
     }
@@ -83,11 +87,11 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
         if (hasNoTrackedGamePiece())
             return joystickValue;
 
-        return calculateThetaAssistPower(assistScalar, joystickValue, distanceFromTrackedGamePiece.getAngle().plus(Rotation2d.k180deg).unaryMinus());
+        return calculateThetaAssistPower(assistScalar, joystickValue, distanceFromTrackedGamePiece.getAngle().unaryMinus());
     }
 
     private double calculateThetaAssistPower(double assistScalar, double joystickValue, Rotation2d thetaOffset) {
-        final double pidOutput = clampToSwerveOutputRange(THETA_PID_CONTROLLER.calculate(thetaOffset.getRadians()));
+        final double pidOutput = clampToSwerveOutputRange(thetaPIDController.calculate(thetaOffset.getRadians()));
         return calculateAssistPower(assistScalar, pidOutput, joystickValue);
     }
 
@@ -188,18 +192,17 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
     }
 
     private Translation2d getSelfRelativeJoystickPosition() {
-        final double
-                joystickX = OperatorConstants.DRIVER_CONTROLLER.getLeftX(),
-                joystickY = OperatorConstants.DRIVER_CONTROLLER.getLeftY();
-
-        return new Translation2d(joystickY, joystickX).rotateBy(RobotContainer.SWERVE.getDriveRelativeAngle().unaryMinus());
+        return getRawJoystickPosition().rotateBy(RobotContainer.SWERVE.getDriveRelativeAngle().unaryMinus());
     }
 
     private Translation2d getFieldRelativeJoystickPosition() {
+        return getRawJoystickPosition().rotateBy(Flippable.isRedAlliance() ? Rotation2d.k180deg : Rotation2d.kZero);
+    }
+
+    private Translation2d getRawJoystickPosition() {
         final double
                 joystickX = OperatorConstants.DRIVER_CONTROLLER.getLeftX(),
                 joystickY = OperatorConstants.DRIVER_CONTROLLER.getLeftY();
-
-        return new Translation2d(joystickY, joystickX).rotateBy(Flippable.isRedAlliance() ? Rotation2d.k180deg : Rotation2d.kZero);
+        return new Translation2d(joystickY, joystickX);
     }
 }
