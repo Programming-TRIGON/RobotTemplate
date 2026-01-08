@@ -145,15 +145,15 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
         return Math.abs(angleOffset.getDegrees()) < scaledMaximumAssistAngleDegrees;
     }
 
-    private double calculateMaximumAssistAngleDegrees(double gamePieceDistance) {
-        return OperatorConstants.INTAKE_ASSIST_MAXIMUM_ASSISTABLE_ANGLE_FORMULA.applyAsDouble(gamePieceDistance);
-    }
-
     private boolean isDrivingTowardsGamePiece(Translation2d gamePieceFieldRelativePosition, Translation2d robotPosition) {
         final Translation2d fieldRelativeDistanceFromGamePiece = gamePieceFieldRelativePosition.minus(robotPosition);
 
         final double velocityTowardsGamePiece = getVelocityTowardsGamePiece(fieldRelativeDistanceFromGamePiece);
         return velocityTowardsGamePiece > OperatorConstants.MINIMUM_VELOCITY_FOR_INTAKE_ASSIST_METERS_PER_SECOND;
+    }
+
+    private double calculateMaximumAssistAngleDegrees(double gamePieceDistance) {
+        return OperatorConstants.INTAKE_ASSIST_MAXIMUM_ASSISTABLE_ANGLE_FORMULA.applyAsDouble(gamePieceDistance);
     }
 
     private double getVelocityTowardsGamePiece(Translation2d fieldRelativeDistanceFromGamePiece) {
@@ -192,7 +192,7 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
                 joystickX = OperatorConstants.DRIVER_CONTROLLER.getLeftX(),
                 joystickY = OperatorConstants.DRIVER_CONTROLLER.getLeftY();
 
-        return new Translation2d(joystickY, joystickX).rotateBy(RobotContainer.SWERVE.getDriveRelativeAngle().unaryMinus());//¯\_(ツ)_/¯
+        return new Translation2d(joystickY, joystickX).rotateBy(RobotContainer.SWERVE.getDriveRelativeAngle().unaryMinus());
     }
 
     private Translation2d getFieldRelativeJoystickPosition() {
@@ -200,6 +200,6 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
                 joystickX = OperatorConstants.DRIVER_CONTROLLER.getLeftX(),
                 joystickY = OperatorConstants.DRIVER_CONTROLLER.getLeftY();
 
-        return new Translation2d(joystickY, joystickX).rotateBy(Flippable.isRedAlliance() ? Rotation2d.k180deg : Rotation2d.kZero);//¯\_(ツ)_/¯
+        return new Translation2d(joystickY, joystickX).rotateBy(Flippable.isRedAlliance() ? Rotation2d.k180deg : Rotation2d.kZero);
     }
 }
