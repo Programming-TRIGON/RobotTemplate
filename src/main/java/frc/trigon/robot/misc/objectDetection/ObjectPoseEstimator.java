@@ -24,9 +24,9 @@ public class ObjectPoseEstimator extends SubsystemBase {
     /**
      * Constructs an ObjectPoseEstimator for estimating the positions of objects detected by camera.
      *
-     * @param deletionThresholdSeconds  the time in seconds after which an object is considered old and removed
-     * @param gamePieceType             the type of game piece to track
-     * @param cameras                   the cameras used for detecting objects
+     * @param deletionThresholdSeconds the time in seconds after which an object is considered old and removed
+     * @param gamePieceType            the type of game piece to track
+     * @param cameras                  the cameras used for detecting objects
      */
     public ObjectPoseEstimator(double deletionThresholdSeconds,
                                SimulatedGamePieceConstants.GamePieceType gamePieceType,
@@ -119,8 +119,12 @@ public class ObjectPoseEstimator extends SubsystemBase {
      * @return the closest object's position on the field, or null if no objects are known
      */
     public Translation2d getClosestObjectToPosition(Translation2d position) {
-        final Translation2d[] objectsTranslations = objectPositionsToTimeStamp.keySet().toArray(Translation2d[]::new);
-        if (objectPositionsToTimeStamp.isEmpty())
+        return getClosestObjectFromSetToPosition(position, objectPositionsToTimeStamp.keySet());
+    }
+
+    public Translation2d getClosestObjectFromSetToPosition(Translation2d position, Set<Translation2d> recognizedObjects) {
+        final Translation2d[] objectsTranslations = recognizedObjects.toArray(Translation2d[]::new);
+        if (recognizedObjects.isEmpty())
             return null;
         Translation2d closestObjectTranslation = objectsTranslations[0];
         double closestObjectDistance = position.getDistance(closestObjectTranslation);
@@ -138,41 +142,46 @@ public class ObjectPoseEstimator extends SubsystemBase {
 
     private void updateObjectPositions() {
         final double currentTimestamp = Timer.getTimestamp();
-        final Set<Translation2d> processedObjects = new HashSet<>();
+        final Set<Translation2d> recognizedObjects = new HashSet<>();
 
-        for (ObjectDetectionCamera currentCamera : cameras) {
-            for (Translation2d visibleObject : currentCamera.getObjectPositionsOnField(gamePieceType)) {
-                Translation2d closestKnownObjectToVisibleObject = getClosestKnownObjectToVisibleObject(visibleObject, processedObjects);
-                double closestKnownObjectToVisibleObjectDistanceMeters = closestKnownObjectToVisibleObject != null
-                        ? visibleObject.getDistance(closestKnownObjectToVisibleObject)
-                        : Double.POSITIVE_INFINITY;
-
-                if (shouldReplaceObject(closestKnownObjectToVisibleObject, closestKnownObjectToVisibleObjectDistanceMeters, currentTimestamp))
-                    removeObject(closestKnownObjectToVisibleObject);
-
-                objectPositionsToTimeStamp.put(visibleObject, currentTimestamp);
-                processedObjects.add(visibleObject);
+        for (Translation2d currentObject : objectPositionsToTimeStamp.keySet()) {
+            recognizedObjects.clear();
+            for (ObjectDetectionCamera currentCamera : cameras) {
+                for (Translation2d visibleObject : currentCamera.getObjectsPositionsOnField(gamePieceType)) {
+                    if (isObjectWithinTolerance(visibleObject, currentObject))
+                        recognizedObjects.add(visibleObject);
+                    else if (isObjectNew(visibleObject)) {
+                        objectPositionsToTimeStamp.put(visibleObject, currentTimestamp);
+                    }
+                }
             }
+            if (!recognizedObjects.isEmpty())
+                updateObject(currentObject, getClosestObjectFromSetToPosition(currentObject, recognizedObjects), currentTimestamp);
         }
     }
 
-    private boolean shouldReplaceObject(Translation2d object, double closestObjectToVisibleObjectDistanceMeters, double currentTimestamp) {
-        return object != null
-                && closestObjectToVisibleObjectDistanceMeters < ObjectDetectionConstants.TRACKED_OBJECT_TOLERANCE_METERS
-                && !objectPositionsToTimeStamp.get(object).equals(currentTimestamp);
+    private void updateObject(Translation2d oldObject, Translation2d newObject, double currentTimestamp) {
+        removeObject(oldObject);
+        objectPositionsToTimeStamp.put(newObject, currentTimestamp);
     }
 
-    private Translation2d getClosestKnownObjectToVisibleObject(Translation2d visibleObject, Set<Translation2d> processedObjects) {
+    private boolean isObjectNew(Translation2d object) {
+        return !isObjectWithinTolerance(getClosestKnownObjectToVisibleObject(object), object);
+    }
+
+    private boolean isObjectWithinTolerance(Translation2d firstObject, Translation2d secondObject) {
+        return firstObject.getDistance(secondObject) < ObjectDetectionConstants.TRACKED_OBJECT_TOLERANCE_METERS;
+    }
+
+    private Translation2d getClosestKnownObjectToVisibleObject(Translation2d visibleObject) {
         Translation2d closestObjectToVisibleObject = null;
         double closestObjectToVisibleObjectDistanceMeters = Double.POSITIVE_INFINITY;
 
         for (Translation2d currentObject : objectPositionsToTimeStamp.keySet()) {
-            if (!processedObjects.contains(currentObject)) {
-                final double currentObjectDistanceMeters = visibleObject.getDistance(currentObject);
-                if (currentObjectDistanceMeters < closestObjectToVisibleObjectDistanceMeters) {
-                    closestObjectToVisibleObjectDistanceMeters = currentObjectDistanceMeters;
-                    closestObjectToVisibleObject = currentObject;
-                }
+            final double currentObjectDistanceMeters = visibleObject.getDistance(currentObject);
+            if (currentObjectDistanceMeters < closestObjectToVisibleObjectDistanceMeters) {
+                closestObjectToVisibleObjectDistanceMeters = currentObjectDistanceMeters;
+                closestObjectToVisibleObject = currentObject;
             }
         }
         return closestObjectToVisibleObject;

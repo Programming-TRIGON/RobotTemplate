@@ -39,7 +39,7 @@ public class ObjectDetectionCamera extends SubsystemBase {
      * @return the closest object's 2D position on the field (z is assumed to be 0)
      */
     public Translation2d calculateClosestObjectPositionOnField(SimulatedGamePieceConstants.GamePieceType targetGamePiece) {
-        final Translation2d[] targetObjectsTranslation = getObjectPositionsOnField(targetGamePiece);
+        final Translation2d[] targetObjectsTranslation = getObjectsPositionsOnField(targetGamePiece);
         final Translation2d currentRobotTranslation = RobotContainer.ROBOT_POSE_ESTIMATOR.getEstimatedRobotPose().getTranslation();
         if (targetObjectsTranslation.length == 0)
             return null;
@@ -59,7 +59,7 @@ public class ObjectDetectionCamera extends SubsystemBase {
         return objectDetectionCameraInputs.hasObject[targetGamePiece.id];
     }
 
-    public Translation2d[] getObjectPositionsOnField(SimulatedGamePieceConstants.GamePieceType targetGamePiece) {
+    public Translation2d[] getObjectsPositionsOnField(SimulatedGamePieceConstants.GamePieceType targetGamePiece) {
         final Rotation3d[] visibleObjectsRotations = getObjectsRotations(targetGamePiece);
         final Translation2d[] objectsPositionsOnField = new Translation2d[visibleObjectsRotations.length];
 
