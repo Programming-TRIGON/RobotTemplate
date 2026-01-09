@@ -128,50 +128,6 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
         return getClosestGamePiece(robotPose.getTranslation(), getAssistableGamePieces(robotPose));
     }
 
-    private ArrayList<Translation2d> getAssistableGamePieces(Pose2d robotPose) {
-        final ArrayList<Translation2d> gamePiecePositionsOnField = new ArrayList<>(RobotContainer.OBJECT_POSE_ESTIMATOR.getObjectsOnField());
-        gamePiecePositionsOnField.removeIf(
-                gamePiecePosition ->
-                        !isGamePieceWithinAssistFOV(robotPose, gamePiecePosition) ||
-                                !isDrivingTowardsGamePiece(gamePiecePosition, robotPose.getTranslation())
-        );
-
-        return gamePiecePositionsOnField;
-    }
-
-    private boolean isGamePieceWithinAssistFOV(Pose2d robotPose, Translation2d gamePiecePosition) {
-        final Translation2d distanceFromGamePiece = gamePiecePosition.minus(robotPose.getTranslation());
-        final Rotation2d robotToGamePieceAngle = distanceFromGamePiece.rotateBy(robotPose.getRotation().unaryMinus()).getAngle();
-
-        final double scaledMaximumAssistAngleDegrees = calculateMaximumAssistAngleDegrees(distanceFromGamePiece.getNorm());
-
-        final Rotation2d angleOffset = getSelfRelativeJoystickPosition().getAngle().minus(robotToGamePieceAngle);
-        return Math.abs(angleOffset.getDegrees()) < scaledMaximumAssistAngleDegrees;
-    }
-
-    private boolean isDrivingTowardsGamePiece(Translation2d gamePieceFieldRelativePosition, Translation2d robotPosition) {
-        final Translation2d fieldRelativeDistanceFromGamePiece = gamePieceFieldRelativePosition.minus(robotPosition);
-
-        final double velocityTowardsGamePiece = getVelocityTowardsGamePiece(fieldRelativeDistanceFromGamePiece);
-        return velocityTowardsGamePiece > OperatorConstants.MINIMUM_VELOCITY_FOR_INTAKE_ASSIST_METERS_PER_SECOND;
-    }
-
-    private double calculateMaximumAssistAngleDegrees(double gamePieceDistance) {
-        return OperatorConstants.INTAKE_ASSIST_MAXIMUM_ASSISTABLE_ANGLE_FORMULA.applyAsDouble(gamePieceDistance);
-    }
-
-    private double getVelocityTowardsGamePiece(Translation2d fieldRelativeDistanceFromGamePiece) {
-        final Translation2d fieldRelativeJoystickPosition = getFieldRelativeJoystickPosition();
-
-        final Rotation2d joystickAngle = fieldRelativeJoystickPosition.getAngle();
-        final Rotation2d fieldRelativeGamePieceAngleFromRobot = fieldRelativeDistanceFromGamePiece.getAngle();
-        final Rotation2d angularOffset = joystickAngle.minus(fieldRelativeGamePieceAngleFromRobot);
-
-        final double desiredRobotVelocity = fieldRelativeJoystickPosition.getNorm() * SwerveConstants.MAXIMUM_SPEED_METERS_PER_SECOND;
-
-        return angularOffset.getCos() * desiredRobotVelocity;
-    }
-
     private Translation2d getClosestGamePiece(Translation2d robotPosition, ArrayList<Translation2d> gamePiecePositionsOnField) {
         Translation2d closestGamePieceFieldRelativePosition = null;
         double distanceFromClosestGamePiece = Double.POSITIVE_INFINITY;
@@ -185,6 +141,51 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
         }
 
         return closestGamePieceFieldRelativePosition;
+    }
+
+    private ArrayList<Translation2d> getAssistableGamePieces(Pose2d robotPose) {
+        final ArrayList<Translation2d> gamePiecePositionsOnField = new ArrayList<>(RobotContainer.OBJECT_POSE_ESTIMATOR.getObjectsOnField());
+        gamePiecePositionsOnField.removeIf(gamePiecePosition -> !isGamePieceAssistable(gamePiecePosition, robotPose));
+
+        return gamePiecePositionsOnField;
+    }
+
+    private boolean isGamePieceAssistable(Translation2d gamePiecePosition, Pose2d robotPose) {
+        return isGamePieceWithinAssistFOV(gamePiecePosition, robotPose) &&
+                isDrivingTowardsGamePiece(gamePiecePosition, robotPose);
+    }
+
+    private boolean isGamePieceWithinAssistFOV(Translation2d gamePiecePosition, Pose2d robotPose) {
+        final Translation2d distanceFromGamePiece = gamePiecePosition.minus(robotPose.getTranslation());
+        final Rotation2d robotToGamePieceAngle = distanceFromGamePiece.rotateBy(robotPose.getRotation().unaryMinus()).getAngle();
+
+        final double scaledMaximumAssistAngleDegrees = calculateMaximumAssistAngleDegrees(distanceFromGamePiece.getNorm());
+
+        final Rotation2d angleOffset = getSelfRelativeJoystickPosition().getAngle().minus(robotToGamePieceAngle);
+        return Math.abs(angleOffset.getDegrees()) < scaledMaximumAssistAngleDegrees;
+    }
+
+    private boolean isDrivingTowardsGamePiece(Translation2d gamePieceFieldRelativePosition, Pose2d robotPose) {
+        final Translation2d fieldRelativeDistanceFromGamePiece = gamePieceFieldRelativePosition.minus(robotPose.getTranslation());
+
+        final double velocityTowardsGamePiece = calculateVelocityTowardsGamePiece(fieldRelativeDistanceFromGamePiece);
+        return velocityTowardsGamePiece > OperatorConstants.MINIMUM_VELOCITY_TOWARDS_GAME_PIECE_FOR_INTAKE_ASSIST_METERS_PER_SECOND;
+    }
+
+    private double calculateMaximumAssistAngleDegrees(double gamePieceDistance) {
+        return OperatorConstants.INTAKE_ASSIST_MAXIMUM_ASSISTABLE_ANGLE_FORMULA.applyAsDouble(gamePieceDistance);
+    }
+
+    private double calculateVelocityTowardsGamePiece(Translation2d fieldRelativeDistanceFromGamePiece) {
+        final Translation2d fieldRelativeJoystickPosition = getFieldRelativeJoystickPosition();
+
+        final Rotation2d joystickAngle = fieldRelativeJoystickPosition.getAngle();
+        final Rotation2d fieldRelativeGamePieceAngleFromRobot = fieldRelativeDistanceFromGamePiece.getAngle();
+        final Rotation2d angularOffset = joystickAngle.minus(fieldRelativeGamePieceAngleFromRobot);
+
+        final double desiredRobotVelocity = fieldRelativeJoystickPosition.getNorm() * SwerveConstants.MAXIMUM_SPEED_METERS_PER_SECOND;
+
+        return angularOffset.getCos() * desiredRobotVelocity;
     }
 
     private double clampToSwerveOutputRange(double value) {
