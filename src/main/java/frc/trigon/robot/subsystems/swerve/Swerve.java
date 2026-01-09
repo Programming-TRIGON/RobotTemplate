@@ -7,7 +7,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.trigon.lib.hardware.phoenix6.Phoenix6SignalThread;
@@ -30,7 +29,6 @@ public class Swerve extends MotorSubsystem {
     private final SwerveModule[] swerveModules = SwerveConstants.SWERVE_MODULES;
     private final Phoenix6SignalThread phoenix6SignalThread = Phoenix6SignalThread.getInstance();
     public Pose2d targetPathPlannerPose = new Pose2d();
-    public boolean isPathPlannerDriving = false;
 
     public Swerve() {
         setName("Swerve");
@@ -156,19 +154,15 @@ public class Swerve extends MotorSubsystem {
         this.targetPathPlannerPose = targetPathPlannerPose;
     }
 
-    public void drivePathPlanner(ChassisSpeeds targetPathPlannerFeedforwardSpeeds, boolean isFromPathPlanner) {
-        isPathPlannerDriving = !isStill(targetPathPlannerFeedforwardSpeeds);
-        if (!isPathPlannerDriving) {
-            pidToPose(new FlippablePose2d(targetPathPlannerPose, false));
+    public void drivePathPlanner(ChassisSpeeds targetPathPlannerFeedforwardSpeeds) {
+        if (!isStill(targetPathPlannerFeedforwardSpeeds)) {
+            final ChassisSpeeds pidSpeeds = calculateSelfRelativePIDSpeedsToPose(new FlippablePose2d(targetPathPlannerPose, false));
+            final ChassisSpeeds scaledSpeeds = targetPathPlannerFeedforwardSpeeds.times(AutonomousConstants.FEEDFORWARD_SCALAR);
+            selfRelativeDrive(pidSpeeds.plus(scaledSpeeds));
             return;
         }
 
-        if (isFromPathPlanner && DriverStation.isAutonomous() && !isPathPlannerDriving)
-            return;
-        final ChassisSpeeds pidSpeeds = calculateSelfRelativePIDSpeedsToPose(new FlippablePose2d(targetPathPlannerPose, false));
-        final ChassisSpeeds scaledSpeeds = targetPathPlannerFeedforwardSpeeds.times(AutonomousConstants.FEEDFORWARD_SCALAR);
-        final ChassisSpeeds combinedSpeeds = pidSpeeds.plus(scaledSpeeds);
-        selfRelativeDrive(combinedSpeeds);
+        pidToPose(new FlippablePose2d(targetPathPlannerPose, false));
     }
 
     /**
