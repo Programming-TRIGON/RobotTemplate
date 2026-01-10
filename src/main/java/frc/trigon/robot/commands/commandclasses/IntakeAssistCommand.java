@@ -107,21 +107,21 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
 
     private void trackGamePiece() {
         distanceFromTrackedGamePiece = RobotContainer.OBJECT_POSE_ESTIMATOR.hasObject() ?
-                calculateDistanceFromBestGamePiece() :
+                calculateSelfRelativeDistanceFromBestGamePiece() :
                 null;
     }
 
-    private Translation2d calculateDistanceFromBestGamePiece() {
+    private Translation2d calculateSelfRelativeDistanceFromBestGamePiece() {
         final Pose2d robotPose = RobotContainer.ROBOT_POSE_ESTIMATOR.getEstimatedRobotPose();
         final Translation2d bestGamePieceFieldRelativePosition = getBestGamePieceFieldRelativePosition(robotPose);
 
         if (bestGamePieceFieldRelativePosition == null)
             return null;
 
-        final Translation2d selfRelativeDistanceFromBestGamePiece = robotPose.getTranslation().minus(bestGamePieceFieldRelativePosition);
-        final Translation2d robotToBestGamePiece = selfRelativeDistanceFromBestGamePiece.rotateBy(robotPose.getRotation().unaryMinus());
-        Logger.recordOutput("IntakeAssist/RobotToTargetGamePiece", robotToBestGamePiece);
-        return robotToBestGamePiece;
+        final Translation2d fieldRelativeDistanceFromBestGamePiece = robotPose.getTranslation().minus(bestGamePieceFieldRelativePosition);
+        final Translation2d selfRelativeDistanceFromBestGamePiece = fieldRelativeDistanceFromBestGamePiece.rotateBy(robotPose.getRotation().unaryMinus());
+        Logger.recordOutput("IntakeAssist/selfRelativeDistanceFromBestGamePiece", selfRelativeDistanceFromBestGamePiece);
+        return selfRelativeDistanceFromBestGamePiece;
     }
 
     private Translation2d getBestGamePieceFieldRelativePosition(Pose2d robotPose) {
@@ -161,8 +161,7 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
 
         final double scaledMaximumAssistAngleDegrees = calculateMaximumAssistAngleDegrees(distanceFromGamePiece.getNorm());
 
-        final Rotation2d angleOffset = getSelfRelativeJoystickPosition().getAngle().minus(robotToGamePieceAngle);
-        return Math.abs(angleOffset.getDegrees()) < scaledMaximumAssistAngleDegrees;
+        return Math.abs(robotToGamePieceAngle.getDegrees()) < scaledMaximumAssistAngleDegrees;
     }
 
     private boolean isDrivingTowardsGamePiece(Translation2d gamePieceFieldRelativePosition, Pose2d robotPose) {
