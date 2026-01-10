@@ -72,7 +72,7 @@ public class SwerveConstants {
             MAXIMUM_PROFILED_ROTATION_ACCELERATION
     );
     static final double MAXIMUM_PID_ANGLE = 180;
-    static final ProfiledPIDController PROFILED_ROTATION_PID_CONTROLLER = new ProfiledPIDController(
+    static final ProfiledPIDController PROFILED_ROTATION_PID_CONTROLLER_DEGREES = new ProfiledPIDController(
             PROFILED_ROTATION_PID_CONSTANTS.kP,
             PROFILED_ROTATION_PID_CONSTANTS.kI,
             PROFILED_ROTATION_PID_CONSTANTS.kD,
@@ -116,7 +116,7 @@ public class SwerveConstants {
         SwerveConstants.X_TRANSLATION_PID_CONTROLLER.setTolerance(TRANSLATION_PID_TOLERANCE_METERS);
         SwerveConstants.Y_TRANSLATION_PID_CONTROLLER.setTolerance(TRANSLATION_PID_TOLERANCE_METERS);
 
-        SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER.setTolerance(ROTATION_PID_TOLERANCE_DEGREES);
-        SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER.enableContinuousInput(-SwerveConstants.MAXIMUM_PID_ANGLE, SwerveConstants.MAXIMUM_PID_ANGLE);
+        SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER_DEGREES.setTolerance(ROTATION_PID_TOLERANCE_DEGREES);
+        SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER_DEGREES.enableContinuousInput(-SwerveConstants.MAXIMUM_PID_ANGLE, SwerveConstants.MAXIMUM_PID_ANGLE);
     }
 }

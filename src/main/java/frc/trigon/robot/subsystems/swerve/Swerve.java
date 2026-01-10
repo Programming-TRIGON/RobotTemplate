@@ -187,7 +187,7 @@ public class Swerve extends MotorSubsystem {
     }
 
     void resetRotationController() {
-        SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER.reset(RobotContainer.ROBOT_POSE_ESTIMATOR.getEstimatedRobotPose().getRotation().getDegrees());
+        SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER_DEGREES.reset(RobotContainer.ROBOT_POSE_ESTIMATOR.getEstimatedRobotPose().getRotation().getDegrees());
     }
 
     /**
@@ -330,13 +330,13 @@ public class Swerve extends MotorSubsystem {
     private double calculateProfiledAngularVelocityRadiansPerSecond(FlippableRotation2d targetAngle) {
         if (targetAngle == null)
             return 0;
-        SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER.setGoal(targetAngle.get().getDegrees());
+        SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER_DEGREES.setGoal(targetAngle.get().getDegrees());
 
         final Rotation2d currentAngle = RobotContainer.ROBOT_POSE_ESTIMATOR.getEstimatedRobotPose().getRotation();
-        final double outputSpeedRadians = Units.degreesToRadians(SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER.calculate(currentAngle.getDegrees()));
-        final boolean atGoal = SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER.atGoal();
-        Logger.recordOutput("Swerve/ProfiledRotationPIDController/Setpoint", SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER.getSetpoint().position);
-        Logger.recordOutput("Swerve/ProfiledRotationPIDController/CurrentAngle", currentAngle.getDegrees());
+        final double outputSpeedRadians = Units.degreesToRadians(SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER_DEGREES.calculate(currentAngle.getDegrees()));
+        final boolean atGoal = SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER_DEGREES.atGoal();
+        Logger.recordOutput("Swerve/ProfiledRotationPIDController/Setpoint", SwerveConstants.PROFILED_ROTATION_PID_CONTROLLER_DEGREES.getSetpoint().position);
+        Logger.recordOutput("Swerve/ProfiledRotationPIDController/CurrentAngleDegrees", currentAngle.getDegrees());
         Logger.recordOutput("Swerve/ProfiledRotationPIDController/AtGoal", atGoal);
         Logger.recordOutput("Swerve/ProfiledRotationPIDController/OutputSpeedRadians", outputSpeedRadians);
         if (atGoal)
