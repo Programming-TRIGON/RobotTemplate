@@ -65,18 +65,18 @@ public class SwerveConstants {
                     new PIDConstants(4, 0, 0) :
                     new PIDConstants(10, 0, 0.1);
     private static final double
-            MAXIMUM_ROTATION_VELOCITY = RobotHardwareStats.isSimulation() ? 720 : Units.radiansToDegrees(MAXIMUM_ROTATIONAL_SPEED_RADIANS_PER_SECOND),
-            MAXIMUM_ROTATION_ACCELERATION = RobotHardwareStats.isSimulation() ? 720 : 900;
-    private static final TrapezoidProfile.Constraints ROTATION_CONSTRAINTS = new TrapezoidProfile.Constraints(
-            MAXIMUM_ROTATION_VELOCITY,
-            MAXIMUM_ROTATION_ACCELERATION
+            MAXIMUM_PROFILED_ROTATION_VELOCITY = RobotHardwareStats.isSimulation() ? 720 : Units.radiansToDegrees(MAXIMUM_ROTATIONAL_SPEED_RADIANS_PER_SECOND),
+            MAXIMUM_PROFILED_ROTATION_ACCELERATION = RobotHardwareStats.isSimulation() ? 720 : 900;
+    private static final TrapezoidProfile.Constraints PROFILED_ROTATION_CONSTRAINTS = new TrapezoidProfile.Constraints(
+            MAXIMUM_PROFILED_ROTATION_VELOCITY,
+            MAXIMUM_PROFILED_ROTATION_ACCELERATION
     );
     static final double MAXIMUM_PID_ANGLE = 180;
     static final ProfiledPIDController PROFILED_ROTATION_PID_CONTROLLER = new ProfiledPIDController(
             PROFILED_ROTATION_PID_CONSTANTS.kP,
             PROFILED_ROTATION_PID_CONSTANTS.kI,
             PROFILED_ROTATION_PID_CONSTANTS.kD,
-            ROTATION_CONSTRAINTS
+            PROFILED_ROTATION_CONSTRAINTS
     );
     static final PIDController
             X_TRANSLATION_PID_CONTROLLER = new PIDController(
@@ -107,7 +107,7 @@ public class SwerveConstants {
         config.MountPose.MountPoseRoll = 0;
 
         GYRO.applyConfiguration(config);
-        GYRO.setSimulationYawVelocitySupplier(() -> RobotContainer.SWERVE.getRotationalVelocityRadiansPerSecond());//IMPORTANT: Leave as lambda expression
+        GYRO.setSimulationYawVelocitySupplier(() -> RobotContainer.SWERVE.getRotationalVelocityRadiansPerSecond());//IMPORTANT: Leave as lambda expression, method reference will crash code
 
         GYRO.registerThreadedSignal(Pigeon2Signal.YAW, PoseEstimatorConstants.ODOMETRY_FREQUENCY_HERTZ);
     }

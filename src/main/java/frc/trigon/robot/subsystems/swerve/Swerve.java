@@ -155,14 +155,10 @@ public class Swerve extends MotorSubsystem {
     }
 
     public void drivePathPlanner(ChassisSpeeds targetPathPlannerFeedforwardSpeeds) {
-        if (!isStill(targetPathPlannerFeedforwardSpeeds)) {
-            final ChassisSpeeds pidSpeeds = calculateSelfRelativePIDSpeedsToPose(new FlippablePose2d(targetPathPlannerPose, false));
-            final ChassisSpeeds scaledSpeeds = targetPathPlannerFeedforwardSpeeds.times(AutonomousConstants.FEEDFORWARD_SCALAR);
-            selfRelativeDrive(pidSpeeds.plus(scaledSpeeds));
-            return;
-        }
+        final ChassisSpeeds pidSpeeds = calculateSelfRelativePIDSpeedsToPose(new FlippablePose2d(targetPathPlannerPose, false));
+        final ChassisSpeeds scaledSpeeds = targetPathPlannerFeedforwardSpeeds.times(AutonomousConstants.FEEDFORWARD_SCALAR);
 
-        pidToPose(new FlippablePose2d(targetPathPlannerPose, false));
+        selfRelativeDrive(pidSpeeds.plus(scaledSpeeds));
     }
 
     /**

@@ -16,7 +16,7 @@ import frc.trigon.robot.constants.AutonomousConstants;
 public class SwerveModuleConstants {
     private static final double
             DRIVE_MOTOR_GEAR_RATIO = 6.03,//R1: 7.03, R2: 6.03, R3: 5.27
-            STEER_MOTOR_GEAR_RATIO = (double) 287 / 11;
+            STEER_MOTOR_GEAR_RATIO = 287.0 / 11.0;
     static final boolean ENABLE_FOC = true;
 
     private static final double
