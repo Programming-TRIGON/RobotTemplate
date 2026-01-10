@@ -34,13 +34,13 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
     private Translation2d distanceFromTrackedGamePiece;
 
     /**
-     * Creates a new intake assist command that assists the axes the user inputs.
+     * Creates a new intake assist command that assists the driver with intaking a game piece based on the powers.
      *
-     * @param xAssist     the assist to apply to the X-axis (Forward and backwards)
-     * @param yAssist     the assist to apply to the Y-axis (Sideways)
-     * @param thetaAssist the assist to apply to the rotation
+     * @param xAssistPower     the amount of assist to apply to the X-axis (Forward and backwards)
+     * @param yAssistPower     the amount of assist to apply to the Y-axis (Sideways)
+     * @param thetaAssistPower the amount of assist to apply to the rotation
      */
-    public IntakeAssistCommand(double xAssist, double yAssist, double thetaAssist) {
+    public IntakeAssistCommand(double xAssistPower, double yAssistPower, double thetaAssistPower) {
         addCommands(
                 new RunCommand(this::trackGamePiece),
                 new SequentialCommandGroup(
@@ -49,9 +49,9 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
                         new WaitUntilCommand(this::hasNoTrackedGamePiece)
                 ).repeatedly(),
                 SwerveCommands.getClosedLoopSelfRelativeDriveCommand(
-                        () -> calculateTranslationPower(true, xAssist),
-                        () -> calculateTranslationPower(false, yAssist),
-                        () -> calculateThetaPower(thetaAssist)
+                        () -> calculateTranslationPower(true, xAssistPower),
+                        () -> calculateTranslationPower(false, yAssistPower),
+                        () -> calculateThetaPower(thetaAssistPower)
                 )
         );
     }
