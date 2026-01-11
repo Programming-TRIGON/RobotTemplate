@@ -17,7 +17,7 @@ import java.util.Set;
 public class ObjectPoseEstimator extends SubsystemBase {
     private final double deletionThresholdSeconds;
     private final SimulatedGamePieceConstants.GamePieceType gamePieceType;
-    private final ObjectDetectionCamera[] cameras;
+    private final ObjectDetectionCamera camera;
     private final HashMap<Translation2d, Double> objectPositionsToTimeStamp;
 
     /**
@@ -25,14 +25,14 @@ public class ObjectPoseEstimator extends SubsystemBase {
      *
      * @param deletionThresholdSeconds the time in seconds after which an object is considered old and removed
      * @param gamePieceType            the type of game piece to track
-     * @param cameras                  the cameras used for detecting objects
+     * @param camera                   the camera used for detecting objects
      */
     public ObjectPoseEstimator(double deletionThresholdSeconds,
                                SimulatedGamePieceConstants.GamePieceType gamePieceType,
-                               ObjectDetectionCamera... cameras) {
+                               ObjectDetectionCamera camera) {
         this.deletionThresholdSeconds = deletionThresholdSeconds;
         this.gamePieceType = gamePieceType;
-        this.cameras = cameras;
+        this.camera = camera;
         this.objectPositionsToTimeStamp = new HashMap<>();
     }
 
@@ -169,17 +169,15 @@ public class ObjectPoseEstimator extends SubsystemBase {
         final double currentTimestamp = Timer.getTimestamp();
         HashMap<Translation2d, Translation2d> currentToNewObjectPositions = new HashMap<>();
 
-        for (ObjectDetectionCamera camera : cameras) {
-            for (Translation2d visibleObject : camera.getObjectsPositionsOnField(gamePieceType)) {
-                final Translation2d closestObjectToVisibleObject = getClosestKnownObjectToPosition(visibleObject);
+        for (Translation2d visibleObject : camera.getObjectsPositionsOnField(gamePieceType)) {
+            final Translation2d closestObjectToVisibleObject = getClosestKnownObjectToPosition(visibleObject);
 
-                if (isObjectNew(visibleObject, currentToNewObjectPositions)) {
-                    currentToNewObjectPositions.put(visibleObject, visibleObject);
-                    continue;
-                }
-                if (isObjectsDistanceWithinTolerance(visibleObject, closestObjectToVisibleObject))
-                    currentToNewObjectPositions = updateHashMapObject(visibleObject, closestObjectToVisibleObject, currentToNewObjectPositions);
+            if (isObjectNew(visibleObject, currentToNewObjectPositions)) {
+                currentToNewObjectPositions.put(visibleObject, visibleObject);
+                continue;
             }
+            if (isObjectsDistanceWithinTolerance(visibleObject, closestObjectToVisibleObject))
+                currentToNewObjectPositions = updateHashMapObject(visibleObject, closestObjectToVisibleObject, currentToNewObjectPositions);
         }
         currentToNewObjectPositions.keySet().forEach(objectPositionsToTimeStamp::remove);
         currentToNewObjectPositions.values().forEach(object -> objectPositionsToTimeStamp.put(object, currentTimestamp));
