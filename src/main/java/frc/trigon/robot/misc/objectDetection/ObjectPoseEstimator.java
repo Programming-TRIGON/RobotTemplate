@@ -142,12 +142,12 @@ public class ObjectPoseEstimator extends SubsystemBase {
 
     private void updateObjectPositions() {
         final double currentTimestamp = Timer.getTimestamp();
-        HashMap<Translation2d, Translation2d> objectsToUpdate = new HashMap<>();
+        HashMap<Translation2d, Translation2d> currentToNewObjectPositions = new HashMap<>();
 
         for (ObjectDetectionCamera camera : cameras) {
             for (Translation2d visibleObject : camera.getObjectsPositionsOnField(gamePieceType)) {
                 if (isObjectNew(visibleObject)) {
-                    objectsToUpdate.put(visibleObject, visibleObject);
+                    currentToNewObjectPositions.put(visibleObject, visibleObject);
                     continue;
                 }
 
@@ -155,11 +155,11 @@ public class ObjectPoseEstimator extends SubsystemBase {
                 final double closestObjectToVisibleObjectDistanceMeters = visibleObject.getDistance(closestObjectToVisibleObject);
 
                 if (closestObjectToVisibleObjectDistanceMeters < ObjectDetectionConstants.TRACKED_OBJECT_TOLERANCE_METERS)
-                    objectsToUpdate.merge(closestObjectToVisibleObject, visibleObject, getClosestVisibleObjectToPosition(closestObjectToVisibleObject));
+                    currentToNewObjectPositions.merge(closestObjectToVisibleObject, visibleObject, getClosestVisibleObjectToPosition(closestObjectToVisibleObject));
             }
         }
-        objectsToUpdate.keySet().forEach(objectPositionsToTimeStamp::remove);
-        objectsToUpdate.values().forEach(object -> objectPositionsToTimeStamp.put(object, currentTimestamp));
+        currentToNewObjectPositions.keySet().forEach(objectPositionsToTimeStamp::remove);
+        currentToNewObjectPositions.values().forEach(object -> objectPositionsToTimeStamp.put(object, currentTimestamp));
     }
 
     private BiFunction<? super Translation2d, ? super Translation2d, ? extends Translation2d> getClosestVisibleObjectToPosition(Translation2d position) {
