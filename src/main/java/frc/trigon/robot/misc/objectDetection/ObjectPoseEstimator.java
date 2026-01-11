@@ -172,11 +172,7 @@ public class ObjectPoseEstimator extends SubsystemBase {
     private boolean isObjectNew(Translation2d object) {
         if (objectPositionsToTimeStamp.isEmpty())
             return true;
-        return !isObjectWithinTolerance(getClosestKnownObjectToVisibleObject(object), object);
-    }
-
-    private boolean isObjectWithinTolerance(Translation2d firstObject, Translation2d secondObject) {
-        return firstObject.getDistance(secondObject) < ObjectDetectionConstants.TRACKED_OBJECT_TOLERANCE_METERS;
+        return object.getDistance(getClosestKnownObjectToVisibleObject(object)) > ObjectDetectionConstants.TRACKED_OBJECT_TOLERANCE_METERS;
     }
 
     private Translation2d getClosestKnownObjectToVisibleObject(Translation2d visibleObject) {
