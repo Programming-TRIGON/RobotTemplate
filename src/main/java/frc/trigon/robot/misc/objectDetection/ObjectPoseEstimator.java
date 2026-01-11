@@ -10,7 +10,9 @@ import frc.trigon.robot.misc.objectDetection.objectdetectioncamera.ObjectDetecti
 import frc.trigon.robot.misc.simulatedfield.SimulatedGamePieceConstants;
 import org.littletonrobotics.junction.Logger;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Set;
 
 public class ObjectPoseEstimator extends SubsystemBase {
     private final double deletionThresholdSeconds;
@@ -143,34 +145,28 @@ public class ObjectPoseEstimator extends SubsystemBase {
 
         for (ObjectDetectionCamera camera : cameras) {
             for (Translation2d visibleObject : camera.getObjectsPositionsOnField(gamePieceType)) {
-                final Translation2d closestObjectToVisibleObject = getClosestKnownObjectToVisibleObject(visibleObject);
                 if (isObjectNew(visibleObject)) {
-                    objectPositionsToTimeStamp.put(visibleObject, currentTimestamp);
                     objectsToUpdate.put(visibleObject, visibleObject);
+                    continue;
                 }
 
-                if (visibleObject.getDistance(closestObjectToVisibleObject) < ObjectDetectionConstants.TRACKED_OBJECT_TOLERANCE_METERS) {
-                    objectsToUpdate = updateObject(visibleObject, objectsToUpdate);
+                final Translation2d closestObjectToVisibleObject = getClosestKnownObjectToVisibleObject(visibleObject);
+                final double closestObjectToVisibleObjectDistanceMeters = visibleObject.getDistance(closestObjectToVisibleObject);
+
+                if (closestObjectToVisibleObjectDistanceMeters < ObjectDetectionConstants.TRACKED_OBJECT_TOLERANCE_METERS) {
+                    objectsToUpdate.merge(
+                            closestObjectToVisibleObject,
+                            visibleObject,
+                            (oldVisibleObject, currentVisibleObject) ->
+                                    currentVisibleObject.getDistance(closestObjectToVisibleObject) < oldVisibleObject.getDistance(closestObjectToVisibleObject)
+                                            ? currentVisibleObject
+                                            : oldVisibleObject
+                    );
                 }
             }
         }
-        for (Translation2d object : objectsToUpdate.keySet()) {
-            objectPositionsToTimeStamp.remove(object);
-            objectPositionsToTimeStamp.put(object, currentTimestamp);
-        }
-    }
-
-    private HashMap<Translation2d, Translation2d> updateObject(Translation2d object, HashMap<Translation2d, Translation2d> objectsToUpdate) {
-        Translation2d closestKnownObject = getClosestKnownObjectToVisibleObject(object);
-        double distanceBetweenObjects = object.getDistance(closestKnownObject);
-        if (objectsToUpdate.containsKey(closestKnownObject)) {
-            final Translation2d closestKnownObjectUpdate = objectsToUpdate.get(closestKnownObject);
-            if (distanceBetweenObjects < closestKnownObjectUpdate.getDistance(closestKnownObject)) {
-                objectsToUpdate.replace(closestKnownObject, object);
-                updateObject(closestKnownObjectUpdate, objectsToUpdate);
-            }
-        }
-        return objectsToUpdate;
+        objectsToUpdate.keySet().forEach(objectPositionsToTimeStamp::remove);
+        objectsToUpdate.values().forEach(object -> objectPositionsToTimeStamp.put(object, currentTimestamp));
     }
 
     private boolean isObjectNew(Translation2d object) {
