@@ -188,10 +188,10 @@ public class ObjectPoseEstimator extends SubsystemBase {
     private HashMap<Translation2d, Translation2d> updateHashMapObject(Translation2d objectUpdate, Translation2d closestObjectToObjectUpdate, HashMap<Translation2d, Translation2d> objectsToUpdate) {
         if (objectsToUpdate.containsKey(closestObjectToObjectUpdate)) {
             final Translation2d closestKnownObjectPreviousUpdate = objectsToUpdate.get(closestObjectToObjectUpdate);
-            if (objectUpdate.getDistance(closestObjectToObjectUpdate) < closestKnownObjectPreviousUpdate.getDistance(closestObjectToObjectUpdate)) {
+            if (objectUpdate.getDistance(closestObjectToObjectUpdate) < closestKnownObjectPreviousUpdate.getDistance(closestObjectToObjectUpdate))
                 objectsToUpdate.replace(closestObjectToObjectUpdate, objectUpdate);
-            }
-        }
+        } else
+            objectsToUpdate.put(closestObjectToObjectUpdate, objectUpdate);
         return objectsToUpdate;
     }
 
