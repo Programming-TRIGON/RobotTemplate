@@ -173,22 +173,26 @@ public class ObjectPoseEstimator extends SubsystemBase {
             for (Translation2d visibleObject : camera.getObjectsPositionsOnField(gamePieceType)) {
                 final Translation2d closestObjectToVisibleObject = getClosestKnownObjectToPosition(visibleObject);
 
-                if (isObjectNew(visibleObject) && !isObjectsDistanceWithinTolerance(visibleObject, getClosestObjectFromSetToPosition(visibleObject, currentToNewObjectPositions.keySet()))) {
+                if (isObjectNew(visibleObject, currentToNewObjectPositions)) {
                     currentToNewObjectPositions.put(visibleObject, visibleObject);
                     continue;
                 }
                 if (isObjectsDistanceWithinTolerance(visibleObject, closestObjectToVisibleObject))
-                    currentToNewObjectPositions.merge(
-                            closestObjectToVisibleObject,
-                            visibleObject,
-                            (oldVisibleObject, currentVisibleObject) ->
-                                    currentVisibleObject.getDistance(closestObjectToVisibleObject) < oldVisibleObject.getDistance(closestObjectToVisibleObject)
-                                            ? currentVisibleObject
-                                            : oldVisibleObject);
+                    currentToNewObjectPositions = updateHashMapObject(visibleObject, closestObjectToVisibleObject, currentToNewObjectPositions);
             }
         }
         currentToNewObjectPositions.keySet().forEach(objectPositionsToTimeStamp::remove);
         currentToNewObjectPositions.values().forEach(object -> objectPositionsToTimeStamp.put(object, currentTimestamp));
+    }
+
+    private HashMap<Translation2d, Translation2d> updateHashMapObject(Translation2d objectUpdate, Translation2d closestObjectToObjectUpdate, HashMap<Translation2d, Translation2d> objectsToUpdate) {
+        if (objectsToUpdate.containsKey(closestObjectToObjectUpdate)) {
+            final Translation2d closestKnownObjectPreviousUpdate = objectsToUpdate.get(closestObjectToObjectUpdate);
+            if (objectUpdate.getDistance(closestObjectToObjectUpdate) < closestKnownObjectPreviousUpdate.getDistance(closestObjectToObjectUpdate)) {
+                objectsToUpdate.replace(closestObjectToObjectUpdate, objectUpdate);
+            }
+        }
+        return objectsToUpdate;
     }
 
     private boolean isObjectsDistanceWithinTolerance(Translation2d firstObject, Translation2d secondObject) {
@@ -197,10 +201,11 @@ public class ObjectPoseEstimator extends SubsystemBase {
         return firstObject.getDistance(secondObject) < ObjectDetectionConstants.TRACKED_OBJECT_TOLERANCE_METERS;
     }
 
-    private boolean isObjectNew(Translation2d object) {
-        if (objectPositionsToTimeStamp.isEmpty())
+    private boolean isObjectNew(Translation2d object, HashMap<Translation2d, Translation2d> currentToNewObjectPositions) {
+        if (objectPositionsToTimeStamp.isEmpty() && currentToNewObjectPositions.isEmpty())
             return true;
-        return object.getDistance(getClosestKnownObjectToPosition(object)) > ObjectDetectionConstants.TRACKED_OBJECT_TOLERANCE_METERS;
+        return object.getDistance(getClosestKnownObjectToPosition(object)) > ObjectDetectionConstants.TRACKED_OBJECT_TOLERANCE_METERS
+                && !isObjectsDistanceWithinTolerance(object, getClosestObjectFromSetToPosition(object, currentToNewObjectPositions.keySet()));
     }
 
     private void removeOldObjects() {
