@@ -13,6 +13,7 @@ import org.littletonrobotics.junction.Logger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.function.BiFunction;
 
 public class ObjectPoseEstimator extends SubsystemBase {
     private final double deletionThresholdSeconds;
@@ -122,9 +123,9 @@ public class ObjectPoseEstimator extends SubsystemBase {
     }
 
     public Translation2d getClosestObjectFromSetToPosition(Translation2d position, Set<Translation2d> objects) {
-        final Translation2d[] objectsTranslations = objects.toArray(Translation2d[]::new);
         if (objects.isEmpty())
             return null;
+        final Translation2d[] objectsTranslations = objects.toArray(Translation2d[]::new);
         Translation2d closestObjectTranslation = objectsTranslations[0];
         double closestObjectDistance = position.getDistance(closestObjectTranslation);
 
@@ -153,20 +154,19 @@ public class ObjectPoseEstimator extends SubsystemBase {
                 final Translation2d closestObjectToVisibleObject = getClosestKnownObjectToVisibleObject(visibleObject);
                 final double closestObjectToVisibleObjectDistanceMeters = visibleObject.getDistance(closestObjectToVisibleObject);
 
-                if (closestObjectToVisibleObjectDistanceMeters < ObjectDetectionConstants.TRACKED_OBJECT_TOLERANCE_METERS) {
-                    objectsToUpdate.merge(
-                            closestObjectToVisibleObject,
-                            visibleObject,
-                            (oldVisibleObject, currentVisibleObject) ->
-                                    currentVisibleObject.getDistance(closestObjectToVisibleObject) < oldVisibleObject.getDistance(closestObjectToVisibleObject)
-                                            ? currentVisibleObject
-                                            : oldVisibleObject
-                    );
-                }
+                if (closestObjectToVisibleObjectDistanceMeters < ObjectDetectionConstants.TRACKED_OBJECT_TOLERANCE_METERS)
+                    objectsToUpdate.merge(closestObjectToVisibleObject, visibleObject, getClosestVisibleObjectToPosition(closestObjectToVisibleObject));
             }
         }
         objectsToUpdate.keySet().forEach(objectPositionsToTimeStamp::remove);
         objectsToUpdate.values().forEach(object -> objectPositionsToTimeStamp.put(object, currentTimestamp));
+    }
+
+    private BiFunction<? super Translation2d, ? super Translation2d, ? extends Translation2d> getClosestVisibleObjectToPosition(Translation2d position) {
+        return (oldVisibleObject, currentVisibleObject) ->
+                currentVisibleObject.getDistance(position) < oldVisibleObject.getDistance(position)
+                        ? currentVisibleObject
+                        : oldVisibleObject;
     }
 
     private boolean isObjectNew(Translation2d object) {
