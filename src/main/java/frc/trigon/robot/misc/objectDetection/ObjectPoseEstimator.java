@@ -146,15 +146,13 @@ public class ObjectPoseEstimator extends SubsystemBase {
 
         for (ObjectDetectionCamera camera : cameras) {
             for (Translation2d visibleObject : camera.getObjectsPositionsOnField(gamePieceType)) {
-                if (isObjectNew(visibleObject)) {
+                final Translation2d closestObjectToVisibleObject = getClosestObjectToPosition(visibleObject);
+
+                if (isObjectNew(visibleObject) && !isObjectsDistanceWithinTolerance(visibleObject, getClosestObjectFromSetToPosition(visibleObject, currentToNewObjectPositions.keySet()))) {
                     currentToNewObjectPositions.put(visibleObject, visibleObject);
                     continue;
                 }
-
-                final Translation2d closestObjectToVisibleObject = getClosestKnownObjectToVisibleObject(visibleObject);
-                final double closestObjectToVisibleObjectDistanceMeters = visibleObject.getDistance(closestObjectToVisibleObject);
-
-                if (closestObjectToVisibleObjectDistanceMeters < ObjectDetectionConstants.TRACKED_OBJECT_TOLERANCE_METERS)
+                if (isObjectsDistanceWithinTolerance(visibleObject, closestObjectToVisibleObject))
                     currentToNewObjectPositions.merge(closestObjectToVisibleObject, visibleObject, getClosestVisibleObjectToPosition(closestObjectToVisibleObject));
             }
         }
@@ -169,24 +167,14 @@ public class ObjectPoseEstimator extends SubsystemBase {
                         : oldVisibleObject;
     }
 
+    private boolean isObjectsDistanceWithinTolerance(Translation2d firstObject, Translation2d secondObject) {
+        return firstObject.getDistance(secondObject) < ObjectDetectionConstants.TRACKED_OBJECT_TOLERANCE_METERS;
+    }
+
     private boolean isObjectNew(Translation2d object) {
         if (objectPositionsToTimeStamp.isEmpty())
             return true;
-        return object.getDistance(getClosestKnownObjectToVisibleObject(object)) > ObjectDetectionConstants.TRACKED_OBJECT_TOLERANCE_METERS;
-    }
-
-    private Translation2d getClosestKnownObjectToVisibleObject(Translation2d visibleObject) {
-        Translation2d closestObjectToVisibleObject = null;
-        double closestObjectToVisibleObjectDistanceMeters = Double.POSITIVE_INFINITY;
-
-        for (Translation2d currentObject : objectPositionsToTimeStamp.keySet()) {
-            final double currentObjectDistanceMeters = visibleObject.getDistance(currentObject);
-            if (currentObjectDistanceMeters < closestObjectToVisibleObjectDistanceMeters) {
-                closestObjectToVisibleObjectDistanceMeters = currentObjectDistanceMeters;
-                closestObjectToVisibleObject = currentObject;
-            }
-        }
-        return closestObjectToVisibleObject;
+        return object.getDistance(getClosestObjectToPosition(object)) > ObjectDetectionConstants.TRACKED_OBJECT_TOLERANCE_METERS;
     }
 
     private void removeOldObjects() {
