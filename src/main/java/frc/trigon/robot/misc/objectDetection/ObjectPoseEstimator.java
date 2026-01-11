@@ -122,7 +122,7 @@ public class ObjectPoseEstimator extends SubsystemBase {
         return getClosestObjectFromSetToPosition(position, objectPositionsToTimeStamp.keySet());
     }
 
-    public Translation2d getClosestObjectFromSetToPosition(Translation2d position, Set<Translation2d> objects) {
+    private Translation2d getClosestObjectFromSetToPosition(Translation2d position, Set<Translation2d> objects) {
         if (objects.isEmpty())
             return null;
         final Translation2d[] objectsTranslations = objects.toArray(Translation2d[]::new);
@@ -140,6 +140,23 @@ public class ObjectPoseEstimator extends SubsystemBase {
         return closestObjectTranslation;
     }
 
+    /**
+     * Updates the positions of previously detected objects, or adds them if they are new.
+     *
+     * <p>{@code currentToNewObjectPositions} maps previously detected objects to the
+     * positions they should be updated to.</p>
+     *
+     * <p>Each object detected by the camera(s) is compared to the closest previously
+     * detected object to determine whether it is new or already tracked. If it is
+     * already tracked, it is added to {@code currentToNewObjectPositions} as an update.</p>
+     *
+     * <p>If multiple objects detected by the camera(s) are closest to the same
+     * previously detected object, the object whose position is closest to that
+     * previously detected object is kept. The others are discarded.</p>
+     *
+     * <p>This assumes that such detections represent the same physical object seen
+     * by different cameras, with small positional differences.</p>
+     */
     private void updateObjectPositions() {
         final double currentTimestamp = Timer.getTimestamp();
         HashMap<Translation2d, Translation2d> currentToNewObjectPositions = new HashMap<>();
@@ -153,7 +170,13 @@ public class ObjectPoseEstimator extends SubsystemBase {
                     continue;
                 }
                 if (isObjectsDistanceWithinTolerance(visibleObject, closestObjectToVisibleObject))
-                    currentToNewObjectPositions.merge(closestObjectToVisibleObject, visibleObject, getClosestVisibleObjectFunction(closestObjectToVisibleObject));
+                    currentToNewObjectPositions.merge(
+                            closestObjectToVisibleObject,
+                            visibleObject,
+                            (oldVisibleObject, currentVisibleObject) ->
+                                    currentVisibleObject.getDistance(closestObjectToVisibleObject) < oldVisibleObject.getDistance(closestObjectToVisibleObject)
+                                            ? currentVisibleObject
+                                            : oldVisibleObject);
             }
         }
         currentToNewObjectPositions.keySet().forEach(objectPositionsToTimeStamp::remove);
