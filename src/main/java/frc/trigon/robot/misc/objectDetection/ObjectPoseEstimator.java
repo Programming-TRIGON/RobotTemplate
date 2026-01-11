@@ -72,7 +72,7 @@ public class ObjectPoseEstimator extends SubsystemBase {
      */
     public void removeClosestObjectToIntake(Transform2d intakeTransform) {
         final Pose2d robotPose = RobotContainer.ROBOT_POSE_ESTIMATOR.getEstimatedRobotPose();
-        removeObject(getClosestObjectToPosition(robotPose.transformBy(intakeTransform).getTranslation()));
+        removeObject(getClosestKnownObjectToPosition(robotPose.transformBy(intakeTransform).getTranslation()));
     }
 
     /**
@@ -81,12 +81,12 @@ public class ObjectPoseEstimator extends SubsystemBase {
      * @param fieldRelativePose the pose to which the removed object is closest
      */
     public void removeClosestObjectToPose(Pose2d fieldRelativePose) {
-        final Translation2d closestObject = getClosestObjectToPosition(fieldRelativePose.getTranslation());
+        final Translation2d closestObject = getClosestKnownObjectToPosition(fieldRelativePose.getTranslation());
         removeObject(closestObject);
     }
 
     public void removeClosestObjectToPosition(Translation2d position) {
-        final Translation2d closestObject = getClosestObjectToPosition(position);
+        final Translation2d closestObject = getClosestKnownObjectToPosition(position);
         removeObject(closestObject);
     }
 
@@ -108,7 +108,7 @@ public class ObjectPoseEstimator extends SubsystemBase {
      * @return the best object's 2D position on the field (z is assumed to be 0)
      */
     public Translation2d getClosestObjectToRobot() {
-        return getClosestObjectToPosition(RobotContainer.ROBOT_POSE_ESTIMATOR.getEstimatedRobotPose().getTranslation());
+        return getClosestKnownObjectToPosition(RobotContainer.ROBOT_POSE_ESTIMATOR.getEstimatedRobotPose().getTranslation());
     }
 
 
@@ -118,7 +118,7 @@ public class ObjectPoseEstimator extends SubsystemBase {
      * @param position the position to which the returned object is closest
      * @return the closest object's position on the field, or null if no objects are known
      */
-    public Translation2d getClosestObjectToPosition(Translation2d position) {
+    public Translation2d getClosestKnownObjectToPosition(Translation2d position) {
         return getClosestObjectFromSetToPosition(position, objectPositionsToTimeStamp.keySet());
     }
 
@@ -146,21 +146,21 @@ public class ObjectPoseEstimator extends SubsystemBase {
 
         for (ObjectDetectionCamera camera : cameras) {
             for (Translation2d visibleObject : camera.getObjectsPositionsOnField(gamePieceType)) {
-                final Translation2d closestObjectToVisibleObject = getClosestObjectToPosition(visibleObject);
+                final Translation2d closestObjectToVisibleObject = getClosestKnownObjectToPosition(visibleObject);
 
                 if (isObjectNew(visibleObject) && !isObjectsDistanceWithinTolerance(visibleObject, getClosestObjectFromSetToPosition(visibleObject, currentToNewObjectPositions.keySet()))) {
                     currentToNewObjectPositions.put(visibleObject, visibleObject);
                     continue;
                 }
                 if (isObjectsDistanceWithinTolerance(visibleObject, closestObjectToVisibleObject))
-                    currentToNewObjectPositions.merge(closestObjectToVisibleObject, visibleObject, getClosestVisibleObjectToPosition(closestObjectToVisibleObject));
+                    currentToNewObjectPositions.merge(closestObjectToVisibleObject, visibleObject, getClosestVisibleObjectFunction(closestObjectToVisibleObject));
             }
         }
         currentToNewObjectPositions.keySet().forEach(objectPositionsToTimeStamp::remove);
         currentToNewObjectPositions.values().forEach(object -> objectPositionsToTimeStamp.put(object, currentTimestamp));
     }
 
-    private BiFunction<? super Translation2d, ? super Translation2d, ? extends Translation2d> getClosestVisibleObjectToPosition(Translation2d position) {
+    private BiFunction<? super Translation2d, ? super Translation2d, ? extends Translation2d> getClosestVisibleObjectFunction(Translation2d position) {
         return (oldVisibleObject, currentVisibleObject) ->
                 currentVisibleObject.getDistance(position) < oldVisibleObject.getDistance(position)
                         ? currentVisibleObject
@@ -174,7 +174,7 @@ public class ObjectPoseEstimator extends SubsystemBase {
     private boolean isObjectNew(Translation2d object) {
         if (objectPositionsToTimeStamp.isEmpty())
             return true;
-        return object.getDistance(getClosestObjectToPosition(object)) > ObjectDetectionConstants.TRACKED_OBJECT_TOLERANCE_METERS;
+        return object.getDistance(getClosestKnownObjectToPosition(object)) > ObjectDetectionConstants.TRACKED_OBJECT_TOLERANCE_METERS;
     }
 
     private void removeOldObjects() {
