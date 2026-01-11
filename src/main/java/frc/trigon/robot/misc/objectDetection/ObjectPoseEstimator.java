@@ -100,6 +100,15 @@ public class ObjectPoseEstimator extends SubsystemBase {
     }
 
     /**
+     * determines whether any objects are stored in the poseEstimator.
+     *
+     * @return if there are objects stored in the poseEstimator
+     */
+    public boolean hasObjects() {
+        return !getObjectsOnField().isEmpty();
+    }
+
+    /**
      * Gets the position of the closest object on the field from the 3D rotation of the object relative to the camera.
      * This assumes the object is on the ground.
      * Once it is known that the object is on the ground,

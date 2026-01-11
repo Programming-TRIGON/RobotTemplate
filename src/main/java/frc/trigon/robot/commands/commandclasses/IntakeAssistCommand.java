@@ -106,7 +106,7 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
     }
 
     private void trackGamePiece() {
-        distanceFromTrackedGamePiece = RobotContainer.OBJECT_POSE_ESTIMATOR.hasObject() ?
+        distanceFromTrackedGamePiece = RobotContainer.OBJECT_POSE_ESTIMATOR.hasObjects() ?
                 calculateSelfRelativeDistanceFromBestGamePiece() :
                 null;
     }
