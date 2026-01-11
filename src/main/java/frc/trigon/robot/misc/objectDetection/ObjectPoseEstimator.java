@@ -13,7 +13,6 @@ import org.littletonrobotics.junction.Logger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
-import java.util.function.BiFunction;
 
 public class ObjectPoseEstimator extends SubsystemBase {
     private final double deletionThresholdSeconds;
@@ -192,14 +191,9 @@ public class ObjectPoseEstimator extends SubsystemBase {
         currentToNewObjectPositions.values().forEach(object -> objectPositionsToTimeStamp.put(object, currentTimestamp));
     }
 
-    private BiFunction<? super Translation2d, ? super Translation2d, ? extends Translation2d> getClosestVisibleObjectFunction(Translation2d position) {
-        return (oldVisibleObject, currentVisibleObject) ->
-                currentVisibleObject.getDistance(position) < oldVisibleObject.getDistance(position)
-                        ? currentVisibleObject
-                        : oldVisibleObject;
-    }
-
     private boolean isObjectsDistanceWithinTolerance(Translation2d firstObject, Translation2d secondObject) {
+        if (firstObject == null || secondObject == null)
+            return false;
         return firstObject.getDistance(secondObject) < ObjectDetectionConstants.TRACKED_OBJECT_TOLERANCE_METERS;
     }
 
