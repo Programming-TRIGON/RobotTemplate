@@ -91,6 +91,11 @@ public class ObjectPoseEstimator extends SubsystemBase {
         removeClosestObjectToPosition(fieldRelativePose.getTranslation());
     }
 
+    /**
+     * Removes the closest object to a given position from the list of objects in the pose estimator.
+     *
+     * @param position the position to which the removed object is closest
+     */
     public void removeClosestObjectToPosition(Translation2d position) {
         final Translation2d closestObject = getClosestKnownObjectToPosition(position);
         if (closestObject == null)
