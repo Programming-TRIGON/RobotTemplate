@@ -117,19 +117,16 @@ public class ObjectPoseEstimator extends SubsystemBase {
     }
 
     /**
-     * Gets the position of the closest object on the field from the 3D rotation of the object relative to the camera.
-     * This assumes the object is on the ground.
-     * Once it is known that the object is on the ground,
-     * one can simply find the transform from the camera to the ground and apply it to the object's rotation.
+     * Gets the position of the closest object to the robot.
      *
-     * @return the best object's 2D position on the field (z is assumed to be 0)
+     * @return the closest object to the robot
      */
     public Translation2d getClosestObjectToRobot() {
         return getClosestKnownObjectToPosition(RobotContainer.ROBOT_POSE_ESTIMATOR.getEstimatedRobotPose().getTranslation());
     }
 
     private void updateObjectPositions() {
-        HashMap<Translation2d, Translation2d> trackedObjectsToUpdatedPositions = new HashMap<>();
+        final HashMap<Translation2d, Translation2d> trackedObjectsToUpdatedPositions = new HashMap<>();
 
         for (Translation2d visibleObject : camera.getObjectsPositionsOnField(gamePieceType))
             updateObjectPosition(visibleObject, trackedObjectsToUpdatedPositions);
@@ -153,18 +150,25 @@ public class ObjectPoseEstimator extends SubsystemBase {
             updateHashMapObject(object, closestObjectToTargetObject, objectsToUpdatedPositions);
     }
 
-    private void updateHashMapObject(Translation2d objectUpdate, Translation2d objectToUpdate, HashMap<Translation2d, Translation2d> objectsToUpdatedPositions) {
-        if (objectsToUpdatedPositions.containsKey(objectToUpdate)) {
-            final Translation2d existingObjectUpdate = objectsToUpdatedPositions.get(objectToUpdate);
-            if (shouldReplaceExistingUpdateWithNewUpdate(objectUpdate, existingObjectUpdate, objectToUpdate)) {
-                objectsToUpdatedPositions.replace(objectToUpdate, objectUpdate);
-                objectsToUpdatedPositions.put(existingObjectUpdate, existingObjectUpdate);
-            }
-        } else
-            objectsToUpdatedPositions.put(objectToUpdate, objectUpdate);
+    private void updateHashMapObject(Translation2d objectsUpdatedPosition, Translation2d objectToUpdate, HashMap<Translation2d, Translation2d> objectsToUpdatedPositions) {
+        if (objectsToUpdatedPositions.containsKey(objectToUpdate))
+            addClosestUpdatedPositionToHashMap(objectsUpdatedPosition, objectToUpdate, objectsToUpdatedPositions);
+        else
+            objectsToUpdatedPositions.put(objectToUpdate, objectsUpdatedPosition);
     }
 
-    private boolean shouldReplaceExistingUpdateWithNewUpdate(Translation2d newUpdate, Translation2d existingUpdate, Translation2d objectToUpdate) {
+    private void addClosestUpdatedPositionToHashMap(Translation2d objectsUpdatedPosition, Translation2d objectToUpdate, HashMap<Translation2d, Translation2d> objectsToUpdatedPositions) {
+        final Translation2d existingUpdatedPosition = objectsToUpdatedPositions.get(objectToUpdate);
+        if (shouldReplaceExistingUpdateWithNewUpdate(objectsUpdatedPosition, existingUpdatedPosition, objectToUpdate)) {
+            objectsToUpdatedPositions.replace(objectToUpdate, objectsUpdatedPosition);
+            objectsToUpdatedPositions.put(existingUpdatedPosition, existingUpdatedPosition);
+            return;
+        }
+        objectsToUpdatedPositions.put(objectsUpdatedPosition, objectToUpdate);
+    }
+
+    private boolean shouldReplaceExistingUpdateWithNewUpdate(Translation2d newUpdate, Translation2d
+            existingUpdate, Translation2d objectToUpdate) {
         return newUpdate.getDistance(objectToUpdate) <
                 existingUpdate.getDistance(objectToUpdate);
     }
