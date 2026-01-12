@@ -61,6 +61,8 @@ public class ObjectPoseEstimator extends SubsystemBase {
      */
     public void removeClosestObjectToRobot() {
         final Translation2d closestObject = getClosestObjectToRobot();
+        if (closestObject == null)
+            return;
         removeObject(closestObject);
     }
 
@@ -71,7 +73,10 @@ public class ObjectPoseEstimator extends SubsystemBase {
      */
     public void removeClosestObjectToIntake(Transform2d intakeTransform) {
         final Pose2d robotPose = RobotContainer.ROBOT_POSE_ESTIMATOR.getEstimatedRobotPose();
-        removeObject(getClosestKnownObjectToPosition(robotPose.transformBy(intakeTransform).getTranslation()));
+        final Translation2d closestObjectToIntake = getClosestKnownObjectToPosition(robotPose.transformBy(intakeTransform).getTranslation());
+        if (closestObjectToIntake == null)
+            return;
+        removeObject(closestObjectToIntake);
     }
 
     /**
@@ -80,12 +85,13 @@ public class ObjectPoseEstimator extends SubsystemBase {
      * @param fieldRelativePose the pose to which the removed object is closest
      */
     public void removeClosestObjectToPose(Pose2d fieldRelativePose) {
-        final Translation2d closestObject = getClosestKnownObjectToPosition(fieldRelativePose.getTranslation());
-        removeObject(closestObject);
+        removeClosestObjectToPosition(fieldRelativePose.getTranslation());
     }
 
     public void removeClosestObjectToPosition(Translation2d position) {
         final Translation2d closestObject = getClosestKnownObjectToPosition(position);
+        if (closestObject == null)
+            return;
         removeObject(closestObject);
     }
 
