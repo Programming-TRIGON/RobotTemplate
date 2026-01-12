@@ -126,12 +126,12 @@ public class ObjectPoseEstimator extends SubsystemBase {
     }
 
     private void updateObjectPositions() {
-        HashMap<Translation2d, Translation2d> currentToNewObjectPositions = new HashMap<>();
+        HashMap<Translation2d, Translation2d> trackedObjectsToUpdatedPositions = new HashMap<>();
 
         for (Translation2d visibleObject : camera.getObjectsPositionsOnField(gamePieceType))
-            currentToNewObjectPositions = updateObjectPosition(visibleObject, currentToNewObjectPositions);
+            updateObjectPosition(visibleObject, trackedObjectsToUpdatedPositions);
 
-        mergeObjectsIntoHashmap(currentToNewObjectPositions);
+        mergeObjectsIntoHashmap(trackedObjectsToUpdatedPositions);
     }
 
     private void mergeObjectsIntoHashmap(HashMap<Translation2d, Translation2d> currentToNewObjectPositions) {
@@ -141,14 +141,13 @@ public class ObjectPoseEstimator extends SubsystemBase {
         currentToNewObjectPositions.values().forEach(object -> objectPositionsToTimeStamp.put(object, currentTimestamp));
     }
 
-    private HashMap<Translation2d, Translation2d> updateObjectPosition(Translation2d object, HashMap<Translation2d, Translation2d> currentToNewObjectPositions) {
+    private void updateObjectPosition(Translation2d object, HashMap<Translation2d, Translation2d> currentToNewObjectPositions) {
         final Translation2d closestObjectToTargetObject = getClosestKnownObjectToPosition(object);
 
         if (isObjectNew(object))
             currentToNewObjectPositions.put(object, object);
         else
             updateHashMapObject(object, closestObjectToTargetObject, currentToNewObjectPositions);
-        return currentToNewObjectPositions;
     }
 
     private void updateHashMapObject(Translation2d objectUpdate, Translation2d closestObjectToObjectUpdate, HashMap<Translation2d, Translation2d> objectsToUpdate) {
