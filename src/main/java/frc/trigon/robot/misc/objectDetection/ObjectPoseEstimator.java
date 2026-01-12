@@ -22,7 +22,7 @@ public class ObjectPoseEstimator extends SubsystemBase {
     /**
      * Holds the position of each detected object and when it was detected.
      */
-    private final KDTree2D<Translation2d, Double> objectPositionsToTimestamp;
+    private final HashMap<Translation2d, Double> objectPositionsToTimestamp;
 
     /**
      * Constructs an ObjectPoseEstimator for estimating the positions of objects detected by camera.
