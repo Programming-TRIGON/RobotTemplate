@@ -12,12 +12,14 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 
 public class ObjectPoseEstimator extends SubsystemBase {
     private final double deletionThresholdSeconds;
     private final SimulatedGamePieceConstants.GamePieceType gamePieceType;
     private final ObjectDetectionCamera camera;
+    private final Set<Translation2d> excludedKnownObjects = new HashSet<>();
     /**
      * Holds the position of each detected object and when it was detected.
      */
@@ -45,7 +47,7 @@ public class ObjectPoseEstimator extends SubsystemBase {
      */
     @Override
     public void periodic() {
-        updateObjectPositions();
+        updateObjectsPositions();
         removeOldObjects();
         Logger.recordOutput("ObjectPoseEstimator/knownObjectPositions", getObjectsOnField().toArray(Translation2d[]::new));
     }
@@ -130,11 +132,13 @@ public class ObjectPoseEstimator extends SubsystemBase {
         return getClosestKnownObjectToPosition(RobotContainer.ROBOT_POSE_ESTIMATOR.getEstimatedRobotPose().getTranslation());
     }
 
-    private void updateObjectPositions() {
+    private void updateObjectsPositions() {
         final HashMap<Translation2d, Translation2d> trackedObjectsToUpdatedPositions = new HashMap<>();
 
-        for (Translation2d visibleObject : camera.getObjectsPositionsOnField(gamePieceType))
+        for (Translation2d visibleObject : camera.getObjectsPositionsOnField(gamePieceType)) {
+            excludedKnownObjects.clear();
             updateObjectPosition(visibleObject, trackedObjectsToUpdatedPositions);
+        }
 
         mergeObjectsIntoHashmap(trackedObjectsToUpdatedPositions);
     }
@@ -147,7 +151,7 @@ public class ObjectPoseEstimator extends SubsystemBase {
     }
 
     private void updateObjectPosition(Translation2d object, HashMap<Translation2d, Translation2d> objectsToUpdatedPositions) {
-        final Translation2d closestObjectToTargetObject = getClosestKnownObjectToPosition(object);
+        final Translation2d closestObjectToTargetObject = getNextClosestKnownObjectToPosition(object, (Translation2d) excludedKnownObjects);
 
         if (isObjectNew(object))
             objectsToUpdatedPositions.put(object, object);
@@ -166,10 +170,15 @@ public class ObjectPoseEstimator extends SubsystemBase {
         final Translation2d existingUpdatedPosition = objectsToUpdatedPositions.get(objectToUpdate);
         if (shouldReplaceExistingUpdateWithNewUpdate(objectsUpdatedPosition, existingUpdatedPosition, objectToUpdate)) {
             objectsToUpdatedPositions.replace(objectToUpdate, objectsUpdatedPosition);
-            objectsToUpdatedPositions.put(existingUpdatedPosition, existingUpdatedPosition);
+            updatePositionOfDiscardedObjectUpdate(existingUpdatedPosition, objectToUpdate, objectsToUpdatedPositions);
             return;
         }
         objectsToUpdatedPositions.put(objectsUpdatedPosition, objectToUpdate);
+    }
+
+    private void updatePositionOfDiscardedObjectUpdate(Translation2d discardedUpdate, Translation2d previousClosestObject, HashMap<Translation2d, Translation2d> objectsToUpdatedPositions) {
+        updateObjectPosition(discardedUpdate, objectsToUpdatedPositions);
+        excludedKnownObjects.add(previousClosestObject);
     }
 
     private boolean shouldReplaceExistingUpdateWithNewUpdate(Translation2d newUpdate, Translation2d
@@ -182,6 +191,13 @@ public class ObjectPoseEstimator extends SubsystemBase {
         if (objectPositionsToTimestamp.isEmpty())
             return true;
         return object.getDistance(getClosestKnownObjectToPosition(object)) > ObjectDetectionConstants.TRACKED_OBJECT_TOLERANCE_METERS;
+    }
+
+    private Translation2d getNextClosestKnownObjectToPosition(Translation2d position, Translation2d... objectsToExclude) {
+        Set<Translation2d> candidateObjects = objectPositionsToTimestamp.keySet();
+        for (Translation2d excludedObject : objectsToExclude)
+            candidateObjects.remove(excludedObject);
+        return getClosestObjectFromSetToPosition(position, candidateObjects);
     }
 
     private Translation2d getClosestKnownObjectToPosition(Translation2d position) {
