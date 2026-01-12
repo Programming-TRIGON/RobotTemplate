@@ -192,7 +192,7 @@ public class ObjectPoseEstimator extends SubsystemBase {
     }
 
     private boolean isObjectNew(Translation2d object, Translation2d nearestTrackedObject) {
-        if (objectPositionsToTimestamp.isEmpty())
+        if (nearestTrackedObject == null)
             return true;
         return object.getDistance(nearestTrackedObject) > ObjectDetectionConstants.TRACKED_OBJECT_TOLERANCE_METERS;
     }
