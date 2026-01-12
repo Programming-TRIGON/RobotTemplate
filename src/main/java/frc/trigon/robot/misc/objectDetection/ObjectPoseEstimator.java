@@ -178,8 +178,8 @@ public class ObjectPoseEstimator extends SubsystemBase {
     private void updatePositionOfDiscardedObjectUpdate(Translation2d discardedObjectUpdate, Translation2d previousClosestObject, HashMap<Translation2d, Translation2d> objectsToUpdatedPositions) {
         excludedKnownObjects.add(previousClosestObject);
         Translation2d nextClosestObjectToDiscardedObjectUpdate = getNextClosestKnownObjectToPosition(discardedObjectUpdate);
-        if (discardedObjectUpdate.getDistance(nextClosestObjectToDiscardedObjectUpdate) > ObjectDetectionConstants.TRACKED_OBJECT_TOLERANCE_METERS
-                || nextClosestObjectToDiscardedObjectUpdate == null) {
+        if (nextClosestObjectToDiscardedObjectUpdate == null ||
+                discardedObjectUpdate.getDistance(nextClosestObjectToDiscardedObjectUpdate) > ObjectDetectionConstants.TRACKED_OBJECT_TOLERANCE_METERS) {
             objectsToUpdatedPositions.put(discardedObjectUpdate, discardedObjectUpdate);
             return;
         }
@@ -199,8 +199,7 @@ public class ObjectPoseEstimator extends SubsystemBase {
 
     private Translation2d getNextClosestKnownObjectToPosition(Translation2d position) {
         Set<Translation2d> candidateObjects = new HashSet<>(objectPositionsToTimestamp.keySet());
-        for (Translation2d excludedObject : excludedKnownObjects)
-            candidateObjects.remove(excludedObject);
+        candidateObjects.removeAll(excludedKnownObjects);
         return getClosestObjectFromSetToPosition(position, candidateObjects);
     }
 
