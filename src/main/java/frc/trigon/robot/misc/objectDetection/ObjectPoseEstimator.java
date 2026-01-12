@@ -115,7 +115,7 @@ public class ObjectPoseEstimator extends SubsystemBase {
     }
 
     /**
-     * determines whether any objects are stored in the poseEstimator.
+     * Determines whether any objects are stored in the poseEstimator.
      *
      * @return if there are objects stored in the poseEstimator
      */
@@ -151,7 +151,7 @@ public class ObjectPoseEstimator extends SubsystemBase {
     }
 
     private void updateObjectPosition(Translation2d object, HashMap<Translation2d, Translation2d> objectsToUpdatedPositions) {
-        final Translation2d closestObjectToTargetObject = getNextClosestKnownObjectToPosition(object, (Translation2d) excludedKnownObjects);
+        final Translation2d closestObjectToTargetObject = getNextClosestKnownObjectToPosition(object);
 
         if (isObjectNew(object))
             objectsToUpdatedPositions.put(object, object);
@@ -173,7 +173,7 @@ public class ObjectPoseEstimator extends SubsystemBase {
             updatePositionOfDiscardedObjectUpdate(existingUpdatedPosition, objectToUpdate, objectsToUpdatedPositions);
             return;
         }
-        objectsToUpdatedPositions.put(objectsUpdatedPosition, objectToUpdate);
+        updatePositionOfDiscardedObjectUpdate(objectsUpdatedPosition, objectToUpdate, objectsToUpdatedPositions);
     }
 
     private void updatePositionOfDiscardedObjectUpdate(Translation2d discardedUpdate, Translation2d previousClosestObject, HashMap<Translation2d, Translation2d> objectsToUpdatedPositions) {
@@ -181,8 +181,7 @@ public class ObjectPoseEstimator extends SubsystemBase {
         excludedKnownObjects.add(previousClosestObject);
     }
 
-    private boolean shouldReplaceExistingUpdateWithNewUpdate(Translation2d newUpdate, Translation2d
-            existingUpdate, Translation2d objectToUpdate) {
+    private boolean shouldReplaceExistingUpdateWithNewUpdate(Translation2d newUpdate, Translation2d existingUpdate, Translation2d objectToUpdate) {
         return newUpdate.getDistance(objectToUpdate) <
                 existingUpdate.getDistance(objectToUpdate);
     }
@@ -193,9 +192,9 @@ public class ObjectPoseEstimator extends SubsystemBase {
         return object.getDistance(getClosestKnownObjectToPosition(object)) > ObjectDetectionConstants.TRACKED_OBJECT_TOLERANCE_METERS;
     }
 
-    private Translation2d getNextClosestKnownObjectToPosition(Translation2d position, Translation2d... objectsToExclude) {
-        Set<Translation2d> candidateObjects = objectPositionsToTimestamp.keySet();
-        for (Translation2d excludedObject : objectsToExclude)
+    private Translation2d getNextClosestKnownObjectToPosition(Translation2d position) {
+        Set<Translation2d> candidateObjects = new HashSet<>(objectPositionsToTimestamp.keySet());
+        for (Translation2d excludedObject : excludedKnownObjects)
             candidateObjects.remove(excludedObject);
         return getClosestObjectFromSetToPosition(position, candidateObjects);
     }
