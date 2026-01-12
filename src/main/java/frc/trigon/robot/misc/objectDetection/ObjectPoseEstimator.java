@@ -18,7 +18,10 @@ public class ObjectPoseEstimator extends SubsystemBase {
     private final double deletionThresholdSeconds;
     private final SimulatedGamePieceConstants.GamePieceType gamePieceType;
     private final ObjectDetectionCamera camera;
-    private final HashMap<Translation2d, Double> objectPositionsToTimeStamp;
+    /**
+     * Holds the position of each detected object and when it was detected.
+     */
+    private final HashMap<Translation2d, Double> objectPositionsToTimestamp;
 
     /**
      * Constructs an ObjectPoseEstimator for estimating the positions of objects detected by camera.
@@ -33,7 +36,7 @@ public class ObjectPoseEstimator extends SubsystemBase {
         this.deletionThresholdSeconds = deletionThresholdSeconds;
         this.gamePieceType = gamePieceType;
         this.camera = camera;
-        this.objectPositionsToTimeStamp = new HashMap<>();
+        this.objectPositionsToTimestamp = new HashMap<>();
     }
 
     /**
@@ -53,7 +56,7 @@ public class ObjectPoseEstimator extends SubsystemBase {
      * @return a list of Translation2d representing the positions of objects on the field
      */
     public ArrayList<Translation2d> getObjectsOnField() {
-        return new ArrayList<>(objectPositionsToTimeStamp.keySet());
+        return new ArrayList<>(objectPositionsToTimestamp.keySet());
     }
 
     /**
@@ -101,7 +104,7 @@ public class ObjectPoseEstimator extends SubsystemBase {
      * @param objectPosition the position of the object to be removed. Must be the precise position as stored in the pose estimator.
      */
     public void removeObject(Translation2d objectPosition) {
-        objectPositionsToTimeStamp.remove(objectPosition);
+        objectPositionsToTimestamp.remove(objectPosition);
     }
 
     /**
@@ -110,7 +113,7 @@ public class ObjectPoseEstimator extends SubsystemBase {
      * @return if there are objects stored in the poseEstimator
      */
     public boolean hasObjects() {
-        return !getObjectsOnField().isEmpty();
+        return !objectPositionsToTimestamp.isEmpty();
     }
 
     /**
@@ -137,38 +140,43 @@ public class ObjectPoseEstimator extends SubsystemBase {
     private void mergeObjectsIntoHashmap(HashMap<Translation2d, Translation2d> currentToNewObjectPositions) {
         final double currentTimestamp = Timer.getTimestamp();
 
-        currentToNewObjectPositions.keySet().forEach(objectPositionsToTimeStamp::remove);
-        currentToNewObjectPositions.values().forEach(object -> objectPositionsToTimeStamp.put(object, currentTimestamp));
+        currentToNewObjectPositions.keySet().forEach(objectPositionsToTimestamp::remove);
+        currentToNewObjectPositions.values().forEach(object -> objectPositionsToTimestamp.put(object, currentTimestamp));
     }
 
-    private void updateObjectPosition(Translation2d object, HashMap<Translation2d, Translation2d> currentToNewObjectPositions) {
+    private void updateObjectPosition(Translation2d object, HashMap<Translation2d, Translation2d> objectsToUpdatedPositions) {
         final Translation2d closestObjectToTargetObject = getClosestKnownObjectToPosition(object);
 
         if (isObjectNew(object))
-            currentToNewObjectPositions.put(object, object);
+            objectsToUpdatedPositions.put(object, object);
         else
-            updateHashMapObject(object, closestObjectToTargetObject, currentToNewObjectPositions);
+            updateHashMapObject(object, closestObjectToTargetObject, objectsToUpdatedPositions);
     }
 
-    private void updateHashMapObject(Translation2d objectUpdate, Translation2d closestObjectToObjectUpdate, HashMap<Translation2d, Translation2d> objectsToUpdate) {
-        if (objectsToUpdate.containsKey(closestObjectToObjectUpdate)) {
-            final Translation2d closestKnownObjectPreviousUpdate = objectsToUpdate.get(closestObjectToObjectUpdate);
-            if (objectUpdate.getDistance(closestObjectToObjectUpdate) < closestKnownObjectPreviousUpdate.getDistance(closestObjectToObjectUpdate)) {
-                objectsToUpdate.replace(closestObjectToObjectUpdate, objectUpdate);
-                objectsToUpdate.put(closestKnownObjectPreviousUpdate, closestKnownObjectPreviousUpdate);
+    private void updateHashMapObject(Translation2d objectUpdate, Translation2d objectToUpdate, HashMap<Translation2d, Translation2d> objectsToUpdatedPositions) {
+        if (objectsToUpdatedPositions.containsKey(objectToUpdate)) {
+            final Translation2d existingObjectUpdate = objectsToUpdatedPositions.get(objectToUpdate);
+            if (shouldReplaceExistingUpdateWithNewUpdate(objectUpdate, existingObjectUpdate, objectToUpdate)) {
+                objectsToUpdatedPositions.replace(objectToUpdate, objectUpdate);
+                objectsToUpdatedPositions.put(existingObjectUpdate, existingObjectUpdate);
             }
         } else
-            objectsToUpdate.put(closestObjectToObjectUpdate, objectUpdate);
+            objectsToUpdatedPositions.put(objectToUpdate, objectUpdate);
+    }
+
+    private boolean shouldReplaceExistingUpdateWithNewUpdate(Translation2d newUpdate, Translation2d existingUpdate, Translation2d objectToUpdate) {
+        return newUpdate.getDistance(objectToUpdate) <
+                existingUpdate.getDistance(objectToUpdate);
     }
 
     private boolean isObjectNew(Translation2d object) {
-        if (objectPositionsToTimeStamp.isEmpty())
+        if (objectPositionsToTimestamp.isEmpty())
             return true;
         return object.getDistance(getClosestKnownObjectToPosition(object)) > ObjectDetectionConstants.TRACKED_OBJECT_TOLERANCE_METERS;
     }
 
     private Translation2d getClosestKnownObjectToPosition(Translation2d position) {
-        return getClosestObjectFromSetToPosition(position, objectPositionsToTimeStamp.keySet());
+        return getClosestObjectFromSetToPosition(position, objectPositionsToTimestamp.keySet());
     }
 
     private Translation2d getClosestObjectFromSetToPosition(Translation2d position, Set<Translation2d> objects) {
@@ -190,7 +198,7 @@ public class ObjectPoseEstimator extends SubsystemBase {
     }
 
     private void removeOldObjects() {
-        objectPositionsToTimeStamp.entrySet().removeIf(entry -> isTooOld(entry.getValue()));
+        objectPositionsToTimestamp.entrySet().removeIf(entry -> isTooOld(entry.getValue()));
     }
 
     private boolean isTooOld(double timestamp) {
