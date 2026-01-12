@@ -22,7 +22,7 @@ public class ObjectPoseEstimator extends SubsystemBase {
     /**
      * Holds the position of each detected object and when it was detected.
      */
-    private final HashMap<Translation2d, Double> objectPositionsToTimestamp;
+    private final KDTree2D<Translation2d, Double> objectPositionsToTimestamp;
 
     /**
      * Constructs an ObjectPoseEstimator for estimating the positions of objects detected by camera.
@@ -132,9 +132,10 @@ public class ObjectPoseEstimator extends SubsystemBase {
     }
 
     private void updateTrackedObjectsPositions() {
+        final Translation2d[] visibleObjects = camera.getObjectsPositionsOnField(gamePieceType);
         final HashMap<Translation2d, Translation2d> trackedObjectsToUpdatedPositions = new HashMap<>();
 
-        for (Translation2d visibleObject : camera.getObjectsPositionsOnField(gamePieceType)) {
+        for (Translation2d visibleObject : visibleObjects) {
             updateObjectPosition(visibleObject, trackedObjectsToUpdatedPositions);
         }
 
@@ -144,7 +145,7 @@ public class ObjectPoseEstimator extends SubsystemBase {
     private void commitObjectUpdates(HashMap<Translation2d, Translation2d> currentToNewObjectPositions) {
         final double currentTimestamp = Timer.getTimestamp();
 
-        currentToNewObjectPositions.keySet().forEach(objectPositionsToTimestamp::remove);
+        objectPositionsToTimestamp.keySet().removeAll(currentToNewObjectPositions.keySet());
         currentToNewObjectPositions.values().forEach(object -> objectPositionsToTimestamp.put(object, currentTimestamp));
     }
 
@@ -209,16 +210,14 @@ public class ObjectPoseEstimator extends SubsystemBase {
     private Translation2d getClosestObjectFromSetToPosition(Translation2d position, Set<Translation2d> objects) {
         if (objects.isEmpty())
             return null;
-        final Translation2d[] objectsTranslations = objects.toArray(Translation2d[]::new);
-        Translation2d closestObjectTranslation = objectsTranslations[0];
-        double closestObjectDistance = position.getDistance(closestObjectTranslation);
+        Translation2d closestObjectTranslation = null;
+        double closestObjectDistance = Double.MAX_VALUE;
 
-        for (int i = 1; i < objectsTranslations.length; i++) {
-            final Translation2d currentObjectTranslation = objectsTranslations[i];
-            final double currentObjectDistance = position.getDistance(currentObjectTranslation);
+        for (Translation2d object : objects) {
+            final double currentObjectDistance = position.getDistance(object);
             if (currentObjectDistance < closestObjectDistance) {
                 closestObjectDistance = currentObjectDistance;
-                closestObjectTranslation = currentObjectTranslation;
+                closestObjectTranslation = object;
             }
         }
         return closestObjectTranslation;
