@@ -19,7 +19,6 @@ public class ObjectPoseEstimator extends SubsystemBase {
     private final double deletionThresholdSeconds;
     private final SimulatedGamePieceConstants.GamePieceType gamePieceType;
     private final ObjectDetectionCamera camera;
-    private final Set<Translation2d> excludedKnownObjects = new HashSet<>();
     /**
      * Holds the position of each detected object and when it was detected.
      */
@@ -136,7 +135,6 @@ public class ObjectPoseEstimator extends SubsystemBase {
         final HashMap<Translation2d, Translation2d> trackedObjectsToUpdatedPositions = new HashMap<>();
 
         for (Translation2d visibleObject : camera.getObjectsPositionsOnField(gamePieceType)) {
-            excludedKnownObjects.clear();
             final Translation2d closestKnownObjectToVisibleObject = getClosestKnownObjectToPosition(visibleObject);
             updateObjectPosition(visibleObject, closestKnownObjectToVisibleObject, trackedObjectsToUpdatedPositions);
         }
@@ -159,31 +157,32 @@ public class ObjectPoseEstimator extends SubsystemBase {
     }
 
     private void updateHashMapObject(Translation2d objectsUpdatedPosition, Translation2d objectToUpdate, HashMap<Translation2d, Translation2d> objectsToUpdatedPositions) {
-        if (objectsToUpdatedPositions.containsKey(objectToUpdate))
-            addClosestUpdatedPositionToHashMap(objectsUpdatedPosition, objectToUpdate, objectsToUpdatedPositions);
-        else
+        if (objectsToUpdatedPositions.containsKey(objectToUpdate)) {
+            final Set<Translation2d> excludedKnownObjects = new HashSet<>();
+            addClosestUpdatedPositionToHashMap(objectsUpdatedPosition, objectToUpdate, objectsToUpdatedPositions, excludedKnownObjects);
+        } else
             objectsToUpdatedPositions.put(objectToUpdate, objectsUpdatedPosition);
     }
 
-    private void addClosestUpdatedPositionToHashMap(Translation2d objectsUpdatedPosition, Translation2d objectToUpdate, HashMap<Translation2d, Translation2d> objectsToUpdatedPositions) {
+    private void addClosestUpdatedPositionToHashMap(Translation2d objectsUpdatedPosition, Translation2d objectToUpdate, HashMap<Translation2d, Translation2d> objectsToUpdatedPositions, Set<Translation2d> excludedKnownObjects) {
         final Translation2d existingUpdatedPosition = objectsToUpdatedPositions.get(objectToUpdate);
         if (shouldReplaceExistingUpdateWithNewUpdate(objectsUpdatedPosition, existingUpdatedPosition, objectToUpdate)) {
             objectsToUpdatedPositions.replace(objectToUpdate, objectsUpdatedPosition);
-            updatePositionOfDiscardedObjectUpdate(existingUpdatedPosition, objectToUpdate, objectsToUpdatedPositions);
+            updatePositionOfDiscardedObjectUpdate(existingUpdatedPosition, objectToUpdate, objectsToUpdatedPositions, excludedKnownObjects);
             return;
         }
-        updatePositionOfDiscardedObjectUpdate(objectsUpdatedPosition, objectToUpdate, objectsToUpdatedPositions);
+        updatePositionOfDiscardedObjectUpdate(objectsUpdatedPosition, objectToUpdate, objectsToUpdatedPositions, excludedKnownObjects);
     }
 
-    private void updatePositionOfDiscardedObjectUpdate(Translation2d discardedObjectUpdate, Translation2d previousClosestObject, HashMap<Translation2d, Translation2d> objectsToUpdatedPositions) {
+    private void updatePositionOfDiscardedObjectUpdate(Translation2d discardedObjectUpdate, Translation2d previousClosestObject, HashMap<Translation2d, Translation2d> objectsToUpdatedPositions, Set<Translation2d> excludedKnownObjects) {
         excludedKnownObjects.add(previousClosestObject);
-        Translation2d nextClosestObjectToDiscardedObjectUpdate = getNextClosestKnownObjectToPosition(discardedObjectUpdate);
+        final Translation2d nextClosestObjectToDiscardedObjectUpdate = getNextClosestKnownObjectToPosition(discardedObjectUpdate, excludedKnownObjects);
         if (nextClosestObjectToDiscardedObjectUpdate == null ||
                 discardedObjectUpdate.getDistance(nextClosestObjectToDiscardedObjectUpdate) > ObjectDetectionConstants.TRACKED_OBJECT_TOLERANCE_METERS) {
             objectsToUpdatedPositions.put(discardedObjectUpdate, discardedObjectUpdate);
             return;
         }
-        updateObjectPosition(discardedObjectUpdate, nextClosestObjectToDiscardedObjectUpdate, objectsToUpdatedPositions);
+        addClosestUpdatedPositionToHashMap(discardedObjectUpdate, nextClosestObjectToDiscardedObjectUpdate, objectsToUpdatedPositions, excludedKnownObjects);
     }
 
     private boolean shouldReplaceExistingUpdateWithNewUpdate(Translation2d newUpdate, Translation2d existingUpdate, Translation2d objectToUpdate) {
@@ -197,7 +196,7 @@ public class ObjectPoseEstimator extends SubsystemBase {
         return object.getDistance(getClosestKnownObjectToPosition(object)) > ObjectDetectionConstants.TRACKED_OBJECT_TOLERANCE_METERS;
     }
 
-    private Translation2d getNextClosestKnownObjectToPosition(Translation2d position) {
+    private Translation2d getNextClosestKnownObjectToPosition(Translation2d position, Set<Translation2d> excludedKnownObjects) {
         Set<Translation2d> candidateObjects = new HashSet<>(objectPositionsToTimestamp.keySet());
         candidateObjects.removeAll(excludedKnownObjects);
         return getClosestObjectFromSetToPosition(position, candidateObjects);
