@@ -141,11 +141,11 @@ public class ObjectPoseEstimator extends SubsystemBase {
         if (isObjectNew(object))
             currentToNewObjectPositions.put(object, object);
         else
-            currentToNewObjectPositions = updateHashMapObject(object, closestObjectToTargetObject, currentToNewObjectPositions);
+            updateHashMapObject(object, closestObjectToTargetObject, currentToNewObjectPositions);
         return currentToNewObjectPositions;
     }
 
-    private HashMap<Translation2d, Translation2d> updateHashMapObject(Translation2d objectUpdate, Translation2d closestObjectToObjectUpdate, HashMap<Translation2d, Translation2d> objectsToUpdate) {
+    private void updateHashMapObject(Translation2d objectUpdate, Translation2d closestObjectToObjectUpdate, HashMap<Translation2d, Translation2d> objectsToUpdate) {
         if (objectsToUpdate.containsKey(closestObjectToObjectUpdate)) {
             final Translation2d closestKnownObjectPreviousUpdate = objectsToUpdate.get(closestObjectToObjectUpdate);
             if (objectUpdate.getDistance(closestObjectToObjectUpdate) < closestKnownObjectPreviousUpdate.getDistance(closestObjectToObjectUpdate)) {
@@ -154,7 +154,6 @@ public class ObjectPoseEstimator extends SubsystemBase {
             }
         } else
             objectsToUpdate.put(closestObjectToObjectUpdate, objectUpdate);
-        return objectsToUpdate;
     }
 
     private boolean isObjectNew(Translation2d object) {
