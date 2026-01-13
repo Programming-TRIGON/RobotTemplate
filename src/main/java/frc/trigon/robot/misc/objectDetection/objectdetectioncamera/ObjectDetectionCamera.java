@@ -44,12 +44,14 @@ public class ObjectDetectionCamera extends SubsystemBase {
         if (targetObjectsTranslation.length == 0)
             return null;
         Translation2d closestObjectTranslation = targetObjectsTranslation[0];
+        double closestObjectDistanceToRobot = currentRobotTranslation.getDistance(closestObjectTranslation);
 
         for (Translation2d currentObjectTranslation : targetObjectsTranslation) {
-            final double closestObjectDistanceToRobot = currentRobotTranslation.getDistance(closestObjectTranslation);
             final double currentObjectDistanceToRobot = currentRobotTranslation.getDistance(currentObjectTranslation);
-            if (currentObjectDistanceToRobot < closestObjectDistanceToRobot)
+            if (currentObjectDistanceToRobot < closestObjectDistanceToRobot) {
                 closestObjectTranslation = currentObjectTranslation;
+                closestObjectDistanceToRobot = currentRobotTranslation.getDistance(closestObjectTranslation);
+            }
         }
         return closestObjectTranslation;
     }

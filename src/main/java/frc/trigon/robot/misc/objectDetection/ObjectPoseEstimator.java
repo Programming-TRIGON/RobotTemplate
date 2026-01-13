@@ -152,7 +152,7 @@ public class ObjectPoseEstimator extends SubsystemBase {
 
     private void updateObjectPosition(Translation2d object, HashMap<Translation2d, Translation2d> trackedObjectsToUpdatedPositions) {
         final Translation2d nearestTrackedObject = getClosestTrackedObjectToPosition(object);
-        if (isObjectAlreadyStored(object, nearestTrackedObject))
+        if (isObjectNotStored(object, nearestTrackedObject))
             trackedObjectsToUpdatedPositions.put(object, object);
         else
             assignUpdateToTrackedObject(object, nearestTrackedObject, trackedObjectsToUpdatedPositions);
@@ -192,7 +192,7 @@ public class ObjectPoseEstimator extends SubsystemBase {
                 existingUpdate.getDistance(trackedObject);
     }
 
-    private boolean isObjectAlreadyStored(Translation2d object, Translation2d nearestTrackedObject) {
+    private boolean isObjectNotStored(Translation2d object, Translation2d nearestTrackedObject) {
         if (nearestTrackedObject == null)
             return true;
         return object.getDistance(nearestTrackedObject) > ObjectDetectionConstants.TRACKED_OBJECT_TOLERANCE_METERS;
