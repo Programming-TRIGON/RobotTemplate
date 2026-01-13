@@ -1,10 +1,12 @@
 package frc.trigon.robot.constants;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.trigon.robot.commands.commandclasses.IntakeAssistCommand;
-import lib.hardware.misc.KeyboardController;
-import lib.hardware.misc.XboxController;
+import frc.trigon.lib.hardware.misc.KeyboardController;
+import frc.trigon.lib.hardware.misc.XboxController;
+
+import java.util.function.DoubleUnaryOperator;
 
 public class OperatorConstants {
     public static final double DRIVER_CONTROLLER_DEADBAND = 0.07;
@@ -22,8 +24,16 @@ public class OperatorConstants {
             TRANSLATION_STICK_SPEED_DIVIDER = 1,
             ROTATION_STICK_SPEED_DIVIDER = 1;
 
-    public static final double INTAKE_ASSIST_SCALAR = 0.0;
-    public static final IntakeAssistCommand.AssistMode DEFAULT_INTAKE_ASSIST_MODE = IntakeAssistCommand.AssistMode.ALTERNATE_ASSIST;
+    public static final double MINIMUM_VELOCITY_TOWARDS_GAME_PIECE_FOR_INTAKE_ASSIST_METERS_PER_SECOND = 1;
+    private static final double
+            INTAKE_ASSIST_MAXIMUM_ASSISTABLE_ANGLE_FORMULA_INTERCEPT = 60,
+            INTAKE_ASSIST_MAXIMUM_ASSISTABLE_ANGLE_FORMULA_SLOPE = -15;
+    public static final DoubleUnaryOperator INTAKE_ASSIST_MAXIMUM_ASSISTABLE_ANGLE_FORMULA =
+            x -> MathUtil.clamp(
+                    (INTAKE_ASSIST_MAXIMUM_ASSISTABLE_ANGLE_FORMULA_SLOPE * x) + INTAKE_ASSIST_MAXIMUM_ASSISTABLE_ANGLE_FORMULA_INTERCEPT,
+                    0,
+                    INTAKE_ASSIST_MAXIMUM_ASSISTABLE_ANGLE_FORMULA_INTERCEPT
+            );
 
     public static final Trigger
             RESET_HEADING_TRIGGER = DRIVER_CONTROLLER.y(),
