@@ -8,14 +8,13 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
-import frc.trigon.robot.constants.RobotConstants;
-import frc.trigon.robot.poseestimation.poseestimator.PoseEstimatorConstants;
-import frc.trigon.robot.subsystems.swerve.SwerveConstants;
 import frc.trigon.lib.hardware.phoenix6.cancoder.CANcoderEncoder;
 import frc.trigon.lib.hardware.phoenix6.cancoder.CANcoderSignal;
 import frc.trigon.lib.hardware.phoenix6.talonfx.TalonFXMotor;
 import frc.trigon.lib.hardware.phoenix6.talonfx.TalonFXSignal;
 import frc.trigon.lib.utilities.Conversions;
+import frc.trigon.robot.poseestimation.poseestimator.PoseEstimatorConstants;
+import frc.trigon.robot.subsystems.swerve.SwerveConstants;
 
 public class SwerveModule {
     private final TalonFXMotor
@@ -49,9 +48,7 @@ public class SwerveModule {
     }
 
     public void setTargetState(SwerveModuleState targetState) {
-        if (willOptimize(targetState)) {
-            targetState.optimize(getCurrentSteerAngle());
-        }
+        targetState.optimize(getCurrentSteerAngle());
 
         this.targetState = targetState;
         setTargetSteerAngle(targetState.angle);
@@ -132,9 +129,10 @@ public class SwerveModule {
         );
     }
 
-    private boolean willOptimize(SwerveModuleState state) {
+    private boolean
+    willOptimize(SwerveModuleState state) {
         final Rotation2d angularDelta = state.angle.minus(getCurrentSteerAngle());
-        return Math.abs(angularDelta.getRadians()) > Math.PI / 2;
+        return true;
     }
 
     /**

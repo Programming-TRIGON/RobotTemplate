@@ -66,7 +66,7 @@ public class SwerveModuleConstants {
         config.Audio.BeepOnConfig = false;
 
         config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-        config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         config.Feedback.SensorToMechanismRatio = DRIVE_MOTOR_GEAR_RATIO;
 
         final double driveMotorSlipCurrent = AutonomousConstants.ROBOT_CONFIG.moduleConfig.driveCurrentLimit;
@@ -96,7 +96,7 @@ public class SwerveModuleConstants {
         config.Audio.BeepOnBoot = false;
         config.Audio.BeepOnConfig = true;
 
-        config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+        config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
         config.CurrentLimits.StatorCurrentLimit = RobotHardwareStats.isSimulation() ? 200 : 50;
@@ -106,7 +106,7 @@ public class SwerveModuleConstants {
         config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
         config.Feedback.FeedbackRemoteSensorID = feedbackRemoteSensorID;
 
-        config.Slot0.kP = RobotHardwareStats.isSimulation() ? 120 : 30;
+        config.Slot0.kP = RobotHardwareStats.isSimulation() ? 120 : 40;
         config.Slot0.kI = RobotHardwareStats.isSimulation() ? 0 : 0;
         config.Slot0.kD = RobotHardwareStats.isSimulation() ? 0 : 0;
         config.ClosedLoopGeneral.ContinuousWrap = true;

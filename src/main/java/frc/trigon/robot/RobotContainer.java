@@ -13,6 +13,7 @@ import frc.trigon.lib.subsystems.MotorSubsystem;
 import frc.trigon.lib.subsystems.flywheel.SimpleMotorSubsystem;
 import frc.trigon.lib.subsystems.flywheel.SimpleMotorSubsystemCommands;
 import frc.trigon.lib.utilities.flippable.Flippable;
+import frc.trigon.robot.commands.commandfactories.GeneralCommands;
 import frc.trigon.robot.constants.AutonomousConstants;
 import frc.trigon.robot.constants.CameraConstants;
 import frc.trigon.robot.constants.LEDConstants;
@@ -58,7 +59,7 @@ public class RobotContainer {
     }
 
     private void bindDefaultCommands() {
-        //  SWERVE.setDefaultCommand(GeneralCommands.getFieldRelativeDriveCommand());
+        SWERVE.setDefaultCommand(GeneralCommands.getFieldRelativeDriveCommand());
         // ARM.setDefaultCommand(ArmSubsystemCommands.getSetTargetStateCommand(ArmConstants.ArmState.REST, ARM));
         //  ELEVATOR.setDefaultCommand(ElevatorSubsystemCommands.getSetTargetStateCommand(ElevatorConstants.ElevatorState.REST,ELEVATOR));
         FLY_WHEEL.setDefaultCommand(SimpleMotorSubsystemCommands.getSetTargetStateCommand(FlyWheelConstants.FlyWheelState.REST, FLY_WHEEL));

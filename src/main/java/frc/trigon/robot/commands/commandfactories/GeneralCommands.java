@@ -14,7 +14,7 @@ import java.util.function.BooleanSupplier;
  */
 public class GeneralCommands {
     public static Command getFieldRelativeDriveCommand() {
-        return SwerveCommands.getClosedLoopFieldRelativeDriveCommand(
+        return SwerveCommands.getOpenLoopFieldRelativeDriveCommand(
                 () -> CommandConstants.calculateDriveStickAxisValue(OperatorConstants.DRIVER_CONTROLLER.getLeftY()),
                 () -> CommandConstants.calculateDriveStickAxisValue(OperatorConstants.DRIVER_CONTROLLER.getLeftX()),
                 () -> CommandConstants.calculateDriveStickAxisValue(OperatorConstants.DRIVER_CONTROLLER.getRightX())

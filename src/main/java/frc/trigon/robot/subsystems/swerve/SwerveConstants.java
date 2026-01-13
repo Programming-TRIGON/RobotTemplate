@@ -30,7 +30,7 @@ public class SwerveConstants {
     private static final double
             FRONT_LEFT_STEER_ENCODER_OFFSET_ROTATIONS = -0.441,
             FRONT_RIGHT_STEER_ENCODER_OFFSET_ROTATIONS = -0.285,
-            REAR_LEFT_STEER_ENCODER_OFFSET_ROTATIONS = 0.493,
+            REAR_LEFT_STEER_ENCODER_OFFSET_ROTATIONS = 0.430,
             REAR_RIGHT_STEER_ENCODER_OFFSET_ROTATIONS = -0.038;
     private static final double//TODO:Calibrate
             FRONT_LEFT_WHEEL_DIAMETER = 0.05 * 2,
