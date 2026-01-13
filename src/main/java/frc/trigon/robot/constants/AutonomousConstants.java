@@ -65,7 +65,7 @@ public class AutonomousConstants {
                 RobotContainer.ROBOT_POSE_ESTIMATOR::getEstimatedRobotPose,
                 RobotContainer.ROBOT_POSE_ESTIMATOR::resetPose,
                 RobotContainer.SWERVE::getSelfRelativeChassisSpeeds,
-                (chassisSpeeds -> RobotContainer.SWERVE.drivePathPlanner(chassisSpeeds, true)),
+                RobotContainer.SWERVE::drivePathPlanner,
                 AUTO_PATH_FOLLOWING_CONTROLLER,
                 ROBOT_CONFIG,
                 Flippable::isRedAlliance,
