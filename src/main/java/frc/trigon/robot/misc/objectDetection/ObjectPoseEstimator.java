@@ -157,17 +157,20 @@ public class ObjectPoseEstimator extends SubsystemBase {
         }
         final Translation2d previousUpdate = trackedObjectsToUpdatedPositions.get(closestAvailableTrackedObjectToVisibleObject);
         trackedObjectsToUpdatedPositions.replace(closestAvailableTrackedObjectToVisibleObject, objectUpdate);
-        updateObjectPosition(previousUpdate, trackedObjectsToUpdatedPositions);
+        if (previousUpdate != null)
+            updateObjectPosition(previousUpdate, trackedObjectsToUpdatedPositions);
     }
 
     private Translation2d getClosestAvailableObjectToUpdate(Translation2d update, HashMap<Translation2d, Translation2d> objectsWithUpdates) {
         Set<Translation2d> availableObjectsToUpdate = getAvailableObjectsToUpdate(update, objectsWithUpdates);
-        if (availableObjectsToUpdate.isEmpty())
+        if (availableObjectsToUpdate == null || availableObjectsToUpdate.isEmpty())
             return null;
         return getClosestObjectFromSetToPosition(update, availableObjectsToUpdate);
     }
 
     private Set<Translation2d> getAvailableObjectsToUpdate(Translation2d update, HashMap<Translation2d, Translation2d> objectsWithUpdates) {
+        if (objectPositionsToTimestamp.isEmpty())
+            return null;
         final Set<Translation2d> availableObjects = new HashSet<>();
         for (Translation2d currentObject : objectPositionsToTimestamp.keySet()) {
             final double updateDistanceFromCurrentObject = update.getDistance(currentObject);
