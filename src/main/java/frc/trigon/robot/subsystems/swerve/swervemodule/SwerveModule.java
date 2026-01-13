@@ -40,9 +40,9 @@ public class SwerveModule {
      * @param wheelDiameter   the diameter of the wheel
      */
     public SwerveModule(int moduleID, double offsetRotations, double wheelDiameter) {
-        driveMotor = new TalonFXMotor(moduleID, "Module" + moduleID + "Drive", RobotConstants.CANIVORE_NAME);
-        steerMotor = new TalonFXMotor(moduleID + 4, "Module" + moduleID + "Steer", RobotConstants.CANIVORE_NAME);
-        steerEncoder = new CANcoderEncoder(moduleID + 4, "Module" + moduleID + "SteerEncoder", RobotConstants.CANIVORE_NAME);
+        driveMotor = new TalonFXMotor(moduleID, "Module" + moduleID + "Drive");
+        steerMotor = new TalonFXMotor(moduleID + 4, "Module" + moduleID + "Steer");
+        steerEncoder = new CANcoderEncoder(moduleID + 4, "Module" + moduleID + "SteerEncoder");
         this.wheelDiameter = wheelDiameter;
 
         configureHardware(offsetRotations);

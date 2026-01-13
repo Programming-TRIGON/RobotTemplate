@@ -4,6 +4,7 @@ import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.pathplanner.lib.config.PIDConstants;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
@@ -19,7 +20,7 @@ import frc.trigon.robot.subsystems.swerve.swervemodule.SwerveModule;
 public class SwerveConstants {
     private static final int GYRO_ID = 0;
     private static final String GYRO_NAME = "SwerveGyro";
-    static final Pigeon2Gyro GYRO = new Pigeon2Gyro(GYRO_ID, GYRO_NAME, RobotConstants.CANIVORE_NAME);
+    static final Pigeon2Gyro GYRO = new Pigeon2Gyro(GYRO_ID, GYRO_NAME);
 
     public static final int
             FRONT_LEFT_ID = 1,
@@ -27,10 +28,10 @@ public class SwerveConstants {
             REAR_LEFT_ID = 3,
             REAR_RIGHT_ID = 4;
     private static final double
-            FRONT_LEFT_STEER_ENCODER_OFFSET_ROTATIONS = 0,
-            FRONT_RIGHT_STEER_ENCODER_OFFSET_ROTATIONS = 0,
-            REAR_LEFT_STEER_ENCODER_OFFSET_ROTATIONS = 0,
-            REAR_RIGHT_STEER_ENCODER_OFFSET_ROTATIONS = 0;
+            FRONT_LEFT_STEER_ENCODER_OFFSET_ROTATIONS = -0.441,
+            FRONT_RIGHT_STEER_ENCODER_OFFSET_ROTATIONS = -0.285,
+            REAR_LEFT_STEER_ENCODER_OFFSET_ROTATIONS = 0.493,
+            REAR_RIGHT_STEER_ENCODER_OFFSET_ROTATIONS = -0.038;
     private static final double//TODO:Calibrate
             FRONT_LEFT_WHEEL_DIAMETER = 0.05 * 2,
             FRONT_RIGHT_WHEEL_DIAMETER = 0.05 * 2,
@@ -102,9 +103,9 @@ public class SwerveConstants {
     private static void configureGyro() {
         final Pigeon2Configuration config = new Pigeon2Configuration();
         //TODO:Calibrate
-        config.MountPose.MountPoseYaw = 0;
-        config.MountPose.MountPosePitch = 0;
-        config.MountPose.MountPoseRoll = 0;
+        config.MountPose.MountPoseYaw = Rotation2d.fromDegrees(-11.623535).getRotations();
+        config.MountPose.MountPosePitch = Rotation2d.fromDegrees(-0.395508).getRotations();
+        config.MountPose.MountPoseRoll = Rotation2d.fromDegrees(-0.043945).getRotations();
 
         GYRO.applyConfiguration(config);
         GYRO.setSimulationYawVelocitySupplier(() -> Units.radiansToDegrees(RobotContainer.SWERVE.getRotationalVelocityRadiansPerSecond()));

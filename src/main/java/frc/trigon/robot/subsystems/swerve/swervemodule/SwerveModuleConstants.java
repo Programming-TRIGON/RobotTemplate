@@ -15,8 +15,8 @@ import frc.trigon.robot.constants.AutonomousConstants;
 
 public class SwerveModuleConstants {
     private static final double
-            DRIVE_MOTOR_GEAR_RATIO = 7.13,
-            REAR_STEER_MOTOR_GEAR_RATIO = 12.8;
+            DRIVE_MOTOR_GEAR_RATIO = 6.03,
+            REAR_STEER_MOTOR_GEAR_RATIO = 26.09;
     static final boolean ENABLE_FOC = true;
 
     private static final double
@@ -96,7 +96,7 @@ public class SwerveModuleConstants {
         config.Audio.BeepOnBoot = false;
         config.Audio.BeepOnConfig = true;
 
-        config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
         config.CurrentLimits.StatorCurrentLimit = RobotHardwareStats.isSimulation() ? 200 : 50;
@@ -106,7 +106,7 @@ public class SwerveModuleConstants {
         config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
         config.Feedback.FeedbackRemoteSensorID = feedbackRemoteSensorID;
 
-        config.Slot0.kP = RobotHardwareStats.isSimulation() ? 120 : 40;
+        config.Slot0.kP = RobotHardwareStats.isSimulation() ? 120 : 30;
         config.Slot0.kI = RobotHardwareStats.isSimulation() ? 0 : 0;
         config.Slot0.kD = RobotHardwareStats.isSimulation() ? 0 : 0;
         config.ClosedLoopGeneral.ContinuousWrap = true;

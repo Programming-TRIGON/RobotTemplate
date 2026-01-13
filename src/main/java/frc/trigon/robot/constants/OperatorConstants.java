@@ -2,13 +2,13 @@ package frc.trigon.robot.constants;
 
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.trigon.robot.commands.commandclasses.IntakeAssistCommand;
 import frc.trigon.lib.hardware.misc.KeyboardController;
 import frc.trigon.lib.hardware.misc.XboxController;
+import frc.trigon.robot.commands.commandclasses.IntakeAssistCommand;
 
 public class OperatorConstants {
     public static final double DRIVER_CONTROLLER_DEADBAND = 0.07;
-    private static final int DRIVER_CONTROLLER_PORT = 0;
+    private static final int DRIVER_CONTROLLER_PORT = 1;
     private static final int
             DRIVER_CONTROLLER_RIGHT_STICK_EXPONENT = 1,
             DRIVER_CONTROLLER_LEFT_STICK_EXPONENT = 2;
@@ -33,5 +33,6 @@ public class OperatorConstants {
             FORWARD_QUASISTATIC_CHARACTERIZATION_TRIGGER = OPERATOR_CONTROLLER.right(),
             BACKWARD_QUASISTATIC_CHARACTERIZATION_TRIGGER = OPERATOR_CONTROLLER.left(),
             FORWARD_DYNAMIC_CHARACTERIZATION_TRIGGER = OPERATOR_CONTROLLER.up(),
-            BACKWARD_DYNAMIC_CHARACTERIZATION_TRIGGER = OPERATOR_CONTROLLER.down();
+            BACKWARD_DYNAMIC_CHARACTERIZATION_TRIGGER = OPERATOR_CONTROLLER.down(),
+            INTAKE_TRIGGER = DRIVER_CONTROLLER.leftTrigger();
 }

@@ -23,7 +23,7 @@ public class FlyWheelConstants {
 
     private static final String NAME = "FlyWheel";
     private final static double
-            GEAR_RATIO = 3,
+            GEAR_RATIO = 1,
             MOMENT_OF_INERTIA = 0.003,
             MAXIMUM_VELOCITY = 20,
             MAXIMUM_ACCELERATION = 7,
@@ -33,7 +33,7 @@ public class FlyWheelConstants {
             SYS_ID_RAMP_RATE = 3,
             SYS_ID_STEP_VOLTAGE = 1;
     private final static boolean FOC_ENABLED = true;
-    private final static boolean SHOULD_USE_VOLTAGE_CONTROL = false;
+    private final static boolean SHOULD_USE_VOLTAGE_CONTROL = true;
     private final static DCMotor GEAR_BOX = DCMotor.getKrakenX60Foc(2);
 
     static SimpleMotorSubsystemConfiguration FLY_WHEEL_CONFIG = new SimpleMotorSubsystemConfiguration();
@@ -72,10 +72,10 @@ public class FlyWheelConstants {
         config.Slot0.kP = 0;
         config.Slot0.kI = 0;
         config.Slot0.kD = 0;
-        config.Slot0.kS = 0.0069588;
+        config.Slot0.kS = 0;
         config.Slot0.kG = 0;
         config.Slot0.kA = 0;
-        config.Slot0.kV = 0.37016;
+        config.Slot0.kV = 0;
 
         MASTER_MOTOR.applyConfiguration(config);
         MASTER_MOTOR.registerSignal(TalonFXSignal.POSITION, 100);
@@ -102,20 +102,19 @@ public class FlyWheelConstants {
 
     public enum FlyWheelState implements SimpleMotorSubsystem.SimpleMotorState {
         REST(0, null),
-        FORWARD(6, null),
-        BACKWARDS(-6, null);
+        INTAKE(6, null);
 
-        private final double targetVelocity;
+        private final double targetVoltage;
         private final FlyWheelState prepareState;
 
-        FlyWheelState(double targetVelocity, FlyWheelState prepareState) {
-            this.targetVelocity = targetVelocity;
+        FlyWheelState(double targetVoltage, FlyWheelState prepareState) {
+            this.targetVoltage = targetVoltage;
             this.prepareState = prepareState;
         }
 
         @Override
         public double getTargetUnit() {
-            return targetVelocity;
+            return targetVoltage;
         }
 
         @Override
