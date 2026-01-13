@@ -4,9 +4,9 @@ import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.trigon.lib.hardware.RobotHardwareStats;
 import frc.trigon.robot.RobotContainer;
-import frc.trigon.robot.misc.simulatedfield.SimulatedGamePieceConstants;
 import frc.trigon.robot.misc.objectDetection.objectdetectioncamera.io.PhotonObjectDetectionCameraIO;
 import frc.trigon.robot.misc.objectDetection.objectdetectioncamera.io.SimulationObjectDetectionCameraIO;
+import frc.trigon.robot.misc.simulatedfield.SimulatedGamePieceConstants;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -39,14 +39,13 @@ public class ObjectDetectionCamera extends SubsystemBase {
      * @return the closest object's 2D position on the field (z is assumed to be 0)
      */
     public Translation2d calculateClosestObjectPositionOnField(SimulatedGamePieceConstants.GamePieceType targetGamePiece) {
-        final Translation2d[] targetObjectsTranslation = getObjectsPositionsOnField(targetGamePiece);
+        final Translation2d[] targetObjectsTranslation = getObjectPositionsOnField(targetGamePiece);
         final Translation2d currentRobotTranslation = RobotContainer.ROBOT_POSE_ESTIMATOR.getEstimatedRobotPose().getTranslation();
         if (targetObjectsTranslation.length == 0)
             return null;
         Translation2d closestObjectTranslation = targetObjectsTranslation[0];
 
-        for (int i = 1; i < targetObjectsTranslation.length; i++) {
-            final Translation2d currentObjectTranslation = targetObjectsTranslation[i];
+        for (Translation2d currentObjectTranslation : targetObjectsTranslation) {
             final double closestObjectDistanceToRobot = currentRobotTranslation.getDistance(closestObjectTranslation);
             final double currentObjectDistanceToRobot = currentRobotTranslation.getDistance(currentObjectTranslation);
             if (currentObjectDistanceToRobot < closestObjectDistanceToRobot)
@@ -59,15 +58,15 @@ public class ObjectDetectionCamera extends SubsystemBase {
         return objectDetectionCameraInputs.hasObject[targetGamePiece.id];
     }
 
-    public Translation2d[] getObjectsPositionsOnField(SimulatedGamePieceConstants.GamePieceType targetGamePiece) {
-        final Rotation3d[] visibleObjectsRotations = getObjectsRotations(targetGamePiece);
-        final Translation2d[] objectsPositionsOnField = new Translation2d[visibleObjectsRotations.length];
+    public Translation2d[] getObjectPositionsOnField(SimulatedGamePieceConstants.GamePieceType targetGamePiece) {
+        final Rotation3d[] visibleObjectRotations = getObjectsRotations(targetGamePiece);
+        final Translation2d[] objectPositionsOnField = new Translation2d[visibleObjectRotations.length];
 
-        for (int i = 0; i < visibleObjectsRotations.length; i++)
-            objectsPositionsOnField[i] = calculateObjectPositionFromRotation(visibleObjectsRotations[i]);
+        for (int i = 0; i < visibleObjectRotations.length; i++)
+            objectPositionsOnField[i] = calculateObjectPositionFromRotation(visibleObjectRotations[i]);
 
-        Logger.recordOutput("ObjectDetectionCamera/Visible" + targetGamePiece.name(), objectsPositionsOnField);
-        return objectsPositionsOnField;
+        Logger.recordOutput("ObjectDetectionCamera/Visible" + targetGamePiece.name(), objectPositionsOnField);
+        return objectPositionsOnField;
     }
 
     public Rotation3d[] getObjectsRotations(SimulatedGamePieceConstants.GamePieceType targetGamePiece) {
@@ -75,7 +74,7 @@ public class ObjectDetectionCamera extends SubsystemBase {
     }
 
     /**
-     * Calculates the position of the object on the field from its 3D rotation relative to the camera.
+     * Calculates the position of an object on the field from its 3D rotation relative to the camera.
      * This assumes the object is on the ground.
      * Once it is known that the object is on the ground,
      * one can simply find the transform from the camera to the ground and apply it to the object's rotation.
