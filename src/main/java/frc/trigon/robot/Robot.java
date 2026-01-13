@@ -43,7 +43,7 @@ public class Robot extends LoggedRobot {
         autonomousCommand = robotContainer.getAutonomousCommand();
 
         if (autonomousCommand != null)
-            CommandScheduler.getInstance().schedule(autonomousCommand);
+            commandScheduler.schedule(autonomousCommand);
     }
 
     @Override
