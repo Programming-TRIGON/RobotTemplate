@@ -50,7 +50,7 @@ public class ObjectDetectionCamera extends SubsystemBase {
             final double currentObjectDistanceToRobot = currentRobotTranslation.getDistance(currentObjectTranslation);
             if (currentObjectDistanceToRobot < closestObjectDistanceToRobot) {
                 closestObjectTranslation = currentObjectTranslation;
-                closestObjectDistanceToRobot = currentRobotTranslation.getDistance(closestObjectTranslation);
+                closestObjectDistanceToRobot = currentObjectDistanceToRobot;
             }
         }
         return closestObjectTranslation;
