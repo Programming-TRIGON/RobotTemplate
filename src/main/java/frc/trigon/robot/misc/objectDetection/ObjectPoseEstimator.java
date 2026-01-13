@@ -136,9 +136,8 @@ public class ObjectPoseEstimator extends SubsystemBase {
         final Translation2d[] visibleObjects = camera.getObjectPositionsOnField(gamePieceType);
         final HashMap<Translation2d, Translation2d> trackedObjectsToUpdatedPositions = new HashMap<>();
 
-        for (Translation2d visibleObject : visibleObjects) {
+        for (Translation2d visibleObject : visibleObjects)
             updateObjectPosition(visibleObject, trackedObjectsToUpdatedPositions);
-        }
 
         updateObjectUpdates(trackedObjectsToUpdatedPositions);
     }
