@@ -13,7 +13,7 @@ import frc.trigon.lib.hardware.phoenix6.pigeon2.Pigeon2Signal;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.constants.AutonomousConstants;
 import frc.trigon.robot.constants.RobotConstants;
-import frc.trigon.robot.poseestimation.poseestimator.PoseEstimatorConstants;
+import frc.trigon.robot.poseestimation.robotposeestimator.RobotPoseEstimatorConstants;
 import frc.trigon.robot.subsystems.swerve.swervemodule.SwerveModule;
 
 public class SwerveConstants {
@@ -109,7 +109,7 @@ public class SwerveConstants {
         GYRO.applyConfiguration(config);
         GYRO.setSimulationYawVelocitySupplier(() -> RobotContainer.SWERVE.getRotationalVelocityRadiansPerSecond());//IMPORTANT: Leave as lambda expression, method reference will crash code
 
-        GYRO.registerThreadedSignal(Pigeon2Signal.YAW, PoseEstimatorConstants.ODOMETRY_FREQUENCY_HERTZ);
+        GYRO.registerThreadedSignal(Pigeon2Signal.YAW, RobotPoseEstimatorConstants.ODOMETRY_FREQUENCY_HERTZ);
     }
 
     private static void configurePIDControllers() {

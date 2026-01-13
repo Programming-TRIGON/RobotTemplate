@@ -9,18 +9,18 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.trigon.robot.RobotContainer;
+import frc.trigon.robot.poseestimation.robotposeestimator.RobotPoseEstimatorConstants;
+import frc.trigon.robot.constants.AutonomousConstants;
+import frc.trigon.robot.subsystems.MotorSubsystem;
+import frc.trigon.robot.subsystems.swerve.swervemodule.SwerveModule;
+import frc.trigon.robot.subsystems.swerve.swervemodule.SwerveModuleConstants;
 import frc.trigon.lib.hardware.phoenix6.Phoenix6SignalThread;
 import frc.trigon.lib.hardware.phoenix6.pigeon2.Pigeon2Gyro;
 import frc.trigon.lib.hardware.phoenix6.pigeon2.Pigeon2Signal;
 import frc.trigon.lib.utilities.flippable.Flippable;
 import frc.trigon.lib.utilities.flippable.FlippablePose2d;
 import frc.trigon.lib.utilities.flippable.FlippableRotation2d;
-import frc.trigon.robot.RobotContainer;
-import frc.trigon.robot.constants.AutonomousConstants;
-import frc.trigon.robot.poseestimation.poseestimator.PoseEstimatorConstants;
-import frc.trigon.robot.subsystems.MotorSubsystem;
-import frc.trigon.robot.subsystems.swerve.swervemodule.SwerveModule;
-import frc.trigon.robot.subsystems.swerve.swervemodule.SwerveModuleConstants;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -32,7 +32,7 @@ public class Swerve extends MotorSubsystem {
 
     public Swerve() {
         setName("Swerve");
-        phoenix6SignalThread.setThreadFrequencyHertz(PoseEstimatorConstants.ODOMETRY_FREQUENCY_HERTZ);
+        phoenix6SignalThread.setThreadFrequencyHertz(RobotPoseEstimatorConstants.ODOMETRY_FREQUENCY_HERTZ);
     }
 
     @Override
