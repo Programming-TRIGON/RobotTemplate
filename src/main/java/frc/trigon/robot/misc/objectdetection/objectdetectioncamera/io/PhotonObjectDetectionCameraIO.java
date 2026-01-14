@@ -1,10 +1,10 @@
-package frc.trigon.robot.misc.objectDetection.objectdetectioncamera.io;
+package frc.trigon.robot.misc.objectdetection.objectdetectioncamera.io;
 
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.util.Units;
-import frc.trigon.robot.misc.objectDetection.ObjectDetectionConstants;
-import frc.trigon.robot.misc.objectDetection.objectdetectioncamera.ObjectDetectionCameraIO;
-import frc.trigon.robot.misc.objectDetection.objectdetectioncamera.ObjectDetectionCameraInputsAutoLogged;
+import frc.trigon.robot.misc.objectdetection.ObjectDetectionConstants;
+import frc.trigon.robot.misc.objectdetection.objectdetectioncamera.ObjectDetectionCameraIO;
+import frc.trigon.robot.misc.objectdetection.objectdetectioncamera.ObjectDetectionCameraInputsAutoLogged;
 import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;

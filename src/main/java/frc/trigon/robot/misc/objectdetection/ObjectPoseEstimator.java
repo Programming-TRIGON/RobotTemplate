@@ -1,4 +1,4 @@
-package frc.trigon.robot.misc.objectDetection;
+package frc.trigon.robot.misc.objectdetection;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -6,7 +6,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.trigon.robot.RobotContainer;
-import frc.trigon.robot.misc.objectDetection.objectdetectioncamera.ObjectDetectionCamera;
+import frc.trigon.robot.misc.objectdetection.objectdetectioncamera.ObjectDetectionCamera;
 import frc.trigon.robot.misc.simulatedfield.SimulatedGamePieceConstants;
 import org.littletonrobotics.junction.Logger;
 

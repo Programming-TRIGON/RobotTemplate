@@ -1,4 +1,4 @@
-package frc.trigon.robot.misc.objectDetection;
+package frc.trigon.robot.misc.objectdetection;
 
 import frc.trigon.robot.misc.simulatedfield.SimulatedGamePieceConstants;
 

@@ -1,7 +1,7 @@
-package frc.trigon.robot.misc.objectDetection.objectdetectioncamera;
+package frc.trigon.robot.misc.objectdetection.objectdetectioncamera;
 
 import edu.wpi.first.math.geometry.Rotation3d;
-import frc.trigon.robot.misc.objectDetection.ObjectDetectionConstants;
+import frc.trigon.robot.misc.objectdetection.ObjectDetectionConstants;
 import org.littletonrobotics.junction.AutoLog;
 
 public class ObjectDetectionCameraIO {
