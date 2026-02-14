@@ -102,7 +102,9 @@ public class SwerveModule {
     }
 
     public SwerveModuleState getCurrentState() {
-        return new SwerveModuleState(driveWheelRotationsToMeters(driveMotor.getSignal(TalonFXSignal.VELOCITY)), getCurrentSteerAngle());
+        final Rotation2d currentSteerAngle = getCurrentSteerAngle();
+        final double currentDriveVelocity = driveMotor.getSignal(TalonFXSignal.VELOCITY) - (currentSteerAngle.getRotations() * SwerveModuleConstants.COUPLED_RATIO);
+        return new SwerveModuleState(driveWheelRotationsToMeters(currentDriveVelocity), currentSteerAngle);
     }
 
     public SwerveModuleState getTargetState() {
@@ -147,6 +149,7 @@ public class SwerveModule {
      * @param targetVelocityMetersPerSecond the target drive velocity, in meters per second
      */
     private void setTargetDriveVelocity(double targetVelocityMetersPerSecond) {
+        targetVelocityMetersPerSecond -= steerMotor.getSignal(TalonFXSignal.VELOCITY) * SwerveModuleConstants.COUPLED_RATIO;
         if (shouldDriveMotorUseClosedLoop) {
             setTargetClosedLoopDriveVelocity(targetVelocityMetersPerSecond);
             return;
@@ -157,9 +160,6 @@ public class SwerveModule {
 
     private void setTargetClosedLoopDriveVelocity(double targetVelocityMetersPerSecond) {
         final double targetDriveVelocityRotationsPerSecond = metersToDriveWheelRotations(targetVelocityMetersPerSecond);
-        final double driveRateBackOut = targetDriveVelocityRotationsPerSecond * SwerveModuleConstants.COUPLED_RATIO;
-        final double velocityToSet = driveRateBackOut;
-
         driveMotor.setControl(driveVelocityRequest.withVelocity(targetDriveVelocityRotationsPerSecond));
     }
 
