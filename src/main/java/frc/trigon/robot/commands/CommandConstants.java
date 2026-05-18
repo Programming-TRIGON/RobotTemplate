@@ -67,11 +67,6 @@ public class CommandConstants {
                     (omegaRadiansPerSecond) -> RobotContainer.SWERVE.selfRelativeDrive(new ChassisSpeeds(0, 0, omegaRadiansPerSecond)),
                     RobotContainer.SWERVE
             );
-    public static final Command //Robot-specific commands
-            INDICATE_ALLIANCE_SHIFT_COMMAND = new InstantCommand(() -> OperatorConstants.DRIVER_CONTROLLER.rumble(
-            INDICATE_ALLIANCE_SHIFT_RUMBLE_DURATION_SECONDS,
-            INDICATE_ALLIANCE_SHIFT_RUMBLE_POWER
-    ));
 
     /**
      * Calculates the target drive power from an axis value by dividing it by the shift mode value.
