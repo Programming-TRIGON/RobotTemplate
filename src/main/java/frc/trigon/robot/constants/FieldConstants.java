@@ -7,6 +7,8 @@ import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
+import frc.trigon.lib.utilities.BoundingBox;
 import frc.trigon.lib.utilities.FilesHandler;
 
 import java.io.IOException;
@@ -17,6 +19,10 @@ public class FieldConstants {
     public static final double
             FIELD_WIDTH_METERS = FlippingUtil.fieldSizeY,
             FIELD_LENGTH_METERS = FlippingUtil.fieldSizeX;
+    public static final BoundingBox FIELD_BOUNDING_BOX = new BoundingBox(
+            new Translation2d(0, 0),
+            new Translation2d(FIELD_LENGTH_METERS, FIELD_WIDTH_METERS)
+    );
     private static final List<Integer> I_HATE_YOU = List.of(
             //Tags to ignore
     );
