@@ -6,20 +6,20 @@ import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.trigon.lib.utilities.QuickSortHandler;
+import frc.trigon.lib.utilities.flippable.Flippable;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.constants.FieldConstants;
 import frc.trigon.robot.poseestimation.apriltagcamera.AprilTagCamera;
 import frc.trigon.robot.poseestimation.relativerobotposesource.RelativeRobotPoseSource;
 import frc.trigon.robot.poseestimation.relativerobotposesource.RelativeRobotPoseSourceConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveConstants;
-import frc.trigon.lib.utilities.QuickSortHandler;
-import frc.trigon.lib.utilities.flippable.Flippable;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -36,6 +36,7 @@ public class RobotPoseEstimator implements AutoCloseable {
     private final AprilTagCamera[] aprilTagCameras;
     private final RelativeRobotPoseSource relativeRobotPoseSource;
     private final boolean shouldUseRelativeRobotPoseSource;
+    private boolean hasUpdateFromCameras = false;
 
     /**
      * Constructs a new RobotPoseEstimator and sets the relativeRobotPoseSource.
@@ -49,7 +50,7 @@ public class RobotPoseEstimator implements AutoCloseable {
         this.relativeRobotPoseSource = relativeRobotPoseSource;
         this.shouldUseRelativeRobotPoseSource = true;
 
-        initialize();
+        initializeFieldWidget();
     }
 
     /**
@@ -63,7 +64,7 @@ public class RobotPoseEstimator implements AutoCloseable {
         this.relativeRobotPoseSource = null;
         this.shouldUseRelativeRobotPoseSource = false;
 
-        initialize();
+        initializeFieldWidget();
     }
 
     @Override
@@ -83,7 +84,7 @@ public class RobotPoseEstimator implements AutoCloseable {
     public void resetHeading() {
         final Rotation2d resetRotation = Flippable.isRedAlliance() ? Rotation2d.k180deg : Rotation2d.kZero;
         swerveDrivePoseEstimator.resetRotation(resetRotation);
-        swerveDriveOdometry.resetRotation(resetRotation);
+        swerveDriveOdometry.resetPose(new Pose2d(getEstimatedRobotPose().getTranslation(), resetRotation));
     }
 
     /**
@@ -120,6 +121,10 @@ public class RobotPoseEstimator implements AutoCloseable {
         return swerveDriveOdometry.getPoseMeters();
     }
 
+    public boolean hasUpdateFromCameras() {
+        return hasUpdateFromCameras;
+    }
+
     /**
      * Updates the pose estimator with the given swerve wheel positions and gyro rotations.
      * This function accepts an array of swerve wheel positions and an array of gyro rotations because the odometry can be updated at a faster rate than the main loop (which is 50 hertz).
@@ -137,7 +142,7 @@ public class RobotPoseEstimator implements AutoCloseable {
 
     /**
      * Gets the estimated pose of the robot at the target timestamp.
-     * Unlike {@link #getPredictedRobotFuturePose} which predicts a future pose, this gets a stored pose from the estimator's buffer.
+     * Unlike {@link #getPredictedRobotPose} which predicts a future pose, this gets a stored pose from the estimator's buffer.
      *
      * @param timestamp the Rio's FPGA timestamp
      * @return the robot's estimated pose at the timestamp
@@ -155,13 +160,15 @@ public class RobotPoseEstimator implements AutoCloseable {
      */
     public Pose2d getPredictedRobotPose(double seconds) {
         final ChassisSpeeds robotVelocity = RobotContainer.SWERVE.getSelfRelativeChassisSpeeds();
-        final double predictedX = robotVelocity.vxMetersPerSecond * seconds;
-        final double predictedY = robotVelocity.vyMetersPerSecond * seconds;
-        final Rotation2d predictedRotation = Rotation2d.fromRadians(robotVelocity.omegaRadiansPerSecond * seconds);
-        return getEstimatedRobotPose().transformBy(new Transform2d(predictedX, predictedY, predictedRotation));
+        final Twist2d robotVelocityTwist = new Twist2d(
+                robotVelocity.vxMetersPerSecond * seconds,
+                robotVelocity.vyMetersPerSecond * seconds,
+                robotVelocity.omegaRadiansPerSecond * seconds
+        );
+        return getEstimatedRobotPose().exp(robotVelocityTwist);
     }
 
-    private void initialize() {
+    private void initializeFieldWidget() {
         putAprilTagsOnFieldWidget();
         SmartDashboard.putData("Field", field);
         logTargetPath();
@@ -209,13 +216,15 @@ public class RobotPoseEstimator implements AutoCloseable {
 
     private void updateFromAprilTagCameras() {
         final AprilTagCamera[] newResultCameras = getCamerasWithResults();
-//        sortCamerasByLatestResultTimestamp(newResultCameras);
+
+        this.hasUpdateFromCameras = newResultCameras.length > 0;
+        sortCamerasByLatestResultTimestamp(newResultCameras);
 
         for (AprilTagCamera aprilTagCamera : newResultCameras) {
             swerveDrivePoseEstimator.addVisionMeasurement(
                     aprilTagCamera.getEstimatedRobotPose(),
                     aprilTagCamera.getLatestResultTimestampSeconds(),
-                    aprilTagCamera.calculateStandardDeviations().toMatrix()
+                    aprilTagCamera.getCurrentStandardDeviations().toMatrix()
             );
         }
     }

@@ -43,7 +43,7 @@ public class Swerve extends MotorSubsystem {
 
     @Override
     public void sysIDDrive(double targetVoltage) {
-        SwerveModuleState[] rotationStates = SwerveConstants.KINEMATICS.toSwerveModuleStates(new ChassisSpeeds(0, 0, 1));
+        final SwerveModuleState[] rotationStates = SwerveConstants.KINEMATICS.toSwerveModuleStates(new ChassisSpeeds(0, 0, 1));
         for (int i = 0; i < 4; i++) {
             swerveModules[i].setTargetDriveVoltage(targetVoltage);
             swerveModules[i].setTargetSteerAngle(rotationStates[i].angle);
@@ -229,6 +229,17 @@ public class Swerve extends MotorSubsystem {
     }
 
     /**
+     * Drives the swerve with the given powers, relative to the field's frame of reference.
+     *
+     * @param translationPowers the translation powers
+     * @param rotationPower     the rotation power
+     */
+    void fieldRelativeDrive(Translation2d translationPowers, double rotationPower) {
+        final ChassisSpeeds speeds = selfRelativeSpeedsFromFieldRelativePowers(translationPowers.getX(), translationPowers.getY(), rotationPower);
+        selfRelativeDrive(speeds);
+    }
+
+    /**
      * Drives the swerve with the given powers, relative to the robot's frame of reference.
      *
      * @param xPower     the x power
@@ -286,18 +297,13 @@ public class Swerve extends MotorSubsystem {
     private ChassisSpeeds calculateSelfRelativePIDSpeedsToPose(FlippablePose2d targetPose) {
         final Pose2d currentPose = RobotContainer.ROBOT_POSE_ESTIMATOR.getPredictedRobotPose(SwerveConstants.PID_TO_POSE_PREDICTION_TIME_SECONDS);
         final Pose2d flippedTargetPose = targetPose.get();
-
-        final double xSpeed = SwerveConstants.X_TRANSLATION_PID_CONTROLLER.atSetpoint() ?
-                0 :
-                SwerveConstants.X_TRANSLATION_PID_CONTROLLER.calculate(currentPose.getX(), flippedTargetPose.getX());
-        final double ySpeed = SwerveConstants.Y_TRANSLATION_PID_CONTROLLER.atSetpoint() ?
-                0 :
-                SwerveConstants.Y_TRANSLATION_PID_CONTROLLER.calculate(currentPose.getY(), flippedTargetPose.getY());
+        final double calculatedXSpeed = SwerveConstants.X_TRANSLATION_PID_CONTROLLER.calculate(currentPose.getX(), flippedTargetPose.getX());
+        final double calculatedYSpeed = SwerveConstants.Y_TRANSLATION_PID_CONTROLLER.calculate(currentPose.getY(), flippedTargetPose.getY());
 
         final int directionSign = Flippable.isRedAlliance() ? -1 : 1;
         final ChassisSpeeds targetFieldRelativeSpeeds = new ChassisSpeeds(
-                xSpeed * directionSign,
-                ySpeed * directionSign,
+                calculatedXSpeed * directionSign,
+                calculatedYSpeed * directionSign,
                 calculateProfiledAngularVelocityRadiansPerSecond(targetPose.getRotation())
         );
 

@@ -26,9 +26,19 @@ public class CommandConstants {
             MINIMUM_TRANSLATION_SHIFT_POWER = 0.30,
             MINIMUM_ROTATION_SHIFT_POWER = 0.4;
     private static final double JOYSTICK_ORIENTED_ROTATION_DEADBAND = 0.07;
+    private static final double
+            INDICATE_CAMERAS_DISCONNECTED_RUMBLE_DURATION_SECONDS = 0.5,
+            INDICATE_CAMERAS_DISCONNECTED_RUMBLE_POWER = 1;
+    private static final double
+            INDICATE_ALLIANCE_SHIFT_RUMBLE_DURATION_SECONDS = 1,
+            INDICATE_ALLIANCE_SHIFT_RUMBLE_POWER = 0.5;
 
-    public static final Command
-            RESET_HEADING_COMMAND = new InstantCommand(RobotContainer.ROBOT_POSE_ESTIMATOR::resetHeading),
+    public static final Command //General Commands
+            RESET_HEADING_COMMAND = new InstantCommand(RobotContainer.ROBOT_POSE_ESTIMATOR::resetHeading).ignoringDisable(true),
+            INDICATE_CAMERAS_DISCONNECTED_COMMAND = new InstantCommand(() -> OperatorConstants.DRIVER_CONTROLLER.rumble(
+                    INDICATE_CAMERAS_DISCONNECTED_RUMBLE_DURATION_SECONDS,
+                    INDICATE_CAMERAS_DISCONNECTED_RUMBLE_POWER
+            )),
             SELF_RELATIVE_DRIVE_FROM_DPAD_COMMAND = SwerveCommands.getClosedLoopSelfRelativeDriveCommand(
                     () -> getXPowerFromPov(DRIVER_CONTROLLER.getPov()) / OperatorConstants.POV_DIVIDER / calculateShiftModeValue(MINIMUM_TRANSLATION_SHIFT_POWER),
                     () -> getYPowerFromPov(DRIVER_CONTROLLER.getPov()) / OperatorConstants.POV_DIVIDER / calculateShiftModeValue(MINIMUM_TRANSLATION_SHIFT_POWER),

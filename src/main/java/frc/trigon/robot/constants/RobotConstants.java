@@ -1,12 +1,11 @@
 package frc.trigon.robot.constants;
 
-import frc.trigon.robot.Robot;
 import frc.trigon.lib.hardware.RobotHardwareStats;
-import frc.trigon.lib.utilities.FilesHandler;
+import frc.trigon.robot.Robot;
 
 public class RobotConstants {
     public static final String CANIVORE_NAME = "SwerveCANivore";
-    public static final String LOGGING_PATH = Robot.IS_REAL ? "/media/sda1/akitlogs/" : FilesHandler.DEPLOY_PATH + "logs/";
+    public static final String LOGGING_PATH = Robot.IS_REAL ? "/media/sda1/akitlogs/" : "logs/akitLogs";
     private static final RobotHardwareStats.ReplayType REPLAY_TYPE = RobotHardwareStats.ReplayType.NONE;
     private static final double PERIODIC_TIME_SECONDS = 0.02;
 

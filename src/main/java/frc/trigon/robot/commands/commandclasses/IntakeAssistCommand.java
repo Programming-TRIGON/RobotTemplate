@@ -1,15 +1,15 @@
 package frc.trigon.robot.commands.commandclasses;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.trigon.lib.hardware.RobotHardwareStats;
 import frc.trigon.lib.utilities.flippable.Flippable;
 import frc.trigon.robot.RobotContainer;
+import frc.trigon.robot.commands.CommandConstants;
 import frc.trigon.robot.constants.OperatorConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveCommands;
 import frc.trigon.robot.subsystems.swerve.SwerveConstants;
@@ -21,26 +21,26 @@ import java.util.ArrayList;
  * A command class to assist in the intaking of a game piece.
  */
 public class IntakeAssistCommand extends ParallelCommandGroup {
-    private final ProfiledPIDController
+    private final PIDController
             xPIDController = RobotHardwareStats.isSimulation() ?
-            new ProfiledPIDController(5, 0, 0, new TrapezoidProfile.Constraints(5, 15)) :
-            new ProfiledPIDController(2.4, 0, 0, new TrapezoidProfile.Constraints(2.65, 5.5)),
+            new PIDController(5, 0, 0) :
+            new PIDController(2.4, 0, 0),
             yPIDController = RobotHardwareStats.isSimulation() ?
-                    new ProfiledPIDController(3, 0, 0.01, new TrapezoidProfile.Constraints(5, 15)) :
-                    new ProfiledPIDController(0.3, 0, 0.03, new TrapezoidProfile.Constraints(2.65, 5.5)),
+                    new PIDController(0.3, 0, 0) :
+                    new PIDController(0.2, 0, 0),
             thetaPIDController = RobotHardwareStats.isSimulation() ?
-                    new ProfiledPIDController(0.1, 0, 0, new TrapezoidProfile.Constraints(2.8, 5)) :
-                    new ProfiledPIDController(2.4, 0, 0, new TrapezoidProfile.Constraints(2.65, 5.5));
+                    new PIDController(0.1, 0, 0) :
+                    new PIDController(2.4, 0, 0);
     private Translation2d distanceFromTrackedGamePiece;
 
     /**
-     * Creates a new intake assist command that assists the driver with intaking a game piece based on the powers.
+     * Creates a new intake assist command that assists the driver with intaking a game piece.
      *
-     * @param xAssistPower     the amount of assist to apply to the X-axis (Forward and backwards)
-     * @param yAssistPower     the amount of assist to apply to the Y-axis (Sideways)
-     * @param thetaAssistPower the amount of assist to apply to the rotation
+     * @param shouldAssistX     should apply to the X-axis (Forward and backwards)
+     * @param shouldAssistY     should apply to the Y-axis (Sideways)
+     * @param shouldAssistTheta should apply to the rotation
      */
-    public IntakeAssistCommand(double xAssistPower, double yAssistPower, double thetaAssistPower) {
+    public IntakeAssistCommand(boolean shouldAssistX, boolean shouldAssistY, boolean shouldAssistTheta) {
         addCommands(
                 new RunCommand(this::trackGamePiece),
                 new SequentialCommandGroup(
@@ -49,28 +49,28 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
                         new WaitUntilCommand(this::hasNoTrackedGamePiece)
                 ).repeatedly(),
                 SwerveCommands.getClosedLoopSelfRelativeDriveCommand(
-                        () -> calculateTranslationPower(true, xAssistPower),
-                        () -> calculateTranslationPower(false, yAssistPower),
-                        () -> calculateThetaPower(thetaAssistPower)
-                )
+                        () -> calculateTranslationPower(true, shouldAssistX),
+                        () -> calculateTranslationPower(false, shouldAssistY),
+                        () -> calculateThetaPower(shouldAssistTheta)
+                ).asProxy()
         );
     }
 
     private void resetPIDControllers() {
-        xPIDController.reset(distanceFromTrackedGamePiece.getX(), RobotContainer.SWERVE.getSelfRelativeVelocity().getX());
-        yPIDController.reset(distanceFromTrackedGamePiece.getY(), RobotContainer.SWERVE.getSelfRelativeVelocity().getY());
-        thetaPIDController.reset(distanceFromTrackedGamePiece.getAngle().getRadians(), RobotContainer.SWERVE.getRotationalVelocityRadiansPerSecond());
+        xPIDController.reset();
+        yPIDController.reset();
+        thetaPIDController.reset();
 
-        xPIDController.setGoal(0);
-        yPIDController.setGoal(0);
-        thetaPIDController.setGoal(0);
+        xPIDController.setSetpoint(0);
+        yPIDController.setSetpoint(0);
+        thetaPIDController.setSetpoint(0);
     }
 
-    private double calculateTranslationPower(boolean isXAxis, double assistScalar) {
+    private double calculateTranslationPower(boolean isXAxis, boolean shouldAssist) {
         final Translation2d selfRelativeJoystickValue = getSelfRelativeJoystickPosition();
-        final double joystickValue = isXAxis ? selfRelativeJoystickValue.getX() : selfRelativeJoystickValue.getY();
+        final double joystickValue = CommandConstants.calculateDriveStickAxisValue(isXAxis ? selfRelativeJoystickValue.getX() : selfRelativeJoystickValue.getY());
 
-        if (hasNoTrackedGamePiece())
+        if (!shouldAssist || hasNoTrackedGamePiece())
             return joystickValue;
 
         final double
@@ -78,27 +78,25 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
                 xPIDController.calculate(distanceFromTrackedGamePiece.getX()) :
                 yPIDController.calculate(distanceFromTrackedGamePiece.getY()));
 
-        return calculateAssistPower(assistScalar, pidOutput, joystickValue);
+        return calculateAssistPower(pidOutput, joystickValue);
     }
 
-    private double calculateThetaPower(double assistScalar) {
-        final double joystickValue = OperatorConstants.DRIVER_CONTROLLER.getRightX();
+    private double calculateThetaPower(boolean shouldAssist) {
+        final double joystickValue = CommandConstants.calculateDriveStickAxisValue(OperatorConstants.DRIVER_CONTROLLER.getRightX());
 
-        if (hasNoTrackedGamePiece())
+        if (!shouldAssist || hasNoTrackedGamePiece())
             return joystickValue;
 
-        return calculateThetaAssistPower(assistScalar, joystickValue, distanceFromTrackedGamePiece.getAngle().unaryMinus());
+        return calculateThetaAssistPower(joystickValue, distanceFromTrackedGamePiece.getAngle().unaryMinus());
     }
 
-    private double calculateThetaAssistPower(double assistScalar, double joystickValue, Rotation2d thetaOffset) {
+    private double calculateThetaAssistPower(double joystickValue, Rotation2d thetaOffset) {
         final double pidOutput = clampToSwerveOutputRange(thetaPIDController.calculate(thetaOffset.getRadians()));
-        return calculateAssistPower(assistScalar, pidOutput, joystickValue);
+        return calculateAssistPower(pidOutput, joystickValue);
     }
 
-    private double calculateAssistPower(double assistScalar, double pidOutput, double joystickValue) {
-        if (assistScalar == 0)
-            return joystickValue;
-        return (joystickValue * (1 - assistScalar)) + (pidOutput * assistScalar);
+    private double calculateAssistPower(double pidOutput, double joystickValue) {
+        return clampToSwerveOutputRange(joystickValue + pidOutput);
     }
 
     private boolean hasNoTrackedGamePiece() {
@@ -120,7 +118,7 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
 
         final Translation2d fieldRelativeDistanceFromBestGamePiece = robotPose.getTranslation().minus(bestGamePieceFieldRelativePosition);
         final Translation2d selfRelativeDistanceFromBestGamePiece = fieldRelativeDistanceFromBestGamePiece.rotateBy(robotPose.getRotation().unaryMinus());
-        Logger.recordOutput("IntakeAssist/selfRelativeDistanceFromBestGamePiece", selfRelativeDistanceFromBestGamePiece);
+        Logger.recordOutput("Assists/selfRelativeDistanceFromBestGamePiece", selfRelativeDistanceFromBestGamePiece);
         return selfRelativeDistanceFromBestGamePiece;
     }
 

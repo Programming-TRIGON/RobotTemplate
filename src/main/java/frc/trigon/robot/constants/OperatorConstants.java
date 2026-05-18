@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.trigon.lib.hardware.misc.KeyboardController;
 import frc.trigon.lib.hardware.misc.XboxController;
+import frc.trigon.robot.RobotContainer;
 
 import java.util.function.DoubleUnaryOperator;
 
@@ -18,6 +19,7 @@ public class OperatorConstants {
             DRIVER_CONTROLLER_PORT, DRIVER_CONTROLLER_RIGHT_STICK_EXPONENT, DRIVER_CONTROLLER_LEFT_STICK_EXPONENT, DRIVER_CONTROLLER_DEADBAND
     );
     public static final KeyboardController OPERATOR_CONTROLLER = new KeyboardController();
+    private static final double ARE_CAMERAS_DISCONNECTED_CHECK_DEBOUNCE_SECONDS = 3;
 
     public static final double
             POV_DIVIDER = 2,
@@ -43,5 +45,6 @@ public class OperatorConstants {
             FORWARD_QUASISTATIC_CHARACTERIZATION_TRIGGER = OPERATOR_CONTROLLER.right(),
             BACKWARD_QUASISTATIC_CHARACTERIZATION_TRIGGER = OPERATOR_CONTROLLER.left(),
             FORWARD_DYNAMIC_CHARACTERIZATION_TRIGGER = OPERATOR_CONTROLLER.up(),
-            BACKWARD_DYNAMIC_CHARACTERIZATION_TRIGGER = OPERATOR_CONTROLLER.down();
+            BACKWARD_DYNAMIC_CHARACTERIZATION_TRIGGER = OPERATOR_CONTROLLER.down(),
+            CAMERAS_DISCONNECTED_TRIGGER = new Trigger(() -> !RobotContainer.ROBOT_POSE_ESTIMATOR.hasUpdateFromCameras()).debounce(ARE_CAMERAS_DISCONNECTED_CHECK_DEBOUNCE_SECONDS);
 }
