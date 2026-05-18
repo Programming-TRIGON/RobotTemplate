@@ -14,6 +14,7 @@ import frc.trigon.lib.hardware.simulation.SimpleMotorSimulation;
 import frc.trigon.robot.constants.AutonomousConstants;
 
 public class SwerveModuleConstants {
+    static final double COUPLED_RATIO = 3;
     private static final double
             DRIVE_MOTOR_GEAR_RATIO = 6.03,//R1: 7.03, R2: 6.03, R3: 5.27
             STEER_MOTOR_GEAR_RATIO = 287.0 / 11.0;
