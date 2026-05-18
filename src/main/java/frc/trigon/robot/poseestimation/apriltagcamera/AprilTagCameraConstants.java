@@ -27,14 +27,18 @@ public class AprilTagCameraConstants {
             SIMULATION_CAMERA_RESOLUTION_WIDTH = 1600,
             SIMULATION_CAMERA_RESOLUTION_HEIGHT = 1200,
             SIMULATION_CAMERA_FPS = 60,
-            SIMULATION_AVERAGE_CAMERA_LATENCY_MILLISECONDS = 0,
-            SIMULATION_CAMERA_LATENCY_STANDARD_DEVIATIONS_MILLISECONDS = 0,
+            SIMULATION_AVERAGE_CAMERA_LATENCY_MILLISECONDS = 35,
+            SIMULATION_CAMERA_LATENCY_STANDARD_DEVIATIONS_MILLISECONDS = 5,
             SIMULATION_CAMERA_EXPOSURE_TIME_MILLISECONDS = 10;
     private static final Rotation2d SIMULATION_CAMERA_DIAGONAL_FOV = Rotation2d.fromDegrees(96.6);
     private static final double
             SIMULATION_CAMERA_AVERAGE_PIXEL_ERROR = 0.25,
             SIMULATION_CAMERA_PIXEL_STANDARD_DEVIATIONS = 0.08;
     public static final SimCameraProperties SIMULATION_CAMERA_PROPERTIES = new SimCameraProperties();
+    static final double
+            MAX_TIME_GAP_FOR_COMPARISON_SECONDS = 3,
+            MAX_POSE_JUMP_METERS = 3,
+            MAX_DISTANCE_FROM_CURRENT_ESTIMATE_METERS = 2;
 
     static {
         if (RobotHardwareStats.isSimulation()) {
