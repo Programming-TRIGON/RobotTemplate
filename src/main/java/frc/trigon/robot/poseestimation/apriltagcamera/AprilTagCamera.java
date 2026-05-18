@@ -126,11 +126,11 @@ public class AprilTagCamera {
         if (hasValidResult())
             updatePreviousResultInfo();
 
-        if (inputs.latestResultTimestampSeconds - previousResultTimestampSeconds > AprilTagCameraConstants.MAX_TIME_GAP_FOR_COMPARISON_SECONDS || previousEstimatedRobotPose == null)
+        if (inputs.latestResultTimestampSeconds - previousResultTimestampSeconds > AprilTagCameraConstants.MAXIMUM_TIME_GAP_FOR_COMPARISON_SECONDS || previousEstimatedRobotPose == null)
             return false;
 
-        return previousEstimatedRobotPose.getTranslation().getDistance(estimatedRobotPose.getTranslation()) > AprilTagCameraConstants.MAX_POSE_JUMP_METERS
-                && estimatedRobotPose.getTranslation().getDistance(RobotContainer.ROBOT_POSE_ESTIMATOR.getEstimatedRobotPose().getTranslation()) > AprilTagCameraConstants.MAX_DISTANCE_FROM_CURRENT_ESTIMATE_METERS;
+        return previousEstimatedRobotPose.getTranslation().getDistance(estimatedRobotPose.getTranslation()) > AprilTagCameraConstants.MAXIMUM_POSE_JUMP_METERS
+                && estimatedRobotPose.getTranslation().getDistance(RobotContainer.ROBOT_POSE_ESTIMATOR.getEstimatedRobotPose().getTranslation()) > AprilTagCameraConstants.MAXIMUM_DISTANCE_FROM_CURRENT_ESTIMATE_METERS;
     }
 
     private void updatePreviousResultInfo() {

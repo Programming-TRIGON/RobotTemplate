@@ -36,9 +36,9 @@ public class AprilTagCameraConstants {
             SIMULATION_CAMERA_PIXEL_STANDARD_DEVIATIONS = 0.08;
     public static final SimCameraProperties SIMULATION_CAMERA_PROPERTIES = new SimCameraProperties();
     static final double
-            MAX_TIME_GAP_FOR_COMPARISON_SECONDS = 3,
-            MAX_POSE_JUMP_METERS = 3,
-            MAX_DISTANCE_FROM_CURRENT_ESTIMATE_METERS = 2;
+            MAXIMUM_TIME_GAP_FOR_COMPARISON_SECONDS = 3,
+            MAXIMUM_POSE_JUMP_METERS = 3,
+            MAXIMUM_DISTANCE_FROM_CURRENT_ESTIMATE_METERS = 2;
 
     static {
         if (RobotHardwareStats.isSimulation()) {
