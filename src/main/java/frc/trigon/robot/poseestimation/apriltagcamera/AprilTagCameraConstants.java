@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import frc.trigon.lib.hardware.RobotHardwareStats;
 import frc.trigon.lib.utilities.DynamicCameraTransform;
 import frc.trigon.robot.constants.FieldConstants;
+import frc.trigon.robot.poseestimation.apriltagcamera.io.AprilTagLimelightIO;
 import frc.trigon.robot.poseestimation.apriltagcamera.io.AprilTagPhotonCameraIO;
 import frc.trigon.robot.poseestimation.apriltagcamera.io.AprilTagSimulationCameraIO;
 import org.photonvision.PhotonPoseEstimator;
@@ -53,7 +54,8 @@ public class AprilTagCameraConstants {
 
     public enum AprilTagCameraType {
         PHOTON_CAMERA(AprilTagPhotonCameraIO::new),
-        SIMULATION_CAMERA(AprilTagSimulationCameraIO::new);
+        SIMULATION_CAMERA(AprilTagSimulationCameraIO::new),
+        LIMELIGHT(AprilTagLimelightIO::new);
 
         final BiFunction<String, DynamicCameraTransform, AprilTagCameraIO> createIOFunction;
 
