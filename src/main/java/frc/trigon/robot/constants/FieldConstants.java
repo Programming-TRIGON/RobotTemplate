@@ -4,10 +4,9 @@ import com.pathplanner.lib.util.FlippingUtil;
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.*;
 import frc.trigon.lib.utilities.FilesHandler;
+import frc.trigon.lib.utilities.flippable.FlippablePose2d;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -30,7 +29,7 @@ public class FieldConstants {
         try {
             return SHOULD_USE_HOME_TAG_LAYOUT ?
                     new AprilTagFieldLayout(FilesHandler.DEPLOY_PATH + "field_calibration.json") :
-                    AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
+                    AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -43,5 +42,18 @@ public class FieldConstants {
                 tagIDToPose.put(aprilTag.ID, aprilTag.pose.transformBy(TAG_OFFSET));
 
         return tagIDToPose;
+    }
+
+    /**
+     * Mirrors a FlippablePose2d across the field's Y-axis centerline.
+     */
+    public static FlippablePose2d mirror(FlippablePose2d pose) {
+        final Pose2d basePose = pose.getBlueObject();
+        return new FlippablePose2d(
+                basePose.getX(),
+                FIELD_WIDTH_METERS - basePose.getY(),
+                Rotation2d.fromDegrees(-basePose.getRotation().getDegrees()),
+                true
+        );
     }
 }
