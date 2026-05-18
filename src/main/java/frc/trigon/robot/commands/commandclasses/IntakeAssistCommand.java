@@ -96,7 +96,7 @@ public class IntakeAssistCommand extends ParallelCommandGroup {
     }
 
     private double calculateAssistPower(double pidOutput, double joystickValue) {
-        return joystickValue + pidOutput;
+        return clampToSwerveOutputRange(joystickValue + pidOutput);
     }
 
     private boolean hasNoTrackedGamePiece() {
