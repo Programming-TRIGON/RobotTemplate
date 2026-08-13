@@ -3,6 +3,7 @@ package frc.trigon.robot.subsystems.flyWheel;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.system.plant.DCMotor;
 import frc.trigon.lib.hardware.phoenix6.talonfx.TalonFXMotor;
@@ -33,6 +34,7 @@ public class FlyWheelConstants {
             SYS_ID_RAMP_RATE = 3,
             SYS_ID_STEP_VOLTAGE = 1;
     private final static boolean FOC_ENABLED = true;
+    private static final MotorAlignmentValue FOLLOWER_ALIGNMENT_TO_MASTER = MotorAlignmentValue.Aligned;
     private final static boolean SHOULD_USE_VOLTAGE_CONTROL = true;
     private final static DCMotor GEAR_BOX = DCMotor.getKrakenX60Foc(2);
 
@@ -96,7 +98,7 @@ public class FlyWheelConstants {
 
         FOLLOWER_MOTOR.applyConfiguration(config);
 
-        final Follower FollowerRequest = new Follower(MASTER_MOTOR_ID, false);
+        final Follower FollowerRequest = new Follower(MASTER_MOTOR_ID, FOLLOWER_ALIGNMENT_TO_MASTER);
         FOLLOWER_MOTOR.setControl(FollowerRequest);
     }
 

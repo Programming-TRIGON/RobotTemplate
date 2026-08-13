@@ -43,6 +43,7 @@ public class ArmConstants {
             MAXIMUM_ANGLE = Rotation2d.fromDegrees(360),
             ANGLE_TOLERANCE = Rotation2d.fromDegrees(3);
     private final static boolean FOC_ENABLED = true;
+    private static final MotorAlignmentValue FOLLOWER_ALIGNMENT_TO_MASTER = MotorAlignmentValue.Aligned;
     private final static boolean SHOULD_SIMULATE_GRAVITY = true;
     private final static DCMotor GEAR_BOX = DCMotor.getKrakenX60Foc(2);
 
@@ -120,7 +121,7 @@ public class ArmConstants {
 
         FOLLOWER_MOTOR.applyConfiguration(config);
 
-        final Follower FollowerRequest = new Follower(MASTER_MOTOR_ID, false);
+        final Follower FollowerRequest = new Follower(MASTER_MOTOR_ID, FOLLOWER_ALIGNMENT_TO_MASTER);
         FOLLOWER_MOTOR.setControl(FollowerRequest);
     }
 

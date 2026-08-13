@@ -2,10 +2,7 @@ package frc.trigon.robot.subsystems.elevator;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.signals.GravityTypeValue;
-import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
+import com.ctre.phoenix6.signals.*;
 import edu.wpi.first.math.system.plant.DCMotor;
 import frc.trigon.lib.hardware.phoenix6.talonfx.TalonFXMotor;
 import frc.trigon.lib.hardware.phoenix6.talonfx.TalonFXSignal;
@@ -37,6 +34,7 @@ public class ElevatorConstants {
             HEIGHT_TOLERANCE_METERS = 0.1,
             DRUM_RADIUS_METERS = 0.05;
     private final static boolean FOC_ENABLED = true;
+    private static final MotorAlignmentValue FOLLOWER_ALIGNMENT_TO_MASTER = MotorAlignmentValue.Aligned;
     private final static boolean SHOULD_SIMULATE_GRAVITY = true;
     private final static DCMotor GEAR_BOX = DCMotor.getKrakenX60Foc(2);
 
@@ -110,7 +108,7 @@ public class ElevatorConstants {
 
         FOLLOWER_MOTOR.applyConfiguration(config);
 
-        final Follower FollowerRequest = new Follower(MASTER_MOTOR_ID, false);
+        final Follower FollowerRequest = new Follower(MASTER_MOTOR_ID, FOLLOWER_ALIGNMENT_TO_MASTER);
         FOLLOWER_MOTOR.setControl(FollowerRequest);
     }
 
