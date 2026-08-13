@@ -1,18 +1,18 @@
 package frc.trigon.robot.poseestimation.apriltagcamera;
 
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Transform3d;
-import org.littletonrobotics.junction.AutoLog;
 import frc.trigon.lib.hardware.RobotHardwareStats;
+import frc.trigon.lib.utilities.DynamicCameraTransform;
+import org.littletonrobotics.junction.AutoLog;
 
 public class AprilTagCameraIO {
-    static AprilTagCameraIO generateIO(AprilTagCameraConstants.AprilTagCameraType aprilTagCameraType, String name, Transform3d robotToCamera) {
+    static AprilTagCameraIO generateIO(AprilTagCameraConstants.AprilTagCameraType aprilTagCameraType, String name, DynamicCameraTransform dynamicCameraTransform) {
         if (RobotHardwareStats.isReplay())
             return new AprilTagCameraIO();
         if (RobotHardwareStats.isSimulation())
             aprilTagCameraType = AprilTagCameraConstants.AprilTagCameraType.SIMULATION_CAMERA;
 
-        return aprilTagCameraType.createIOFunction.apply(name, robotToCamera);
+        return aprilTagCameraType.createIOFunction.apply(name, dynamicCameraTransform);
     }
 
     protected void updateInputs(AprilTagCameraInputsAutoLogged inputs) {

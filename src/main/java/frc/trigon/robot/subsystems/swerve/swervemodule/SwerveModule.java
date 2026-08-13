@@ -8,12 +8,14 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
+import frc.trigon.robot.constants.RobotConstants;
+import frc.trigon.robot.poseestimation.robotposeestimator.RobotPoseEstimatorConstants;
+import frc.trigon.robot.subsystems.swerve.SwerveConstants;
 import frc.trigon.lib.hardware.phoenix6.cancoder.CANcoderEncoder;
 import frc.trigon.lib.hardware.phoenix6.cancoder.CANcoderSignal;
 import frc.trigon.lib.hardware.phoenix6.talonfx.TalonFXMotor;
 import frc.trigon.lib.hardware.phoenix6.talonfx.TalonFXSignal;
 import frc.trigon.lib.utilities.Conversions;
-import frc.trigon.robot.poseestimation.poseestimator.PoseEstimatorConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveConstants;
 
 public class SwerveModule {
@@ -199,7 +201,7 @@ public class SwerveModule {
         driveMotor.registerSignal(TalonFXSignal.VELOCITY, 100);
         driveMotor.registerSignal(TalonFXSignal.TORQUE_CURRENT, 100);
         driveMotor.registerSignal(TalonFXSignal.MOTOR_VOLTAGE, 100);
-        driveMotor.registerThreadedSignal(TalonFXSignal.POSITION, PoseEstimatorConstants.ODOMETRY_FREQUENCY_HERTZ);
+        driveMotor.registerThreadedSignal(TalonFXSignal.POSITION, RobotPoseEstimatorConstants.ODOMETRY_FREQUENCY_HERTZ);
     }
 
     private void configureSteerMotor() {
@@ -209,7 +211,7 @@ public class SwerveModule {
         steerMotor.registerSignal(TalonFXSignal.VELOCITY, 100);
         steerMotor.registerSignal(TalonFXSignal.TORQUE_CURRENT, 100);
         steerMotor.registerSignal(TalonFXSignal.MOTOR_VOLTAGE, 100);
-        steerMotor.registerThreadedSignal(TalonFXSignal.POSITION, PoseEstimatorConstants.ODOMETRY_FREQUENCY_HERTZ);
+        steerMotor.registerThreadedSignal(TalonFXSignal.POSITION, RobotPoseEstimatorConstants.ODOMETRY_FREQUENCY_HERTZ);
     }
 
     private void configureSteerEncoder(double offsetRotations) {

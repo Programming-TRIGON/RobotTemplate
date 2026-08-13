@@ -2,7 +2,8 @@ package frc.trigon.robot.poseestimation.apriltagcamera;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform3d;
+import frc.trigon.lib.hardware.RobotHardwareStats;
+import frc.trigon.lib.utilities.DynamicCameraTransform;
 import frc.trigon.robot.constants.FieldConstants;
 import frc.trigon.robot.poseestimation.apriltagcamera.io.AprilTagLimelightIO;
 import frc.trigon.robot.poseestimation.apriltagcamera.io.AprilTagPhotonCameraIO;
@@ -10,13 +11,12 @@ import frc.trigon.robot.poseestimation.apriltagcamera.io.AprilTagSimulationCamer
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
-import frc.trigon.lib.hardware.RobotHardwareStats;
 
 import java.util.function.BiFunction;
 
 public class AprilTagCameraConstants {
     static final double
-            MAXIMUM_DISTANCE_FROM_TAG_FOR_ACCURATE_RESULT_METERS = 5,
+            MAXIMUM_DISTANCE_FROM_TAG_FOR_ACCURATE_RESULT_METERS = 7,
             MAXIMUM_DISTANCE_FROM_TAG_FOR_ACCURATE_SOLVE_PNP_RESULT_METERS = 2;
     static final Pose2d[] EMPTY_POSE_ARRAY = new Pose2d[0];
     static final double MAXIMUM_AMBIGUITY = 0.4;
@@ -30,11 +30,15 @@ public class AprilTagCameraConstants {
             SIMULATION_AVERAGE_CAMERA_LATENCY_MILLISECONDS = 35,
             SIMULATION_CAMERA_LATENCY_STANDARD_DEVIATIONS_MILLISECONDS = 5,
             SIMULATION_CAMERA_EXPOSURE_TIME_MILLISECONDS = 10;
-    private static final Rotation2d SIMULATION_CAMERA_FOV = Rotation2d.fromDegrees(70);
+    private static final Rotation2d SIMULATION_CAMERA_DIAGONAL_FOV = Rotation2d.fromDegrees(96.6);
     private static final double
             SIMULATION_CAMERA_AVERAGE_PIXEL_ERROR = 0.25,
             SIMULATION_CAMERA_PIXEL_STANDARD_DEVIATIONS = 0.08;
     public static final SimCameraProperties SIMULATION_CAMERA_PROPERTIES = new SimCameraProperties();
+    static final double
+            MAXIMUM_TIME_GAP_FOR_COMPARISON_SECONDS = 3,
+            MAXIMUM_POSE_JUMP_METERS = 3,
+            MAXIMUM_DISTANCE_FROM_CURRENT_ESTIMATE_METERS = 2;
 
     static {
         if (RobotHardwareStats.isSimulation()) {
@@ -44,7 +48,7 @@ public class AprilTagCameraConstants {
     }
 
     private static void configureSimulationCameraProperties() {
-        SIMULATION_CAMERA_PROPERTIES.setCalibration(SIMULATION_CAMERA_RESOLUTION_WIDTH, SIMULATION_CAMERA_RESOLUTION_HEIGHT, SIMULATION_CAMERA_FOV);
+        SIMULATION_CAMERA_PROPERTIES.setCalibration(SIMULATION_CAMERA_RESOLUTION_WIDTH, SIMULATION_CAMERA_RESOLUTION_HEIGHT, SIMULATION_CAMERA_DIAGONAL_FOV);
         SIMULATION_CAMERA_PROPERTIES.setCalibError(SIMULATION_CAMERA_AVERAGE_PIXEL_ERROR, SIMULATION_CAMERA_PIXEL_STANDARD_DEVIATIONS);
         SIMULATION_CAMERA_PROPERTIES.setFPS(SIMULATION_CAMERA_FPS);
         SIMULATION_CAMERA_PROPERTIES.setAvgLatencyMs(SIMULATION_AVERAGE_CAMERA_LATENCY_MILLISECONDS);
@@ -57,9 +61,9 @@ public class AprilTagCameraConstants {
         SIMULATION_CAMERA(AprilTagSimulationCameraIO::new),
         LIMELIGHT(AprilTagLimelightIO::new);
 
-        final BiFunction<String, Transform3d, AprilTagCameraIO> createIOFunction;
+        final BiFunction<String, DynamicCameraTransform, AprilTagCameraIO> createIOFunction;
 
-        AprilTagCameraType(BiFunction<String, Transform3d, AprilTagCameraIO> createIOFunction) {
+        AprilTagCameraType(BiFunction<String, DynamicCameraTransform, AprilTagCameraIO> createIOFunction) {
             this.createIOFunction = createIOFunction;
         }
     }

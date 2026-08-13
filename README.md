@@ -28,7 +28,7 @@ Have questions? Want to learn more? Reach out to us!
 | 🌐 **Website**   | [trigon5990.org](https://trigon5990.org)                     |
 | 💻 **GitHub**    | [@Programming-TRIGON](https://github.com/Programming-TRIGON) |
 | 📸 **Instagram** | [@trigon5990](https://www.instagram.com/trigon5990/)         |
-| 🎥 **YouTube**   | [Trigon 5990](https://www.youtube.com/@Trigon5990)           |
-| 💼 **LinkedIn**  | [Trigon 5990](https://www.linkedin.com/company/trigon5990/)  |
-| 📘 **Facebook**  | [Trigon 5990](https://www.facebook.com/trigon5990/)          |
+| 🎥 **YouTube**   | [TRIGON 5990](https://www.youtube.com/@TRIGON5990)           |
+| 💼 **LinkedIn**  | [TRIGON 5990](https://www.linkedin.com/company/trigon-5990/)  |
+| 📘 **Facebook**  | [TRIGON 5990](https://www.facebook.com/trigon5990/)          |
 | 📧 **Email**     | [trigon5990@gmail.com](mailto:trigon5990@gmail.com)          |

@@ -8,9 +8,10 @@ package frc.trigon.robot;
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.trigon.robot.constants.RobotConstants;
 import frc.trigon.lib.hardware.RobotHardwareStats;
 import frc.trigon.lib.hardware.phoenix6.Phoenix6Inputs;
+import frc.trigon.robot.constants.RobotConstants;
+import frc.trigon.robot.misc.simulatedfield.SimulationFieldHandler;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -43,7 +44,7 @@ public class Robot extends LoggedRobot {
         autonomousCommand = robotContainer.getAutonomousCommand();
 
         if (autonomousCommand != null)
-            autonomousCommand.schedule();
+            commandScheduler.schedule(autonomousCommand);
     }
 
     @Override
@@ -59,6 +60,7 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void simulationPeriodic() {
+        SimulationFieldHandler.update();
     }
 
     @Override

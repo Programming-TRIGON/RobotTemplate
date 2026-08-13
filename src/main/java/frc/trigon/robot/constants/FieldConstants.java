@@ -4,10 +4,10 @@ import com.pathplanner.lib.util.FlippingUtil;
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.*;
+import frc.trigon.lib.utilities.BoundingBox;
 import frc.trigon.lib.utilities.FilesHandler;
+import frc.trigon.lib.utilities.flippable.FlippablePose2d;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -17,6 +17,10 @@ public class FieldConstants {
     public static final double
             FIELD_WIDTH_METERS = FlippingUtil.fieldSizeY,
             FIELD_LENGTH_METERS = FlippingUtil.fieldSizeX;
+    public static final BoundingBox FIELD_BOUNDING_BOX = new BoundingBox(
+            new Translation2d(0, 0),
+            new Translation2d(FIELD_LENGTH_METERS, FIELD_WIDTH_METERS)
+    );
     private static final List<Integer> I_HATE_YOU = List.of(
             //Tags to ignore
     );
@@ -30,7 +34,7 @@ public class FieldConstants {
         try {
             return SHOULD_USE_HOME_TAG_LAYOUT ?
                     new AprilTagFieldLayout(FilesHandler.DEPLOY_PATH + "field_calibration.json") :
-                    AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
+                    AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -43,5 +47,18 @@ public class FieldConstants {
                 tagIDToPose.put(aprilTag.ID, aprilTag.pose.transformBy(TAG_OFFSET));
 
         return tagIDToPose;
+    }
+
+    /**
+     * Mirrors a FlippablePose2d across the field's Y-axis centerline.
+     */
+    public static FlippablePose2d mirror(FlippablePose2d pose) {
+        final Pose2d basePose = pose.getBlueObject();
+        return new FlippablePose2d(
+                basePose.getX(),
+                FIELD_WIDTH_METERS - basePose.getY(),
+                Rotation2d.fromDegrees(-basePose.getRotation().getDegrees()),
+                true
+        );
     }
 }
