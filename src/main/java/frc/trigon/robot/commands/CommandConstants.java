@@ -23,15 +23,12 @@ import frc.trigon.robot.subsystems.swerve.SwerveCommands;
 public class CommandConstants {
     private static final XboxController DRIVER_CONTROLLER = OperatorConstants.DRIVER_CONTROLLER;
     private static final double
-            MINIMUM_TRANSLATION_SHIFT_POWER = 0.30,
+            MINIMUM_TRANSLATION_SHIFT_POWER = 0.3,
             MINIMUM_ROTATION_SHIFT_POWER = 0.4;
     private static final double JOYSTICK_ORIENTED_ROTATION_DEADBAND = 0.07;
     private static final double
             INDICATE_CAMERAS_DISCONNECTED_RUMBLE_DURATION_SECONDS = 0.5,
             INDICATE_CAMERAS_DISCONNECTED_RUMBLE_POWER = 1;
-    private static final double
-            INDICATE_ALLIANCE_SHIFT_RUMBLE_DURATION_SECONDS = 1,
-            INDICATE_ALLIANCE_SHIFT_RUMBLE_POWER = 0.5;
 
     public static final Command //General Commands
             RESET_HEADING_COMMAND = new InstantCommand(RobotContainer.ROBOT_POSE_ESTIMATOR::resetHeading).ignoringDisable(true),
