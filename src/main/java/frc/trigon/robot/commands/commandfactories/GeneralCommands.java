@@ -3,8 +3,8 @@ package frc.trigon.robot.commands.commandfactories;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.trigon.robot.commands.CommandConstants;
 import frc.trigon.robot.constants.OperatorConstants;
-import frc.trigon.robot.subsystems.MotorSubsystem;
 import frc.trigon.robot.subsystems.swerve.SwerveCommands;
+import frc.trigon.lib.subsystems.MotorSubsystem;
 
 import java.util.function.BooleanSupplier;
 
@@ -14,7 +14,7 @@ import java.util.function.BooleanSupplier;
  */
 public class GeneralCommands {
     public static Command getFieldRelativeDriveCommand() {
-        return SwerveCommands.getClosedLoopFieldRelativeDriveCommand(
+        return SwerveCommands.getOpenLoopFieldRelativeDriveCommand(
                 () -> CommandConstants.calculateDriveStickAxisValue(OperatorConstants.DRIVER_CONTROLLER.getLeftY()),
                 () -> CommandConstants.calculateDriveStickAxisValue(OperatorConstants.DRIVER_CONTROLLER.getLeftX()),
                 () -> CommandConstants.calculateDriveStickAxisValue(OperatorConstants.DRIVER_CONTROLLER.getRightX())

@@ -15,8 +15,9 @@ import frc.trigon.robot.constants.AutonomousConstants;
 
 public class SwerveModuleConstants {
     private static final double
-            DRIVE_MOTOR_GEAR_RATIO = 6.03,//R1: 7.03, R2: 6.03, R3: 5.27
-            STEER_MOTOR_GEAR_RATIO = 287.0 / 11.0;
+            DRIVE_MOTOR_GEAR_RATIO = 6.03,
+            STEER_MOTOR_GEAR_RATIO = 26.09;
+
     static final boolean ENABLE_FOC = true;
 
     private static final double
@@ -65,7 +66,7 @@ public class SwerveModuleConstants {
         config.Audio.BeepOnConfig = false;
 
         config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-        config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         config.Feedback.SensorToMechanismRatio = DRIVE_MOTOR_GEAR_RATIO;
 
         final double driveMotorSlipCurrent = AutonomousConstants.ROBOT_CONFIG.moduleConfig.driveCurrentLimit;

@@ -16,6 +16,7 @@ import frc.trigon.lib.hardware.phoenix6.cancoder.CANcoderSignal;
 import frc.trigon.lib.hardware.phoenix6.talonfx.TalonFXMotor;
 import frc.trigon.lib.hardware.phoenix6.talonfx.TalonFXSignal;
 import frc.trigon.lib.utilities.Conversions;
+import frc.trigon.robot.subsystems.swerve.SwerveConstants;
 
 public class SwerveModule {
     private final TalonFXMotor
@@ -40,18 +41,16 @@ public class SwerveModule {
      * @param wheelDiameter   the diameter of the wheel
      */
     public SwerveModule(int moduleID, double offsetRotations, double wheelDiameter) {
-        driveMotor = new TalonFXMotor(moduleID, "Module" + moduleID + "Drive", RobotConstants.CANIVORE_NAME);
-        steerMotor = new TalonFXMotor(moduleID + 4, "Module" + moduleID + "Steer", RobotConstants.CANIVORE_NAME);
-        steerEncoder = new CANcoderEncoder(moduleID + 4, "Module" + moduleID + "SteerEncoder", RobotConstants.CANIVORE_NAME);
+        driveMotor = new TalonFXMotor(moduleID, "Module" + moduleID + "Drive");
+        steerMotor = new TalonFXMotor(moduleID + 4, "Module" + moduleID + "Steer");
+        steerEncoder = new CANcoderEncoder(moduleID + 4, "Module" + moduleID + "SteerEncoder");
         this.wheelDiameter = wheelDiameter;
 
         configureHardware(offsetRotations);
     }
 
     public void setTargetState(SwerveModuleState targetState) {
-        if (willOptimize(targetState)) {
-            targetState.optimize(getCurrentSteerAngle());
-        }
+        targetState.optimize(getCurrentSteerAngle());
 
         this.targetState = targetState;
         setTargetSteerAngle(targetState.angle);
@@ -132,9 +131,10 @@ public class SwerveModule {
         );
     }
 
-    private boolean willOptimize(SwerveModuleState state) {
+    private boolean
+    willOptimize(SwerveModuleState state) {
         final Rotation2d angularDelta = state.angle.minus(getCurrentSteerAngle());
-        return Math.abs(angularDelta.getRadians()) > Math.PI / 2;
+        return true;
     }
 
     /**
