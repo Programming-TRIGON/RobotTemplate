@@ -179,6 +179,18 @@ public class Swerve extends MotorSubsystem {
         setTargetModuleStates(swerveModuleStates);
     }
 
+    /**
+     * Calculates and sets the target states for each module from robot-relative chassis speeds and sets a robot-relative center of rotation.
+     *
+     * @param targetSpeeds the desired robot-relative targetSpeeds
+     * @param centerOfRotation the desired robot-relative centerOfRotation
+     *
+     */
+    public void selfRelativeDrive(ChassisSpeeds targetSpeeds, Translation2d centerOfRotation) {
+        final SwerveModuleState[] swerveModuleStates = SwerveConstants.KINEMATICS.toSwerveModuleStates(targetSpeeds, centerOfRotation);
+        setTargetModuleStates(swerveModuleStates);
+    }
+
     public Rotation2d getDriveRelativeAngle() {
         final Rotation2d currentAngle = RobotContainer.ROBOT_POSE_ESTIMATOR.getEstimatedRobotPose().getRotation();
         return Flippable.isRedAlliance() ? currentAngle.rotateBy(Rotation2d.k180deg) : currentAngle;
@@ -229,6 +241,19 @@ public class Swerve extends MotorSubsystem {
     }
 
     /**
+     * Drives the swerve with the given powers, relative to the field's frame of reference, using a custom center of rotation.
+     *
+     * @param xPower     the x power
+     * @param yPower     the y power
+     * @param thetaPower the theta power
+     * @param centerOfRotation the center of rotation relative to the robot's frame of reference
+     */
+    void fieldRelativeDrive(double xPower, double yPower, double thetaPower, Translation2d centerOfRotation) {
+        final ChassisSpeeds speeds = selfRelativeSpeedsFromFieldRelativePowers(xPower, yPower, thetaPower);
+        selfRelativeDrive(speeds, centerOfRotation);
+    }
+
+    /**
      * Drives the swerve with the given powers, relative to the field's frame of reference.
      *
      * @param translationPowers the translation powers
@@ -249,6 +274,19 @@ public class Swerve extends MotorSubsystem {
     void selfRelativeDrive(double xPower, double yPower, double thetaPower) {
         final ChassisSpeeds speeds = powersToSpeeds(xPower, yPower, thetaPower);
         selfRelativeDrive(speeds);
+    }
+
+    /**
+     * Drives the swerve with the given powers, relative to the robot's frame of reference.
+     *
+     * @param xPower     the x power
+     * @param yPower     the y power
+     * @param thetaPower the theta power
+     * @param centerOfRotation the center of rotation relative to the robot's frame of reference
+     */
+    void selfRelativeDrive(double xPower, double yPower, double thetaPower, Translation2d centerOfRotation) {
+        final ChassisSpeeds speeds = powersToSpeeds(xPower, yPower, thetaPower);
+        selfRelativeDrive(speeds, centerOfRotation);
     }
 
     /**
